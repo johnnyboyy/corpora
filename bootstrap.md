@@ -1,6 +1,6 @@
 ---
 name: bootstrap
-description: Bootstrap a UI library for a new project. Run once before any feature design work begins. Can work from existing design documentation, brand guidelines, aesthetic references, or from scratch with operator guidance. Output is a text-based corpora/ui-library.md plus seed corpora/ui-designer.md. Text-only format — no screenshots, no image exports. See LINEAGE.md for why.
+description: Bootstrap a UI library and tooling config for a new project. Run once before any feature design work begins. Can work from existing design documentation, brand guidelines, aesthetic references, or from scratch with operator guidance. Outputs corpora/config.md (the project tool surface), corpora/ui-library.md, and seed corpora/ui-designer.md. Text-only format — no screenshots, no image exports. See LINEAGE.md for why.
 ---
 
 # UI Library Bootstrap
@@ -11,11 +11,15 @@ designer sessions will read first. Get this right and every subsequent session s
 with real constraints; get it wrong and every session invents in a vacuum.
 
 The output of this session is:
-1. **`corpora/ui-library.md`** (or the project's chosen path) — the living design system reference
-2. **`corpora/ui-designer.md`** — seed principles distilled from the foundational decisions made here
+1. **`corpora/config.md`** — the project tool surface every role reads at the start of its work:
+   which browser automation, image generation, and color tools exist and how to invoke them, the
+   UI library location, and verification commands. This is what flips the project from "not
+   bootstrapped" to "bootstrapped" for the role prompts.
+2. **`corpora/ui-library.md`** (or the project's chosen path) — the living design system reference
+3. **`corpora/ui-designer.md`** — seed principles distilled from the foundational decisions made here
 
-Both are text-only. See LINEAGE.md in the `corpora` skill repo for why text outperforms
-design artifacts for this purpose.
+The library and corpus are text-only. See LINEAGE.md in the `corpora` skill repo for why text
+outperforms design artifacts for this purpose.
 
 ---
 
@@ -129,7 +133,7 @@ to mark state changes. No decorative elements. Data reads as the hero; chrome re
 ### 6. Color utility
 
 Check whether the project already has a color utility script. If it does, read how to
-invoke it and document it in the library under a "Tooling" section.
+invoke it and record it under the color-utility entry in `corpora/config.md` (schema below).
 
 If it doesn't, assess whether one is worth building. It is worth building when:
 - The design uses material-based, category-based, or temperature-graded color palettes
@@ -174,8 +178,9 @@ preferring native CSS OKLCH, the utility may not be needed at all — OKLCH arit
 can happen directly in the stylesheet.
 
 Wire it to a named package.json script (e.g., `pnpm color adjust "205 127 50" --hue -8`)
-and document the commands in CLAUDE.md so future designer and coder sessions can find it
-without reading the role prompts.
+and record the invocation under the color-utility entry in `corpora/config.md` (schema below)
+so future designer and coder sessions find it without reading the role prompts. Mirroring the
+command into CLAUDE.md is optional; `corpora/config.md` is the source of truth roles read.
 
 ---
 
@@ -199,7 +204,75 @@ where to find the canonical reference.
 
 ---
 
+## The tooling config (`corpora/config.md`)
+
+This is the file the role prompts read to learn the project's tool surface. Producing it is the
+part of bootstrap that the roles depend on most — without it, every role falls back to "not
+bootstrapped" and uses standard tools only.
+
+Detect each capability rather than assuming it:
+
+- **Browser automation** — is a browser automation tool available in this environment (a skill, an
+  MCP server, a CLI)? Name it and how to invoke it. If none, write `none`.
+- **Image generation** — is an image generation tool available? Name it. If none, write `none`.
+- **Color utility** — does the project have (or did this session build) a color utility script?
+  Record its path and the exact command form. If none, write `none`.
+- **UI library** — where does the design system reference live? Default `corpora/ui-library.md`;
+  only note a path here if it's non-standard.
+- **Verification commands** — the project's lint and type-check (and test, if relevant) commands,
+  read from CLAUDE.md / README / package.json.
+
+### Schema
+
+Human-readable and edited by hand as tooling changes; machine-read by every role at session start.
+One section per capability. Every value is either a concrete invocation or the literal word `none`
+— a role treats `none` as "this capability is unavailable; do not attempt it or substitute another
+tool." Keep it terse; this file loads into context on every role invocation.
+
+```markdown
+# Tooling config
+
+Read this file at the start of any role session. It declares which project-specific tools exist and
+how to invoke them. Generated by `corpora:bootstrap`; edit by hand as the project's tooling changes.
+A value of `none` means the capability is unavailable — do not attempt it or substitute another tool.
+
+## browser-automation
+status: available
+invoke: <tool name + how to call it, e.g. "agent-browser skill — see its docs for subcommands">
+
+## image-generation
+status: available
+invoke: <tool name, e.g. "generate-image skill">
+
+## color-utility
+status: available
+script: <path, e.g. scripts/color.js>
+invoke: <command form, e.g. pnpm color <op> "<r g b>" [--hue N] [--chroma N] [--lightness N]>
+ops: <e.g. blend, adjust, palette>
+
+## ui-library
+path: corpora/ui-library.md
+
+## verification-commands
+lint: <e.g. pnpm lint>
+typecheck: <e.g. pnpm typecheck>
+test: <e.g. pnpm test, or none>
+```
+
+For any capability that is unavailable, collapse its section to a single `status: none` line:
+
+```markdown
+## image-generation
+status: none
+```
+
 ## Output format
+
+### corpora/config.md
+
+Write the config file using the schema above. Detect, don't assume — a wrong `available` entry is
+worse than `none`, because a role will try to invoke a tool that isn't there. When unsure whether a
+tool exists, mark it `none` and note it as a follow-up rather than guessing an invocation.
 
 ### corpora/ui-library.md
 

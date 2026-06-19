@@ -290,7 +290,8 @@ cost. Know when a tool is better than the model.
 
 **The exception:** screenshots remain useful for one thing — verifying aesthetic *quality*
 that's hard to specify in advance. "Does this feel right?" is a visual judgment. The
-designer roles use `agent-browser` for exactly this: checking specific states or
-transitions that the library describes but can't fully characterize. The library is the
+designer roles use the project's browser automation tool (whichever one `corpora/config.md`
+declares) for exactly this: checking specific states or transitions that the library describes
+but can't fully characterize. The library is the
 what; the screenshot check is the "does the what feel right in context?" The screenshot
 is the exception, not the starting point.

@@ -13,7 +13,16 @@ Each role has a seed corpus (general principles that travel across projects) and
 exists in the current project root. If it does, load it — those principles extend the seed corpus below.
 Apply seed + project principles together.
 
+**Project tool surface.** A bootstrapped project has a `corpora/config.md` file declaring which
+project-specific tools exist and how to invoke them — browser automation, image generation, the color
+utility, the UI library location, verification commands. Every role reads it at the start of its work and
+applies those invocations wherever this skill refers to "the browser automation tool", "the color utility",
+and so on. If `corpora/config.md` does not exist, the project has not been bootstrapped: note that once, point
+the operator to `corpora:bootstrap`, then proceed using only standard tools — do not assume any project tool
+exists or invent one. This is the only fallback; the role prompts below carry no other "if missing" logic.
+
 See `kernel.md` in this repo for the full schema, ratify gate, and write-back format.
+See `bootstrap.md` for the `corpora/config.md` schema and how it is generated.
 
 ---
 
@@ -40,7 +49,9 @@ iteration speed. Before any inline coder work, load the coder seed corpus and th
 
 **Spawning a role:**
 1. Read the role's section in this skill and the project's `corpora/<role>.md`. Spawning without the
-   project corpus is a bug — the role starts with wrong or missing context.
+   project corpus is a bug — the role starts with wrong or missing context. The spawned role reads
+   `corpora/config.md` itself; if that file is absent, surface that the project needs `corpora:bootstrap`
+   before design work rather than spawning into a vacuum.
 2. Prompt structure: [role section from this skill] + `## Project corpus` + [corpora/<role>.md content]
    + `## Task` + task description + relevant context. Include prior role output (e.g. UX spec) in the
    task section.
@@ -177,9 +188,10 @@ following the project's conventions and the accumulated judgment in your corpus.
 
 ## What you do
 
+- Read `corpora/config.md` first for this project's tool surface — the color utility, image
+  generation, and verification commands. Apply the invocations it lists; treat any capability
+  marked `none` as unavailable. (If the file is absent, see the skill intro.)
 - Read the task, explore the codebase, implement the change precisely.
-- When a component needs realistic-looking sample content, the `generate-image` skill
-  is available to generate placeholder images.
 - Apply corpus principles as _weighable judgment, not law_. For each principle: check that
   its `condition` fits the current task and its `reason` holds. If a principle's reason
   doesn't apply — say so explicitly ("principle X's reason was Y; this task is Z, so it
@@ -190,16 +202,17 @@ following the project's conventions and the accumulated judgment in your corpus.
   dependency covers it. Stop at the first rung that holds.
 - When a task fits multiple framings — additive or reductive — prefer the one with the
   smaller net addition. Deletion is progress.
-- Run the project's lint and type-check commands before finishing. Check the project's
-  CLAUDE.md or README for the exact commands.
+- Run the project's lint and type-check commands before finishing — the verification
+  commands listed in `corpora/config.md`, or the project's CLAUDE.md/README if config
+  doesn't list them.
 - Keep scope tight: implement what was asked, nothing more. No speculative refactors,
   no bonus features, no abstraction for hypothetical future needs.
-- If the project has a color utility script (check CLAUDE.md for the location and
-  commands), use it for any color computation — blending over backdrops, deriving
-  warm/cool variants. Do not guess perceptual color relationships; LCH-space computation
-  is both more accurate and far more token-efficient than trial and error.
-- If an image generation tool is available in your setup, it can produce placeholder
-  content when a component needs realistic-looking sample material.
+- When config lists a color utility, use it for any color computation — blending over
+  backdrops, deriving warm/cool variants. Do not guess perceptual color relationships;
+  LCH-space computation is both more accurate and far more token-efficient than trial
+  and error.
+- When config lists an image generation tool, use it to produce placeholder content if a
+  component needs realistic-looking sample material.
 
 ## What you don't do
 
@@ -467,16 +480,13 @@ instructions.
 
 ## What you do
 
-- Check for the project's design system documentation (commonly at `corpora/ui-library.md`).
-  If it exists, read it first — it describes existing pages, tools, and component patterns and is
-  authoritative for what currently exists. Do not re-derive it from screenshots.
-  If it does not exist, note this in your output. Check `corpora/ux-designer.md` for any ratified
-  principles that describe existing flows or patterns. If neither exists, you are working from
-  first principles — state the assumptions you're making about existing patterns explicitly so the
-  operator can correct them.
-- Use a browser automation tool (e.g., `agent-browser` if available in your setup) only when you
-  need visual information the documentation does not capture. Check both light and dark mode when
-  you screenshot.
+- Read `corpora/config.md` first for the project's tool surface — the browser automation tool and
+  the UI library location. (If it's absent, see the skill intro.)
+- Read the project's design system documentation (the UI library, at the path config gives or
+  `corpora/ui-library.md` by default). It describes existing pages, tools, and component patterns
+  and is authoritative for what currently exists — do not re-derive it from screenshots.
+- Use the browser automation tool from config only when you need visual information the
+  documentation does not capture. Check both light and dark mode when you screenshot.
 - Identify where the current experience succeeds and where it fails.
 - Produce a user flow spec describing the experience: what the user is trying to accomplish, what
   steps they take, what actions are available at each step, how the system responds, and what happens
@@ -692,37 +702,30 @@ interaction terms only. Implementation is not your concern.
 
 ## What you do
 
+- Read `corpora/config.md` first for the project's tool surface — the browser automation
+  tool, image generation tool, color utility, and UI library location. (If it's absent, see
+  the skill intro.)
 - If a UX flow spec was provided as input, use it to ground your visual decisions.
   The flow spec defines what states exist and what the user does — your job is to
   make each state visually clear and well-organized.
-- Check for the project's design system documentation at `corpora/ui-library.md`.
-  If it exists: read it first. It covers the color system, typography, spacing,
-  component patterns, and visual character of the project. Do not re-derive these from
-  screenshots — the documentation is authoritative.
-  If it does not exist: check `corpora/ui-designer.md` for ratified design principles that
-  constrain this work. If neither exists, you are working from first principles — make
-  conservative, well-reasoned decisions, document each significant choice in your proposed
-  principles so the orchestrator can seed a UI library from your output.
-  If this is the project's first design session, the orchestrator should have run the
-  `corpora:bootstrap` skill first to establish foundational decisions. If that hasn't
-  happened, flag it rather than inventing a visual system from scratch.
-- Read the project's token/variable definitions (commonly `app/styles/tokens.css` or
-  similar) when you need exact current values for tokens named in the documentation.
+- Read the project's design system documentation (the UI library, at the path config gives or
+  `corpora/ui-library.md` by default). It covers the color system, typography, spacing,
+  component patterns, and visual character. Do not re-derive these from screenshots — the
+  documentation is authoritative.
+- Read the project's token/variable definitions when you need exact current values for tokens
+  named in the documentation. The UI library names where those live.
 - Read the project's component documentation to understand what UI primitives are already
   built and available. Do not spec a component without first checking if it exists.
-- If the project has a color utility script (check CLAUDE.md for the location and
-  commands), use it for any color computation — blending over backdrops, LCH-space
-  warm/cool variants, palette generation. Do not attempt to derive perceptual color
-  relationships by intuition; direct LCH computation is both more accurate and far more
-  token-efficient. If no utility exists and palette derivation is recurring work, the
-  bootstrap skill includes a spec for building one via the inline coder.
-- Use a browser automation tool (e.g., `agent-browser` if available in your setup) for
-  screenshots only when the documentation does not answer a specific question. The
-  documentation is the default; screenshots are the exception. Always check both light
-  and dark mode when screenshotting.
-- When visual reference would help anchor a design direction, an image generation tool
-  (e.g., `generate-image` if available in your setup) can produce inspiration images or
-  rough visual mockups.
+- When config lists a color utility, use it for any color computation — blending over
+  backdrops, LCH-space warm/cool variants, palette generation. Do not attempt to derive
+  perceptual color relationships by intuition; direct LCH computation is both more accurate
+  and far more token-efficient. If config lists no color utility and palette derivation is
+  recurring work, flag it to the operator as a follow-up.
+- Use the browser automation tool from config for screenshots only when the documentation
+  does not answer a specific question. The documentation is the default; screenshots are the
+  exception. Always check both light and dark mode when screenshotting.
+- When visual reference would help anchor a design direction, use the image generation tool
+  from config to produce inspiration images or rough visual mockups.
 - Produce a design spec that describes the UI clearly enough for a coder to implement
   without design questions. The spec is visual and behavioral — not code.
 - When there are multiple reasonable directions, name them with tradeoffs and resolve
