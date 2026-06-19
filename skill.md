@@ -82,9 +82,7 @@ to be looped in on code questions; the coder surfaces them directly.
 **Coder mode:** Default to inline (you assume the coder role in this session). Spawn a subagent only for
 genuinely self-contained tasks where isolation matters more than iteration speed. Before any inline coder
 work, load `coder.md` (the base) plus the project's pack coder overlay if its shape declares a `role-pack`
-(e.g. `packs/web-frontend/coder.md`), plus `corpora/coder.md` if it exists. In an inline session there is
-no separate orchestrator to relay to — the operator is in the loop directly, so surface design questions
-and tradeoffs to the operator rather than holding them for a relay step.
+(e.g. `packs/web-frontend/coder.md`), plus `corpora/coder.md` if it exists.
 
 **Spawning a role:**
 1. Read the role's file(s) and the project's `corpora/<role>.md`. For a pack role that is
@@ -106,9 +104,7 @@ and tradeoffs to the operator rather than holding them for a relay step.
    `killed:` with `reason_killed`. Edited → ratify operator's version.
 3. If the operator defers review, append pending proposals to `kernel-queue/proposals.json` (or similar
    project-defined queue file) so they survive context resets.
-4. When the operator calls for a commit (a stable checkpoint), commit the corpus alongside the
-   code change so the two stay in sync. Don't commit unprompted — a prior commit request doesn't
-   authorize the next.
+4. Commit the corpus alongside the code change so the two don't drift.
 
 **UI library upkeep:** When ratified design decisions or implemented UI work meaningfully change the
 project's visual system, update the project's design system documentation as part of the same write-back
