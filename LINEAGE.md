@@ -225,6 +225,74 @@ the defaults they're starting with — and override them knowingly if their cont
 
 ---
 
+## The kernel / role-pack split
+
+The first portability pass (above) sorted principles by *project*-specificity — file paths,
+token names, domain vocabulary. It worked, but it used the wrong filter. It never asked whether a
+principle was *stack*-specific. So a principle like `imports-before-tailwind-directives` — whose
+condition is literally "when restructuring Tailwind CSS" — sailed into the seed corpus that
+"travels to every project," and the JS/React coder conventions (block arrow bodies, null-first
+ternary) were promoted into the coder prompt as if they were universal. The system claimed to be
+portable while carrying TypeScript + React + CSS + a web UI as unstated assumptions. Dropped into a
+Python service or a Rust CLI, more than half the coder seed corpus was dead weight, and several
+prompt "conventions" were actively wrong (Go *prefers* early returns; "type vs interface" is
+meaningless without TypeScript).
+
+The fix was a second sort, by a different question: *does this hold in any language and framework,
+or only in this stack?* That split the content into two layers. The **kernel** — the orchestrator,
+the base coder, and the genuinely stack-agnostic principles — is always loaded. A **role pack**
+(only `web-frontend` exists) carries the stack-specific conventions and corpora and loads only when
+a project's `corpora/config.md` declares it. A non-web project loads the kernel alone and never pays
+tokens for, or is misled by, React conventions. What lets a role know which layer to apply is the
+project-shape block in `config.md` — `role-pack` and `has-ui` — detected once at bootstrap.
+
+The load-bearing constraint on this design came from the operator, guarding against a failure mode
+worth naming: decomposing one concern across technology variants until you have a typescript-coder
+handing off to a react-coder handing off to a nextjs-coder — granularity with no payoff. The guard:
+a pack adds **depth to the existing roles, not new roles.** There is one coder; on a web project it
+loads the base plus the web overlay. Stack-specificity is configuration depth on a single role, not
+role breadth. This is orthogonal to — and must not be confused with — keeping the three *concerns*
+(coder, UX, UI) separate, which is a different axis entirely (see "Role isolation" below). The two
+axes look similar and pull in opposite directions: collapse technology variants into one role;
+keep distinct concerns in separate roles.
+
+A new stack therefore inherits the kernel for free and adds a pack only when a real body of
+recurring conventions has accumulated — never speculatively. The first stack to need this was the
+one the system was distilled from; the second pack will be written when a second stack demands it,
+not before.
+
+## Role isolation
+
+Each role runs in its own context — its own file(s) and its own project corpus, never another
+role's. This is not an efficiency nicety; it is a correctness boundary, and it was discovered, not
+designed.
+
+The original system kept all roles in one session and let the orchestrator do small coding
+iterations inline. A retrospective surfaced the problem: design work done early in a session left
+its decisions sitting in the transcript, and those decisions bled into the small coding iterations
+that came later — the coder kept "enhancing" and "refining" toward a design intent that was no
+longer the task. Asked about it directly, the agent reported that the lingering design context made
+those decisions leak into unrelated small tasks, and that filtering them back out cost tokens on
+every subsequent turn. The contamination was one-directional and asymmetric: iterative *coding* on
+itself seemed fine, but design-then-code in a shared context did not.
+
+The fix was to make the role boundary physical. Designers are always spawned into a fresh context,
+never run inline, so their decisions never enter the orchestrator's working transcript at all. The
+coder's context is assembled from coder files only; the designers' from their own files only. When
+the role content was later split into kernel + pack files, the packaging was chosen to *preserve*
+this seam rather than threaten it: one file per role, so "this role reads only its own content" is a
+fact of the filesystem rather than something the orchestrator has to carefully extract. A monolithic
+pack file bundling coder + UX + UI would have reintroduced exactly the leakage the isolation was
+built to prevent.
+
+This is why the role-pack guard ("collapse technology variants, don't multiply roles") and the
+isolation seam ("keep distinct concerns physically separate") sit on orthogonal axes and never
+trade off against each other. Decomposing the *web pack* into three role files is exactly as
+granular as the three concerns that already existed — no new roles, just each existing one given its
+own physical boundary.
+
+---
+
 ## Why the UI library is text, not design artifacts
 
 The UI library — a markdown document describing the project's color system, typography,

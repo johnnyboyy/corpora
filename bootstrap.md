@@ -3,48 +3,90 @@ name: bootstrap
 description: Bootstrap a UI library and tooling config for a new project. Run once before any feature design work begins. Can work from existing design documentation, brand guidelines, aesthetic references, or from scratch with operator guidance. Outputs corpora/config.md (the project tool surface), corpora/ui-library.md, and seed corpora/ui-designer.md. Text-only format — no screenshots, no image exports. See LINEAGE.md for why.
 ---
 
-# UI Library Bootstrap
+# Project Bootstrap
 
-You are the UI designer bootstrapping a design system for a project that has none yet.
-Your output is not a feature spec — it is the foundational document that all future
-designer sessions will read first. Get this right and every subsequent session starts
-with real constraints; get it wrong and every session invents in a vacuum.
+Run once to set a new project up for the role-kernel system. Bootstrap has two phases:
+
+- **Phase 1 — Project shape and config (always).** Detect the project's shape and tool surface
+  and write `corpora/config.md`. This is what flips the project from "not bootstrapped" to
+  "bootstrapped" for the roles, and it runs for every project regardless of type.
+- **Phase 2 — UI library (only when the project has a UI).** If Phase 1 finds `has-ui: yes`,
+  bootstrap a design system. This is the UI designer's foundational work — get it right and every
+  subsequent designer session starts with real constraints; get it wrong and every session invents
+  in a vacuum. A project with no UI (a CLI, a library, a backend service) skips this phase entirely.
 
 The output of this session is:
-1. **`corpora/config.md`** — the project tool surface every role reads at the start of its work:
-   which browser automation, image generation, and color tools exist and how to invoke them, the
-   UI library location, and verification commands. This is what flips the project from "not
-   bootstrapped" to "bootstrapped" for the role prompts.
-2. **`corpora/ui-library.md`** (or the project's chosen path) — the living design system reference
-3. **`corpora/ui-designer.md`** — seed principles distilled from the foundational decisions made here
+1. **`corpora/config.md`** — project shape (language, framework, package manager, `has-ui`, styling,
+   `role-pack`) plus the tool surface (browser automation, image generation, color utility, UI
+   library location, verification commands). **Always written.** Schema below.
+2. **`corpora/ui-library.md`** (or the project's chosen path) — the living design system reference.
+   *Phase 2 only.*
+3. **`corpora/ui-designer.md`** — seed principles distilled from the foundational design decisions.
+   *Phase 2 only.*
 
 The library and corpus are text-only. See LINEAGE.md in the `corpora` skill repo for why text
 outperforms design artifacts for this purpose.
 
 ---
 
-## Before starting
+## Phase 1 — Project shape and config (always)
 
-The orchestrator should pass any of the following that exist. Work with what's provided;
-ask for what's missing only if it's blocking a foundational decision.
+Detect the project's shape before anything else. Read the project's CLAUDE.md, README,
+package manifest (`package.json`, `pyproject.toml`, `Cargo.go`, `go.mod`, etc.), and lockfiles.
+Determine, and ask the operator only for what you cannot infer:
+
+- **Language(s)** — typescript, python, rust, go, etc.
+- **Framework** — next.js, astro, electron, fastapi, none, etc.
+- **Package manager** — pnpm, npm, bun, uv, cargo, go, etc.
+- **`has-ui`** — does this project render a user interface a person looks at? A web app, an
+  Electron app, a TUI → yes. A CLI that prints text, a library, a backend service → no. This
+  single field decides whether Phase 2 runs.
+- **Styling approach** — tailwind, css-modules, vanilla-css, none, etc. (`none` is correct for
+  non-UI projects.)
+- **`role-pack`** — which role pack the project's roles should overlay. A web/Electron UI on a
+  JS/TS stack → `web-frontend`. Anything this repo has no pack for → `none` (the project runs on
+  the kernel alone; that is a valid, complete configuration).
+- **Verification commands** — the project's lint, type-check, build, and/or test commands. Run
+  what the project actually has; not every ecosystem separates these, and some have none.
+
+Detect the tool surface too (browser automation, image generation, color utility — see §6 and
+the schema below). Then **write `corpora/config.md`** using the schema at the end of this file.
+Detect, don't assume: a wrong `available`/`role-pack` is worse than `none`, because a role will
+try to use something that isn't there. When unsure, write `none` and note it as a follow-up.
+
+**If `has-ui: no`, Phase 1 is the whole job.** Write `corpora/config.md` and stop — no UI library,
+no design principles, no designer roles for this project. Note to the operator that design-phase
+roles are inactive and the project runs on the kernel (orchestrator + base coder).
+
+**If `has-ui: yes`, continue to Phase 2.**
+
+---
+
+## Phase 2 — UI library (only when `has-ui: yes`)
+
+You are now the UI designer bootstrapping a design system for a project that has none yet. The
+orchestrator should pass any of the following that exist; work with what's provided and ask for
+what's missing only if it blocks a foundational decision:
 
 - Existing design documentation (brand guidelines, style guides, Figma exports as text)
 - Token or variable files from an existing codebase (`tokens.css`, design tokens JSON, etc.)
 - Aesthetic references (described or linked — e.g., "like Linear", "like Notion", "like a Bloomberg terminal")
 - Audience and use context (from the project's CLAUDE.md or operator description)
-- Tech stack (framework, CSS approach, whether Tailwind is in use)
 
-If none of this was provided, begin the session by asking the operator three questions
-before proceeding — no more than three:
+If none of this was provided, ask the operator two questions before proceeding — no more than two
+(stack is already known from Phase 1):
 
 1. **Audience and context** — who uses this product and in what setting? (Office desk,
    field mobile, developer tooling, consumer app?)
 2. **Aesthetic direction** — one reference or a few adjectives. If the operator has
    nothing, offer three distinct directions with a one-line description each and ask
    them to pick or redirect. (See defaults below.)
-3. **Tech stack** — is Tailwind in use? Are there existing CSS variables or tokens?
 
-After those three answers, proceed. Do not ask more questions until you have a draft.
+After those answers, proceed. Do not ask more questions until you have a draft.
+
+The library sections below assume a CSS-based styling layer (web or Electron), which is the
+context Phase 2 runs in. Express values in the project's actual styling vocabulary as found in
+Phase 1 — CSS custom properties, Tailwind utilities, or plain CSS.
 
 ---
 
@@ -177,8 +219,8 @@ Recommended library: `chroma-js` for full LCH support in Node.js. For modern pro
 preferring native CSS OKLCH, the utility may not be needed at all — OKLCH arithmetic
 can happen directly in the stylesheet.
 
-Wire it to a named package.json script (e.g., `pnpm color adjust "205 127 50" --hue -8`)
-and record the invocation under the color-utility entry in `corpora/config.md` (schema below)
+Wire it to a named script via the project's package manager (e.g., `pnpm color adjust "205 127 50"
+--hue -8`) and record the invocation under the color-utility entry in `corpora/config.md` (schema below)
 so future designer and coder sessions find it without reading the role prompts. Mirroring the
 command into CLAUDE.md is optional; `corpora/config.md` is the source of truth roles read.
 
@@ -204,13 +246,15 @@ where to find the canonical reference.
 
 ---
 
-## The tooling config (`corpora/config.md`)
+## The config file (`corpora/config.md`)
 
-This is the file the role prompts read to learn the project's tool surface. Producing it is the
+This is the file the roles read to learn the project's shape and tool surface. Producing it is the
 part of bootstrap that the roles depend on most — without it, every role falls back to "not
-bootstrapped" and uses standard tools only.
+bootstrapped" and uses the kernel and standard tools only. It has two halves: **project shape**
+(detected in Phase 1, governs which roles and pack apply) and the **tool surface** (which
+project-specific tools exist and how to invoke them).
 
-Detect each capability rather than assuming it:
+For the tool surface, detect each capability rather than assuming it:
 
 - **Browser automation** — is a browser automation tool available in this environment (a skill, an
   MCP server, a CLI)? Name it and how to invoke it. If none, write `none`.
@@ -218,23 +262,31 @@ Detect each capability rather than assuming it:
 - **Color utility** — does the project have (or did this session build) a color utility script?
   Record its path and the exact command form. If none, write `none`.
 - **UI library** — where does the design system reference live? Default `corpora/ui-library.md`;
-  only note a path here if it's non-standard.
-- **Verification commands** — the project's lint and type-check (and test, if relevant) commands,
-  read from CLAUDE.md / README / package.json.
+  only note a path here if it's non-standard. `none` for projects with no UI.
+- **Verification commands** — the project's lint, type-check, build, and/or test commands. Record
+  only what the project actually has.
 
 ### Schema
 
-Human-readable and edited by hand as tooling changes; machine-read by every role at session start.
-One section per capability. Every value is either a concrete invocation or the literal word `none`
-— a role treats `none` as "this capability is unavailable; do not attempt it or substitute another
-tool." Keep it terse; this file loads into context on every role invocation.
+Human-readable and edited by hand as the project changes; machine-read by every role at session
+start. Every value is either a concrete value/invocation or the literal word `none` — a role treats
+`none` as "unavailable; do not attempt it or substitute another tool." Keep it terse; this file
+loads into context on every role invocation.
 
 ```markdown
-# Tooling config
+# Config
 
-Read this file at the start of any role session. It declares which project-specific tools exist and
-how to invoke them. Generated by `corpora:bootstrap`; edit by hand as the project's tooling changes.
-A value of `none` means the capability is unavailable — do not attempt it or substitute another tool.
+Read this file at the start of any role session. It declares the project's shape and which
+project-specific tools exist and how to invoke them. Generated by `corpora:bootstrap`; edit by hand
+as the project changes. A value of `none` means unavailable — do not attempt it or substitute another.
+
+## project-shape
+language: <e.g. typescript, python, rust, go>
+framework: <e.g. next.js, astro, electron, fastapi, none>
+package-manager: <e.g. pnpm, npm, bun, uv, cargo, go>
+has-ui: <yes | no>
+styling: <e.g. tailwind, css-modules, vanilla-css, none>
+role-pack: <e.g. web-frontend, or none>
 
 ## browser-automation
 status: available
@@ -247,19 +299,21 @@ invoke: <tool name, e.g. "generate-image skill">
 ## color-utility
 status: available
 script: <path, e.g. scripts/color.js>
-invoke: <command form, e.g. pnpm color <op> "<r g b>" [--hue N] [--chroma N] [--lightness N]>
+invoke: <command form, e.g. {package-manager} color <op> "<r g b>" [--hue N] [--chroma N] [--lightness N]>
 ops: <e.g. blend, adjust, palette>
 
 ## ui-library
 path: corpora/ui-library.md
 
 ## verification-commands
-lint: <e.g. pnpm lint>
-typecheck: <e.g. pnpm typecheck>
-test: <e.g. pnpm test, or none>
+lint: <the project's lint command, or none>
+typecheck: <the project's type-check command, or none>
+build: <the project's build command, or none>
+test: <the project's test command, or none>
 ```
 
-For any capability that is unavailable, collapse its section to a single `status: none` line:
+For any capability that is unavailable, collapse its section to a single `status: none` line (the
+`project-shape` block is always written in full):
 
 ```markdown
 ## image-generation

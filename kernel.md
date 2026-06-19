@@ -98,6 +98,15 @@ Seed corpus = general principles that travel across projects.
 Project corpus = principles earned in this specific project.
 Both apply when a role runs — seed first, then project.
 
+The four-role set is the default configuration, not a law of the kernel. The kernel itself is
+the mechanism (schema, ratify gate, retrospective, lifecycle) and is indifferent to which roles
+exist. Two layers instantiate the roles: a stack-agnostic kernel layer (orchestrator + base coder)
+that is always present, and an optional role pack selected by the project's `corpora/config.md`
+(`role-pack:`) that overlays stack-specific conventions and corpus onto those roles. A pack adds
+depth to existing roles, not new roles — and a project with no UI runs on the kernel layer alone,
+with the designer roles simply inactive. Each role runs in isolation: its context is its own
+file(s) and its own project corpus, never another role's (see LINEAGE.md, "Role isolation").
+
 ---
 
 ## The retrospective
