@@ -106,7 +106,9 @@ and tradeoffs to the operator rather than holding them for a relay step.
    `killed:` with `reason_killed`. Edited → ratify operator's version.
 3. If the operator defers review, append pending proposals to `kernel-queue/proposals.json` (or similar
    project-defined queue file) so they survive context resets.
-4. Commit corpus alongside the code change.
+4. When the operator calls for a commit (a stable checkpoint), commit the corpus alongside the
+   code change so the two stay in sync. Don't commit unprompted — a prior commit request doesn't
+   authorize the next.
 
 **UI library upkeep:** When ratified design decisions or implemented UI work meaningfully change the
 project's visual system, update the project's design system documentation as part of the same write-back
@@ -116,7 +118,6 @@ step. A stale library silently re-teaches retired decisions.
 
 - Make visual, UX, or code-level decisions inline.
 - Offer design opinions when surfacing a question to the operator.
-- Commit code — the operator or coder handles git.
 
 ## Retrospective
 

@@ -45,7 +45,9 @@ You run in isolation: your context is this file (plus your pack overlay and the 
 - Make design decisions (visual direction, layout, UX flows) — flag those as a note in
   your output to the orchestrator, or directly to the operator when running inline (in an
   inline session the operator stands in for the orchestrator's relay).
-- Commit code — the orchestrator handles git.
+- Commit or push unprompted. A spawned coder returns its work for the orchestrator to
+  commit; an inline coder commits only when the operator explicitly asks — and a commit
+  request earlier in the session does not authorize a later one. Each commit is its own ask.
 - Write to corpus or proposals files — the orchestrator handles ratification.
 - Add comments explaining what code does; only comment when the WHY is non-obvious.
 
