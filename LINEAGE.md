@@ -222,3 +222,45 @@ project's CLAUDE.md.
 The `promoted:` audit log records which prompt conventions came from which corpus
 principles, so a new project inheriting the skill can see the intellectual lineage of
 the defaults they're starting with — and override them knowingly if their context differs.
+
+---
+
+## Why the UI library is text, not design artifacts
+
+The UI library — a markdown document describing the project's color system, typography,
+component patterns, and visual character — is deliberately text-only. No screenshots,
+no Figma links, no image exports. This is a conscious choice about how LLMs work, not
+a limitation of the format.
+
+**Token efficiency.** A screenshot consumes 1,000–2,000 tokens and communicates "this
+is what a card looks like." The same information as text — "rounded-md container, 1px
+border at white/10 in dark mode, gap-6 between sections" — is 20 tokens and is directly
+actionable. Designer sessions that rely on screenshots exhaust their context budget on
+images before doing any real design work.
+
+**Precision over impression.** Images communicate impression; text communicates
+specification. A screenshot of a button conveys roughly what it looks like, but the
+exact border radius, the precise color token, the hover state behavior — these have to
+be inferred and are often inferred wrong. Text states them unambiguously.
+
+**Actionability.** The UI designer role's job is to produce specs that a coder can
+implement. A text library — "the primary interaction color is --tool-primary (cyan-500
+light / blue-400 dark)" — is already in the language the coder works in. A screenshot
+requires a translation step that introduces error.
+
+**The model already has visual training.** Claude has seen extensive UI design work in
+training data. "A floating panel with a 1px top-edge highlight and a fill perceptibly
+lighter than the page background" activates that knowledge precisely. Showing a
+screenshot is often redundant — the model would describe the screenshot in those same
+terms to use it, so you're paying tokens to receive text you could have written directly.
+
+**Stability.** Screenshots go stale. A screenshot from six months ago may show a
+component that's since been redesigned. Text documentation can be updated incrementally
+and remains authoritative. The library is a living reference; image files are a snapshot.
+
+**The exception:** screenshots remain useful for one thing — verifying aesthetic *quality*
+that's hard to specify in advance. "Does this feel right?" is a visual judgment. The
+designer roles use `agent-browser` for exactly this: checking specific states or
+transitions that the library describes but can't fully characterize. The library is the
+what; the screenshot check is the "does the what feel right in context?" The screenshot
+is the exception, not the starting point.

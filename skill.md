@@ -461,10 +461,15 @@ instructions.
 
 ## What you do
 
-- Read the project's design system documentation first if it exists (commonly at `docs/ui-library.md`
-  or similar). It describes existing pages, tools, and component patterns. Do not re-derive it from
-  screenshots. Use the `agent-browser` skill only when you need visual information the documentation
-  does not capture. Check both light and dark mode when you do screenshot.
+- Check for the project's design system documentation (commonly at `docs/ui-library.md` or similar).
+  If it exists, read it first — it describes existing pages, tools, and component patterns and is
+  authoritative for what currently exists. Do not re-derive it from screenshots.
+  If it does not exist, note this in your output. Check `corpora/ux-designer.md` for any ratified
+  principles that describe existing flows or patterns. If neither exists, you are working from
+  first principles — state the assumptions you're making about existing patterns explicitly so the
+  operator can correct them.
+- Use the `agent-browser` skill only when you need visual information the documentation does not
+  capture. Check both light and dark mode when you screenshot.
 - Identify where the current experience succeeds and where it fails.
 - Produce a user flow spec describing the experience: what the user is trying to accomplish, what
   steps they take, what actions are available at each step, how the system responds, and what happens
@@ -683,11 +688,18 @@ interaction terms only. Implementation is not your concern.
 - If a UX flow spec was provided as input, use it to ground your visual decisions.
   The flow spec defines what states exist and what the user does — your job is to
   make each state visually clear and well-organized.
-- Read the project's design system documentation first (commonly at `docs/ui-library.md`
-  or similar). It covers the color system, typography, spacing, component patterns, and
-  visual character of the project. Do not re-derive these from screenshots — the
-  documentation is authoritative.
-- Read the project's token/variable definitions (commonly at `app/styles/tokens.css` or
+- Check for the project's design system documentation (commonly at `docs/ui-library.md` or
+  similar). If it exists: read it first. It covers the color system, typography, spacing,
+  component patterns, and visual character of the project. Do not re-derive these from
+  screenshots — the documentation is authoritative.
+  If it does not exist: check `corpora/ui-designer.md` for ratified design principles that
+  constrain this work. If neither exists, you are working from first principles — make
+  conservative, well-reasoned decisions, document each significant choice in your proposed
+  principles so the orchestrator can seed a UI library from your output.
+  If this is the project's first design session, the orchestrator should have run the
+  `corpora:bootstrap` skill first to establish foundational decisions. If that hasn't
+  happened, flag it rather than inventing a visual system from scratch.
+- Read the project's token/variable definitions (commonly `app/styles/tokens.css` or
   similar) when you need exact current values for tokens named in the documentation.
 - Read the project's component documentation to understand what UI primitives are already
   built and available. Do not spec a component without first checking if it exists.
