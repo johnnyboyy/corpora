@@ -44,7 +44,7 @@ Every cross-boundary change is **propose → ratify → promote**, never write-d
 
 ### Write-back format
 
-Ratified principle — append before the `killed:` line:
+Ratified principle — append before the `promoted:` line:
 
 ```yaml
 - id: principle-id
@@ -55,19 +55,27 @@ Ratified principle — append before the `killed:` line:
   status: ratified
 ```
 
+Promoted principle — when a corpus entry graduates to the role prompt itself (becomes a baked-in
+default rather than a weighable principle), move it from `principles:` to `promoted:`. Keep the
+entry so the audit trail is legible — a promoted principle that reappears as a corpus proposal
+is a signal of regression, not new insight.
+
+```yaml
+- id: principle-id
+  promoted_to: "<role> role prompt — <section name>"
+  provenance: "Date, task, context. Note if it was subsumed by a meta-rule."
+```
+
+The trigger for promotion: a principle has been ratified long enough that checking its
+`condition` and `reason` before every task is friction without benefit — the judgment has
+become the default. Or: several principles share a common root justification; the meta-rule
+that unifies them gets promoted, and the individual entries become examples of it.
+
 Killed entry — append at end of file:
 
 ```yaml
 - rule: "The rejected rule."
   reason_killed: "Operator's reason."
-  provenance: "Date, task, context."
-```
-
-Promoted principle — when a principle graduates from corpus to the role prompt itself:
-
-```yaml
-- id: principle-id
-  promoted_to: roles/<role>/prompt.md    # or skill section name
   provenance: "Date, task, context."
 ```
 

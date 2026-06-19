@@ -38,15 +38,13 @@ Each follows the schema in `kernel.md`:
 last-retrospective: YYYY-MM-DD
 
 principles:
+  # active ratified principles
 
-- id: principle-id
-  rule: "The guidance."
-  condition: "When this applies."
-  reason: "Why."
-  provenance: "Date, task, context."
-  status: ratified
+promoted:
+  # principles that graduated to the role prompt; kept for audit trail
 
 killed:
+  # rejected proposals; kept so the same mistake isn't ratified twice
 ```
 
 ## Cross-project learning

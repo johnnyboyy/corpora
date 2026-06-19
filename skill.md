@@ -413,6 +413,31 @@ principles:
   provenance: "2026-06-18, Blog project explicit-by-default post review."
   status: ratified
 
+promoted:
+# Principles that graduated from corpus entries to baked-in conventions in the coder role prompt above.
+# Kept here so the audit trail is legible — a ratified principle that also appears in the prompt
+# section should not be re-proposed as a corpus entry.
+
+- id: prefer-error-exposing-form
+  promoted_to: coder role prompt — "General conventions" section
+  provenance: "2026-06-19, Blog project. JSLint/Crockford analysis. Generalizes null-first-ternary, arrow-block-body, and the ===/!== convention into one meta-rule."
+
+- id: arrow-block-body
+  promoted_to: coder role prompt — "General conventions" section
+  provenance: "2026-06-18, Blog project. {} ambiguity + single consistent style removes per-function judgment call. Subsumed by prefer-error-exposing-form."
+
+- id: deletion-over-addition
+  promoted_to: coder role prompt — "What you do" section (prefer smaller net addition)
+  provenance: "2026-06-17, Blog project retrospective."
+
+- id: yagni-gate-before-implementing
+  promoted_to: coder role prompt — "What you do" section (ask whether it needs to exist, stdlib, installed dep)
+  provenance: "2026-06-17, Blog project retrospective."
+
+- id: verify-build-not-just-lint
+  promoted_to: coder role prompt — "What you do" section (run lint and type-check before finishing)
+  provenance: "2026-06-17, Blog project retrospective."
+
 killed:
 ```
 
