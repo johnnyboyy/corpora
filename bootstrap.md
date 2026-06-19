@@ -1,6 +1,6 @@
 ---
 name: bootstrap
-description: Bootstrap a UI library for a new project. Run once before any feature design work begins. Can work from existing design documentation, brand guidelines, aesthetic references, or from scratch with operator guidance. Output is a text-based docs/ui-library.md plus seed corpora/ui-designer.md. Text-only format — no screenshots, no image exports. See LINEAGE.md for why.
+description: Bootstrap a UI library for a new project. Run once before any feature design work begins. Can work from existing design documentation, brand guidelines, aesthetic references, or from scratch with operator guidance. Output is a text-based corpora/ui-library.md plus seed corpora/ui-designer.md. Text-only format — no screenshots, no image exports. See LINEAGE.md for why.
 ---
 
 # UI Library Bootstrap
@@ -11,7 +11,7 @@ designer sessions will read first. Get this right and every subsequent session s
 with real constraints; get it wrong and every session invents in a vacuum.
 
 The output of this session is:
-1. **`docs/ui-library.md`** (or the project's chosen path) — the living design system reference
+1. **`corpora/ui-library.md`** (or the project's chosen path) — the living design system reference
 2. **`corpora/ui-designer.md`** — seed principles distilled from the foundational decisions made here
 
 Both are text-only. See LINEAGE.md in the `corpora` skill repo for why text outperforms
@@ -126,13 +126,71 @@ enough to rule things out. Avoid generic words like "clean" or "modern" without
 qualification. Instead: "Low saturation throughout. Motion is used sparingly and only
 to mark state changes. No decorative elements. Data reads as the hero; chrome recedes."
 
-### 6. Interaction and motion
+### 6. Color utility
+
+Check whether the project already has a color utility script. If it does, read how to
+invoke it and document it in the library under a "Tooling" section.
+
+If it doesn't, assess whether one is worth building. It is worth building when:
+- The design uses material-based, category-based, or temperature-graded color palettes
+  where multiple related tints need to be derived from a single base color
+- The project has sticky or elevated surfaces where translucent tints bleed through on
+  scroll and need premixed solid equivalents
+- Palette derivation will recur across multiple design sessions
+
+If it's worth building, use the inline coder to implement it now. Provide the following
+spec to the coder:
+
+---
+
+**Color utility spec**
+
+A small CLI script that computes perceptual color relationships precisely, so the designer
+and coder aren't guessing at LCH-space values.
+
+Core operations needed:
+
+1. **adjust** — given an input color and LCH deltas (hue rotation, chroma shift,
+   lightness shift), output the resulting color. This is how you derive a "cooler" or
+   "warmer" variant of a base color without guessing: LCH is a perceptually uniform space
+   where equal numeric steps produce equal perceived differences.
+
+2. **blend** — given an input color, an opacity, and the project's backdrop color(s),
+   output the premixed solid equivalent. This is needed whenever a translucent tint is
+   used on a sticky or elevated surface: translucent backgrounds let page content bleed
+   through on scroll.
+
+3. **palette** (optional, add if the project derives palettes from base colors) — given
+   a base color, output a set of variants using predefined LCH deltas appropriate to the
+   project's palette logic. What "a set of variants" means is project-specific: temperature
+   stops, lightness scale, semantic tints, etc.
+
+Output format must match the project's CSS approach. For Tailwind: arbitrary-value class
+strings. For CSS custom properties: the computed RGB values and a suggested variable name.
+For plain CSS: hex values. The utility is only useful if its output is directly pasteable.
+
+Recommended library: `chroma-js` for full LCH support in Node.js. For modern projects
+preferring native CSS OKLCH, the utility may not be needed at all — OKLCH arithmetic
+can happen directly in the stylesheet.
+
+Wire it to a named package.json script (e.g., `pnpm color adjust "205 127 50" --hue -8`)
+and document the commands in CLAUDE.md so future designer and coder sessions can find it
+without reading the role prompts.
+
+---
+
+If building the utility is out of scope for this bootstrap session, note it as a
+recommended follow-up and describe the project's palette derivation approach manually
+in the library so designers can at least document the intended relationships, even if
+they can't compute them precisely yet.
+
+### 7. Interaction and motion
 
 - Default transition duration and easing for state changes
 - Whether animations are used at all and in what contexts (functional only, or expressive)
 - Touch target minimums if mobile is a context
 
-### 7. Sub-systems (if applicable)
+### 8. Sub-systems (if applicable)
 
 If the project has sections with a distinct visual language (a marketing homepage vs.
 an app dashboard, a documentation section vs. a tools section), document each as a
@@ -143,7 +201,7 @@ where to find the canonical reference.
 
 ## Output format
 
-### docs/ui-library.md
+### corpora/ui-library.md
 
 Structure the document with a section per topic above. Use concrete, precise language.
 Every value that a designer or coder will need to use should be named — not "a dark

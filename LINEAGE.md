@@ -258,6 +258,36 @@ terms to use it, so you're paying tokens to receive text you could have written 
 component that's since been redesigned. Text documentation can be updated incrementally
 and remains authoritative. The library is a living reference; image files are a snapshot.
 
+---
+
+## Why a color utility exists
+
+The color utility (`scripts/color.js`) was created after a session where the designer
+was asked to derive two variants of a given color — one warmer, one cooler — and had
+to guess values, render them, evaluate visually, and iterate. This produced inaccurate
+results (LCH-space relationships are not intuitive to reason about arithmetically) and
+consumed a large number of tokens doing work that a small script could do in a single
+command.
+
+The fix was a CLI script that operates in LCH space — a perceptually uniform color model
+where equal numeric steps produce equal perceived differences. Given a base color, it can:
+- Blend it over a backdrop at a given opacity (producing a solid premixed equivalent for
+  sticky surfaces, where translucent backgrounds bleed through on scroll)
+- Shift it by precise LCH deltas (producing cooler/warmer variants that are
+  perceptually related to the original)
+- Generate palette stops from a material base using project-specific delta logic
+
+What the script does is general; what it outputs is project-specific (Tailwind arbitrary
+values, CSS custom properties, or plain hex depending on the project's CSS approach).
+For this reason the skill doesn't include a reference implementation — it includes a spec
+in `bootstrap.md` that the inline coder can use to build the right tool for each project.
+
+The underlying lesson: LCH color computation is not something a model does well by
+intuition. It is something a small script does exactly, every time, for near-zero token
+cost. Know when a tool is better than the model.
+
+---
+
 **The exception:** screenshots remain useful for one thing — verifying aesthetic *quality*
 that's hard to specify in advance. "Does this feel right?" is a visual judgment. The
 designer roles use `agent-browser` for exactly this: checking specific states or
