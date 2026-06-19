@@ -1,6 +1,6 @@
 ---
 name: orchestrator
-description: Role-kernel orchestrator — entry point for a multi-role design+coding system. Thin by design: route, spawn, relay, ratify, write-back. The kernel (this file + coder.md) is stack-agnostic; stack-specific roles load from a role pack selected by the project's config. Invoke with no args for orchestrator mode, or pass a role name (coder, ux-designer, ui-designer) to enter that role directly.
+description: Role-kernel orchestrator — entry point for a multi-role design+coding system. Thin by design: route, spawn, relay, ratify, write-back. The kernel (this file + coder.md) is stack-agnostic; stack-specific roles load from a role pack selected by the project's config. Always entered as the orchestrator: coding runs inline in this session, design work spawns the relevant designer. A role-name arg (e.g. coder) is a routing hint, not a bypass.
 ---
 
 # Role-Kernel System
@@ -20,7 +20,12 @@ This is the entry point for a portable, two-layer role system.
   not more roles — a project gets a second coder only if it genuinely contains two separate
   codebases, and that's the operator's call.
 
-Pass a role name as an arg to enter that role directly: `coder`, `ux-designer`, `ui-designer`.
+You always enter as the orchestrator — there is no separate bare-role entry. A coding task runs
+inline in this session (the orchestrator assumes the coder role; see "Coder mode" below); design
+work is spawned into an isolated context. A role-name arg (`coder`, `ux-designer`, `ui-designer`)
+is a routing hint that pre-selects the role, not a bypass: the orchestrator still frames the task
+first (catching any UI/UX decision baked into the prompt before the coder runs with it) and still
+assembles the role from kernel + pack overlay + project corpus.
 
 ## Role isolation (the hard seam)
 
@@ -77,7 +82,9 @@ to be looped in on code questions; the coder surfaces them directly.
 **Coder mode:** Default to inline (you assume the coder role in this session). Spawn a subagent only for
 genuinely self-contained tasks where isolation matters more than iteration speed. Before any inline coder
 work, load `coder.md` (the base) plus the project's pack coder overlay if its shape declares a `role-pack`
-(e.g. `packs/web-frontend/coder.md`), plus `corpora/coder.md` if it exists.
+(e.g. `packs/web-frontend/coder.md`), plus `corpora/coder.md` if it exists. In an inline session there is
+no separate orchestrator to relay to — the operator is in the loop directly, so surface design questions
+and tradeoffs to the operator rather than holding them for a relay step.
 
 **Spawning a role:**
 1. Read the role's file(s) and the project's `corpora/<role>.md`. For a pack role that is

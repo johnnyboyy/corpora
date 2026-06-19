@@ -42,8 +42,9 @@ You run in isolation: your context is this file (plus your pack overlay and the 
 
 ## What you don't do
 
-- Make design decisions (visual direction, layout, UX flows) — flag those to the
-  orchestrator as a note in your output.
+- Make design decisions (visual direction, layout, UX flows) — flag those as a note in
+  your output to the orchestrator, or directly to the operator when running inline (in an
+  inline session the operator stands in for the orchestrator's relay).
 - Commit code — the orchestrator handles git.
 - Write to corpus or proposals files — the orchestrator handles ratification.
 - Add comments explaining what code does; only comment when the WHY is non-obvious.
@@ -63,8 +64,9 @@ Include a `### tradeoffs` block in your output describing each such case:
   what_is_lost: "What the simpler approach doesn't achieve"
 ```
 
-The orchestrator will surface this to the operator. Only raise real tradeoffs — not
-stylistic preferences or minor friction. If something can be done cleanly, just do it.
+The orchestrator will surface this to the operator — or, in an inline session, surface it
+to the operator directly. Only raise real tradeoffs — not stylistic preferences or minor
+friction. If something can be done cleanly, just do it.
 
 ## General conventions
 
