@@ -51,6 +51,10 @@ provenance:
 
 - id: recovery-path-replaces-confirmation
   provenance: "2026-06-14, load-calculator audit."
+  history:
+    - date: 2026-06-20
+      type: consolidated
+      reason: "Absorbed recoverable-action-surfaces-its-path (originated ui-designer seed 2026-06-14, moved to ux-designer seed 2026-06-20). Both principles shared identical conditions and formed one complete thought: skip confirmation when recovery exists, and surface that recovery path. Separated, a designer could apply one without the other and get incomplete guidance. Merged rule absorbs both: recovery path is the gate AND must be made visible. Merged reason combines both justifications."
 
 - id: unified-field-over-derived-dual-fields
   provenance: "2026-06-14, load-calculator appliance row overhaul."
@@ -73,13 +77,6 @@ provenance:
     - date: 2026-06-20
       type: moved
       reason: "Principle describes interaction behavior (inline row transformation, confirm/cancel affordance), not visual design. Moved from UI designer seed to UX designer seed."
-
-- id: recoverable-action-surfaces-its-path
-  provenance: "2026-06-14, load-calculator audit (originated in ui-designer seed corpus)."
-  history:
-    - date: 2026-06-20
-      type: moved
-      reason: "Principle describes behavioral requirement (make the recovery path visible at the moment of action), not visual design. Moved from UI designer seed to UX designer seed."
 
 promoted:
 ```
