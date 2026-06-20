@@ -124,6 +124,38 @@ I agree with the Opus assessment’s core thesis: **lower Reader Tax helps the m
 
 ---
 
+## Convergence so far (editorial synthesis — not an assessment)
+
+The two assessments above are left untouched; this section only reads across them.
+
+Two models from different families (Claude Opus 4.8, ChatGPT GPT-5.5) were asked the same question
+independently. The result is strong convergence on the **mechanism**, not merely the conclusion:
+
+- **All six claims held.** GPT agreed with every one, marking claims 2 (writer-is-reader) and 4
+  (ambiguity-not-brevity) as *strong* agreement.
+- **Independent rediscovery of the same refinement.** Both centered the caveat that the model-positive
+  target is *recoverable semantics / reduced ambiguity*, not verbosity. Opus raised it as a tentative
+  refinement to claim 4; GPT made it the spine of its whole assessment. That is the strongest signal
+  the document was built to detect.
+- **GPT extended the account** in two places: the tax concentrates at *edit seams* (branch/helper
+  boundaries, state transitions, intermediate naming, preconditions near effectful code), not
+  uniformly; and "Reader Tax" for a model is usefully framed as a *branching-factor* problem — ambiguity
+  leaves more plausible continuations live, and explicit forms collapse that space.
+- **GPT caught a real weakness in claim 5:** rules-plus-reasons outperforming bare rules could be
+  confounded by instruction length and distinctiveness (longer, more salient prompts draw more
+  attention), not the reason-content itself. Fair hit.
+
+The honest limit: two transformer models agreeing is **rhyme, not proof**. They share architecture
+priors and likely overlapping training notions about attention and chain-of-thought, so convergence
+can reflect shared lineage rather than shared truth. The cleanest tests remain a model of maximally
+different lineage examining this cold, and the empirical comparison both assessments point to.
+
+For the corpus: the claim-4 refinement ("prefer recoverable semantics / reduced ambiguity over mere
+verbosity") now has two independent supporters — a candidate for a future *retrospective* to fold into
+the coder's Explicit-by-Default framing, surfaced from evidence rather than promoted off two essays.
+
+---
+
 ## Other model assessments
 
 To add one: a different model reads this document and the post, then appends a dated, attributed
