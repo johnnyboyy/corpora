@@ -42,6 +42,31 @@ as an audit trail: if a future task produces a proposed principle that's already
 prompt, the log explains why it's already there rather than letting it re-enter the corpus
 as if it were new.
 
+### Why the corpus splits into working and audit files
+
+A cost analysis of role invocation surfaced that the coder's corpus carried roughly a quarter
+of its tokens as material the coder never weighs while working: `provenance` (where a rule came
+from), the `promoted:` audit trail, and the `killed:` log. The kernel already says as much —
+`condition` and `reason` are what a role reasons over; `provenance` is "for audit and trust,"
+a retrospective-time concern. So those fields were moved out of the loaded path into a sibling
+`<role>.audit.md`, loaded only when the orchestrator ratifies or runs a retrospective.
+
+The tempting alternative — have the orchestrator strip the fields at spawn time — was rejected
+because the coder also runs *inline* (the orchestrator loads `coder.md` itself), where no spawn
+step exists to do the stripping; a file-level split makes the leanness structural and identical
+for both paths, with no runtime YAML surgery. The split was scoped to the coder: the designers'
+provenance is already one-liners and they have no `promoted:` section, so their audit volume
+(~6–7%) didn't justify a second file.
+
+The one real hazard is that this looks like a violation of `full-corpus-on-spawn` (the principle
+that bars excerpting the corpus by relevance). It isn't: the split drops no *principle* and makes
+no relevance judgment — every active rule/condition/reason still loads in full; only uniform
+audit metadata moves. That distinction is written into both `full-corpus-on-spawn` and the
+kernel's "working vs audit" note so a future orchestrator doesn't "correct" the split back into
+one file. The residual cost — `promoted:`/`killed:` are the guard against re-proposing an
+already-decided principle, and the working coder no longer sees them — is borne by the
+orchestrator, which retains the audit file and screens proposals at the ratify gate.
+
 ### The genotype / phenotype distinction
 
 The kernel is described as the genotype because it's the mechanism shared identically by

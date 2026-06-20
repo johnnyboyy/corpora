@@ -41,9 +41,12 @@ Designers are always spawned into a fresh context, never run inline. See LINEAGE
 
 - `skill.md` — the entry skill: the orchestrator role plus the kernel/pack/shape model and assembly
   logic. Invoke via the Claude Code skill system; pass a role name as an arg for direct invocation.
-- `coder.md` — the base (stack-agnostic) coder: prompt + seed corpus. Loaded for every project.
-- `packs/web-frontend/` — the web-frontend role pack: `coder.md` (overlay), `ux-designer.md`,
-  `ui-designer.md`, each with its own seed corpus. Loaded only when `role-pack: web-frontend`.
+- `coder.md` — the base (stack-agnostic) coder: prompt + seed corpus (working fields only).
+  Loaded for every project. `coder.audit.md` holds its provenance/promoted/killed record,
+  loaded only at ratify/retrospective time — see "working vs audit" in `kernel.md`.
+- `packs/web-frontend/` — the web-frontend role pack: `coder.md` (overlay, with `coder.audit.md`
+  alongside), `ux-designer.md`, `ui-designer.md`, each with its own seed corpus. Loaded only
+  when `role-pack: web-frontend`.
 - `bootstrap.md` — one-time project setup skill. Phase 1 detects project shape + tool surface and
   writes `corpora/config.md` (always); Phase 2 generates `corpora/ui-library.md` and seed
   `corpora/ui-designer.md` (only when the project has a UI).

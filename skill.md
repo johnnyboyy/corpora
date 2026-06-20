@@ -103,11 +103,14 @@ work, load `coder.md` (the base) plus the project's pack coder overlay if its sh
 
 **Ratify gate (after coder work):**
 1. Present proposed principles (rule, condition, reason, provenance). Ask: ratify / reject / edit.
-2. Write-back per the format in `kernel.md`. Ratified → append before `killed:`. Rejected → append to
-   `killed:` with `reason_killed`. Edited → ratify operator's version.
+2. Write-back per the format in `kernel.md`. Ratified → working fields (`rule`/`condition`/`reason`/
+   `status`) to the end of `principles:` in `corpora/<role>.md`; the proposal's `provenance` goes to
+   `corpora/<role>.audit.md` when the role's corpus is split (the coder is), inline on the principle
+   otherwise. Rejected → append to the `killed:` log (in the audit file when split) with `reason_killed`.
+   Edited → ratify operator's version.
 3. If the operator defers review, append pending proposals to `kernel-queue/proposals.json` (or similar
    project-defined queue file) so they survive context resets.
-4. Commit the corpus alongside the code change so the two don't drift.
+4. Commit the corpus — working and audit files together — alongside the code change so they don't drift.
 
 **UI library upkeep:** When ratified design decisions or implemented UI work meaningfully change the
 project's visual system, update the project's design system documentation as part of the same write-back
@@ -210,9 +213,9 @@ principles:
   status: ratified
 
 - id: full-corpus-on-spawn
-  rule: "Always pass the full role corpus when spawning a designer or coder subagent. Do not excerpt or filter by perceived task relevance."
+  rule: "Always pass the full role corpus when spawning a designer or coder subagent. Do not excerpt or filter by perceived task relevance. This bars dropping *principles* by relevance — it does not bar the working/audit storage split (see kernel.md), which removes audit metadata (provenance, promoted, killed) uniformly and still passes every active principle in full."
   condition: "Any subagent spawn where a role corpus exists."
-  reason: "Selective inclusion requires the orchestrator to judge which principles are relevant from the task framing — a judgment it cannot make reliably. A missed principle silently degrades the spec or implementation without any signal that it was missed."
+  reason: "Selective inclusion requires the orchestrator to judge which principles are relevant from the task framing — a judgment it cannot make reliably. A missed principle silently degrades the spec or implementation without any signal that it was missed. The storage split is exempt because it drops no principle and makes no relevance judgment — every active rule/condition/reason still loads."
   provenance: "2026-06-19, operator rejected selective inclusion after orchestrator proposed it as a cost-reduction strategy."
   status: ratified
 

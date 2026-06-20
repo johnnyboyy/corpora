@@ -31,6 +31,26 @@ Notes on fields:
   "the reason was X; this task is Y, so the rule doesn't bind here."
 - **provenance** is cheap to record and invaluable for trusting or retiring a principle later.
 
+### Storage: working vs audit
+
+A role's corpus may be split across two files so the role's working context carries only the
+fields it weighs during a task:
+
+- **Working file** (`<role>.md`, e.g. `coder.md`) — the active `principles:` with their
+  `id / rule / condition / reason / status / see-also`. This is the only corpus file loaded
+  when the role works, inline or spawned.
+- **Audit file** (`<role>.audit.md`, e.g. `coder.audit.md`) — per-principle `provenance`
+  (keyed by `id`), the `promoted:` block, and the `killed:` log. Loaded only at ratify and
+  retrospective time, by the orchestrator — never in the role's working context.
+
+This is a *storage* split, not a *corpus* excerpt: every active principle is still passed in
+full with the fields a role reasons over. Only the audit metadata — which a role does not weigh
+mid-task (`provenance` records where a rule came from; `promoted:`/`killed:` are the regression
+guard checked at the ratify gate) — moves out of the loaded path. The split is optional per role;
+adopt it where the audit volume is worth the second file (the coder, with its verbose merge
+provenance). The two files are kept consistent by `id`: every active `id` in the working file has
+a `provenance` entry in the audit file, and vice versa.
+
 ---
 
 ## The ratify gate
@@ -44,16 +64,23 @@ Every cross-boundary change is **propose → ratify → promote**, never write-d
 
 ### Write-back format
 
-Ratified principle — append before the `promoted:` line:
+Ratified principle — append the working fields to the end of `principles:`:
 
 ```yaml
 - id: principle-id
   rule: "The guidance."
   condition: "When this applies."
   reason: "Why — the justification."
-  provenance: "Date, task, context."
   status: ratified
 ```
+
+The proposal that surfaced the principle carries its `provenance` (provenance is captured at
+proposal time, not at ratification). On write-back, that `provenance` is filed by `id`:
+
+- **Split corpus** (role has an audit file) — append `{ id, provenance }` to the audit file's
+  `provenance:` block. The working file's principle carries no `provenance` field.
+- **Inline corpus** (no audit file) — keep `provenance:` as a field on the principle, appended
+  before the `promoted:` line.
 
 Promoted principle — when a corpus entry graduates to the role prompt itself (becomes a baked-in
 default rather than a weighable principle), move it from `principles:` to `promoted:`. Keep the
@@ -79,7 +106,8 @@ universal while still drawing its truth from the current climate; promoting it b
 into the prompt, where it stops being weighable. When in doubt, leave it in `principles:` where its
 `condition` and `reason` can still be checked against an unfamiliar case.
 
-Killed entry — append at end of file:
+Killed entry — append to the `killed:` log (in the audit file when the corpus is split,
+otherwise at the end of the working file). Kills carry no `id`:
 
 ```yaml
 - rule: "The rejected rule."
