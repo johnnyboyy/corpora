@@ -172,6 +172,10 @@ working context holding concerns from another mode?
    tension — never assumed up front from how a human team would be organized.
 3. **Convergence → explorer** — corpus has stopped changing, corrections rare. Proposal: pair with an
    explorer to prevent calcification.
+4. **Seed promotion candidate** — a project corpus principle whose condition makes no reference to this
+   project's stack, domain, or specifics, and has held across enough tasks to read as general. Surface it
+   as a candidate for promotion to the seed corpus in the role-kernel repo. The exact process for that
+   promotion is not yet defined; the retrospective's job is to flag the candidate, not to execute the move.
 
 **Anti-overfitting (coder, and any role whose work has been single-context):** surface which ratified
 principles were earned only in one project shape (e.g. UI/web work) and should stay provisional —

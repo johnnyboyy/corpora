@@ -1,121 +1,63 @@
 # corpora
 
-A portable role-kernel system — a multi-role design+coding discipline that accumulates judgment
-across projects. A stack-agnostic kernel travels everywhere; stack-specific conventions live in
-role packs that load only when a project's shape selects them.
+A system for accumulating and scoping learned judgment across agent sessions and projects without collapsing role boundaries.
 
-## How it works
+The mechanics: each role carries a **kernel** (shared mechanism: schema, ratify gate, retrospective) and a **seed corpus** (general principles earned from real work). A project adds its own corpus. Principles ratified there can promote upward — to the seed corpus when they generalize across projects, to the role prompt itself when they stabilize into defaults. Rejected principles are kept with their reason — the kill log is often more instructive than the ratified list. Kernel and seed travel in this repo; project corpora stay in the project.
+
+## Architecture
 
 **Two layers of role content:**
 
-- **Kernel (stack-agnostic, always loaded)** — the orchestrator (`skill.md`) and the base coder
-  (`coder.md`). Their conventions and corpora hold in any language or framework. This is what a
-  project with no role pack runs on.
-- **Role pack (stack-specific, loaded by project shape)** — a set of per-role overlay files under
-  `packs/<name>/` that extend the kernel roles with stack-specific conventions and corpus. The only
-  pack here is `web-frontend` (a coder overlay plus UX and UI designer roles). A project's
-  `corpora/config.md` declares `role-pack:` to select one, or `none` to run on the kernel alone.
+- **Kernel** — stack-agnostic, always loaded. One orchestrator (`skill.md`) and one base coder (`coder.md`). Every project starts here, even with no role pack.
+- **Role pack** — stack-specific overlays and additional roles under `packs/<name>/`, loaded only when a project's `corpora/config.md` declares `role-pack: <name>`. The only pack here is `web-frontend` (coder overlay, UX designer, UI designer).
 
-A pack adds **depth to the existing roles, not new roles.** There is one coder, one UX designer,
-one UI designer per project — a web project's coder loads the base plus the web overlay; it never
-becomes a chain of stack-flavored coders. A role splits into scoped instances only when its own
-corpus reveals the seam (the retrospective fork signal — see `kernel.md`), not by assuming one up
-front. The structure is discovered from accumulated tension, not imported from an org chart.
+A pack adds **depth to existing roles** — more conventions, more corpus — not new roles. There is one coder, one UX designer, one UI designer per project. Roles split into scoped instances only when the retrospective surfaces a fork signal (conditions in the corpus that partition the space and give opposing advice), never from an org chart.
 
 **Two layers of corpus** (orthogonal to the above):
 
-- **Seed corpus** — general principles distilled from real work. Lives in this repo beside each
-  role (kernel roles in `coder.md`/`skill.md`; pack roles in `packs/<name>/<role>.md`).
-- **Project corpus** — project-specific accumulated judgment at `corpora/<role>.md`. Extends the
-  seed; never merged back here without abstraction.
+- **Seed corpus** — general principles, living beside each role file in this repo.
+- **Project corpus** — project-specific accumulated judgment at `corpora/<role>.md` in the target project. Never merged back here without abstraction.
 
-Both corpus layers apply when a role runs — seed first, then project.
+Both apply when a role runs — seed first, then project.
 
-**Role isolation.** Each role runs in its own context: its own file(s) plus its own project
-corpus, and nothing from another role. The coder never carries design corpora; the designers never
-carry coder or each other's. This is a deliberate, load-bearing boundary — design decisions sitting
-in a shared transcript bleed into later coding iterations and cost tokens to filter back out.
-Designers are always spawned into a fresh context, never run inline. See LINEAGE.md, "Role isolation."
+**Role isolation.** Each role runs in its own context: its own file(s) plus its own project corpus, nothing from another role. Design roles always spawn into a fresh context; the coder runs inline. Design decisions in a shared transcript bleed into coding iterations and cost tokens to filter back out. See LINEAGE.md, "Role isolation."
 
 ## Files
 
-- `skill.md` — the entry skill: the orchestrator role plus the kernel/pack/shape model and assembly
-  logic. Invoke via the Claude Code skill system; pass a role name as an arg for direct invocation.
-- `coder.md` — the base (stack-agnostic) coder: prompt + seed corpus (working fields only).
-  Loaded for every project. `coder.audit.md` holds its provenance/promoted/killed record,
-  loaded only at ratify/retrospective time — see "working vs audit" in `kernel.md`.
-- `packs/web-frontend/` — the web-frontend role pack: `coder.md` (overlay, with `coder.audit.md`
-  alongside), `ux-designer.md`, `ui-designer.md`, each with its own seed corpus. Loaded only
-  when `role-pack: web-frontend`.
-- `bootstrap.md` — one-time project setup skill. Phase 1 detects project shape + tool surface and
-  writes `corpora/config.md` (always); Phase 2 generates `corpora/ui-library.md` and seed
-  `corpora/ui-designer.md` (only when the project has a UI).
-- `kernel.md` — the schema, ratify gate, and write-back format. Reference document.
-- `LINEAGE.md` — intellectual history: why conventions became law, key kills, system design decisions.
-- `reader-tax-and-the-model.md` — a living, multi-model document examining whether Explicit by Default
-  helps the model itself (not only the human reviewer). Other models are invited to append assessments.
+- `skill.md` — the orchestrator: routes tasks, spawns designers, drives the ratify gate. Entry point for the Claude Code skill system (`/corpora`).
+- `coder.md` — base coder, working fields only. Loaded for every project. `coder.audit.md` holds provenance/promoted/killed — loaded only at ratify and retrospective time.
+- `orchestrator.audit.md` — provenance and audit history for the orchestrator corpus.
+- `packs/web-frontend/` — the web-frontend pack: `coder.md` (overlay, with `coder.audit.md`), `ux-designer.md` (with `ux-designer.audit.md`), `ui-designer.md` (with `ui-designer.audit.md`). Loaded only when `role-pack: web-frontend`.
+- `bootstrap.md` — one-time project setup. Phase 1 detects project shape and writes `corpora/config.md`. Phase 2 (UI projects only) generates `corpora/ui-library.md` and seeds `corpora/ui-designer.md`.
+- `kernel.md` — the schema, ratify gate, write-back format, retrospective signals, and role lifecycle. Reference document.
+- `LINEAGE.md` — intellectual history: why conventions became law, key kills, design decisions.
+- `reader-tax-and-the-model.md` — a living, multi-model assessment of whether Explicit by Default helps the model itself, not only the human reviewer.
 
 ## Using in a project
 
-1. Install this repo as a Claude Code plugin (`git clone` into `~/.claude/plugins/corpora`).
-2. For a new project, run `corpora:bootstrap` first. Phase 1 detects the project's shape (language,
-   framework, `has-ui`, `role-pack`) and tool surface and writes `corpora/config.md` — this runs for
-   every project. If the project has a UI, Phase 2 also generates `corpora/ui-library.md` and seeds
-   design principles; a project with no UI stops after Phase 1 and runs on the kernel alone. If the
-   project needs a color utility, bootstrap builds one from the spec in `bootstrap.md` (the repo
-   ships the spec, not an implementation) and records its invocation in `corpora/config.md`.
-3. Invoke the skill: `/corpora:orchestrator` for orchestrator mode, or pass a role name
-   for direct entry. The skill reads `corpora/config.md`, loads the declared role pack if any, and
-   assembles each role from kernel + pack overlay + project corpus.
-4. The skill reads `corpora/<role>.md` from the project root. Create that file (empty is
-   fine) when the first project-specific principle is ratified.
+1. Clone into `~/.claude/plugins/corpora` to install as a Claude Code plugin.
+2. Run `/corpora:bootstrap` before first use. Phase 1 detects project shape (`language`, `framework`, `has-ui`, `role-pack`) and tool surface, and writes `corpora/config.md`. If the project has a UI, Phase 2 generates `corpora/ui-library.md` and seeds design principles.
+3. Invoke `/corpora` to enter orchestrator mode. The orchestrator routes tasks, runs inline coder work, spawns designers when needed, and drives the ratify gate after any session that produces ratifiable decisions.
+4. `corpora/<role>.md` in the project root holds project-specific principles. The orchestrator creates it on first ratification.
 
-## Project files (all under `corpora/` in the target project)
+**Project files** (all under `corpora/` in the target project):
 
-- `corpora/config.md` — project tool surface read by every role at session start (generated by bootstrap)
-- `corpora/ui-library.md` — design system reference (generated by bootstrap, updated by designers)
-- `corpora/coder.md` — project-specific coder principles
-- `corpora/orchestrator.md` — project-specific orchestrator principles
-- `corpora/ux-designer.md` — project-specific UX principles
-- `corpora/ui-designer.md` — project-specific UI principles
+- `config.md` — project shape and tool surface, read by every role at session start (generated by bootstrap)
+- `ui-library.md` — design system documentation (generated by bootstrap, updated by designers)
+- `coder.md`, `orchestrator.md`, `ux-designer.md`, `ui-designer.md` — per-role accumulated judgment (working fields only; provenance/promoted/killed in sibling `<role>.audit.md`)
 
-## Project corpus format
-
-`corpora/coder.md`, `corpora/orchestrator.md`, `corpora/ux-designer.md`, `corpora/ui-designer.md`
-
-Each follows the schema in `kernel.md`:
-
-```yaml
-last-retrospective: YYYY-MM-DD
-
-principles:
-  # active ratified principles
-
-promoted:
-  # principles that graduated to the role prompt; kept for audit trail
-
-killed:
-  # rejected proposals; kept so the same mistake isn't ratified twice
-```
+See `kernel.md` for the full principle schema and write-back format.
 
 ## Cross-project learning
 
-When a principle in a project corpus proves general — its condition doesn't reference the
-project's specific stack or domain — propose promoting it to the seed corpus here via a PR.
-The project corpus is where principles are earned; this repo is where they graduate.
+When a principle in a project corpus is general — its condition doesn't reference the project's stack or domain — it's a candidate for promotion to the seed corpus here. The project corpus is where principles are earned; this repo is where they graduate.
+
+The retrospective is the natural trigger: when a project-level principle has held across enough tasks that it reads as general rather than project-specific, the retrospective can surface it as a seed promotion candidate. The exact process for that promotion is not yet spelled out.
+
+The seed corpora here have been through their first retrospective pass (2026-06-20): scoping misplaced principles to the right roles, flagging single-project principles as provisional, and killing redundant entries. A provisional flag means the principle was earned in one project context and hasn't been stress-tested against a second.
 
 ## New stacks and role splitting
 
-**A new stack** (Astro, Electron, a Python backend) inherits the kernel for free — the
-orchestrator and the base coder apply unchanged, so a new project starts on top of the established
-general best practices. Add a role pack only when a *body* of stack-specific conventions has
-actually accumulated and is worth shipping across projects of that stack; until then, project-earned
-specifics live in the project's `corpora/<role>.md`. Do not pre-build packs speculatively.
+**New stack:** the kernel applies unchanged — every new project inherits the orchestrator and base coder for free. Add a role pack only when a body of stack-specific conventions has accumulated and is worth shipping across projects of that stack. Until then, project-earned specifics live in `corpora/coder.md`. Do not pre-build packs speculatively.
 
-**Domain-split roles** — separate scoped instances of a role per area (frontend/backend, or by
-feature area) — are a project-level choice: create additional corpus files (`corpora/frontend-coder.md`,
-`corpora/dashboard-ux.md`) and let the orchestrator load the right one per task. This is distinct from
-a role pack (which configures the *single* role for a stack) and from the kernel default. Reach for it
-only when the **fork signal** surfaces the seam — the role's corpus develops conditions that partition
-the space and repeatedly give opposing advice — not when an org chart suggests it should exist. Let the
-accumulated tension reveal the split; don't assume it.
+**Domain-split roles:** create additional project-corpus files (`corpora/frontend-coder.md`, `corpora/dashboard-ux.md`) and let the orchestrator load the right one per task. Reach for this only when the fork signal surfaces the seam — not from an org chart. Let accumulated tension reveal the split.
