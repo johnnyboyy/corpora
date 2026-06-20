@@ -1,0 +1,85 @@
+# UX Designer audit record (web-frontend pack)
+
+Provenance and promotions for `ux-designer.md`. Loaded only at ratify/retrospective time — never
+in the UX designer's working context. Keyed by principle `id`. See `kernel.md`, "Storage: working
+vs audit." (The kill log lives in `ux-designer.md` so it is available in the working context.)
+
+```yaml
+provenance:
+
+- id: triage-and-ranking-are-independent-signals
+  provenance: "Merged from intake-and-ranking-are-separate-activities + elo-as-independent-ranking-signal, 2026-06-02."
+
+- id: category-scope-is-visible-on-ranked-items
+  provenance: "2026-06-02."
+
+- id: choice-prompt-anchors-on-usefulness-not-preference
+  provenance: "2026-06-02."
+
+- id: callout-label-describes-property-not-judgment
+  provenance: "2026-06-02, Box Selector UX review."
+
+- id: out-of-order-callout-requires-sort-explanation
+  provenance: "2026-06-02, Box Selector UX review."
+
+- id: zero-count-orphan-rows
+  provenance: "2026-06-02, Box Selector UX review."
+
+- id: warning-banner-must-locate-its-fix
+  provenance: "2026-06-02, Box Selector UX review."
+
+- id: filter-side-effects-are-surfaced
+  provenance: "2026-06-02, Box Selector UX review."
+
+- id: scrollytelling-must-always-react
+  provenance: "2026-06-13, homepage journey audit."
+
+- id: origin-step-marked-visited-on-navigation
+  provenance: "2026-06-14, load-calculator UX audit."
+
+- id: destructive-global-actions-require-confirmation
+  provenance: "2026-06-14, load-calculator UX audit."
+
+- id: wizard-output-consistent-regardless-of-path
+  provenance: "2026-06-14, load-calculator UX audit."
+
+- id: optional-step-must-be-labeled-optional
+  provenance: "2026-06-14, load-calculator UX audit."
+
+- id: numeric-inputs-start-empty-not-zero
+  provenance: "2026-06-14, load-calculator UX audit."
+
+- id: recovery-path-replaces-confirmation
+  provenance: "2026-06-14, load-calculator audit."
+
+- id: unified-field-over-derived-dual-fields
+  provenance: "2026-06-14, load-calculator appliance row overhaul."
+
+- id: persistent-controls-not-conditional
+  provenance: "2026-06-14, load-calculator appliance row overhaul."
+
+- id: section-level-explanation-not-row-level
+  provenance: "2026-06-14, load-calculator appliance row overhaul."
+
+- id: indicator-weight-matches-job
+  provenance: "2026-06-16, load calculator history redesign."
+
+- id: active-row-is-inert
+  provenance: "2026-06-16, load calculator history redesign."
+
+- id: destructive-inline-confirmation
+  provenance: "2026-06-02 (originated in ui-designer seed corpus)."
+  history:
+    - date: 2026-06-20
+      type: moved
+      reason: "Principle describes interaction behavior (inline row transformation, confirm/cancel affordance), not visual design. Moved from UI designer seed to UX designer seed."
+
+- id: recoverable-action-surfaces-its-path
+  provenance: "2026-06-14, load-calculator audit (originated in ui-designer seed corpus)."
+  history:
+    - date: 2026-06-20
+      type: moved
+      reason: "Principle describes behavioral requirement (make the recovery path visible at the moment of action), not visual design. Moved from UI designer seed to UX designer seed."
+
+promoted:
+```

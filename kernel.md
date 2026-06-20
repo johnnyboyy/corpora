@@ -37,18 +37,20 @@ A role's corpus may be split across two files so the role's working context carr
 fields it weighs during a task:
 
 - **Working file** (`<role>.md`, e.g. `coder.md`) — the active `principles:` with their
-  `id / rule / condition / reason / status / see-also`. This is the only corpus file loaded
-  when the role works, inline or spawned.
+  `id / rule / condition / reason / status / see-also`, plus the `killed:` log. This is the
+  only corpus file loaded when the role works, inline or spawned.
 - **Audit file** (`<role>.audit.md`, e.g. `coder.audit.md`) — per-principle `provenance`
-  (keyed by `id`), the `promoted:` block, and the `killed:` log. Loaded only at ratify and
-  retrospective time, by the orchestrator — never in the role's working context.
+  (keyed by `id`) and the `promoted:` block. Loaded only at ratify and retrospective time,
+  by the orchestrator — never in the role's working context.
 
-This is a *storage* split, not a *corpus* excerpt: every active principle is still passed in
-full with the fields a role reasons over. Only the audit metadata — which a role does not weigh
-mid-task (`provenance` records where a rule came from; `promoted:`/`killed:` are the regression
-guard checked at the ratify gate) — moves out of the loaded path. The split is optional per role;
-adopt it where the audit volume is worth the second file (the coder, with its verbose merge
-provenance). The two files are kept consistent by `id`: every active `id` in the working file has
+The `killed:` log lives in the working file because it is active guidance — it tells the role
+what has already been tried and rejected, prevents the same pattern from re-emerging, and opens
+new directions by making the rejection reason visible. Provenance and promotions, by contrast,
+are audit metadata a role does not weigh mid-task, so they stay in the audit file.
+
+This is a *storage* split, not a *corpus* excerpt: every active principle and kill entry is
+still passed in full with the fields a role reasons over. The split is the standard for all
+roles. The two files are kept consistent by `id`: every active `id` in the working file has
 a `provenance` entry in the audit file, and vice versa.
 
 ---
@@ -77,10 +79,23 @@ Ratified principle — append the working fields to the end of `principles:`:
 The proposal that surfaced the principle carries its `provenance` (provenance is captured at
 proposal time, not at ratification). On write-back, that `provenance` is filed by `id`:
 
-- **Split corpus** (role has an audit file) — append `{ id, provenance }` to the audit file's
-  `provenance:` block. The working file's principle carries no `provenance` field.
-- **Inline corpus** (no audit file) — keep `provenance:` as a field on the principle, appended
-  before the `promoted:` line.
+Append `{ id, provenance }` to the audit file's `provenance:` block. The working file's
+principle carries no `provenance` field.
+
+When a ratified principle is meaningfully reshaped — generalized, consolidated with another,
+or split — add an optional `history:` sub-list to its provenance entry. Each item carries
+`date`, `type` (generalized / consolidated / split), and `reason` (the insight that drove
+the change). This keeps the full story of a principle co-located under its `id` without
+adding a new top-level block:
+
+```yaml
+- id: some-principle
+  provenance: "2026-01-01, original task."
+  history:
+    - date: 2026-06-20
+      type: generalized
+      reason: "Original rule was too narrow — named a specific pattern rather than the underlying principle. Broadened to cover the general case."
+```
 
 Promoted principle — when a corpus entry graduates to the role prompt itself (becomes a baked-in
 default rather than a weighable principle), move it from `principles:` to `promoted:`. Keep the
@@ -106,8 +121,7 @@ universal while still drawing its truth from the current climate; promoting it b
 into the prompt, where it stops being weighable. When in doubt, leave it in `principles:` where its
 `condition` and `reason` can still be checked against an unfamiliar case.
 
-Killed entry — append to the `killed:` log (in the audit file when the corpus is split,
-otherwise at the end of the working file). Kills carry no `id`:
+Killed entry — append to the `killed:` log in the **working file**. Kills carry no `id`:
 
 ```yaml
 - rule: "The rejected rule."
@@ -119,29 +133,23 @@ otherwise at the end of the working file). Kills carry no `id`:
 
 ## Project corpora
 
-In any project using this system, project-specific accumulated judgment lives at:
-
-```
-<project-root>/corpora/
-  coder.md
-  orchestrator.md
-  ux-designer.md
-  ui-designer.md
-```
+In any project using this system, project-specific accumulated judgment lives under
+`<project-root>/corpora/`, one file per active role (`<role>.md`). The kernel itself is the
+mechanism (schema, ratify gate, retrospective, lifecycle) and is indifferent to which roles
+exist or how many there are.
 
 These files use the same schema and extend the seed corpus in the skill.
 Seed corpus = general principles that travel across projects.
 Project corpus = principles earned in this specific project.
 Both apply when a role runs — seed first, then project.
 
-The four-role set is the default configuration, not a law of the kernel. The kernel itself is
-the mechanism (schema, ratify gate, retrospective, lifecycle) and is indifferent to which roles
-exist. Two layers instantiate the roles: a stack-agnostic kernel layer (orchestrator + base coder)
-that is always present, and an optional role pack selected by the project's `corpora/config.md`
-(`role-pack:`) that overlays stack-specific conventions and corpus onto those roles. A pack adds
-depth to existing roles, not new roles — and a project with no UI runs on the kernel layer alone,
-with the designer roles simply inactive. Each role runs in isolation: its context is its own
-file(s) and its own project corpus, never another role's (see LINEAGE.md, "Role isolation").
+Two layers instantiate the default roles: a stack-agnostic kernel layer (orchestrator + base
+coder) that is always present, and an optional role pack selected by the project's
+`corpora/config.md` (`role-pack:`) that overlays stack-specific conventions and corpus onto
+those roles. A pack adds depth to existing roles, not new roles — and a project with no UI runs
+on the kernel layer alone, with designer roles simply inactive. Each role runs in isolation: its
+context is its own file(s) and its own project corpus, never another role's (see LINEAGE.md,
+"Role isolation").
 
 ---
 

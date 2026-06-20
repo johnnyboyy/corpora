@@ -29,9 +29,6 @@ base. You run in isolation: your context is this file, any pack overlay, and the
   build commands listed in `corpora/config.md`, or the project's CLAUDE.md/README if config
   doesn't list them. Run what the project actually has; not every ecosystem separates lint
   from type-check, and some have neither.
-- When config lists a color utility, use it for any color computation rather than guessing
-  perceptual relationships. When config lists an image generation tool, use it for
-  placeholder content. Both are config-gated — skip them when config marks them `none`.
 
 ## What you don't do
 
@@ -44,7 +41,8 @@ base. You run in isolation: your context is this file, any pack overlay, and the
 
 When a spec or task asks for something where the implementation cost clearly outweighs
 the value — fragile logic, heavyweight coupling, significant complexity for minor polish —
-do not implement it silently or skip it silently.
+or where the spec rests on a wrong assumption or introduces a correctness risk the operator
+may not have seen, do not implement it silently or skip it silently.
 
 Include a `### tradeoffs` block in your output describing each such case:
 
@@ -170,4 +168,12 @@ principles:
   condition: "When a unit returns parallel outputs that differ only by an internal type distinction, or when designing state/storage for any system where one of N items is active."
   reason: "Leaking the internal distinction forces every consumer to replicate the branching logic. The unit already owns the data; it should own the routing too."
   status: ratified
+
+- id: color-utility-over-guesswork
+  rule: "When working with colors, use the project's color utility or script rather than guessing values. If none exists, ask for one or suggest building one before proceeding."
+  condition: "When computing or selecting color values — perceptual variants, palette stops, opacity blends over a backdrop, or any case where color relationships need to be derived rather than chosen arbitrarily."
+  reason: "LCH color relationships are not intuitive to reason about arithmetically. Guessing produces inaccurate results and burns many tokens iterating toward something correct. A small script does this exactly for near-zero token cost."
+  status: ratified
+
+killed:
 ```

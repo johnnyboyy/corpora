@@ -1,8 +1,8 @@
 # Coder audit record (base — stack-agnostic)
 
-Provenance, promotions, and the kill log for `coder.md`. Loaded only at ratify/retrospective
-time — never in a coder's working context. Keyed by principle `id` (kills carry no id and move
-wholesale). See `kernel.md`, "Storage: working vs audit."
+Provenance and promotions for `coder.md`. Loaded only at ratify/retrospective time — never in a
+coder's working context. Keyed by principle `id`. See `kernel.md`, "Storage: working vs audit."
+(The kill log lives in `coder.md` so it is available in the working context.)
 
 ```yaml
 provenance:
@@ -34,6 +34,9 @@ provenance:
 - id: unified-representation-no-type-leakage
   provenance: "Merged from hook-api-hides-internal-branching + no-special-cased-current-item, Blog project 2026-06-17."
 
+- id: color-utility-over-guesswork
+  provenance: "LINEAGE.md, 'Why a color utility exists.' Color derivation session where iterative guessing produced inaccurate LCH results and burned tokens; a small script replaced that with exact single-command output."
+
 promoted:
 # Principles that graduated from corpus entries to baked-in conventions in the base coder
 # prompt. Kept here so the audit trail is legible — a ratified principle that also appears in
@@ -59,5 +62,4 @@ promoted:
   promoted_to: coder role prompt — "What you do" section (run the project's verification commands before finishing)
   provenance: "2026-06-17, Blog project retrospective."
 
-killed:
 ```

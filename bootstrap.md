@@ -1,19 +1,25 @@
 ---
-name: bootstrap
+name: corpora:bootstrap
 description: Bootstrap a UI library and tooling config for a new project. Run once before any feature design work begins. Can work from existing design documentation, brand guidelines, aesthetic references, or from scratch with operator guidance. Outputs corpora/config.md (the project tool surface), corpora/ui-library.md, and seed corpora/ui-designer.md. Text-only format — no screenshots, no image exports. See LINEAGE.md for why.
 ---
 
 # Project Bootstrap
 
-Run once to set a new project up for the role-kernel system. Bootstrap has two phases:
+Reference document for the orchestrator's bootstrap flow. The orchestrator reads this file when
+`corpora/config.md` is absent and runs the two phases itself — Phase 1 inline, Phase 2 by
+spawning the UI designer with the Phase 2 section as the task. This file is not a standalone
+skill; it is read and executed by the orchestrator.
 
-- **Phase 1 — Project shape and config (always).** Detect the project's shape and tool surface
-  and write `corpora/config.md`. This is what flips the project from "not bootstrapped" to
-  "bootstrapped" for the roles, and it runs for every project regardless of type.
-- **Phase 2 — UI library (only when the project has a UI).** If Phase 1 finds `has-ui: yes`,
-  bootstrap a design system. This is the UI designer's foundational work — get it right and every
-  subsequent designer session starts with real constraints; get it wrong and every session invents
-  in a vacuum. A project with no UI (a CLI, a library, a backend service) skips this phase entirely.
+Bootstrap has two phases:
+
+- **Phase 1 — Project shape and config (always, run inline by the orchestrator).** Detect the
+  project's shape and tool surface and write `corpora/config.md`. This is what flips the project
+  from "not bootstrapped" to "bootstrapped" for the roles, and it runs for every project
+  regardless of type.
+- **Phase 2 — UI library (only when `has-ui: yes`, run by spawning the UI designer).** Bootstrap
+  a design system. This is the UI designer's foundational work — get it right and every subsequent
+  designer session starts with real constraints; get it wrong and every session invents in a vacuum.
+  A project with no UI skips this phase entirely.
 
 The output of this session is:
 1. **`corpora/config.md`** — project shape (language, framework, package manager, `has-ui`, styling,
