@@ -48,6 +48,8 @@ Designers are always spawned into a fresh context, never run inline. See LINEAGE
   `corpora/ui-designer.md` (only when the project has a UI).
 - `kernel.md` — the schema, ratify gate, and write-back format. Reference document.
 - `LINEAGE.md` — intellectual history: why conventions became law, key kills, system design decisions.
+- `reader-tax-and-the-model.md` — a living, multi-model document examining whether Explicit by Default
+  helps the model itself (not only the human reviewer). Other models are invited to append assessments.
 
 ## Using in a project
 

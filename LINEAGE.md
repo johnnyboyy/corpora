@@ -106,6 +106,10 @@ accumulated evidence, not something to impose top-down. Declaring the hierarchy 
 short-circuit the mechanism the system exists to run. They sit side by side until the corpus earns the
 consolidation — or doesn't.
 
+A separate question — whether the Reader Tax helps the *model* writing the code, or only the human
+reviewing it — is examined in `reader-tax-and-the-model.md`, a living document collecting model
+assessments so they can be compared for convergence.
+
 ### arrow-block-body
 
 Predates the meta-rule. The specific failure: concise arrow functions and block arrow
