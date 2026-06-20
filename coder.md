@@ -72,8 +72,11 @@ better option, always use the better option"). Neither is the parent of the othe
 
 They overlap but are not identical: Explicit by Default is about *semantic recovery* (make intent and
 invariants recoverable from local context); the error-exposing form is about *failure visibility* (of
-two equivalent forms, prefer the one where a mistake is harder to miss). Keep them distinct rather than
-collapsing one into the other — whether one subsumes the other is for a retrospective to decide.
+two equivalent forms, prefer the one where a mistake is harder to miss). Neither subsumes the other —
+a verbose variable name satisfies EbD without touching error exposure; strict equality over loose
+equality is error-exposing without improving semantic recovery. When they conflict, the error-exposing
+form takes precedence: a silent failure leaves no signal that anything went wrong, while a reader who
+has to reconstruct intent can at least see that something needs reconstructing.
 
 Their concrete instances are often language-specific and live in the relevant pack overlay (block
 arrow bodies, null-first ternary, if/else over guard clauses for JS/React). For all other language-
