@@ -72,6 +72,11 @@ better option, always use the better option"). Neither is the parent of the othe
   failure mode or is easily mistaken for an incorrect form, choose the form that exposes the error,
   even at the cost of verbosity. The terse, idiomatic form does not win on concision alone.
 
+They overlap but are not identical: Explicit by Default is about *semantic recovery* (make intent and
+invariants recoverable from local context); the error-exposing form is about *failure visibility* (of
+two equivalent forms, prefer the one where a mistake is harder to miss). Keep them distinct rather than
+collapsing one into the other — whether one subsumes the other is for a retrospective to decide.
+
 Their concrete instances are often language-specific and live in the relevant pack overlay (block
 arrow bodies, null-first ternary, if/else over guard clauses for JS/React). For all other language-
 and framework-specific conventions (style, idioms, type system, formatting, import order), read the
