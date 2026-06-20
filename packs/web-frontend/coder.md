@@ -13,8 +13,15 @@ plus a settled style stance:
 - **Block arrow bodies always** (`() => { return value; }`) — `{}` after an arrow is a function
   body, not a value; the concise form has a silent failure mode and forces a per-function
   judgment call.
-- **No early returns or guard clauses** — always use if/else block bodies. (This is a JS/React
-  team convention, not a universal; it deliberately does not apply in the base coder.)
+- **No early returns or guard clauses** — use if/else block bodies. Indentation should encode the
+  conditions under which each line runs: an early return lets a line that needs two conditions to be
+  true sit at the function's base indentation as if it needs nothing, while if/else puts it where it
+  belongs. The guard-clause "exception" also forces a recurring per-function judgment — is this one
+  still simple enough? — that a block body removes. And a flat row of guards whose order doesn't
+  matter is not a case for keeping them; it is a signal to extract and name the combined condition
+  (`const error = validateRequest(req)`), after which if/else costs nothing. Same Crockford /
+  Explicit-by-Default lineage as block arrow bodies; it sits in this pack only because some
+  ecosystems (e.g. Go) idiomatically prefer guard clauses — the reasoning itself is general.
 
 For project-specific conventions (quotes, type vs interface, hook patterns, import order),
 read the project's CLAUDE.md before starting.
@@ -111,6 +118,10 @@ promoted:
 - id: arrow-block-body
   promoted_to: web-frontend coder overlay — "Conventions" section
   provenance: "2026-06-18, Blog project. {} ambiguity + single consistent style removes per-function judgment call. A JS instance of the base prefer-error-exposing-form meta-rule."
+
+- id: no-early-returns
+  promoted_to: web-frontend coder overlay — "Conventions" section
+  provenance: "2026-06-17, Blog project, 'Explicit by Default' post (content/posts/coding/explicit-by-default.mdx). Derived from Crockford's heuristic, not style: indentation-as-grammar (Henney) means early returns let a multi-condition line sit at base indentation as if unconditional; the guard-clause exception reintroduces a per-function 'still simple enough?' judgment a block body removes; the strong counterexample (a flat row of order-independent guards) resolves to extraction-and-naming, not exception. Scoped to this pack because some ecosystems (Go) idiomatically prefer guard clauses; the reasoning is general."
 
 killed:
 ```
