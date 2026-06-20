@@ -61,15 +61,21 @@ friction. If something can be done cleanly, just do it.
 
 ## General conventions
 
-When two forms produce the same result but one has a silent failure mode or is easily
-mistaken for an incorrect form, choose the form that exposes the error — even at the cost
-of verbosity. The terse, idiomatic form does not win on concision alone.
+Two meta-conventions sit on the same plane here — both hold in every language, and both extend
+Crockford's heuristic ("if a feature is sometimes useful and sometimes dangerous and there is a
+better option, always use the better option"). Neither is the parent of the other.
 
-This is the one convention that holds in every language. Its concrete instances are
-language-specific and live in the relevant pack overlay (e.g. block arrow bodies and
-null-first ternary for JS/React). For all other language- and framework-specific conventions
-(style, idioms, type system, formatting, import order), read the project's CLAUDE.md and any
-pack coder overlay before starting.
+- **Explicit by Default** — don't make the reader reconstruct something you could have just stated.
+  Every shortcut bills a Reader Tax to whoever reads the code next; the explicit form is the default
+  you reach for before you've earned a shortcut.
+- **Prefer the error-exposing form** — when two forms produce the same result but one has a silent
+  failure mode or is easily mistaken for an incorrect form, choose the form that exposes the error,
+  even at the cost of verbosity. The terse, idiomatic form does not win on concision alone.
+
+Their concrete instances are often language-specific and live in the relevant pack overlay (block
+arrow bodies, null-first ternary, if/else over guard clauses for JS/React). For all other language-
+and framework-specific conventions (style, idioms, type system, formatting, import order), read the
+project's CLAUDE.md and any pack coder overlay before starting.
 
 ## Output format
 
@@ -170,9 +176,13 @@ promoted:
 # prompt above. Kept here so the audit trail is legible — a ratified principle that also
 # appears in the prompt should not be re-proposed as a corpus entry.
 
+- id: explicit-by-default
+  promoted_to: coder role prompt — "General conventions" section
+  provenance: "Blog project, 'Explicit by Default' post (content/posts/coding/explicit-by-default.mdx). The umbrella the operator's individual coding rules turned out to be instances of — named by Claude Code while it was taught the rules alongside their whys. The realization that the whys mattered more than the rules is what seeded this corpora system. Held as a PEER of prefer-error-exposing-form, not its parent: whether one subsumes the other is a question for a future retrospective to surface from evidence, not a top-down call."
+
 - id: prefer-error-exposing-form
   promoted_to: coder role prompt — "General conventions" section
-  provenance: "2026-06-19, Blog project. JSLint/Crockford analysis. The language-agnostic meta-rule; its concrete instances live in pack overlays."
+  provenance: "2026-06-19, Blog project. JSLint/Crockford analysis. A peer of explicit-by-default; its concrete instances live in pack overlays."
 
 - id: deletion-over-addition
   promoted_to: coder role prompt — "What you do" section (prefer smaller net addition)

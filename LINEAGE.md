@@ -80,6 +80,32 @@ three separate conventions.
 This was prompted by a post analyzing JSLint and Crockford's style rules — noticing that
 his seemingly opinionated preferences all shared the same underlying logic.
 
+### Explicit by Default (meta-rule, peer to prefer-error-exposing-form)
+
+This one is older than the corpus system — it's arguably what seeded it. The operator spent years
+collecting coding rules and tried to teach them to Claude Code by stating them directly; they didn't
+stick. What worked was walking through real refactors out loud and explaining the *why* behind each
+choice. Claude reported that the whys mattered more to it than the rules themselves — and, after a
+few sessions, noticed that most of the individual rules were instances of one thing, which it named
+**Explicit by Default**: don't make the reader reconstruct something you could have just stated. It
+named the cost too — the **Reader Tax**, paid by whoever reads the code next. The canonical writeup
+is `content/posts/coding/explicit-by-default.mdx`.
+
+Two things came out of that. First, the principle. Second, and more important: the realization that
+*reasons travel further than rules* — which is the insight this entire role-kernel system is built on
+(every principle carries a `reason` field; see "Why reason travels with the rule"). Explicit by
+Default is also itself an instance of the system surfacing a principle the operator hadn't named —
+Claude articulated it — and the standing hope is that it keeps doing that: teaching the operator
+patterns they haven't yet discovered, not only absorbing the ones they have.
+
+Explicit by Default and prefer-error-exposing-form are held as **peers, not a hierarchy**, even though
+it's tempting to call the latter a special case of the former (error-exposure is one face;
+precondition legibility and naming/extraction are others). The restraint is methodological: whether
+one subsumes the other is exactly the kind of commonality a *retrospective* is meant to surface from
+accumulated evidence, not something to impose top-down. Declaring the hierarchy now would
+short-circuit the mechanism the system exists to run. They sit side by side until the corpus earns the
+consolidation — or doesn't.
+
 ### arrow-block-body
 
 Predates the meta-rule. The specific failure: concise arrow functions and block arrow
