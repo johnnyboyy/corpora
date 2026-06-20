@@ -106,26 +106,14 @@ Provenance, the `promoted:` audit trail, and the kill log live in `ui-designer.a
 only at ratify/retrospective time. See `kernel.md`, "Storage: working vs audit."
 
 ```yaml
-last-retrospective: 2026-06-12
+last-retrospective: 2026-06-20
 
 principles:
-
-- id: one-highlight-per-result-set
-  rule: "Apply the highlight card variant to exactly one card per results panel. When two values are genuinely co-primary outputs, present them together in a single highlighted card with an internal divider — not as two competing highlighted cards."
-  condition: "Any results panel with multiple output cards."
-  reason: "Hierarchy through scarcity: multiple full-highlight cards compete with each other, canceling the emphasis signal. Merging co-primary results preserves scarcity while giving both results the weight they deserve."
-  status: ratified
 
 - id: color-palette-inspiration
   rule: "When a color reference or taste palette informs a design direction, extract what it embodies — hue relationships, saturation register, warmth or coolness, depth contrast — rather than sourcing values from it directly."
   condition: "When making a color decision where a reference palette or taste example has been provided. Does not apply when selecting an existing project token by name."
   reason: "A palette submitted as a taste example encodes relationships and sensibilities, not prescriptions. Pulling hex values directly overfits — the example encodes what worked in that context, not a color system."
-  status: ratified
-
-- id: accent-color-for-distinction-not-data
-  rule: "Accent color appears only on the distinguished/recommended row. All other data values use secondary text color."
-  condition: "When a results list has one row that needs to stand out."
-  reason: "Accent on every value creates noise; restricting it to the callout row means the color carries signal."
   status: ratified
 
 - id: warning-colocated-with-resolution

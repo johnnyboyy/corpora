@@ -93,7 +93,7 @@ Provenance, the `promoted:` audit trail, and the kill log live in `ux-designer.a
 only at ratify/retrospective time. See `kernel.md`, "Storage: working vs audit."
 
 ```yaml
-last-retrospective: 2026-06-12
+last-retrospective: 2026-06-20
 
 principles:
 

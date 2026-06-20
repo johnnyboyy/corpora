@@ -7,14 +7,8 @@ vs audit." (The kill log lives in `ui-designer.md` so it is available in the wor
 ```yaml
 provenance:
 
-- id: one-highlight-per-result-set
-  provenance: "2026-06-13, load calculator full visual audit."
-
 - id: color-palette-inspiration
   provenance: "2026-06-02, operator-provided. Clarified 2026-06-13."
-
-- id: accent-color-for-distinction-not-data
-  provenance: "2026-06-02, Box Selector visual spec."
 
 - id: warning-colocated-with-resolution
   provenance: "2026-06-02, Box Selector visual spec."
@@ -34,6 +28,10 @@ provenance:
 
 - id: hierarchy-through-scarcity
   provenance: "2026-06-04, retrospective consolidation."
+  history:
+    - date: 2026-06-20
+      type: absorbed-examples
+      reason: "Killed one-highlight-per-result-set and accent-color-for-distinction-not-data as redundant instances of this principle. Concrete examples those principles captured: (1) apply highlight to exactly one card per results panel — when two outputs are co-primary, merge into one highlighted card with an internal divider rather than two competing highlights; (2) accent color belongs only on the distinguished row, all other data values in secondary text color. Both earned in Box Selector results panel."
 
 - id: motion-as-accent
   provenance: "2026-06-03, taste training session."

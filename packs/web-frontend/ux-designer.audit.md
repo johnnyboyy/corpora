@@ -9,12 +9,24 @@ provenance:
 
 - id: triage-and-ranking-are-independent-signals
   provenance: "Merged from intake-and-ranking-are-separate-activities + elo-as-independent-ranking-signal, 2026-06-02."
+  history:
+    - date: 2026-06-20
+      type: provisional-flag
+      reason: "Earned exclusively in a comparative ranking/evaluation tool (Taste Trainer). Condition is narrow — tools that mix quick triage with deliberate ranking. Plausible general principle but untested against a second project with a ranking or evaluation feature. Do not promote until confirmed in a second context."
 
 - id: category-scope-is-visible-on-ranked-items
   provenance: "2026-06-02."
+  history:
+    - date: 2026-06-20
+      type: provisional-flag
+      reason: "Earned exclusively in a per-category ranking tool (Box Selector). Condition presupposes category-scoped rankings — a pattern that may not recur in other web-frontend projects. Do not promote until confirmed in a second context."
 
 - id: choice-prompt-anchors-on-usefulness-not-preference
   provenance: "2026-06-02."
+  history:
+    - date: 2026-06-20
+      type: provisional-flag
+      reason: "Earned exclusively in a reference-building tool (Taste Trainer). Condition is narrow — tools whose output is meant to inform future decisions, not record taste. Do not promote until confirmed in a second context."
 
 - id: callout-label-describes-property-not-judgment
   provenance: "2026-06-02, Box Selector UX review."

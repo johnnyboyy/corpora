@@ -111,7 +111,7 @@ only at ratify/retrospective time, never in a coder's working context. See `kern
 "Storage: working vs audit."
 
 ```yaml
-last-retrospective: 2026-06-17
+last-retrospective: 2026-06-20
 
 principles:
 
