@@ -14,9 +14,6 @@ real rather than a plausible-sounding confabulation. If they merely rhyme, that 
 informative. If they diverge, the principle's model-side justification is shakier than its human-side
 one — and worth leaning on less.
 
-The canonical statement of the principle is the post `content/posts/coding/explicit-by-default.mdx`
-in the Blog project. Read it first; the assessments below assume it.
-
 **On method and epistemics.** These are introspective and architectural assessments, not
 measurements. No model has privileged access to its own weights or decoding; each is reasoning from
 how the transformer architecture is known to work, plus the chain-of-thought literature, plus
@@ -153,6 +150,38 @@ different lineage examining this cold, and the empirical comparison both assessm
 For the corpus: the claim-4 refinement ("prefer recoverable semantics / reduced ambiguity over mere
 verbosity") now has two independent supporters — a candidate for a future *retrospective* to fold into
 the coder's Explicit-by-Default framing, surfaced from evidence rather than promoted off two essays.
+
+---
+
+## Refinement note — 2026-06-20
+
+A follow-up conversation sharpened the boundary of where the training-frequency argument applies.
+
+**The syntactic / semantic distinction.** Claim 4 frames the operative target as *ambiguity and
+implicit preconditions*, not verbosity. A corollary: EbD barely applies when there is nothing to
+recover. `item => item.id` carries no hidden invariant, no silent failure mode, no precondition
+invisible from local context — so the frequency argument (this form is so canonical the model has
+near-zero decoding cost) has its most force exactly here, at the corner where EbD's domain has
+nearly zero surface. The principle's strongest cases — `!!x`, `~arr.indexOf(val)`, a misleading
+parameter name — are semantic shorthands that require knowing the trick. The frequency argument
+does not challenge those. It mainly applies to *syntactic* shorthands that are unambiguous and
+saturate the training corpus with a single meaning.
+
+**The form's own signal.** Block-body arrow functions appear in training data almost exclusively
+when there is more happening: conditionals, side effects, early returns. `(item) => { return
+item.id; }` as a one-liner would be anomalous. So the block form subtly primes "expect
+complexity" — and then doesn't deliver it. The expression form is not merely shorter; it encodes
+"this is a trivial transformation," which is the accurate signal. This is a narrow case where the
+terse form is *less* ambiguous in context, not more.
+
+**Within-context vs cross-context cost.** The human case for explicitness rests partly on
+maintenance cost over time — returning to code after a week, holding context across a large
+codebase. Within a single context window, an LLM processes everything in parallel without the
+equivalent degradation. The analogous problem surfaces *across* context windows: when code is
+chunked or handed off to a subagent. There, naming and decomposition dominate; syntactic choices
+mostly don't survive as a differentiator. This suggests the highest-leverage targets for
+model-readable code are the same as for the human case — names, visible preconditions, local
+invariants — rather than syntactic expansion of already-clear one-liners.
 
 ---
 
