@@ -58,6 +58,25 @@ role: a generative model drifts to the average of its training data unless ancho
 constraint. That turned out to apply to any generative role, not just design — so it was
 lifted into the kernel.
 
+### Roles are discovered, not org-charted
+
+The early instinct was to model the system on a human team: a project manager coordinating a
+coder, a designer, and so on — the org chart you would draw for people doing this work. That
+instinct was wrong, and recognizing why sharpened the whole design. An LLM-mediated system does
+not have the constraints a human org is structured around (limited working memory, communication
+overhead, individual specialization, calendars). Importing the org chart drags those assumptions in
+as dead weight and invents role boundaries that the work itself never asked for.
+
+So the system inverts it: roles and their boundaries are *discovered from accumulated tension*, not
+assumed up front. A role starts as a discipline guess (coder, UX, UI). Whether it is really one role
+or two is then revealed by the corpus — when its ratified principles develop conditions that partition
+the same space and give opposing advice, the *fork signal* surfaces a candidate seam (see kernel.md's
+retrospective). The operator judges whether the partition is real. This is why "a second coder" is not
+gated on "separate codebases" or on what a human team would look like, but on whether the role's own
+accumulated judgment has split. Growth is differentiation under tension — never promotion up a ladder,
+and never an org chart imposed in advance. It is a new frontier; the point is to discover its native
+structure, not to make an old one work.
+
 ---
 
 ## How the coder prompt conventions were earned

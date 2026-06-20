@@ -71,6 +71,14 @@ The trigger for promotion: a principle has been ratified long enough that checki
 become the default. Or: several principles share a common root justification; the meta-rule
 that unifies them gets promoted, and the individual entries become examples of it.
 
+**Promotion restraint.** Before promoting, ask: would the role still need to reconsider this when
+the project context changes? Promote only if the judgment is stable *across the kinds of projects
+the role serves* — or is so foundational that contestability has genuinely become noise — not merely
+because it has repeated inside one project family. A principle earned only in (say) web work may feel
+universal while still drawing its truth from the current climate; promoting it bakes that overfitting
+into the prompt, where it stops being weighable. When in doubt, leave it in `principles:` where its
+`condition` and `reason` can still be checked against an unfamiliar case.
+
 Killed entry — append at end of file:
 
 ```yaml
@@ -121,8 +129,18 @@ working context holding concerns from another mode?
 1. **Contamination detected** — attention was spent on concerns outside the task's mode. Fix routing.
 2. **Corpus tension → fork** — two ratified principles have conditions that partition the same space.
    Proposal: fork the role into two. Advisory only — operator judges whether the partition is a real seam.
+   *What counts:* one cluster of coder principles clearly governs UI component work and another governs
+   backend data workflows, and they repeatedly give *opposing* advice under their respective conditions —
+   that is a seam. *What doesn't:* one principle about helper extraction and another about verification
+   commands are simply different topics, not a partition. The seam is discovered here, from accumulated
+   tension — never assumed up front from how a human team would be organized.
 3. **Convergence → explorer** — corpus has stopped changing, corrections rare. Proposal: pair with an
    explorer to prevent calcification.
+
+**Anti-overfitting (coder, and any role whose work has been single-context):** surface which ratified
+principles were earned only in one project shape (e.g. UI/web work) and should stay provisional —
+weighable, not promoted — until tested against another shape. A principle that has only ever been
+pressure-tested in one climate is a promotion risk, not a settled default.
 
 Each corpus carries `last-retrospective: <date>` at the top to make convergence measurable.
 

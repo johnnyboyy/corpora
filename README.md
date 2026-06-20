@@ -18,8 +18,9 @@ role packs that load only when a project's shape selects them.
 
 A pack adds **depth to the existing roles, not new roles.** There is one coder, one UX designer,
 one UI designer per project — a web project's coder loads the base plus the web overlay; it never
-becomes a chain of stack-flavored coders. A second coder appears only if the project genuinely
-holds two separate codebases, and that's the operator's call.
+becomes a chain of stack-flavored coders. A role splits into scoped instances only when its own
+corpus reveals the seam (the retrospective fork signal — see `kernel.md`), not by assuming one up
+front. The structure is discovered from accumulated tension, not imported from an org chart.
 
 **Two layers of corpus** (orthogonal to the above):
 
@@ -108,8 +109,10 @@ general best practices. Add a role pack only when a *body* of stack-specific con
 actually accumulated and is worth shipping across projects of that stack; until then, project-earned
 specifics live in the project's `corpora/<role>.md`. Do not pre-build packs speculatively.
 
-**Domain-split roles** — for a large project that genuinely needs separate roles per area
-(frontend/backend, or by feature area) — are a project-level choice: create additional corpus files
-(`corpora/frontend-coder.md`, `corpora/dashboard-ux.md`) and let the orchestrator load the right one
-per task. This is distinct from a role pack (which configures the *single* role for a stack) and
-distinct from the kernel default; reach for it only when one codebase truly hosts two domains.
+**Domain-split roles** — separate scoped instances of a role per area (frontend/backend, or by
+feature area) — are a project-level choice: create additional corpus files (`corpora/frontend-coder.md`,
+`corpora/dashboard-ux.md`) and let the orchestrator load the right one per task. This is distinct from
+a role pack (which configures the *single* role for a stack) and from the kernel default. Reach for it
+only when the **fork signal** surfaces the seam — the role's corpus develops conditions that partition
+the space and repeatedly give opposing advice — not when an org chart suggests it should exist. Let the
+accumulated tension reveal the split; don't assume it.

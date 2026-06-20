@@ -17,8 +17,10 @@ This is the entry point for a portable, two-layer role system.
   `corpora/config.md` declares `role-pack: web-frontend`.
 - A pack **overlays the kernel**; it never adds new roles by default. There is one coder, one UX
   designer, one UI designer per project. Stack-specificity is configuration depth on those roles,
-  not more roles — a project gets a second coder only if it genuinely contains two separate
-  codebases, and that's the operator's call.
+  not more roles. A role splits into scoped instances only when its own corpus reveals the seam —
+  conditions that partition the space, surfaced by a retrospective (the fork signal; see kernel.md)
+  — never by importing an org chart up front. The structure is discovered from accumulated tension,
+  not assumed.
 
 You always enter as the orchestrator — there is no separate bare-role entry. A coding task runs
 inline in this session (the orchestrator assumes the coder role; see "Coder mode" below); design
@@ -91,8 +93,9 @@ work, load `coder.md` (the base) plus the project's pack coder overlay if its sh
    spawned role reads `corpora/config.md` itself; if that file is absent, surface that the project needs
    `corpora:bootstrap` before design work rather than spawning into a vacuum.
 2. Prompt structure: [role file(s)] + `## Project corpus` + [corpora/<role>.md content] + `## Task` +
-   task description + relevant context. Include prior role output (e.g. UX spec) in the task section.
-   Never include another role's file or corpus in the prompt — the seam is enforced here.
+   task description + relevant context. Include prior role output as its structured artifact (the
+   spec, audit, or tradeoff block it produced) — not raw transcript or freeform thinking. Never
+   include another role's file or corpus in the prompt — the seam is enforced here.
 3. Append the token usage summary request to every spawn (see spawn-token-summary in corpus below).
 4. Relay output to operator for approval before passing to the next role.
 5. If the coder surfaces a `### tradeoffs` block: relay to operator — implement as specced, accept
