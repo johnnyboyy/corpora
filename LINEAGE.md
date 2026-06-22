@@ -5,9 +5,29 @@ This document explains how the system and its conventions came to be — not wha
 who finds a convention and wonders whether it's arbitrary, or for anyone returning after
 a gap who wants the reasoning rather than just the rule.
 
+Because it is a history, it records *decisions and their reasoning as dated events* — the
+form of claim that stays true even after the code moves on. It is deliberately not the
+authority on current state: where an entry explains why something was decided, whether that
+decision still holds is answered by `kernel.md`/`skill.md`, not here. A present-tense state
+claim ("X is in the kernel") is a defect in this document — it rots silently the moment the
+code diverges. The durable form is "on `<date>`, we reasoned toward X, because…": verifiable,
+and immune to staleness when the code later moves on.
+
+*Dating convention.* The original body was authored 2026-06-19 (`951273f`); each section below
+opens with an italic anchor giving the date and commit of the *decision it records*, which is
+not the same as when these words were written. Events that predate this repo originated in the
+**Blog** project, from which this system was distilled — they carry no commit here and are
+marked as pre-repo. This document was dated and scoped in a pass on 2026-06-22, before the v1
+snapshot, so the anchors reflect git history up to that tag.
+
 ---
 
 ## The kernel design
+
+*Founding mechanisms, materialized at this repo's first commit (2026-06-19, `2ca7f6e`); the
+promoted section (`d669829`) and the working/audit split (`8c22959`) landed the same day. The
+"reason travels with the rule" bet has roots that predate this repo — see Explicit by Default
+below. The anti-mean note was corrected in the 2026-06-22 pass and carries its own inline date.*
 
 ### Why "reason travels with the rule"
 
@@ -77,11 +97,23 @@ what makes a good UX decision — is the phenotype. That distinction is what mak
 kernel copyable: to create a new role, you start an empty corpus and let it accumulate its
 own phenotype. The kernel doesn't need to change.
 
-The anti-regression-to-the-mean requirement for generative roles was identified as a
-kernel-level concern during a design review. The original insight came from the UI designer
-role: a generative model drifts to the average of its training data unless anchored to a
-constraint. That turned out to apply to any generative role, not just design — so it was
-lifted into the kernel.
+During a design review, the anti-regression-to-the-mean requirement was reasoned about as a
+possible *kernel-level* concern. The original insight came from the UI designer role — a
+generative model drifts to the average of its training data unless anchored to a constraint —
+and the argument was that this generalizes to any generative role, not just design.
+
+That generalization was asserted but never executed in the code. As of 2026-06-22 the
+constraint lives as a single principle in the web-frontend UI designer pack
+(`packs/web-frontend/ui-designer.md`), extracted there from the role's prompt — its real
+motion has been *toward* domain-specificity, not into the kernel. The redesign argues that is
+correct: anti-mean anchoring is load-bearing for *divergent* domains (design, where the value
+is differentiation from the expected) and actively wrong for *convergent* ones (coding, where
+the training mean is often the right answer — see `reader-tax-and-the-model.md` on idiomatic
+brevity being low-cost). What might be genuinely kernel-level is only the thinner meta-claim —
+that a generative role must know whether its domain rewards convergence or divergence and
+anchor accordingly — and that abstraction is not worth writing until a second divergent domain
+demands it. Verify against `kernel.md` for current state; do not infer from this paragraph
+that anything lives in the kernel.
 
 ### Roles are discovered, not org-charted
 
@@ -105,6 +137,13 @@ structure, not to make an old one work.
 ---
 
 ## How the coder prompt conventions were earned
+
+*Most of these conventions were earned in the Blog project before this repo and captured here
+2026-06-19. Explicit by Default predates the corpus system entirely (its canonical post is dated
+2026-06-17 in Blog). In-repo landmarks: the real why for no-early-returns (`9ff2f52`), EbD
+captured as a peer meta-convention (`40f9942`) and distinguished from the error-exposing form
+(`3629582`), all 2026-06-19; the deferred EbD-vs-error-exposing tension was resolved 2026-06-20
+(`f5695aa`).*
 
 The coder prompt's "General conventions" section is not arbitrary style preferences. Each
 one was earned through a failure mode.
@@ -198,6 +237,10 @@ finishing" — not lint alone.
 
 ## How the orchestrator's routing principles were earned
 
+*Captured 2026-06-19. The inline-session design-question gate was made to work in inline coder
+sessions the same day (`137dec4`); the `route-questions-not-roles` sharpening and the
+fork-discovered-seam framing came from the external-review pass (`6fd9c39`, 2026-06-19).*
+
 ### Route by question, not by pipeline
 
 The early orchestrator corpus had a killed principle: "Before routing a task, determine
@@ -233,6 +276,10 @@ ask at the natural seam. The seam is always present; "end of session" is not.
 ---
 
 ## Key killed principles worth preserving
+
+*These kills occurred in the Blog project (the calculator references predate this repo) and were
+recorded here 2026-06-19. The Laws-of-UX bulk assessment and related seed-corpus scope fixes
+were revisited in the 2026-06-20 corpus audit and retrospectives (`f23215b`, `dd0eac9`).*
 
 Some kills are worth preserving not because the rule was wrong in itself, but because
 the kill exposed something structural.
@@ -273,6 +320,11 @@ path must be made visible at the moment of action).
 
 ## The portable skill design
 
+*The first portability pass, authored 2026-06-19. Its filter (project-specificity) was found
+insufficient the same day and superseded in framing by the stack-specificity sort in the next
+section — read the two in order; this one is kept because the kill is instructive, not because
+its filter is still the operative one.*
+
 The system originally lived entirely inside one project — the Blog repo. All role prompts,
 corpora, and the kernel spec were checked into that project. The portability problem emerged
 when a second project was anticipated: project-specific assumptions (the UI token system,
@@ -300,6 +352,10 @@ the defaults they're starting with — and override them knowingly if their cont
 ---
 
 ## The kernel / role-pack split
+
+*Decided 2026-06-19 (`108d9ca`), building on the `config.md` project surface introduced the same
+day (`85cb290`). "Only `web-frontend` exists" was current as of 2026-06-22; verify the pack list
+against `packs/` for later state.*
 
 The first portability pass (above) sorted principles by *project*-specificity — file paths,
 token names, domain vocabulary. It worked, but it used the wrong filter. It never asked whether a
@@ -337,6 +393,11 @@ not before.
 
 ## Role isolation
 
+*The contamination was discovered in the Blog single-session era (pre-repo); the physical-isolation
+fix and this account were recorded 2026-06-19 (`108d9ca`). The "one file per role" arrangement
+described below is the pre-redesign state as of 2026-06-22 — the redesign proposal revisits where
+corpora live while deliberately preserving this isolation seam.*
+
 Each role runs in its own context — its own file(s) and its own project corpus, never another
 role's. This is not an efficiency nicety; it is a correctness boundary, and it was discovered, not
 designed.
@@ -368,6 +429,9 @@ own physical boundary.
 ---
 
 ## Why the UI library is text, not design artifacts
+
+*Rationale recorded 2026-06-19 (`660172b`). A design rationale about how LLMs consume reference
+material, not a state claim — durable as written.*
 
 The UI library — a markdown document describing the project's color system, typography,
 component patterns, and visual character — is deliberately text-only. No screenshots,
@@ -403,6 +467,9 @@ and remains authoritative. The library is a living reference; image files are a 
 ---
 
 ## Why a color utility exists
+
+*The utility was built in the Blog project (pre-repo); the skill's decision to ship a *spec*
+rather than a reference implementation was recorded 2026-06-19 (`aabb436`).*
 
 The color utility (`scripts/color.js`) was created after a session where the designer
 was asked to derive two variants of a given color — one warmer, one cooler — and had
