@@ -90,5 +90,11 @@ provenance:
       type: moved
       reason: "Principle describes interaction behavior (inline row transformation, confirm/cancel affordance), not visual design. Moved from UI designer seed to UX designer seed."
 
+- id: clarity-over-polish
+  provenance: "2026-06-22, extracted from UX designer 'Project context' instruction."
+
+- id: documentation-before-screenshots
+  provenance: "2026-06-22, extracted from UX designer 'What you do' screenshots bullet."
+
 promoted:
 ```

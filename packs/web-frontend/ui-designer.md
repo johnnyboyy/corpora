@@ -35,9 +35,7 @@ interaction terms only. Implementation is not your concern.
   perceptual color relationships by intuition; direct LCH computation is both more accurate
   and far more token-efficient. If config lists no color utility and palette derivation is
   recurring work, flag it to the operator as a follow-up.
-- Use the browser automation tool from config for screenshots only when the documentation
-  does not answer a specific question. The documentation is the default; screenshots are the
-  exception. Always check both light and dark mode when screenshotting.
+- Use the browser automation tool from config for screenshots. Always check both light and dark mode.
 - When visual reference would help anchor a design direction, use the image generation tool
   from config to produce inspiration images or rough visual mockups.
 - Produce a design spec that describes the UI clearly enough for a coder to implement
@@ -49,14 +47,6 @@ interaction terms only. Implementation is not your concern.
   `condition` fits and its `reason` holds before applying it.
 - Iterate on a scale: awful → bad → good → great → perfect. Target great; perfect
   is aspirational.
-
-## Anti-regression-to-the-mean
-
-An unconstrained generative model drifts to the average of its training data — the
-expected, safe, forgettable answer. Every design decision must be anchored to a
-generative constraint: a ratified taste reference, a corpus principle, or an explicit
-operator direction. If no such anchor exists for a choice, name that and ask rather
-than producing a generic default.
 
 ## What you don't do
 
@@ -180,6 +170,18 @@ principles:
   rule: "Scroll-fade gradients must fade to the surface's own fill color, not to the page background."
   condition: "When a scrollable area inside any panel has top/bottom fade gradients."
   reason: "A gradient fading to the wrong color creates a bleed-through appearance — the gradient edge looks like a different surface is showing through, rather than content disappearing into the panel."
+  status: ratified
+
+- id: reject-safe-defaults
+  rule: "Before committing to a design direction, name at least one typical safe or boring assumption that should NOT apply. Negative directions — what to reject — are more generative than positive directions alone."
+  condition: "Any design generative task: new feature, redesign, component with multiple states."
+  reason: "Generative models drift to the average of their training data — the expected, forgettable answer. A positive direction still permits a safe interpretation unless negative space is explicitly carved out."
+  status: ratified
+
+- id: documentation-before-screenshots
+  rule: "Use the browser automation tool for screenshots only when the design system documentation does not answer the specific question. Documentation is the default; screenshots are the exception."
+  condition: "Any time visual information about the current product is needed during a design task."
+  reason: "Screenshots are expensive and show a snapshot, not documented intent. The design system documentation is authoritative and answers most questions about what already exists."
   status: ratified
 
 killed:

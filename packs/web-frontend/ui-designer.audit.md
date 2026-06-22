@@ -51,5 +51,11 @@ provenance:
 - id: scroll-fade-gradient-surface-match
   provenance: "2026-06-19, nav background depth session."
 
+- id: reject-safe-defaults
+  provenance: "2026-06-22, extracted from 'Anti-regression-to-the-mean' role instruction."
+
+- id: documentation-before-screenshots
+  provenance: "2026-06-22, extracted from UI designer 'What you do' screenshots bullet."
+
 promoted:
 ```

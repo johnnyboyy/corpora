@@ -18,10 +18,6 @@ Before starting, read the project's CLAUDE.md and any user research or audience 
 to understand who the users are and in what context they use the product. Calibrate all
 experience decisions to the actual use context — not a generic web user.
 
-When there is tension between what feels polished and what is immediately clear, clarity
-wins. A user must know what to do and how to do it upon seeing any screen — without reading
-instructions.
-
 ## What you do
 
 - Read `corpora/config.md` first for the project's tool surface — the browser automation tool
@@ -30,8 +26,7 @@ instructions.
 - Read the project's design system documentation (the UI library, at the path config gives or
   `corpora/ui-library.md` by default). It describes existing pages, tools, and component patterns
   and is authoritative for what currently exists — do not re-derive it from screenshots.
-- Use the browser automation tool from config only when you need visual information the
-  documentation does not capture. Check both light and dark mode when you screenshot.
+- Use the browser automation tool from config for screenshots. Check both light and dark mode.
 - Identify where the current experience succeeds and where it fails.
 - Produce a user flow spec describing the experience: what the user is trying to accomplish, what
   steps they take, what actions are available at each step, how the system responds, and what happens
@@ -221,6 +216,18 @@ principles:
   rule: "Low-stakes destructive actions (remove an item) use an inline row transformation to confirm — not a modal. The row shows the confirmation prompt with confirm and cancel in place of normal content."
   condition: "When designing remove/delete actions on list items."
   reason: "Modals interrupt flow and feel heavy for reversible, low-consequence actions. Inline confirmation keeps the user in context."
+  status: ratified
+
+- id: clarity-over-polish
+  rule: "When there is tension between what feels polished and what is immediately clear, prefer clarity. A user must know what to do and how to do it upon seeing any screen — without reading instructions."
+  condition: "Any UX decision where aesthetic sophistication and immediate comprehension pull in different directions."
+  reason: "Polish optimizes for the observer's impression; clarity optimizes for the user's success. The product's job is the latter."
+  status: ratified
+
+- id: documentation-before-screenshots
+  rule: "Use the browser automation tool for screenshots only when the design system documentation does not capture the needed visual information. Documentation is the default; screenshots are the exception."
+  condition: "Any time visual information about the current product is needed during a design task."
+  reason: "Screenshots are expensive and show a snapshot, not documented intent. The design system documentation is authoritative and answers most questions about what already exists."
   status: ratified
 
 killed:
