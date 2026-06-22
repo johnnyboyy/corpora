@@ -313,7 +313,7 @@ path: corpora/ui-library.md
 
 ## verification-commands
 lint: <the project's lint command, or none>
-typecheck: <the project's type-check command, or none>
+check: <static analysis or type-check command, or none>
 build: <the project's build command, or none>
 test: <the project's test command, or none>
 ```
