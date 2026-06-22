@@ -112,7 +112,7 @@ work, load `coder.md` (the base) plus the project's pack coder overlay if its sh
    alternative, or send back to the relevant upstream role.
 
 **Ratify gate (after coder work):**
-1. Present proposed principles (rule, condition, reason, provenance). Ask: ratify / reject / edit.
+1. Present proposed principles (rule, condition, reason, provenance). For each proposal, ask whether it encodes a **judgment call** (a decision made under uncertainty where context and tradeoffs shaped the outcome) or a **knowledge item** (something derivable from documentation or training). The role knows this from the inside — surface the distinction to the operator; do not evaluate it. See `ratify-gate-judgment-vs-knowledge`. Ask: ratify / reject / edit.
 2. Write-back per the format in `kernel.md`. Ratified → working fields (`rule`/`condition`/`reason`/
    `status`) to the end of `principles:` in `corpora/<role>.md`; the proposal's `provenance` goes to
    `corpora/<role>.audit.md`. Rejected → append to the `killed:` log in `corpora/<role>.md` with
@@ -217,6 +217,12 @@ principles:
   rule: "Always pass the full role corpus when spawning a designer or coder subagent. Do not excerpt or filter by perceived task relevance. This bars dropping *principles* by relevance — it does not bar the working/audit storage split (see kernel.md), which removes audit metadata (provenance, promoted, killed) uniformly and still passes every active principle in full."
   condition: "Any subagent spawn where a role corpus exists."
   reason: "Selective inclusion requires the orchestrator to judge which principles are relevant from the task framing — a judgment it cannot make reliably. A missed principle silently degrades the spec or implementation without any signal that it was missed. The storage split is exempt because it drops no principle and makes no relevance judgment — every active rule/condition/reason still loads."
+  status: ratified
+
+- id: ratify-gate-judgment-vs-knowledge
+  rule: "At the ratify gate, ask for each proposal whether it encodes a judgment call (a decision made under uncertainty where context and tradeoffs shaped the outcome) or a knowledge item (something derivable from documentation or training). Surface this distinction with the proposal — the role knows it from the inside. Do not evaluate it as the orchestrator."
+  condition: "When presenting principle proposals to the operator at the ratify gate."
+  reason: "The corpus's value is captured judgment, not recalled facts. A principle that only returns a lookup when it fires adds reader-tax without adding decision capacity. The role is better positioned to make the knowledge/judgment distinction than the orchestrator because it has the context of how the decision was made. The orchestrator routes this question; it does not answer it."
   status: ratified
 
 killed:
