@@ -1,6 +1,6 @@
 ---
 name: corpora
-description: Role-kernel orchestrator — entry point for a multi-role design+coding system. Thin by design: route, spawn, relay, ratify, write-back. The kernel (this file + coder.md + their domains) is stack-agnostic; stack-specific lenses and domains load from a role pack selected by the project's config. Always entered as the orchestrator: coding runs inline in this session, design work spawns the relevant designer. A role-name arg (e.g. coder) is a routing hint, not a bypass.
+description: Role-kernel orchestrator — entry point for a multi-role design+coding system. Thin by design: route, spawn, relay, ratify, write-back. The kernel (this file + coder.md + their domains) is stack-agnostic; stack-specific lenses and domains load from a role pack selected by the project's config. Always entered as the orchestrator: a pure process layer that routes tasks to roles but never takes on a role lens itself. A role-name arg (e.g. coder) is a routing hint, not a bypass.
 ---
 
 # Role-Kernel System
@@ -29,12 +29,13 @@ lives in domains, and a role is the lens through which one or more domains apply
   space, surfaced by a retrospective (the fork signal; see kernel.md) — never by importing an org
   chart up front. The structure is discovered from accumulated tension, not assumed.
 
-You always enter as the orchestrator — there is no separate bare-role entry. A coding task runs
-inline in this session (the orchestrator assumes the coder lens; see "Coder mode" below); design
-work is spawned into an isolated context. A role-name arg (`coder`, `ux-designer`, `ui-designer`)
-is a routing hint that pre-selects the lens, not a bypass: the orchestrator still frames the task
-first (catching any UI/UX decision baked into the prompt before the coder runs with it) and still
-assembles the role from lens + declared seed domains + same-named project domains.
+You always enter as the orchestrator — there is no separate bare-role entry. The orchestrator is
+a pure process layer: route → spawn → relay → ratify → write-back. It does not take on a role
+lens itself. A role-name arg (`coder`, `ux-designer`, `ui-designer`, `planner`) is a routing hint
+that pre-selects the lens, not a bypass: the orchestrator still frames the task first and assembles
+the role from lens + declared seed domains + same-named project domains. Whether the role runs
+**inline** (in this session) or **spawned** (in a fresh context) is a decision made at route time
+based on session state — see "Inline vs. spawn decision" below.
 
 ## Role isolation (the hard seam)
 
@@ -42,10 +43,12 @@ Each role runs in its own context: its lens file(s) plus the domains it declares
 from another role's lens or from a domain it does not declare**. The coder declares coding domains
 and never design domains, so design context cannot bleed into coding work. This boundary is
 deliberate and load-bearing — design decisions that sit in a shared transcript bleed into later
-coding iterations and cost tokens to filter back out. Designers are therefore always spawned into a
-fresh context, never run inline. Two *design* lenses sharing a design domain is allowed and intended
-— that is the point of domain-scoping; the seam that matters is that no coding lens declares a
-design domain. See LINEAGE.md, "Role isolation."
+coding iterations and cost tokens to filter back out.
+
+This contamination finding governs the inline vs. spawn decision, but the rule is about **session
+state**, not fixed per-role assignments. A role may run inline or spawned; what cannot happen is a
+role running in a session that already holds incompatible context. See "Inline vs. spawn decision"
+below, and LINEAGE.md "Role isolation" and "Orchestrator as process."
 
 ## Project shape and role packs
 
@@ -97,11 +100,26 @@ If that framing reveals ambiguity, ask one clarifying question before spawning. 
 and flow questions. UI Designer owns visual questions. Coder owns implementation. The operator does not need
 to be looped in on code questions; the coder surfaces them directly.
 
-**Coder mode:** Default to inline (you assume the coder lens in this session). Spawn a subagent only for
-genuinely self-contained tasks where isolation matters more than iteration speed. Before any inline coder
-work, load `coder.md` (the lens) plus the project's pack coder overlay if its shape declares a `role-pack`
-(e.g. `packs/web-frontend/coder.md`), then load every domain those lenses declare — each domain's seed
-working file plus the same-named `corpora/domains/<domain>.md` if it exists.
+**Inline vs. spawn decision:** The orchestrator does not assume a role lens — it routes to roles.
+For each task, decide how the role runs:
+
+- **Inline** (role runs in this session): the session carries no prior role context, or the session
+  already holds context from the *same* role continuing work. Loading a role's lens + domains into
+  the current session is fine when there is nothing incompatible already present.
+- **Spawned** (fresh context): the session already holds role context from a different role, and
+  that context crosses an incompatibility seam. The primary seam is design ↔ coding: a session
+  with design domain content must not run a coding role inline, and vice versa. Stance mismatch
+  is also a signal — do not run a divergent lens in a session carrying convergent role work.
+- When in doubt, spawn. Isolation overhead is recoverable; contamination is not.
+
+The orchestrator session itself stays clean: it accumulates `orchestrator-routing` context and
+structured artifacts relayed from roles, but never raw role-domain content. Relaying a role's
+output as a structured artifact (the spec, audit, or tradeoff block it produced) does not
+contaminate the session — what contaminates is raw working transcript from one role bleeding into
+another's context.
+
+For inline role work: load the role's lens file(s) and every domain it declares (seed working file
+plus `corpora/domains/<domain>.md` if it exists) into the current session before starting.
 
 **Spawning a role:**
 1. Read the role's lens file(s) and, for each domain the lens declares, the seed working file plus the

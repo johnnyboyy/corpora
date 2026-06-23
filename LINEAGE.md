@@ -551,6 +551,41 @@ independently on separate concerns.
 
 ---
 
+## Orchestrator as process — context-state routing
+
+*Decided 2026-06-22, same session as the planner role and UI/UX seam entries above.*
+
+The original system encoded the contamination finding (see "Role isolation" above) as fixed
+per-role assignments: designers always spawn, coder always inline. The finding was correct; the
+encoding was over-specified. The assignment was determined by which role was being invoked, not by
+whether the session actually held incompatible context. That distinction matters because it makes
+the system brittle: the rule cannot accommodate a new role (the planner) cleanly, and it prevents
+the coder from spawning even when spawning would be cleaner.
+
+The fix separates two things that were conflated:
+
+1. **The orchestrator is a pure process layer.** It routes, spawns, relays, ratifies, writes back.
+   It does not take on a role lens. In the original system the orchestrator "assumed the coder
+   lens" for coding tasks — making it simultaneously a process and an actor. That dual role
+   introduced its own contamination risk: the orchestrator session accumulated coder domain context,
+   which could leak into subsequent routing decisions or relayed output. A pure process layer
+   accumulates only `orchestrator-routing` context and structured artifacts — never role-domain
+   content.
+
+2. **Inline vs. spawn is a session-state decision, not a per-role rule.** The contamination
+   finding holds — design context in a coding session contaminates. But the rule is: spawn when the
+   session holds incompatible context; inline when it doesn't. A coder may run inline in a clean
+   session. A designer must be spawned if the session has prior coder work. A planner may run
+   inline or spawned depending on what the session already holds. The per-role assignments were a
+   conservative approximation of this rule, not the rule itself.
+
+The practical consequence: the inline path is available to any role when session state permits.
+Divergent lenses (UI designer) should still be spawned in almost all cases — a divergent lens in
+a convergent-context session is the most dangerous contamination direction — but the reason is
+session state, not role identity. The rule is derivable from principle, not from a lookup table.
+
+---
+
 ## Why the UI library is text, not design artifacts
 
 *Rationale recorded 2026-06-19 (`660172b`). A design rationale about how LLMs consume reference

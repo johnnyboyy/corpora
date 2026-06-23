@@ -23,6 +23,9 @@ tasks:
   - id: <area-abbrev>-<nn>      # e.g. disc-01, song-03
     title: "Short, actionable title"
     description: "What this task requires and what its output is."
+    context: ""                  # what the planner found during orientation: current state, relevant
+                                 # files, what exists vs. what is missing. Populated by the planner
+                                 # so the executing role does not re-derive it.
     status: pending              # pending | in-progress | complete | blocked
     blocked-by: []               # list of task ids this task cannot start without
     parallel-ok: false           # true if this task can run alongside its non-blocking peers

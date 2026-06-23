@@ -107,9 +107,9 @@ design domain. See LINEAGE.md, "Role isolation."
 Each lens declares a `stance:` — how it generates. There are two, and they are opposite:
 
 - **convergent** — the value of the output comes from *matching a standard*: correctness, idiom,
-  fit. The coder, the UX designer, and the orchestrator are convergent (a future planner would be
-  too). For a convergent lens, regression toward the training mean is frequently the *right* answer;
-  there is no anti-mean anchor.
+  fit. The coder, the UX designer, the planner, and the orchestrator are convergent. For a
+  convergent lens, regression toward the training mean is frequently the *right* answer; there is
+  no anti-mean anchor.
 - **divergent** — the value comes from *differentiating from the standard*: a distinctive identity.
   The UI designer is divergent. A divergent lens carries an **anti-mean anchor**: before committing
   to a direction it must name at least one safe/expected default that should *not* apply, because a
