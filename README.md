@@ -1,6 +1,6 @@
 # corpora
 
-A system for accumulating and scoping learned judgment across agent sessions and projects without collapsing role boundaries.
+A system for accumulating learned judgment across agent sessions and projects. Judgment lives in **domains**, not roles — roles are lenses that declare which domains they load, so shared judgment is written once and never duplicated across role files.
 
 The mechanics: judgment lives in **domains** (corpora scoped to a subject matter or decision class), and a **role** is a *lens* (a domain prompt) plus a static declaration of the domains it loads. The shared mechanism — schema, ratify gate, retrospective — is the **kernel**. Seed domains carry general principles earned from real work; a project adds its own same-named domains. Principles ratified in a project can promote upward — to the seed domain when they generalize across projects, to the lens prompt itself when they stabilize into defaults. Rejected principles are kept with their reason and a `kill_type` — the kill log is often more instructive than the ratified list. Kernel, lenses, and seed domains travel in this repo; project domains stay in the project.
 
@@ -42,9 +42,9 @@ For each domain a lens declares, both apply when the role runs — seed first, t
 
 ## Using in a project
 
-1. Clone into `~/.claude/plugins/corpora` to install as a Claude Code plugin.
-2. Run `/corpora:bootstrap` before first use. Phase 1 detects project shape (`language`, `framework`, `has-ui`, `role-pack`) and tool surface, and writes `corpora/config.md`. If the project has a UI, Phase 2 generates `corpora/ui-library.md` and proposes design principles (ratified into project design domains).
-3. Invoke `/corpora` to enter orchestrator mode. The orchestrator routes tasks, runs inline coder work, spawns designers when needed, and drives the ratify gate after any session that produces ratifiable decisions.
+1. Symlink or clone into `~/.claude/skills/corpora` to install as a Claude Code skill.
+2. Invoke `/corpora` on an unbootstrapped project. The orchestrator detects that `corpora/config.md` is absent and runs bootstrap automatically — Phase 1 inline (detects project shape, writes `corpora/config.md`), Phase 2 by spawning the UI designer if `has-ui: yes` (generates `corpora/ui-library.md` and proposes seed design principles).
+3. On any subsequent invocation, `/corpora` enters orchestrator mode. The orchestrator routes tasks, runs inline coder work, spawns designers when needed, and drives the ratify gate after any session that produces ratifiable decisions.
 4. `corpora/domains/<domain>.md` in the project holds project-specific principles. The orchestrator creates a domain file on first ratification into it, and assigns each proposal a domain at the gate.
 
 **Project files** (all under `corpora/` in the target project):
