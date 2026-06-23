@@ -525,6 +525,30 @@ effect. The way to get a more divergent UI is to let the divergent lens lead, no
 the convergent one. The role split the operator had felt was "both real and arbitrary" was a proxy
 for the stance axis all along; the stance axis is the principled version of it.
 
+### UI/UX seam settled — stance as the answer
+
+*Settled 2026-06-22, closing the open question recorded at the end of "Domain-scoped corpora" above.*
+
+The earlier note deferred the question of whether UI and UX are really one role or two, leaving it
+for accumulated tension to answer. The stance model settled it without requiring a further
+retrospective: the seam is the stance axis itself.
+
+The **UX designer** is convergent — it aims for correctness. Usability, flow, and navigability have
+better and worse answers; the lens generates by matching against those standards. The **UI designer**
+is divergent — it aims for creative differentiation. Visual expression does not converge on a single
+right answer; the lens generates by resisting the mean. These are not two specializations of the
+same activity; they are opposite generative modes applied to adjacent subject matter.
+
+This means the fork signal (a shared domain developing opposing conditions that partition the space)
+is not what resolved it. The seam was visible the moment stance became a first-class lens property:
+one lens is convergent, the other is divergent, and no future convergence of their domain corpora
+would collapse that difference. The question is closed.
+
+The practical consequence: a session that leads visual work with the UX lens — the convergent one —
+will pull toward the mean before the UI lens has a chance to differentiate. The roles must be
+sequenced so the divergent lens does its work before the convergent lens constrains it, or run
+independently on separate concerns.
+
 ---
 
 ## Why the UI library is text, not design artifacts

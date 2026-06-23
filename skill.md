@@ -122,7 +122,13 @@ working file plus the same-named `corpora/domains/<domain>.md` if it exists.
    alternative, or send back to the relevant upstream role.
 
 **Ratify gate (after role work):**
-1. Present proposed principles (rule, condition, reason, provenance). For each proposal, ask whether it
+1. **Audit the output against existing principles.** Before presenting proposed principles, read the
+   role's output against each ratified principle in the domains it declared. Flag any violations to the
+   operator — a violation is a case where the output contradicts a principle's rule under its stated
+   condition. Do not silently correct violations; surface them so the operator can decide whether to
+   send the work back or accept a deviation. This pass is what catches principle violations that the
+   role did not self-identify.
+2. Present proposed principles (rule, condition, reason, provenance). For each proposal, ask whether it
    encodes a **judgment call** (a decision made under uncertainty where context and tradeoffs shaped the
    outcome) or a **knowledge item** (something derivable from documentation or training). The role knows
    this from the inside — surface the distinction; do not evaluate it. See `ratify-gate-judgment-vs-knowledge`.

@@ -115,6 +115,11 @@ provenance:
   domain: orchestrator-routing
   provenance: "2026-06-22, corpus redesign. Domain-scoping moved corpus ownership off roles; the ratify gate became the point where a proposal is assigned a domain (or a new domain is born). New principle introduced with the redesign, not yet pressure-tested on a live ratify session — provisional."
 
+# domain: planning
+- id: task-describes-output-not-implementation
+  domain: planning
+  provenance: "2026-06-22, FAMOUS disc-02. Planner described the implementation path (files to touch, data to thread) rather than the observable output. Operator noticed and flagged it; principle surfaced through operator investigation, not through the planner's self-check."
+
 promoted:
 
 # domain: coding-general
