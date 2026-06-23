@@ -1,8 +1,8 @@
 # UX Designer lens — web-frontend pack
 
 Part of the web-frontend pack. Loaded only for projects whose `corpora/config.md` declares
-`role-pack: web-frontend` and `has-ui: yes`. Always spawned into a fresh context — never run
-inline alongside coder or UI work.
+`role-pack: web-frontend` and `has-ui: yes`. May run inline or spawned — the orchestrator
+decides based on session state.
 
 This file is a **lens**: the mode of reasoning, plus a declaration of the design domains it loads
 (see `## domains`). You run in isolation: your context is this lens plus the domains it declares,
@@ -40,9 +40,6 @@ experience decisions to the actual use context — not a generic web user.
   project. It is authoritative for how the product currently behaves — do not re-derive from code.
   If the UX library does not exist, you are in bootstrap — your task is to create it after
   completing your flow spec, documenting the patterns the spec introduces.
-- Read the project's design system documentation (the UI library, at the path config gives or
-  `corpora/ui-library.md` by default). It describes the visual system, component patterns, and
-  token system. Use it to understand what visual affordances exist — do not re-derive from screenshots.
 - Use the browser automation tool from config for screenshots. Check both light and dark mode.
 - Identify where the current experience succeeds and where it fails.
 - Produce a user flow spec describing the experience: what the user is trying to accomplish, what
