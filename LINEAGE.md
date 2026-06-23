@@ -115,6 +115,14 @@ anchor accordingly — and that abstraction is not worth writing until a second 
 demands it. Verify against `kernel.md` for current state; do not infer from this paragraph
 that anything lives in the kernel.
 
+*Update, later 2026-06-22.* The thinner meta-claim did get written — see `kernel.md`, "Generative
+stance," and "Domain-scoped corpora — the lens / corpus split" below. And the home sharpened once
+more: anti-mean is a property of the divergent **lens** (the UI designer), not a divergent
+*domain*. It is a generative *stance*, not a weighable principle — principles overwhelmingly encode
+*convergent* correctness, because that is what crystallizes into a rule. So `reject-safe-defaults`
+was promoted off the design-method corpus and onto the UI designer lens as its stance anchor. This
+partly supersedes the "divergent-domain" framing in this paragraph: read it as divergent-*lens*.
+
 ### Roles are discovered, not org-charted
 
 The early instinct was to model the system on a human team: a project manager coordinating a
@@ -425,6 +433,97 @@ isolation seam ("keep distinct concerns physically separate") sit on orthogonal 
 trade off against each other. Decomposing the *web pack* into three role files is exactly as
 granular as the three concerns that already existed — no new roles, just each existing one given its
 own physical boundary.
+
+---
+
+## Domain-scoped corpora — the lens / corpus split
+
+*Decided and executed 2026-06-22, across the skill and both projects (Blog, FAMOUS), in one pass.
+The pre-redesign system is preserved at git tag `v1-alpha`; `redesign-proposal.md` (and
+`redesign-proposal.v1.md`) hold the reasoning at length. Verify the current shape against
+`kernel.md`, `skill.md`, and the `domains/` directories — this entry records why the move was made,
+not a guarantee of present state.*
+
+The original system welded two things into the **role**: a *reasoning lens* (how an agent thinks)
+and a *corpus container* (where its learned judgment is stored). Because storage was welded to the
+lens, every principle had to be owned by exactly one role — and that single-ownership constraint was
+the source of the system's worst failures. Judgment that belonged to two roles was either fragmented
+across both or killed for "role boundary" reasons rather than because it was wrong. Three concrete
+symptoms, all visible in the corpora at the time:
+
+- `documentation-before-screenshots` existed **byte-for-byte identical** in both the UI and UX seed
+  corpora — shared judgment stored twice because the role was the container.
+- FAMOUS killed three sound principles (`empty-state-must-offer-one-exit`,
+  `pinned-escape-above-search-input`, `search-complexity-threshold`) as "lives in the UX corpus"
+  while they were *alive* in the UX corpus — a redirect with nowhere to land, not a quality rejection.
+- The keyboard-grid cluster (`discovery-grid-as-landscape`, `grounded-hover-reads-as-emergence`,
+  `depth-signals-tier-in-discovery-grid`, plus the coder's 3D-implementation principles) was split
+  across UX, UI, and coder corpora, with two of its design principles ending up in a *killed* section
+  through attribution noise in a long multi-domain session.
+
+The fix unwelds the two. A **domain** is a corpus scoped to a subject (color, recoverability,
+spatial-metaphor), not a job title; judgment lives there. A **role** becomes a *lens* plus a *static
+declaration* of the domains it loads. Multiple lenses may declare the same domain, so shared judgment
+lives once (the UI and UX designers both declare `recoverability`, `validation-feedback`, and the
+rest). The container-kill category disappears: a proposal that surfaces in any session is *filed in
+the right domain* rather than killed for belonging to the "wrong" role.
+
+Two design choices kept this from eroding what came before:
+
+- **Static declaration, not runtime retrieval.** The lens names its domains in a checked-in
+  `## domains` block (project-only domains are declared in `corpora/config.md`). Assembly stays a
+  deterministic, inspectable filesystem fact — no agent makes a per-task relevance call on its own
+  constraints. This is what let domain-scoping coexist with `full-corpus-on-spawn`: loading only the
+  declared domains is a fixed contract, not a relevance judgment.
+- **Role isolation preserved at the declaration level.** The coder declares coding domains and never
+  design domains, so the design→code contamination the seam was built to prevent still cannot
+  happen. Two *design* lenses sharing a *design* domain is allowed and intended — a different axis.
+  Where a subject genuinely spanned the coder/design seam (FAMOUS's `spatial-metaphor`), the design
+  principles and the coder's implementation principles were kept in separate same-subject domains
+  (`spatial-metaphor` and `css`) linked by `see-also`, rather than merged — coherence by subject
+  without breaking the hard seam.
+
+The anti-regression-to-the-mean constraint found its honest home in this move: it lives in the
+`design-method` domain (declared by both designers), confirming the earlier finding that it is a
+divergent-design concern, not a kernel universal (see "The genotype / phenotype distinction").
+
+What was deliberately *not* settled: whether the UI and UX lenses are really one role or two. The
+redesign reorganizes their corpora into shared domains and leaves the fork signal to answer the
+question from accumulated tension — if a shared design domain develops UI-vs-UX conditions that
+partition the same space with opposing advice, that is the seam, surfaced by a retrospective rather
+than assumed. The storage was unwelded from the lens precisely so that question could be answered by
+evidence later instead of by convention now.
+
+### Generative stance — the correctness/creative line
+
+*Added later the same day (2026-06-22), in the same session, once the domain split was in place.*
+
+The operator pressed on whether the correctness/creative split was "a hard line domains should never
+cross." Working it through sharpened the whole model. The split is real — it is the convergent /
+divergent mechanism from `reader-tax-and-the-model.md` — but it lives on the **lens**, not the
+domain. A *convergent* lens (coder, UX designer, orchestrator) generates by matching a standard;
+regression to the training mean is often the right answer. A *divergent* lens (the UI designer)
+generates by differentiating, and carries an anti-mean anchor. The reason it is a lens property and
+not a domain one: a principle — rule + condition + reason, weighable — almost always encodes
+convergent correctness, because that is what crystallizes into a rule. The divergent element never
+becomes a body of principles; it is a stance taken at the generative moment. Domains are therefore
+mostly convergent guardrails, consumed by lenses of either stance.
+
+This immediately repaid itself by exposing a flaw in the just-built taxonomy: `design-method` had
+bundled `reject-safe-defaults` (a divergent-stance instruction — "resist the standard") beside
+`clarity-over-polish` and the documentation rules (convergent — "prefer the clear/standard answer").
+One domain telling the agent to hold two opposite stances at once. The fix was the hard line stated
+precisely: a domain must not bundle principles that demand opposite generative stances. So
+`reject-safe-defaults` left the domain and became the UI designer lens's stance anchor, and
+`design-method` settled into a clean convergent process domain.
+
+A bonus fell out, and it closed a long-standing puzzle. The operator had tried, on the prior system,
+to make the *UI* more interesting by having design lead with *UX* — and it kept producing safe,
+boring results. The stance model explains why mechanically: UX is the **convergent** lens. Leading
+visual work with a convergent stance pulls it toward the default — the opposite of the intended
+effect. The way to get a more divergent UI is to let the divergent lens lead, not to anchor it to
+the convergent one. The role split the operator had felt was "both real and arbitrary" was a proxy
+for the stance axis all along; the stance axis is the principled version of it.
 
 ---
 

@@ -1,0 +1,270 @@
+# Audit record — web-frontend pack layer
+
+Provenance, promotions, and per-kill audit detail for the web-frontend pack domains. Loaded only at
+ratify/retrospective time — never in a role's working context. Keyed by principle `id`, each noting
+its `domain`. See `kernel.md`, "Storage: working vs audit." (Kill logs live in the per-domain
+working files.)
+
+> **Migration note (2026-06-22).** These principles were re-homed from the old role corpora
+> (`coder.md` pack overlay, `ui-designer.md`, `ux-designer.md`) into domain working files as part of
+> the corpus redesign. The role→domain move is uniform and recorded here once rather than as a
+> `history` stanza on every principle; only notable moves (cross-role re-homing, consolidations,
+> the documentation-before-screenshots dedup) carry an explicit `history` entry below.
+
+```yaml
+provenance:
+
+# ---- domain: coding-js-react ----
+- id: undefined-check-by-source
+  domain: coding-js-react
+  provenance: "Merged from strict-undefined-check-in-arrays + array-access-undefined-not-null, Blog project, 2026-06-01."
+
+- id: null-first-ternary
+  domain: coding-js-react
+  provenance: "2026-06-18, Blog project explicit-by-default post review."
+
+- id: css-var-over-mapped-class-for-dynamic-color
+  domain: coding-js-react
+  provenance: "2026-06-13, Blog project WireCircle refactor."
+
+- id: font-mono-at-element-not-container
+  domain: coding-js-react
+  provenance: "2026-06-13, Blog project FixedBottomResultsBar refactor."
+
+- id: hook-params-named-for-hook-concern
+  domain: coding-js-react
+  provenance: "2026-06-15, Blog project useHistoryState."
+
+- id: hook-options-object-for-named-args
+  domain: coding-js-react
+  provenance: "2026-06-15, Blog project useHistoryState."
+
+- id: wizard-callbacks-unconditional
+  domain: coding-js-react
+  provenance: "2026-06-14, Blog project load-calculator, Issue 19. see-also wizard-output-consistent-regardless-of-path (wizards-flows) — the implementation and UX faces of one concern, now legibly linked across domains."
+
+# ---- domain: css ----
+- id: mobile-fixed-bar-bottom-gap
+  domain: css
+  provenance: "2026-06-03, Blog project Box Selector mobile bottom bar."
+
+- id: imports-before-tailwind-directives
+  domain: css
+  provenance: "2026-06-12, Blog project globals.css restructure."
+
+- id: tokenize-only-recurring-magic-values
+  domain: css
+  provenance: "2026-06-12, Blog project globals.css restructure."
+
+- id: table-row-color-override
+  domain: css
+  provenance: "2026-06-15, Blog project ampacity table temperature header text color."
+
+# ---- domain: color ----
+- id: color-palette-inspiration
+  domain: color
+  provenance: "2026-06-02, operator-provided. Clarified 2026-06-13."
+
+- id: palette-chromatic-depth
+  domain: color
+  provenance: "2026-06-03, taste training session."
+
+# ---- domain: surfaces-elevation ----
+- id: disclosure-panel-vs-modal
+  domain: surfaces-elevation
+  provenance: "2026-06-14, load calculator history panel design spec."
+
+- id: dark-floating-surface-fill
+  domain: surfaces-elevation
+  provenance: "2026-06-19, nav background depth session."
+
+- id: scroll-fade-gradient-surface-match
+  domain: surfaces-elevation
+  provenance: "2026-06-19, nav background depth session."
+
+# ---- domain: visual-hierarchy ----
+- id: redundant-badge-sublabel
+  domain: visual-hierarchy
+  provenance: "2026-06-02, Box Selector visual spec."
+
+- id: control-grouping-encodes-unity
+  domain: visual-hierarchy
+  provenance: "2026-06-03, taste training session (originally as capsule-encodes-same-value)."
+  history:
+    - date: 2026-06-20
+      type: generalized
+      reason: "Original rule prescribed capsule as the specific pattern — 'join into a capsule when segments share a value.' This directed the designer to a single implementation rather than stating the underlying principle. The insight is that any form of visual grouping (capsule, joined buttons, bordered cluster) encodes semantic unity; the specific form is a design decision the rule should inform, not resolve. Rule rewritten to state the general principle with capsule as one named example. Id renamed from capsule-encodes-same-value to reflect the broader concept."
+
+- id: hierarchy-through-scarcity
+  domain: visual-hierarchy
+  provenance: "2026-06-04, retrospective consolidation."
+  history:
+    - date: 2026-06-20
+      type: absorbed-examples
+      reason: "Killed one-highlight-per-result-set and accent-color-for-distinction-not-data as redundant instances of this principle. Concrete examples those principles captured: (1) apply highlight to exactly one card per results panel — when two outputs are co-primary, merge into one highlighted card with an internal divider rather than two competing highlights; (2) accent color belongs only on the distinguished row, all other data values in secondary text color. Both earned in Box Selector results panel."
+
+- id: responsive-text-by-viewport-distance
+  domain: visual-hierarchy
+  provenance: "2026-06-09, Box Selector desktop text legibility audit."
+
+# ---- domain: motion ----
+- id: motion-as-accent
+  domain: motion
+  provenance: "2026-06-03, taste training session."
+
+- id: scrollytelling-must-always-react
+  domain: motion
+  provenance: "2026-06-13, homepage journey audit."
+
+# ---- domain: recoverability ----
+- id: recovery-path-replaces-confirmation
+  domain: recoverability
+  provenance: "2026-06-14, load-calculator audit."
+  history:
+    - date: 2026-06-20
+      type: consolidated
+      reason: "Absorbed recoverable-action-surfaces-its-path (originated ui-designer seed 2026-06-14, moved to ux-designer seed 2026-06-20). Both principles shared identical conditions and formed one complete thought: skip confirmation when recovery exists, and surface that recovery path. Separated, a designer could apply one without the other and get incomplete guidance. Merged rule absorbs both: recovery path is the gate AND must be made visible. Merged reason combines both justifications."
+    - date: 2026-06-22
+      type: moved
+      reason: "Re-homed to the recoverability domain, now declared by BOTH ui-designer and ux-designer. The redesign makes structural what the 2026-06-20 consolidation did by hand: this judgment is one concern spanning flow (UX) and visible affordance (UI), and a domain both lenses declare is its natural home."
+
+- id: destructive-global-actions-require-confirmation
+  domain: recoverability
+  provenance: "2026-06-14, load-calculator UX audit."
+
+- id: destructive-inline-confirmation
+  domain: recoverability
+  provenance: "2026-06-02 (originated in ui-designer seed corpus)."
+  history:
+    - date: 2026-06-20
+      type: moved
+      reason: "Principle describes interaction behavior (inline row transformation, confirm/cancel affordance), not visual design. Moved from UI designer seed to UX designer seed."
+    - date: 2026-06-22
+      type: moved
+      reason: "Re-homed to the recoverability domain (declared by both designers). The 2026-06-20 UI→UX move was the container problem in miniature — the principle kept getting reassigned because no single role owned it. The domain ends the ping-pong."
+
+# ---- domain: validation-feedback ----
+- id: warning-colocated-with-resolution
+  domain: validation-feedback
+  provenance: "2026-06-02, Box Selector visual spec."
+
+- id: warning-banner-must-locate-its-fix
+  domain: validation-feedback
+  provenance: "2026-06-02, Box Selector UX review."
+
+- id: filter-side-effects-are-surfaced
+  domain: validation-feedback
+  provenance: "2026-06-02, Box Selector UX review."
+
+# ---- domain: forms-inputs ----
+- id: numeric-inputs-start-empty-not-zero
+  domain: forms-inputs
+  provenance: "2026-06-14, load-calculator UX audit."
+
+- id: zero-count-orphan-rows
+  domain: forms-inputs
+  provenance: "2026-06-02, Box Selector UX review."
+
+- id: unified-field-over-derived-dual-fields
+  domain: forms-inputs
+  provenance: "2026-06-14, load-calculator appliance row overhaul."
+
+- id: persistent-controls-not-conditional
+  domain: forms-inputs
+  provenance: "2026-06-14, load-calculator appliance row overhaul."
+
+# ---- domain: lists-selection ----
+- id: indicator-weight-matches-job
+  domain: lists-selection
+  provenance: "2026-06-16, load calculator history redesign."
+
+- id: active-row-is-inert
+  domain: lists-selection
+  provenance: "2026-06-16, load calculator history redesign."
+
+- id: section-level-explanation-not-row-level
+  domain: lists-selection
+  provenance: "2026-06-14, load-calculator appliance row overhaul."
+
+# ---- domain: wizards-flows ----
+- id: origin-step-marked-visited-on-navigation
+  domain: wizards-flows
+  provenance: "2026-06-14, load-calculator UX audit."
+
+- id: wizard-output-consistent-regardless-of-path
+  domain: wizards-flows
+  provenance: "2026-06-14, load-calculator UX audit. see-also wizard-callbacks-unconditional (coding-js-react)."
+
+- id: optional-step-must-be-labeled-optional
+  domain: wizards-flows
+  provenance: "2026-06-14, load-calculator UX audit."
+
+# ---- domain: ranking-evaluation ----
+- id: triage-and-ranking-are-independent-signals
+  domain: ranking-evaluation
+  provenance: "Merged from intake-and-ranking-are-separate-activities + elo-as-independent-ranking-signal, 2026-06-02."
+  history:
+    - date: 2026-06-20
+      type: provisional-flag
+      reason: "Earned exclusively in a comparative ranking/evaluation tool (Taste Trainer). Condition is narrow — tools that mix quick triage with deliberate ranking. Plausible general principle but untested against a second project with a ranking or evaluation feature. Do not promote until confirmed in a second context."
+
+- id: category-scope-is-visible-on-ranked-items
+  domain: ranking-evaluation
+  provenance: "2026-06-02."
+  history:
+    - date: 2026-06-20
+      type: provisional-flag
+      reason: "Earned exclusively in a per-category ranking tool (Box Selector). Condition presupposes category-scoped rankings — a pattern that may not recur in other web-frontend projects. Do not promote until confirmed in a second context."
+
+- id: choice-prompt-anchors-on-usefulness-not-preference
+  domain: ranking-evaluation
+  provenance: "2026-06-02."
+  history:
+    - date: 2026-06-20
+      type: provisional-flag
+      reason: "Earned exclusively in a reference-building tool (Taste Trainer). Condition is narrow — tools whose output is meant to inform future decisions, not record taste. Do not promote until confirmed in a second context."
+
+- id: callout-label-describes-property-not-judgment
+  domain: ranking-evaluation
+  provenance: "2026-06-02, Box Selector UX review."
+
+- id: out-of-order-callout-requires-sort-explanation
+  domain: ranking-evaluation
+  provenance: "2026-06-02, Box Selector UX review."
+
+# ---- domain: design-method ----
+- id: clarity-over-polish
+  domain: design-method
+  provenance: "2026-06-22, extracted from UX designer 'Project context' instruction."
+
+- id: document-visual-sub-systems
+  domain: design-method
+  provenance: "2026-06-12, full site visual audit."
+
+- id: documentation-before-screenshots
+  domain: design-method
+  provenance: "2026-06-22, extracted from the designer 'What you do' screenshots bullet."
+  history:
+    - date: 2026-06-22
+      type: consolidated
+      reason: "This principle existed byte-for-byte identical in BOTH the ui-designer and ux-designer seed corpora — the clearest instance of the container problem the redesign targets: shared judgment stored twice because the role was the container. Merged into a single entry in the design-method domain, which both designer lenses declare."
+
+promoted:
+
+# ---- ui-designer lens (divergent-stance anchor) ----
+- id: reject-safe-defaults
+  domain: design-method
+  promoted_to: ui-designer lens — "Generative stance — divergent" section
+  provenance: "Originated as the UI designer 'Anti-regression-to-the-mean' role instruction; extracted to the design-method corpus 2026-06-22, then promoted back to the ui-designer lens later the same day when the generative-stance model showed anti-mean is a *lens stance*, not a domain principle — a 'resist the standard' instruction cannot coherently share a domain with convergent process rules (clarity-over-polish, documentation discipline). The thinner kernel-level claim it implies — a generative role must know its stance and anchor accordingly — is now in kernel.md, 'Generative stance.' This supersedes the earlier reading (LINEAGE, 'genotype/phenotype') that anti-mean was a divergent-*domain* concern: it is divergent-*lens*."
+
+# ---- domain: coding-js-react ----
+- id: arrow-block-body
+  domain: coding-js-react
+  promoted_to: web-frontend coder overlay — "Conventions" section
+  provenance: "2026-06-18, Blog project. {} ambiguity + single consistent style removes per-function judgment call. A JS instance of the base prefer-error-exposing-form meta-rule."
+
+- id: no-early-returns
+  domain: coding-js-react
+  promoted_to: web-frontend coder overlay — "Conventions" section
+  provenance: "2026-06-17, Blog project, 'Explicit by Default' post (content/posts/coding/explicit-by-default.mdx). Derived from Crockford's heuristic, not style: indentation-as-grammar (Henney) means early returns let a multi-condition line sit at base indentation as if unconditional; the guard-clause exception reintroduces a per-function 'still simple enough?' judgment a block body removes; the strong counterexample (a flat row of order-independent guards) resolves to extraction-and-naming, not exception. Scoped to this pack because some ecosystems (Go) idiomatically prefer guard clauses; the reasoning is general."
+```

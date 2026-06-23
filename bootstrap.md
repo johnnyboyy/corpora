@@ -1,6 +1,6 @@
 ---
 name: corpora:bootstrap
-description: Bootstrap a UI library and tooling config for a new project. Run once before any feature design work begins. Can work from existing design documentation, brand guidelines, aesthetic references, or from scratch with operator guidance. Outputs corpora/config.md (the project tool surface), corpora/ui-library.md, and seed corpora/ui-designer.md. Text-only format — no screenshots, no image exports. See LINEAGE.md for why.
+description: Bootstrap a UI library and tooling config for a new project. Run once before any feature design work begins. Can work from existing design documentation, brand guidelines, aesthetic references, or from scratch with operator guidance. Outputs corpora/config.md (the project tool surface), corpora/ui-library.md, and proposed design principles (ratified into the project's design domains under corpora/domains/). Text-only format — no screenshots, no image exports. See LINEAGE.md for why.
 ---
 
 # Project Bootstrap
@@ -27,8 +27,9 @@ The output of this session is:
    library location, verification commands). **Always written.** Schema below.
 2. **`corpora/ui-library.md`** (or the project's chosen path) — the living design system reference.
    *Phase 2 only.*
-3. **`corpora/ui-designer.md`** — seed principles distilled from the foundational design decisions.
-   *Phase 2 only.*
+3. **Proposed design principles** — distilled from the foundational design decisions and surfaced
+   in the standard proposed-principles block. The orchestrator ratifies them into the project's
+   design domains (`corpora/domains/<domain>.md`), assigning each a domain at the gate. *Phase 2 only.*
 
 The library and corpus are text-only. See LINEAGE.md in the `corpora` skill repo for why text
 outperforms design artifacts for this purpose.
@@ -344,12 +345,14 @@ Include a short intro paragraph explaining: what this document is, who reads it,
 that it is text-based because text descriptions are more token-efficient and precise
 than design artifacts (one sentence on the why is enough).
 
-### corpora/ui-designer.md
+### Proposed design principles
 
-Distill the significant decisions made in this session into seed principles in the standard
-corpus schema. A foundational color system choice, a density decision, a typography role
-assignment — these are worth encoding as ratified principles with conditions and reasons,
-so future designer sessions can weigh them rather than re-derive them.
+Distill the significant decisions made in this session into principles in the standard schema, and
+surface them in the proposed-principles block below. A foundational color system choice, a density
+decision, a typography role assignment — these are worth encoding with conditions and reasons, so
+future designer sessions can weigh them rather than re-derive them. You propose the judgment; the
+orchestrator assigns each ratified principle to a design domain at the gate (e.g. a color decision
+to `color`, a documentation rule to `design-method`) and writes it to `corpora/domains/<domain>.md`.
 
 Aim for 5–10 principles. Do not encode every detail of the library — only the decisions
 that involve real tradeoffs and where the reason matters for future work.
@@ -378,8 +381,9 @@ transcribe the relevant values and add the sections the source document missed
 End your output with the standard proposed principles block:
 
 ```yaml
-# Foundational design decisions proposed as seed principles.
-# These will be written to corpora/ui-designer.md after operator review.
+# Foundational design decisions proposed as principles.
+# The orchestrator ratifies these into the project's design domains (corpora/domains/<domain>.md),
+# assigning each a domain at the gate, after operator review.
 #
 # - id: kebab-case-identifier
 #   rule: "The guidance."
