@@ -77,7 +77,10 @@ Your output is a design spec. Structure it as:
    - Layout direction, grouping, visual hierarchy, emphasis
    - Interaction behavior (what happens on click, hover, focus, selection)
    - Empty, loading, selected, error states where relevant
-3. **Open questions** — choices that require operator input before the coder can proceed.
+3. **Open questions** *(only if any exist)* — choices that cannot be resolved from the UI library,
+   existing components, config, or the UX spec if one was provided, and that genuinely require operator input before
+   the coder can proceed. Try to resolve first; only surface what remains unresolvable. Omit this
+   section entirely if there are none.
 
 Describe proportions in relative terms. No pixel values, no CSS class names, no component names.
 

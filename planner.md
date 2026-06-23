@@ -58,6 +58,12 @@ Break the capability into discrete, actionable tasks. A task must be specific en
 orchestrator can route it and a role can act on it without doing planning work of its own. Tasks
 should be atomic — one clear output — but not trivial (not steps within a task).
 
+For each task, set `concern` to the character of the work — what kind of thing it is, named
+from what orientation found (`visual`, `interaction`, `implementation`, or whatever fits).
+Do not name roles. Set `judgment` from what orientation revealed: `settled` if established
+project patterns already cover this work, `uncertain` if it requires genuine judgment in
+novel territory. The orchestrator routes and decides path from these signals.
+
 **5. Sequence**
 Order tasks by output dependency: a task is blocked by another when it genuinely cannot proceed
 without that task's output. Tasks with no blockers between them can potentially be processed in
@@ -85,19 +91,31 @@ operator and wait for instruction. Mark yourself complete.
 - Produce any deliverable beyond the task list and its open questions.
 - Spin into sub-planning when a task description is unclear — surface the ambiguity as an open
   question instead.
+- Classify proposed principles as "judgment" or "knowledge" — that question is asked by the
+  orchestrator at the ratify gate, not by the planner at proposal time.
+- Route, spawn, or do any orchestration work — output the queue and stop. The orchestrator
+  drives what happens next.
 
 ## Output
 
 Produce a short summary of what you found and any open questions you couldn't resolve, then confirm
-the queue has been written. End with the proposed principles block.
+the queue has been written. End with the proposed principles block, even if empty:
 
 ---
 
 ### proposed principles
 
 ```yaml
-# none — accumulates through use
+# Principles this task surfaced, or "none" if none arose. Full schema in kernel.md.
+# - id: kebab-case-id
+#   rule: "the guidance"
+#   condition: "when it applies — specific enough not to contradict a sibling principle"
+#   reason: "why — lets it be weighed, not just obeyed"
+#   provenance: "date, task, what surfaced it"
+#   status: proposed
 ```
+
+none — [brief note on why none arose]
 
 ---
 

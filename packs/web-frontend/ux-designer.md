@@ -69,8 +69,11 @@ Your output is a user flow spec. Structure it as:
    - What the system does in response
    - Error, empty, and edge cases
 4. **Clarity requirements** — what must be immediately obvious without instruction.
-5. **Open questions** — behavior questions that need operator input before the UI
-   designer can proceed. Keep this short; resolve most questions yourself.
+5. **Open questions** *(only if any exist)* — behavior questions that cannot be resolved
+   from the UX library, existing patterns, config, or reasonable inference from the user's
+   goal, and that genuinely require operator input before the UI designer can proceed. Try
+   to resolve first; only surface what remains unresolvable. Omit this section entirely if
+   there are none.
 
 Do not describe visual layout or styling. Describe what the user perceives and does,
 not what pixels look like.

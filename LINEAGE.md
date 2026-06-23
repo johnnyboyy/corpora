@@ -281,6 +281,34 @@ The merger happened during a retrospective that recognized the "entry/exit" fram
 artificial — the real structure is: load corpus before starting, flag decisions in-flight,
 ask at the natural seam. The seam is always present; "end of session" is not.
 
+### Why the orchestrator inlines domain content rather than passing file paths
+
+*Surfaced 2026-06-23, first full planner session on FAMOUS. No commit — a design rationale
+confirmed in production use, not introduced by a code change.*
+
+The kernel instructs the orchestrator to read each role's declared domain files and include
+their content inline in the spawn prompt. The obvious alternative — pass file paths and let
+the spawned agent read its own context — would reduce orchestrator token cost. It was
+considered and rejected, for a reason worth recording.
+
+A spawned agent told to read files before beginning will shortcut when the file name sounds
+familiar, when the task context already feels rich, when the file is long and the first
+section answered the obvious question, or when the agent has pattern-matched the file type
+against training knowledge and assumed coverage. The failure is not random — it happens
+precisely on the principles that feel obvious enough to skip. And the cost of underfetching
+is not "the role missed some principles evenly" but "the role missed the one principle that
+would have prevented the mistake it then made," which is the hardest failure to detect after
+the fact.
+
+The inline approach makes this underfetch impossible. The spawned agent cannot choose not to
+have read a domain because the domain content is already in its context window.
+
+A secondary effect emerged from the same session: inlining has a direct cost the orchestrator
+feels, which enforces tight domain management. If the orchestrator pays tokens to relay every
+domain it spawns with, bloated domains raise the cost of every spawn immediately and visibly.
+Letting the agent read its own files diffuses that cost and removes the forcing function — the
+feedback signal that tells you the domains are getting heavy.
+
 ---
 
 ## Key killed principles worth preserving
@@ -662,3 +690,107 @@ declares) for exactly this: checking specific states or transitions that the lib
 but can't fully characterize. The library is the
 what; the screenshot check is the "does the what feel right in context?" The screenshot
 is the exception, not the starting point.
+
+---
+
+## Planner behavior and knowledge boundary
+
+*Decided 2026-06-23 (pre-commit, same session as the planner role's introduction). Verify
+current state against `planner.md` and `domains/planning.md`.*
+
+The first real use of the planner role surfaced three failure modes in one session: it
+proposed principles without the kernel schema (a vague placeholder instead of
+`id / rule / condition / reason / provenance / status`), it pre-classified each proposal as
+"judgment" or "knowledge" — work that belongs to the orchestrator at the ratify gate, not
+to the role at proposal time — and it did orchestration work (routing decisions) after
+writing the queue instead of stopping.
+
+The first two were output format defects, fixed by making the principle schema explicit in
+`planner.md` and adding a prohibition matching the coder's existing output block. The third
+was a contamination effect: the planner ran inline, the orchestrator's context (including its
+routing behaviors) was still live in the session, and the planner had no explicit instruction
+to stop at the queue. The fix added the prohibition directly to the planner lens.
+
+The question of whether to spawn the planner by default — as designers are spawned — was
+raised and rejected. The dominant use pattern is inline coder iteration, not planning; making
+the planner always-spawn would add isolation overhead to every invocation of a role that is
+itself occasional. The explicit prohibition is the lighter and sufficient fix for a lens that
+runs rarely and has a well-defined output boundary.
+
+---
+
+## Open questions in designer specs — from required to conditional
+
+*Decided 2026-06-23 (same session). Verify current state against
+`packs/web-frontend/ui-designer.md` and `packs/web-frontend/ux-designer.md`.*
+
+Both designer lenses had "Open questions" as a required section in the spec format — a
+structural slot that created pressure to fill even when there was nothing genuinely
+unresolved. In practice this produced two failure modes: questions the designer could have
+resolved from available material (the library, existing patterns, the UX spec), and
+manufactured questions where none existed.
+
+The UX designer already carried a softener ("keep this short; resolve most questions
+yourself"), but it was still a required section. The fix made the section conditional in
+both lenses: omit it entirely if there are none, try to resolve from available material
+first, only surface what genuinely cannot be resolved. The resolution sources are named
+explicitly so the designer knows what to check before surfacing: the UI library, existing
+components, config, and the UX spec (if provided) for the UI designer; the UX library,
+existing patterns, config, and inference from the user's goal for the UX designer.
+
+---
+
+## Planner signals: concern and judgment
+
+*Decided 2026-06-23 (same session). Verify current state against `domains/planning.md`
+(queue schema) and `planner.md` (decompose step).*
+
+The queue schema needed a signal to help the orchestrator decide routing and spawn path
+without the planner knowing which roles exist. The first attempt introduced `role-hint`
+with values naming the current roles (`coder | ux-designer | ui-designer | planner`).
+This was wrong on two counts: role assignment is orchestrator territory, and coupling the
+field values to the current role taxonomy means a new role requires updating the planner —
+the wrong dependency direction.
+
+The replacement separates two things the planner can actually assess during orientation:
+
+- **`concern`** — the character of the work, named from what orientation found (`visual`,
+  `interaction`, `implementation`, or whatever the task actually involves). Open-ended
+  and role-agnostic: the orchestrator knows which role handles `visual` work; the planner
+  does not need to.
+- **`judgment`** — `settled | uncertain` — whether established project patterns already
+  cover this work, or genuine novel territory where judgment under uncertainty is required.
+  Assessable from orientation: if the library covers the patterns, `settled`; if not,
+  `uncertain`.
+
+These two signals together give the orchestrator what it actually needs for routing and
+spawn-threshold decisions, without the planner knowing the role taxonomy. A future role
+added to the system slots in without touching the planner or the queue schema.
+
+---
+
+## Design spawn cost and the lighter path
+
+*Decided 2026-06-23 (same session). The triggering case: a UI designer spawn for a page
+that followed an already-documented subsystem. Verify the proposed principle against
+`domains/orchestrator-routing.md` (`design-pattern-application-lighter-path`).*
+
+A post-mortem on a designer spawn that cost roughly 20k tokens surfaced the pattern: a
+full designer session loading the lens, all declared domains, and running the ratify gate
+is justified when there is genuine visual judgment under uncertainty. It is not justified
+when the work is applying documented vocabulary from the library to a new surface. In that
+case the useful output — which tokens go where, resolving a pending library item — was
+reachable without a spawn. The session produced three proposed principles that were killed
+immediately as format violations, with their substance going to the library directly.
+
+The `design-pattern-application-lighter-path` principle encodes the rule: when a design
+task has `judgment: settled`, prefer reading the library, identifying gaps, and surfacing
+them as targeted questions to the operator, rather than spawning the full designer. Spawn
+only if the operator's answers reveal actual design judgment is needed. The principle is
+currently `proposed` — the case was clear enough to earn the rule, but one instance in one
+project is not yet ratification evidence.
+
+The existing `spawn-threshold-is-spec-scope` and `route-questions-not-roles` principles
+already pointed toward this, but neither covered the case where the orchestrator could
+handle the gap-identification work itself rather than routing to a role or the operator.
+The new principle names that third path explicitly.

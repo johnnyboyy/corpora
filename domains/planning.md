@@ -29,6 +29,12 @@ tasks:
     status: pending              # pending | in-progress | complete | blocked
     blocked-by: []               # list of task ids this task cannot start without
     parallel-ok: false           # true if this task can run alongside its non-blocking peers
+    concern: ""                  # what kind of work this task involves — open-ended, named from
+                                 # what orientation found (e.g. visual, interaction, implementation).
+                                 # The orchestrator routes from this; the planner does not name roles.
+    judgment: ""                 # settled | uncertain — whether orientation found established project
+                                 # patterns that cover this work, or genuine novel territory where
+                                 # judgment under uncertainty is required.
     notes: ""                    # planner or orchestrator notes; resolution of open questions
 
 open-questions:
