@@ -794,3 +794,47 @@ The existing `spawn-threshold-is-spec-scope` and `route-questions-not-roles` pri
 already pointed toward this, but neither covered the case where the orchestrator could
 handle the gap-identification work itself rather than routing to a role or the operator.
 The new principle names that third path explicitly.
+
+---
+
+## Planner scope expansion and the coder orientation gap
+
+*Decided 2026-06-23, from a cross-model experiment comparing four implementations of the
+same app. Verify current state against `domains/planning.md` (queue schema, `context` field;
+`surface-shared-concept-before-implementation` principle) and
+`packs/web-frontend/domains/coding-js-react.md` (four proposed principles).*
+
+A comparison of four Pokemon Tinder implementations — three by Sonnet (one without the skill,
+one with an early version, one without) and one by Haiku with the current skill including
+the planner — surfaced two related findings.
+
+**The planner expands scope and narrows coder orientation.** The Sonnet implementation using
+the early skill (no planner) produced fewer features but higher correctness. The Haiku
+implementation with the planner produced more features but several confirmed runtime state
+bugs. The planner was working correctly: it decomposed a richer capability into actionable
+tasks. The failure was structural. A coder working from a vague prompt must do its own
+orientation — reading the codebase, understanding what exists, building the full state picture
+itself. That process naturally surfaces interaction surfaces between features. A coder working
+from a plan gets pre-digested context and may skip orientation, trusting the plan to have
+captured what matters. The plan is a lossy summary: it records what exists and what to build,
+but not what multiple tasks will share at runtime.
+
+**The fix has two parts.** First, a new planning principle (`surface-shared-concept-before-implementation`)
+requires the planner to detect when two or more tasks will operate on the same runtime concept
+and surface it as a blocked open question before implementation begins. Second, the `context`
+field description in the queue schema was updated to make explicit that the planner must
+populate not just "what exists" but also "what this task shares with other tasks in this
+capability" — so the executing role starts with the interaction surface visible.
+
+**A domain gap in `coding-js-react` also contributed.** The confirmed bugs fell into three
+categories with no ratified principles covering them: reading state in the same synchronous
+scope as its setter (stale read), storing timer handles in state rather than refs (dep cascade),
+and recording position rather than stable identity for deferred operations (undo/filter
+interaction). A fourth, more general principle about frequent state in callback dep arrays
+was added to cover the class. All four are proposed in `coding-js-react`; the planning
+principle is proposed in `planning`. None were ratified outright — one project, one experiment.
+
+**The model-specificity finding.** The planner increasing scope is correct behavior; the
+domain corpus not having kept up with the failure modes that expanded scope introduces is
+where the gap lived. The principle additions are the corpus catching up, not a constraint on
+scope. Whether these principles hold across a second project is the condition for ratification.

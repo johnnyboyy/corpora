@@ -54,5 +54,29 @@ principles:
   see-also: wizard-output-consistent-regardless-of-path
   status: ratified
 
+- id: frequent-state-in-callback-deps-triggers-cascade
+  rule: "Before including a state value in a useCallback or useMemo dependency array, check whether that value is updated by the same interactions the callback serves. If it is, prefer a ref or functional updater to remove the dep — or confirm that every effect listing this callback as a dep should re-fire on each state change."
+  condition: "When a useCallback or useMemo dependency array includes state that is also mutated during the interactions or events the component handles."
+  reason: "A dep that changes on each interaction recreates the callback each time. Any useEffect listing this callback as a dep re-fires with it — including effects whose purpose is unrelated to the changed value. The cascade is silent: types are correct, the effect appears to fire correctly, but it fires more often than intended."
+  status: proposed
+
+- id: no-read-after-set-in-same-scope
+  rule: "Never read a state value (via getter, selector, or derived hook) in the same synchronous scope as the setter call that changes it."
+  condition: "When a state setter and a state read of the same value appear in the same event handler or callback — including when the read is wrapped in a memoized function that closes over the same state."
+  reason: "React's setState is asynchronous — the update is enqueued, not applied. A read that immediately follows a setter cannot observe the new value and will silently compute against stale data, producing wrong output with no error signal."
+  status: proposed
+
+- id: timer-handles-in-refs-not-state
+  rule: "Store setTimeout/setInterval return values in refs (useRef), not state (useState). Never include a timer ID in a useCallback or useMemo dependency array."
+  condition: "When a component or hook needs to clear or track a pending timer."
+  reason: "A timer ID in state causes a re-render on every timer start or clear. Any useCallback that captures the ID must include it in deps, which recreates the callback each time — propagating recreation to every hook and effect that depends on it, potentially re-firing effects that should not have run."
+  status: proposed
+
+- id: stable-id-not-position-for-deferred-ops
+  rule: "When recording state for a deferred operation (undo, redo, queue, bookmark), store the item's stable identity (e.g. ID, slug), never its current position in a filtered, sorted, or paginated view."
+  condition: "Any undo, redo, or queued action that references an item by how it was found rather than what it is."
+  reason: "Position in a derived collection is only valid while the collection's filter/sort/pagination is unchanged. A stable ID remains correct across any view change; a position silently references a different item or crashes on out-of-bounds access with no warning."
+  status: proposed
+
 killed:
 ```

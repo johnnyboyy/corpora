@@ -24,8 +24,12 @@ tasks:
     title: "Short, actionable title"
     description: "What this task requires and what its output is."
     context: ""                  # what the planner found during orientation: current state, relevant
-                                 # files, what exists vs. what is missing. Populated by the planner
-                                 # so the executing role does not re-derive it.
+                                 # files, what exists vs. what is missing. Also: any concepts this
+                                 # task shares with other tasks in this capability — state, data, or
+                                 # behavior that multiple tasks will read or mutate — so the executing
+                                 # role starts with the interaction surface visible, not just the
+                                 # task's own scope. Populated by the planner so the executing role
+                                 # does not re-derive it.
     status: pending              # pending | in-progress | complete | blocked
     blocked-by: []               # list of task ids this task cannot start without
     parallel-ok: false           # true if this task can run alongside its non-blocking peers
@@ -84,6 +88,12 @@ principles:
   condition: "When writing or reviewing any task description in the queue."
   reason: "Naming implementation details couples the plan to a specific approach before the coder has seen the code. It narrows the solution space unnecessarily and makes the queue wrong the moment the code diverges from the assumption — without any signal that it has. The coder's job is to decide how; the planner's job is to decide what."
   status: ratified
+
+- id: surface-shared-concept-before-implementation
+  rule: "When orientation reveals that two or more tasks in the decomposition will operate on the same runtime concept — a current position, a selection, a history, a running count — add an open question naming that concept, stating the conflict or ambiguity, and blocking all affected tasks. Do not decompose into tasks that will independently decide how a shared concept behaves."
+  condition: "When a capability description mentions multiple features (e.g. undo + filter, pagination + sort, bookmark + search) that imply a shared underlying concept the tasks will each need to read or mutate."
+  reason: "Tasks that independently decide how a shared runtime concept behaves produce implementations that are locally correct but globally inconsistent. The conflict only appears at runtime, where it is expensive to fix. Surfacing it as a blocked open question moves the cost to planning time, where it is cheap — one operator answer becomes context for every affected task."
+  status: proposed
 
 killed:
 ```
