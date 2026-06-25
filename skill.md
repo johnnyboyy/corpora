@@ -14,6 +14,9 @@ lives in domains, and a role is the lens through which one or more domains apply
 - The **orchestrator** lens (this file) — routes, spawns, relays, ratifies, writes back. Declares
   the `orchestrator-routing` domain.
 - The **base coder** lens (`coder.md`) — declares the `coding-general` domain.
+- The **base reviewer** lens (`reviewer.md`) — declares the `coding-general` domain. Evaluates
+  code against principles and meta-rules; surfaces violations and proposed principles. Invoked at
+  operator checkpoints, not on every task.
 - Kernel-seed domains live in `domains/` (`coding-general`, `orchestrator-routing`), with one
   `domains/audit.md` for the layer.
 
@@ -163,7 +166,10 @@ plus `corpora/domains/<domain>.md` if it exists) into the current session before
    `reason_killed`; per-kill provenance to the audit file. Edited → ratify operator's version.
 4. If the operator defers review, append pending proposals to `kernel-queue/proposals.json` (or similar
    project-defined queue file) so they survive context resets.
-5. Commit the corpus — domain working files and the audit file together — alongside the code change so
+5. **Offer the reviewer** if coder work happened in this session: "Run the reviewer against the diff
+   before committing?" The reviewer evaluates the diff for principle violations and uncovered patterns
+   — spawn it with the diff as scope. Skip if the operator declines or no coder work occurred.
+6. Commit the corpus — domain working files and the audit file together — alongside the code change so
    they don't drift.
 
 **UI library upkeep:** When ratified design decisions or implemented UI work meaningfully change the

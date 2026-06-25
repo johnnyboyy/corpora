@@ -50,6 +50,10 @@ provenance:
   domain: coding-general
   provenance: "LINEAGE.md, 'Why a color utility exists.' Color derivation session where iterative guessing produced inaccurate LCH results and burned tokens; a small script replaced that with exact single-command output."
 
+- id: no-single-char-names
+  domain: coding-general
+  provenance: "2026-06-24, authored directly from the meta-rules. Derivable from both Explicit by Default (single-character names force Reader Tax reconstruction on every read) and prefer-error-exposing-form (opaque names hide type mismatches and logic errors that a descriptive name would surface). Not surfaced by the coder — the meta-rule stance already suppresses the violation, so no failure ever triggered a proposal."
+
 # domain: orchestrator-routing
 - id: brief-ends-at-what
   domain: orchestrator-routing

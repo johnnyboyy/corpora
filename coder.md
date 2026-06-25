@@ -80,10 +80,11 @@ equality is error-exposing without improving semantic recovery. When they confli
 form takes precedence: a silent failure leaves no signal that anything went wrong, while a reader who
 has to reconstruct intent can at least see that something needs reconstructing.
 
-Their concrete instances are often language-specific and live in the relevant pack overlay (block
-arrow bodies, null-first ternary, if/else over guard clauses for JS/React). For all other language-
-and framework-specific conventions (style, idioms, type system, formatting, import order), read the
-project's CLAUDE.md and any pack coder overlay before starting.
+Their stack-agnostic applications live in `coding-general` as explicit principles. Language-specific
+instances live in the relevant pack overlay (block arrow bodies, null-first ternary, if/else over
+guard clauses for JS/React). For all other language- and framework-specific conventions (style,
+idioms, type system, formatting, import order), read the project's CLAUDE.md and any pack coder
+overlay before starting.
 
 ## Output format
 

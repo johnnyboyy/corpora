@@ -69,5 +69,17 @@ principles:
   reason: "LCH color relationships are not intuitive to reason about arithmetically. Guessing produces inaccurate results and burns many tokens iterating toward something correct. A small script does this exactly for near-zero token cost."
   status: ratified
 
+- id: scripts-over-hand-editing-structured-data
+  rule: "When generating or modifying structured data files at scale, write a script that produces the output rather than editing the files directly. The script is the artifact; the output file is its build product."
+  condition: "When a task involves adding, transforming, or regenerating structured data files with more than a handful of entries."
+  reason: "Hand-editing large structured files is token-expensive, error-prone, and produces an unreviewed intermediate state. A script is idempotent (safe to re-run), captures the generation logic for future modification, and is cheaper to correct than a partially-edited JSON file."
+  status: ratified
+
+- id: no-single-char-names
+  rule: "Never use single-character variable names. Name what the variable holds: `index` not `i`, `xCoord` not `x`, `error` not `e`. Exception: abbreviations whose meaning is fully determined by universal convention and carries no ambiguity (e.g. two-letter state codes)."
+  condition: "When naming any variable, parameter, loop counter, catch binding, or destructured value — in any language."
+  reason: "Single-character names force every reader to reconstruct what the variable holds from surrounding context — the Reader Tax on every read. The convention originated as a program-size constraint that no longer exists; the tradeoff that justified it is gone. Descriptive names also make bulk rename safe; a single-character name appears in unrelated contexts and cannot be safely replaced."
+  status: ratified
+
 killed:
 ```
