@@ -5,7 +5,7 @@ lens. Provenance, promotions, and per-kill audit detail live in `domains/audit.m
 loaded only at ratify/retrospective time. See `kernel.md`, "Storage: working vs audit."
 
 ```yaml
-last-retrospective: 2026-06-17
+last-retrospective: 2026-06-29
 
 principles:
 

@@ -43,6 +43,24 @@ provenance:
   domain: coding-js-react
   provenance: "2026-06-14, Blog project load-calculator, Issue 19. see-also wizard-output-consistent-regardless-of-path (wizards-flows) — the implementation and UX faces of one concern, now legibly linked across domains."
 
+- id: coordinated-setters-signal-reducer
+  domain: coding-js-react
+  kind: judgment
+  provenance: "2026-06-28, HiraganaQuiz refactor. useQuizQueue had 8 useState calls; submitAnswer fired 5 setters and the advance timer fired 6. These groups mapped cleanly to 'submit' and 'advance' action types. Recognizing the grouped setters as an unnamed state machine — not just a large hook — is the non-obvious judgment."
+  history:
+    - date: 2026-06-29
+      type: moved
+      reason: "Promoted from Blog project domain to web-frontend pack seed — condition makes no reference to Blog-specific structure; general React hook wisdom."
+
+- id: same-state-same-name
+  domain: coding-js-react
+  kind: judgment
+  provenance: "2026-06-28, HiraganaQuiz refactor. TileState 'resting' vs SpellTile 'idle' — same visual concept, two names. Decision to rename before extracting rather than casting or adding a translation layer. Renaming made SpellTile['state'] a structurally valid subset of TileState, eliminating buildSpellTileClass."
+  history:
+    - date: 2026-06-29
+      type: moved
+      reason: "Promoted from Blog project domain to web-frontend pack seed — general TypeScript/React structural wisdom, no Blog-specific framing."
+
 # ---- domain: css ----
 - id: mobile-fixed-bar-bottom-gap
   domain: css

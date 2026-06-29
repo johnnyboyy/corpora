@@ -117,7 +117,7 @@ provenance:
 
 - id: domain-assignment-at-ratify-gate
   domain: orchestrator-routing
-  provenance: "2026-06-22, corpus redesign. Domain-scoping moved corpus ownership off roles; the ratify gate became the point where a proposal is assigned a domain (or a new domain is born). New principle introduced with the redesign, not yet pressure-tested on a live ratify session — provisional."
+  provenance: "2026-06-22, corpus redesign. Domain-scoping moved corpus ownership off roles; the ratify gate became the point where a proposal is assigned a domain (or a new domain is born). Exercised in practice 2026-06-28 (HiraganaQuiz ratify session)."
 
 # domain: planning
 - id: task-describes-output-not-implementation

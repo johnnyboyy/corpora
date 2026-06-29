@@ -5,7 +5,7 @@ promotions, and per-kill audit detail live in `packs/web-frontend/domains/audit.
 ratify/retrospective time. See `kernel.md`, "Storage: working vs audit."
 
 ```yaml
-last-retrospective: 2026-06-18
+last-retrospective: 2026-06-29
 
 principles:
 
@@ -66,6 +66,16 @@ principles:
   rule: "When recording state for a deferred operation (undo, redo, queue, bookmark), store the item's stable identity (e.g. ID, slug), never its current position in a filtered, sorted, or paginated view."
   condition: "Any undo, redo, or queued action that references an item by how it was found rather than what it is."
   reason: "Position in a derived collection is only valid while the collection's filter/sort/pagination is unchanged. A stable ID remains correct across any view change; a position silently references a different item or crashes on out-of-bounds access with no warning."
+
+- id: coordinated-setters-signal-reducer
+  rule: "When a hook has 4+ state variables that consistently update together in the same handlers — where multiple setters always fire as a group — replace them with useReducer. Name the action types explicitly; they are the state machine's transitions."
+  condition: "When reviewing a hook's event handlers and finding that 3+ setters always fire together, especially when the groups represent named transitions (answer submitted, question advanced, item loaded)."
+  reason: "Scattered setters in a handler are a decomposed state machine — the transitions exist but aren't named. useReducer makes them explicit, consolidates mutation to one place, and lets a reader understand all valid state changes from a single function."
+
+- id: same-state-same-name
+  rule: "When two sibling types have states that produce the same visual output, unify the state vocabulary before extracting a shared renderer. A naming mismatch signals the same concept split across two types — rename first, then the shared function compiles without casting."
+  condition: "When two types have parallel state fields that map to identical visual output, differing only in the name of the base/default state."
+  reason: "Separate names for the same visual concept force either a translation layer or casts at the merge point. Renaming removes the impedance mismatch and makes the subset relationship structurally visible to TypeScript — the narrower type becomes assignable to the wider one without casting."
 
 killed:
 ```
