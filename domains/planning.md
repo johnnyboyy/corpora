@@ -69,31 +69,26 @@ principles:
   rule: "A task must be specific enough that the orchestrator can route it and a role can act on it without doing planning work of its own. If a task description requires the role to first decide what the task actually is, it is not yet a task."
   condition: "When decomposing a capability into tasks."
   reason: "The planner's job is to consume the ambiguity so roles do not have to. A task that delegates planning back to the role negates the benefit of the queue and makes loop-mode orchestration unreliable."
-  status: ratified
 
 - id: sequence-by-output-dependency
   rule: "Sequence tasks by what each task's output is required by, not by assumed role order. Two tasks that don't depend on each other's output are parallelizable regardless of which roles would handle them."
   condition: "When ordering tasks in the queue."
   reason: "Role order (UX before UI before coder) is a heuristic, not a law. It breaks when tasks within a capability don't align with that order. Output dependency is the correct sequencing signal — it holds regardless of who does the work."
-  status: ratified
 
 - id: open-questions-are-explicit
   rule: "A question the planner cannot resolve from available information must appear as an explicit open question in the queue, with the tasks it blocks listed. Do not make an assumption and proceed silently."
   condition: "When a decomposition decision hinges on information the planner does not have."
   reason: "Silent assumptions compound. An unresolved question that travels silently into a task produces a deliverable built on an unknown foundation. Making the question explicit lets the orchestrator surface it to the operator before work begins."
-  status: ratified
 
 - id: task-describes-output-not-implementation
   rule: "A task description states the observable output and its acceptance condition. It does not name files, functions, types, or data paths the role should touch."
   condition: "When writing or reviewing any task description in the queue."
   reason: "Naming implementation details couples the plan to a specific approach before the coder has seen the code. It narrows the solution space unnecessarily and makes the queue wrong the moment the code diverges from the assumption — without any signal that it has. The coder's job is to decide how; the planner's job is to decide what."
-  status: ratified
 
 - id: surface-shared-concept-before-implementation
   rule: "When orientation reveals that two or more tasks in the decomposition will operate on the same runtime concept — a current position, a selection, a history, a running count — add an open question naming that concept, stating the conflict or ambiguity, and blocking all affected tasks. Do not decompose into tasks that will independently decide how a shared concept behaves."
   condition: "When a capability description mentions multiple features (e.g. undo + filter, pagination + sort, bookmark + search) that imply a shared underlying concept the tasks will each need to read or mutate."
   reason: "Tasks that independently decide how a shared runtime concept behaves produce implementations that are locally correct but globally inconsistent. The conflict only appears at runtime, where it is expensive to fix. Surfacing it as a blocked open question moves the cost to planning time, where it is cheap — one operator answer becomes context for every affected task."
-  status: proposed
 
 killed:
 ```

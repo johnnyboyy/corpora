@@ -28,7 +28,6 @@ principle:
           #   it lets the principle be weighed against the present case rather than
           #   obeyed mechanically. A rule without its reason is dogma.
   provenance: # WHERE it came from. Date, task, context. For audit and trust.
-  status: # proposed | ratified. Only ratified principles guide work.
   see-also: # OPTIONAL. ids of related principles (same domain or another domain).
 ```
 
@@ -51,7 +50,7 @@ the working load is *selective* (only declared domains); audit metadata is one f
 because the audit load is *broad* (the orchestrator pulls the whole layer at once).
 
 - **Working file** (`domains/<domain>.md`) — one per domain. The active `principles:` with their
-  `id / rule / condition / reason / status / see-also`, plus the `killed:` log. This is the only
+  `id / rule / condition / reason / see-also`, plus the `killed:` log. This is the only
   part loaded when a role works, inline or spawned.
 - **Audit file** (`domains/audit.md`, one per layer — kernel-seed, each pack, and each project) —
   per-principle `provenance` keyed by `id` (each entry noting its `domain`), the `promoted:` block,
@@ -136,7 +135,7 @@ proposal is wrong — surface it (a fork candidate), do not force the fit.
 
 Every cross-boundary change is **propose → ratify → promote**, never write-directly.
 
-- A role proposes a principle (`status: proposed`) as part of its output. It cannot write a corpus.
+- A role proposes a principle as part of its output. It cannot write a corpus.
 - The operator (or a ratifying role acting under standing rules) reviews and ratifies or rejects.
 - **Rejections are kept** with their reason. The kill log is the highest-signal training data.
 - Structural changes (split a domain, fork a role, add an explorer, change a route) go through the
@@ -160,7 +159,6 @@ Ratified principle — append the working fields to the end of the target domain
   rule: "The guidance."
   condition: "When this applies."
   reason: "Why — the justification."
-  status: ratified
 ```
 
 The proposal that surfaced the principle carries its `provenance` (captured at proposal time, not

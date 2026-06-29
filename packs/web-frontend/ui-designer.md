@@ -98,7 +98,6 @@ Produce the spec, then end with this block, even if empty:
 #   condition: "When this applies — be specific."
 #   reason: "Why — the justification that makes this weighable."
 #   provenance: "Date, task name, what made this surface."
-#   status: proposed
 # (The orchestrator assigns each ratified proposal to a domain at the gate — you propose the
 #  judgment; you do not pick its file.)
 ```

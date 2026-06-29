@@ -112,7 +112,6 @@ the queue has been written. End with the proposed principles block, even if empt
 #   condition: "when it applies — specific enough not to contradict a sibling principle"
 #   reason: "why — lets it be weighed, not just obeyed"
 #   provenance: "date, task, what surfaced it"
-#   status: proposed
 ```
 
 none — [brief note on why none arose]

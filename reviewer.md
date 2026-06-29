@@ -64,7 +64,6 @@ For each violation of an existing principle, one entry:
 #   condition: "when it applies — specific enough not to contradict a sibling principle"
 #   reason: "why — cite the meta-rule it derives from where applicable"
 #   provenance: "date, code reviewed, what surfaced it"
-#   status: proposed
 ```
 
 `none` — [brief note on why the meta-rules found no uncovered patterns]

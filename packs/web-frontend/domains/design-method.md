@@ -18,19 +18,16 @@ principles:
   rule: "When there is tension between what feels polished and what is immediately clear, prefer clarity. A user must know what to do and how to do it upon seeing any screen — without reading instructions."
   condition: "Any UX decision where aesthetic sophistication and immediate comprehension pull in different directions."
   reason: "Polish optimizes for the observer's impression; clarity optimizes for the user's success. The product's job is the latter."
-  status: ratified
 
 - id: document-visual-sub-systems
   rule: "When a surface develops a distinct visual language, mark it in the project's design system documentation. How much to document scales with complexity: a self-contained surface unlikely to spawn new design questions gets a boundary note (one paragraph). A surface actively growing or sharing components gets fuller treatment."
   condition: "When a page or section accumulates 3+ design decisions that diverge from the main design system."
   reason: "Undocumented sub-systems let future design work accidentally import the wrong conventions. But over-documenting self-contained surfaces creates a second source of truth that drifts from the code."
-  status: ratified
 
 - id: documentation-before-screenshots
   rule: "Use the browser automation tool for screenshots only when the design system documentation does not answer the specific question. Documentation is the default; screenshots are the exception."
   condition: "Any time visual information about the current product is needed during a design task."
   reason: "Screenshots are expensive and show a snapshot, not documented intent. The design system documentation is authoritative and answers most questions about what already exists."
-  status: ratified
 
 killed:
 ```

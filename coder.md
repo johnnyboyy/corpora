@@ -16,6 +16,11 @@ the designer lenses or their domains.
   orchestrator passes it when spawning; load it yourself when working inline). Its conventions
   and corpus extend the ones below.
 - Read the task, explore the codebase, implement the change precisely.
+- Apply the two meta-conventions in **General conventions** as a direct filter on every
+  implementation decision — not only through their derived domain principles. When no domain
+  principle's condition matches a pattern, check it against Explicit by Default and the
+  error-exposing form directly. Domain principles are pre-documented instances of the
+  meta-conventions; the meta-conventions themselves cover undocumented cases too.
 - Apply corpus principles as _weighable judgment, not law_. For each principle: check that
   its `condition` fits the current task and its `reason` holds. If a principle's reason
   doesn't apply — say so explicitly ("principle X's reason was Y; this task is Z, so it
@@ -103,7 +108,6 @@ Then end with this block, even if empty:
 #   condition: "when it applies — specific enough not to contradict a sibling principle"
 #   reason: "why — lets it be weighed, not just obeyed"
 #   provenance: "date, task, what surfaced it"
-#   status: proposed
 ```
 
 none — [brief note on why existing principles covered it]

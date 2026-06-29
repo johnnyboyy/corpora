@@ -390,5 +390,4 @@ End your output with the standard proposed principles block:
 #   condition: "When this applies — be specific."
 #   reason: "Why — the justification that makes this weighable."
 #   provenance: "Bootstrap session, [date], [project name]."
-#   status: proposed
 ```
