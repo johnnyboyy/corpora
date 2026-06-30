@@ -149,27 +149,32 @@ plus `corpora/domains/<domain>.md` if it exists) into the current session before
    condition. Do not silently correct violations; surface them so the operator can decide whether to
    send the work back or accept a deviation. This pass is what catches principle violations that the
    role did not self-identify.
-2. Present proposed principles (rule, condition, reason, provenance). For each proposal, ask whether it
+2. **Check reading candidates.** Look for `reading/candidates.md` in the corpora skill (the repo this
+   file lives in). If it exists and has entries whose `domains` match any domain the current project
+   declares, surface them alongside session proposals — marked `[reading pipeline: <source URL>]` so
+   they're distinguishable from work-earned proposals. They go through the same ratify/kill decision;
+   ratified entries are removed from `candidates.md`, killed entries likewise.
+3. Present proposed principles (rule, condition, reason, provenance). For each proposal, ask whether it
    encodes a **judgment call** (a decision made under uncertainty where context and tradeoffs shaped the
    outcome) or a **knowledge item** (something derivable from documentation or training). The role knows
    this from the inside — surface the distinction; do not evaluate it. See `ratify-gate-judgment-vs-knowledge`.
    Ask: ratify / reject / edit.
-2. **Assign a domain.** For each ratified proposal, decide which domain it belongs to and write it there.
+4. **Assign a domain.** For each ratified proposal, decide which domain it belongs to and write it there.
    If no existing domain fits, create a new domain working file (`corpora/domains/<new>.md`, or a seed
    domain if it is general) and add it to the declarations of the roles that should load it. If a proposal
    spans two domains, surface that as a possible domain-boundary problem rather than fragmenting it. See
    `domain-assignment-at-ratify-gate`.
-3. **Write-back** per the format in `kernel.md`. Ratified → working fields (`rule`/`condition`/`reason`/
+5. **Write-back** per the format in `kernel.md`. Ratified → working fields (`rule`/`condition`/`reason`/
    `status`) to the end of `principles:` in the target domain working file; the proposal's `provenance`
    (with its `domain:`) to that layer's `domains/audit.md`. Rejected → append to the `killed:` log in the
    domain's working file with an `id`, a `kill_type` (`quality` | `container` | `attribution-noise`), and
    `reason_killed`; per-kill provenance to the audit file. Edited → ratify operator's version.
-4. If the operator defers review, append pending proposals to `kernel-queue/proposals.json` (or similar
+6. If the operator defers review, append pending proposals to `kernel-queue/proposals.json` (or similar
    project-defined queue file) so they survive context resets.
-5. **Offer the reviewer** if coder work happened in this session: "Run the reviewer against the diff
+7. **Offer the reviewer** if coder work happened in this session: "Run the reviewer against the diff
    before committing?" The reviewer evaluates the diff for principle violations and uncovered patterns
    — spawn it with the diff as scope. Skip if the operator declines or no coder work occurred.
-6. Commit the corpus — domain working files and the audit file together — alongside the code change so
+8. Commit the corpus — domain working files and the audit file together — alongside the code change so
    they don't drift.
 
 **UI library upkeep:** When ratified design decisions or implemented UI work meaningfully change the
