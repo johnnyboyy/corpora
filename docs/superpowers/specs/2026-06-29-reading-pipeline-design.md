@@ -17,7 +17,7 @@ corpus domain files (gap derivation)
         ↓ quality filter
   reading/queue.md
         ↓ (triggered by new entries, weeknights 2 AM PST)
-  reading agent → lens + declared domains, fresh context
+  reading agent (weeknights 2 AM PST) → lens + declared domains, fresh context
         ↓
   reading/candidates.md
         ↓
@@ -64,8 +64,9 @@ Each entry written to `queue.md` includes: source URL or reference, domain tag(s
 
 ## Reading agent
 
-Triggered when discovery adds entries to `queue.md`. Runs one source at a time in a fresh
-context — no shared state with the discovery agent or prior reading runs.
+Runs weeknights at 2 AM PST. Processes whatever entries are in `queue.md` at that time, one
+source at a time in a fresh context — no shared state with the discovery agent or prior reading
+runs. Exits cleanly if the queue is empty.
 
 Loads the lens declared for the tagged domain(s), fetches the source, reads through that lens.
 Extracted candidates are written to `reading/candidates.md` in the standard principle schema
