@@ -69,5 +69,10 @@ principles:
   condition: "When naming any variable, parameter, loop counter, catch binding, or destructured value — in any language."
   reason: "Single-character names force every reader to reconstruct what the variable holds from surrounding context — the Reader Tax on every read. The convention originated as a program-size constraint that no longer exists; the tradeoff that justified it is gone. Descriptive names also make bulk rename safe; a single-character name appears in unrelated contexts and cannot be safely replaced."
 
+- id: sibling-config-over-consumer-branch
+  rule: "When N siblings share the same shape — the same set of methods or properties, varying only in their values and logic — model them as an array of config records, each carrying its own logic as functions. The consumer maps over the array; it does not branch on index or type."
+  condition: "When a consumer has or would have a switch/if-chain over sibling cases (steps, sections, tabs), and each case's logic is self-contained."
+  reason: "A consumer switch grows linearly with siblings and must be updated in two places (the data and the branch) when a sibling is added or changed. A config record concentrates each sibling's identity and logic in one object; the consumer stays fixed. Adding a sibling is a single-site edit: append to the array."
+
 killed:
 ```

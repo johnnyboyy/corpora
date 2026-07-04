@@ -77,5 +77,45 @@ principles:
   condition: "When two types have parallel state fields that map to identical visual output, differing only in the name of the base/default state."
   reason: "Separate names for the same visual concept force either a translation layer or casts at the merge point. Renaming removes the impedance mismatch and makes the subset relationship structurally visible to TypeScript — the narrower type becomes assignable to the wider one without casting."
 
+- id: stable-ref-for-document-listeners
+  rule: "When a document-level event handler (visibilitychange, blur, beforeunload) must read current React state, shadow each reactive value with a ref updated on every render. The handler reads the ref, not the closure. Do not add the state to the effect's deps array as a workaround."
+  condition: "When a useEffect registers a document-level listener that needs to observe current React state — and re-registering on every state change is incorrect or undesirable."
+  reason: "React closures capture state at the time the effect ran. A document-level listener registered once sees stale state. Adding state to deps fixes the staleness but re-registers the listener on every change — often wrong for events like visibilitychange. A ref updated each render is always current without forcing re-registration."
+  see-also: timer-handles-in-refs-not-state
+
+- id: behavior-flags-in-refs
+  rule: "Ephemeral boolean flags that control behavior but don't affect rendering — mount guards, pending-write trackers, round-error flags, any 'did-X-happen-in-this-session' bit — belong in refs, not useState."
+  condition: "When adding a boolean flag whose only purpose is gating a side-effect or skipping an operation, and changing it should not trigger a re-render."
+  reason: "A flag in state causes a re-render when toggled and includes the flag in the dependency surface of any memo or callback that reads it. A ref has zero rendering cost and zero dep-cascade cost. The test: would the UI look different if this flag changed? If no, it belongs in a ref."
+  see-also: timer-handles-in-refs-not-state
+
+- id: extract-named-concern-into-custom-hook
+  rule: "When hook calls in a component manage a single named concern, extract them into
+    a custom hook named for that concern. The component body should read as a list of
+    named concerns, not a sequence of hook mechanics."
+  condition: "When a component body contains any hook call or group of related hook calls
+    whose purpose can be given a domain name (useOnOff, useInput, usePagination,
+    useDocumentTitle). Does NOT apply when hooks are genuinely unrelated concerns that
+    happen to sit near each other."
+  reason: "Inline hook calls interleave multiple concerns at the component level and
+    force the reader to reconstruct concern boundaries from proximity and naming alone.
+    A named custom hook makes each concern boundary structural and explicit. The hook
+    name replaces a comment; the component body becomes declarative."
+  see-also: coordinated-setters-signal-reducer
+
+- id: hook-returns-own-handlers
+  rule: "A custom hook that owns state should return the mutation functions (handlers,
+    dispatchers, setters) for that state as part of its return value. The consuming
+    component should not define event handlers for state it does not own."
+  condition: "When building or revisiting a custom hook that manages state and has
+    associated event handlers or mutation operations — including existing hooks that
+    currently return only state and leave handler definition to the consumer."
+  reason: "A hook that owns state but requires consumers to write handlers breaks
+    encapsulation: the consumer must understand internal state structure to mutate it
+    correctly. Returning handlers keeps mutation logic co-located with the state,
+    lets the implementation change without consumer edits, and makes the hook's
+    interface complete."
+
+
 killed:
 ```

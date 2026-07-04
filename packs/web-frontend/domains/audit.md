@@ -60,6 +60,12 @@ provenance:
     - date: 2026-06-29
       type: moved
       reason: "Promoted from Blog project domain to web-frontend pack seed — general TypeScript/React structural wisdom, no Blog-specific framing."
+- id: extract-named-concern-into-custom-hook
+  domain: coding-js-react
+  provenance: "2026-07-04, reading kyleshevlin.com/use-encapsulation/. Identified gap between coordinated-setters-signal-reducer (threshold-based) and the article's broader claim: the extraction signal is a nameable concern, not a setter count. Judgment call: extraction overhead vs. readability gain."
+- id: hook-returns-own-handlers
+  domain: coding-js-react
+  provenance: "2026-07-04, reading kyleshevlin.com/use-encapsulation/. Bundled-handler pattern shown in useOnOff and useInput examples — no existing principle covered it. Judgment call: complete hook interface vs. consumer flexibility."
 
 # ---- domain: css ----
 - id: mobile-fixed-bar-bottom-gap
