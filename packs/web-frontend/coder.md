@@ -1,9 +1,8 @@
 # Coder overlay — web-frontend pack
 
-This overlays the base coder lens (`coder.md`). Load it alongside the base for any project whose
-`corpora/config.md` declares `role-pack: web-frontend`. It adds JavaScript/TypeScript/React/CSS
-conventions and declares two stack-specific coding domains. The base coder's lens and its
-`coding-general` domain still apply in full — this only extends them.
+Overlays the base coder lens (`coder.md`) when `corpora/config.md` declares
+`role-pack: web-frontend`: adds JS/TS/React/CSS conventions and two stack-specific coding domains.
+The base lens and its `coding-general` domain still apply in full — this only extends them.
 
 ## Conventions (extend the base "General conventions")
 
@@ -28,11 +27,11 @@ read the project's CLAUDE.md before starting.
 
 ## domains
 
-This overlay adds these coding domains to the coder lens's declaration (each domain's pack-seed
-working file, then the same-named `corpora/domains/<domain>.md` when it exists):
+Added to the coder lens's declaration (load order per `kernel.md` — pack-seed working file, then
+`corpora/domains/<domain>.md` if it exists):
 
 - `coding-js-react` — `packs/web-frontend/domains/coding-js-react.md`. JS/TS/React code patterns.
 - `css` — `packs/web-frontend/domains/css.md`. CSS/Tailwind authoring and specificity.
 
-Provenance, promotions, and per-domain kill logs are reached only at ratify/retrospective time
-(`packs/web-frontend/domains/audit.md`); each domain's kill log lives in its working file.
+Audit metadata (`packs/web-frontend/domains/audit.md`) is reached only at ratify/retrospective
+time; each domain's kill log lives in its working file.

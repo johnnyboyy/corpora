@@ -1,8 +1,7 @@
 # Domain: orchestrator-routing
 
 Judgment about routing, spawning, relay, and the ratify gate. Declared by the **orchestrator**
-lens. Provenance, promotions, and per-kill audit detail live in `domains/audit.md` (this layer),
-loaded only at ratify/retrospective time. See `kernel.md`, "Storage: working vs audit."
+lens. Audit metadata lives in `domains/audit.md`, loaded only at ratify/retrospective time.
 
 ```yaml
 last-retrospective: 2026-06-29

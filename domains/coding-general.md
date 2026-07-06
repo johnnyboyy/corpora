@@ -1,8 +1,7 @@
 # Domain: coding-general
 
 Stack-agnostic coding judgment — applies in any language or framework. Declared by the **coder**
-lens (always). Provenance, promotions, and per-kill audit detail live in `domains/audit.md` (this
-layer), loaded only at ratify/retrospective time. See `kernel.md`, "Storage: working vs audit."
+lens (always). Audit metadata lives in `domains/audit.md`, loaded only at ratify/retrospective time.
 
 ```yaml
 last-retrospective: 2026-06-20

@@ -1,13 +1,11 @@
 # Domain: design-method (web-frontend pack)
 
 Design *process and discipline* — the clarity/polish priority and documentation rules. A
-**convergent** body of correctness guardrails. The anti-mean *stance* is deliberately **not** here:
-it is a generative stance, not a principle, and lives on the divergent UI designer lens (see
-`kernel.md`, "Generative stance"). Mixing it in here was the worked example of the stance hard line —
-a "resist the standard" instruction cannot share a domain with "prefer the clear/standard answer"
-rules. Cross-role — declared by both the **ui-designer** and **ux-designer** lenses. Provenance and
-per-kill audit detail live in `packs/web-frontend/domains/audit.md`, loaded only at
-ratify/retrospective time. See `kernel.md`.
+**convergent** body of correctness guardrails: the anti-mean *stance* is deliberately **not** here —
+it is a generative stance, not a principle, and lives on the divergent UI designer lens; mixing it
+in was the worked example of the stance hard line (see `kernel.md`, "Generative stance").
+Cross-role — declared by both the **ui-designer** and **ux-designer** lenses. Audit metadata lives
+in `packs/web-frontend/domains/audit.md`, loaded only at ratify/retrospective time.
 
 ```yaml
 last-retrospective: 2026-06-20

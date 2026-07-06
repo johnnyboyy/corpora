@@ -1,8 +1,7 @@
 # Domain: surfaces-elevation (web-frontend pack)
 
-Surfaces, floating elements, and how depth is signaled. Declared by the **ui-designer** lens.
-Provenance and per-kill audit detail live in `packs/web-frontend/domains/audit.md`, loaded only at
-ratify/retrospective time. See `kernel.md`, "Storage: working vs audit."
+Surfaces, floating elements, and how depth is signaled. Declared by the **ui-designer** lens. Audit
+metadata lives in `packs/web-frontend/domains/audit.md`, loaded only at ratify/retrospective time.
 
 ```yaml
 last-retrospective: 2026-06-20

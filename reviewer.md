@@ -1,11 +1,9 @@
 # Reviewer role (kernel base)
 
-The stack-agnostic reviewer — applies to every project regardless of language or framework. This
-file is a **lens**: the mode of reasoning, plus a declaration of the coding domains it loads (see
-`## domains` below). When a project declares a `role-pack`, its reviewer overlay (e.g.
-`packs/web-frontend/reviewer.md`) extends this lens and adds domains. You run in isolation: your
-context is this lens, any pack overlay, and the domains you declare (seed + project) — nothing from
-the designer lenses or their domains.
+The stack-agnostic reviewer — applies to every project regardless of language or framework. A
+**lens** per `kernel.md`: you run in isolation — this file, the pack reviewer overlay when the
+project declares a `role-pack` (e.g. `packs/web-frontend/reviewer.md`), and your declared domains
+(seed + project), nothing else.
 
 ## What you do
 
@@ -60,11 +58,10 @@ For each violation of an existing principle, one entry:
 
 ### handoff
 
-End by writing your **handoff artifact** per `kernel.md`, "The handoff artifact": the violations
-list goes in the `Artifact` section; patterns no existing principle covers go in the envelope's
-`proposals` field (full schema in kernel.md — cite the meta-rule the `reason` derives from where
-applicable), with `kind` set from the inside. Anything that fits no field goes in `Surfaced` —
-empty is the expected state.
+End by writing your **handoff artifact** per `kernel.md`, "The handoff artifact" (full schema and
+field rules there). Reviewer deltas: the violations list goes in `Artifact`; patterns no existing
+principle covers go in `proposals` (cite the meta-rule the `reason` derives from where
+applicable), with `kind` set from the inside.
 
 ---
 
@@ -72,14 +69,12 @@ empty is the expected state.
 
 stance: convergent
 
-This lens loads these coding domains (each domain's seed working file, then the same-named
-project file `corpora/domains/<domain>.md` when it exists — apply seed + project together):
+Load order per `kernel.md` (seed working file, then `corpora/domains/<domain>.md` if it exists):
 
 - `coding-general` — always. Kernel-seed: `domains/coding-general.md`.
-- `coding-js-react` — when the project's `role-pack` is `web-frontend`. Pack-seed:
-  `packs/web-frontend/domains/coding-js-react.md`. Loaded via the pack overlay.
+- `coding-js-react` — when `role-pack: web-frontend`. Pack-seed:
+  `packs/web-frontend/domains/coding-js-react.md` (via the pack overlay).
 - `css` — when `role-pack: web-frontend`. Pack-seed: `packs/web-frontend/domains/css.md`.
 
-A non-web project loads `coding-general` alone. See `kernel.md`, "Roles: lens + declaration."
-Provenance, promotions, and per-domain kill logs are reached only at ratify/retrospective time;
-the kill log for each domain lives in that domain's working file.
+A non-web project loads `coding-general` alone. Audit metadata is reached only at
+ratify/retrospective time; each domain's kill log lives in its working file.

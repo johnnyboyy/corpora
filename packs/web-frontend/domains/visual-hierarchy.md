@@ -1,8 +1,7 @@
 # Domain: visual-hierarchy (web-frontend pack)
 
-Emphasis, grouping, and legibility weight. Declared by the **ui-designer** lens. Provenance and
-per-kill audit detail live in `packs/web-frontend/domains/audit.md`, loaded only at
-ratify/retrospective time. See `kernel.md`, "Storage: working vs audit."
+Emphasis, grouping, and legibility weight. Declared by the **ui-designer** lens. Audit metadata
+lives in `packs/web-frontend/domains/audit.md`, loaded only at ratify/retrospective time.
 
 ```yaml
 last-retrospective: 2026-06-20

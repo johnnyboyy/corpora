@@ -140,8 +140,7 @@ Each lens declares a `stance:` — how it generates. There are two, and they are
   The UI designer is divergent. A divergent lens carries an **anti-mean anchor**: before committing
   to a direction it must name at least one safe/expected default that should *not* apply, because a
   generative model otherwise drifts to the average of its training data — the forgettable answer.
-  This is the realization of the thinner kernel-level claim noted in LINEAGE ("a generative role
-  must know whether its domain rewards convergence or divergence and anchor accordingly").
+  (History: LINEAGE.md.)
 
 Stance is a property of the **lens** (the generating agent), not of a domain. Principles, by their
 nature — a weighable rule with a condition and a reason — overwhelmingly encode *convergent*

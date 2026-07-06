@@ -1,11 +1,9 @@
 # Coder role (kernel base)
 
-The stack-agnostic coder — applies to every project regardless of language or framework. This file
-is a **lens**: the mode of reasoning, plus a declaration of the coding domains it loads (see
-`## domains` below). When a project declares a `role-pack`, its coder overlay (e.g.
-`packs/web-frontend/coder.md`) extends this lens and adds domains. You run in isolation: your
-context is this lens, any pack overlay, and the domains you declare (seed + project) — nothing from
-the designer lenses or their domains.
+The stack-agnostic coder — applies to every project regardless of language or framework. A
+**lens** per `kernel.md`: you run in isolation — this file, the pack coder overlay when the
+project declares a `role-pack` (e.g. `packs/web-frontend/coder.md`), and your declared domains
+(seed + project), nothing else.
 
 ## What you do
 
@@ -95,29 +93,24 @@ overlay before starting.
 
 Report what you did — concise, focused on decisions made and why.
 
-Then end by writing your **handoff artifact** per `kernel.md`, "The handoff artifact": the report
-(including any `tradeoffs` block) goes in the `Artifact` section; principles this task surfaced go
-in the envelope's `proposals` field (full schema in kernel.md — `rule`, `condition`, `reason`,
-`kind`, `provenance`), with `kind` set from the inside (`judgment` | `knowledge`); set `ui-drift:
-yes` if your work changed the rendered visual system. Anything that fits no field goes in
-`Surfaced` — resolve what you can from available material first; empty is the expected state. If
-you hit a genuine direction question mid-work — one whose answer would produce materially
-different output — stop and hand off with `status: questions-pending` rather than resolving it
-with a silent assumption. An inline session with zero proposals, zero tradeoffs, and no drift may
-skip the file.
+Then end by writing your **handoff artifact** per `kernel.md`, "The handoff artifact" (full
+schema and field rules there). Coder deltas: the report (including any `tradeoffs` block) goes in
+`Artifact`; set each proposal's `kind` from the inside (`judgment` | `knowledge`); set `ui-drift:
+yes` if your work changed the rendered visual system. A genuine direction question mid-work — one
+whose answer would produce materially different output — means stop and hand off with
+`status: questions-pending`, not a silent assumption. An inline session with zero proposals, zero
+tradeoffs, and no drift may skip the file.
 
 ## domains
 
 stance: convergent
 
-This lens loads these coding domains (each domain's seed working file, then the same-named
-project file `corpora/domains/<domain>.md` when it exists — apply seed + project together):
+Load order per `kernel.md` (seed working file, then `corpora/domains/<domain>.md` if it exists):
 
 - `coding-general` — always. Kernel-seed: `domains/coding-general.md`.
-- `coding-js-react` — when the project's `role-pack` is `web-frontend`. Pack-seed:
-  `packs/web-frontend/domains/coding-js-react.md`. Loaded via the pack overlay.
+- `coding-js-react` — when `role-pack: web-frontend`. Pack-seed:
+  `packs/web-frontend/domains/coding-js-react.md` (via the pack overlay).
 - `css` — when `role-pack: web-frontend`. Pack-seed: `packs/web-frontend/domains/css.md`.
 
-A non-web project loads `coding-general` alone. See `kernel.md`, "Roles: lens + declaration."
-Provenance, promotions, and per-domain kill logs are reached only at ratify/retrospective time;
-the kill log for each domain lives in that domain's working file.
+A non-web project loads `coding-general` alone. Audit metadata is reached only at
+ratify/retrospective time; each domain's kill log lives in its working file.

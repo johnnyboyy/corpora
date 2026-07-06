@@ -1,38 +1,29 @@
 ---
 name: corpora:bootstrap
-description: Bootstrap a UI library and tooling config for a new project. Run once before any feature design work begins. Can work from existing design documentation, brand guidelines, aesthetic references, or from scratch with operator guidance. Outputs corpora/config.md (the project tool surface), corpora/ui-library.md, and proposed design principles (ratified into the project's design domains under corpora/domains/). Text-only format — no screenshots, no image exports. See LINEAGE.md for why.
+description: Bootstrap a project's config and UI library. Run once, before any feature design work. Works from existing design documentation, brand guidelines, aesthetic references, or from scratch with operator guidance. Outputs corpora/config.md (project shape + tool surface), corpora/ui-library.md, and proposed design principles ratified into the project's design domains. Text-only — no screenshots or image exports (see LINEAGE.md for why).
 ---
 
 # Project Bootstrap
 
-Reference document for the orchestrator's bootstrap flow. The orchestrator reads this file when
-`corpora/config.md` is absent and runs the two phases itself — Phase 1 inline, Phase 2 by
-spawning the UI designer with the Phase 2 section as the task. This file is not a standalone
-skill; it is read and executed by the orchestrator.
+Reference for the orchestrator's bootstrap flow, run when `corpora/config.md` is absent — Phase 1
+inline, Phase 2 by spawning the UI designer with the Phase 2 section as the task. Not a standalone
+skill.
 
-Bootstrap has two phases:
+- **Phase 1 — always, run inline.** Detect the project's shape and tool surface; write
+  **`corpora/config.md`** (schema below: shape — language, framework, package manager, `has-ui`,
+  styling, `role-pack`; tool surface — browser automation, image generation, color utility, UI
+  library location, verification commands). This flips the project to "bootstrapped" and runs for
+  every project type.
+- **Phase 2 — only when `has-ui: yes`, spawned UI designer.** Bootstrap the design system:
+  **`corpora/ui-library.md`** (or the project's chosen path — the living design system reference)
+  plus **proposed design principles** distilled from the foundational decisions and surfaced in
+  the standard proposed-principles block; the orchestrator ratifies them into the project's design
+  domains (`corpora/domains/<domain>.md`), assigning each a domain at the gate. This is the UI
+  designer's foundational work — get it right and every subsequent designer session starts with
+  real constraints; get it wrong and every session invents in a vacuum.
 
-- **Phase 1 — Project shape and config (always, run inline by the orchestrator).** Detect the
-  project's shape and tool surface and write `corpora/config.md`. This is what flips the project
-  from "not bootstrapped" to "bootstrapped" for the roles, and it runs for every project
-  regardless of type.
-- **Phase 2 — UI library (only when `has-ui: yes`, run by spawning the UI designer).** Bootstrap
-  a design system. This is the UI designer's foundational work — get it right and every subsequent
-  designer session starts with real constraints; get it wrong and every session invents in a vacuum.
-  A project with no UI skips this phase entirely.
-
-The output of this session is:
-1. **`corpora/config.md`** — project shape (language, framework, package manager, `has-ui`, styling,
-   `role-pack`) plus the tool surface (browser automation, image generation, color utility, UI
-   library location, verification commands). **Always written.** Schema below.
-2. **`corpora/ui-library.md`** (or the project's chosen path) — the living design system reference.
-   *Phase 2 only.*
-3. **Proposed design principles** — distilled from the foundational design decisions and surfaced
-   in the standard proposed-principles block. The orchestrator ratifies them into the project's
-   design domains (`corpora/domains/<domain>.md`), assigning each a domain at the gate. *Phase 2 only.*
-
-The library and corpus are text-only. See LINEAGE.md in the `corpora` skill repo for why text
-outperforms design artifacts for this purpose.
+The library and corpus are text-only. See LINEAGE.md for why text outperforms design artifacts
+for this purpose.
 
 ---
 
@@ -255,13 +246,10 @@ where to find the canonical reference.
 
 ## The config file (`corpora/config.md`)
 
-This is the file the roles read to learn the project's shape and tool surface. Producing it is the
-part of bootstrap that the roles depend on most — without it, every role falls back to "not
-bootstrapped" and uses the kernel and standard tools only. It has two halves: **project shape**
-(detected in Phase 1, governs which roles and pack apply) and the **tool surface** (which
-project-specific tools exist and how to invoke them).
-
-For the tool surface, detect each capability rather than assuming it:
+The file every role reads to learn the project's shape and tool surface — without it the project
+is "not bootstrapped." Two halves: **project shape** (Phase 1; governs which roles and pack apply)
+and **tool surface** (which project-specific tools exist and how to invoke them). Detect each
+capability rather than assuming it:
 
 - **Browser automation** — is a browser automation tool available in this environment (a skill, an
   MCP server, a CLI)? Name it and how to invoke it. If none, write `none`.
@@ -331,9 +319,7 @@ status: none
 
 ### corpora/config.md
 
-Write the config file using the schema above. Detect, don't assume — a wrong `available` entry is
-worse than `none`, because a role will try to invoke a tool that isn't there. When unsure whether a
-tool exists, mark it `none` and note it as a follow-up rather than guessing an invocation.
+Write the config file using the schema above (detect, don't assume — see Phase 1).
 
 ### corpora/ui-library.md
 

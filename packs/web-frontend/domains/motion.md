@@ -1,8 +1,7 @@
 # Domain: motion (web-frontend pack)
 
-Animation and motion as signal. Declared by the **ui-designer** and **ux-designer** lenses.
-Provenance and per-kill audit detail live in `packs/web-frontend/domains/audit.md`, loaded only at
-ratify/retrospective time. See `kernel.md`, "Storage: working vs audit."
+Animation and motion as signal. Declared by the **ui-designer** and **ux-designer** lenses. Audit
+metadata lives in `packs/web-frontend/domains/audit.md`, loaded only at ratify/retrospective time.
 
 ```yaml
 last-retrospective: 2026-06-20

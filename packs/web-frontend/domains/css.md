@@ -1,8 +1,8 @@
 # Domain: css (web-frontend pack)
 
 CSS / Tailwind authoring and specificity. Declared by the coder lens when `role-pack: web-frontend`.
-Provenance, promotions, and per-kill audit detail live in `packs/web-frontend/domains/audit.md`,
-loaded only at ratify/retrospective time. See `kernel.md`, "Storage: working vs audit."
+Audit metadata lives in `packs/web-frontend/domains/audit.md`, loaded only at ratify/retrospective
+time.
 
 ```yaml
 last-retrospective: 2026-06-18

@@ -1,8 +1,8 @@
 # Domain: lists-selection (web-frontend pack)
 
 Lists, rows, and active/selected item treatment. Cross-role — declared by both the **ux-designer**
-and **ui-designer** lenses. Provenance and per-kill audit detail live in
-`packs/web-frontend/domains/audit.md`, loaded only at ratify/retrospective time. See `kernel.md`.
+and **ui-designer** lenses. Audit metadata lives in `packs/web-frontend/domains/audit.md`, loaded
+only at ratify/retrospective time.
 
 ```yaml
 last-retrospective: 2026-06-20

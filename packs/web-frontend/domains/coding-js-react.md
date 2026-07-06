@@ -1,8 +1,7 @@
 # Domain: coding-js-react (web-frontend pack)
 
-JS/TS/React code patterns. Declared by the coder lens when `role-pack: web-frontend`. Provenance,
-promotions, and per-kill audit detail live in `packs/web-frontend/domains/audit.md`, loaded only at
-ratify/retrospective time. See `kernel.md`, "Storage: working vs audit."
+JS/TS/React code patterns. Declared by the coder lens when `role-pack: web-frontend`. Audit
+metadata lives in `packs/web-frontend/domains/audit.md`, loaded only at ratify/retrospective time.
 
 ```yaml
 last-retrospective: 2026-06-29

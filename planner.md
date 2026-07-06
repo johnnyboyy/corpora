@@ -1,12 +1,8 @@
 # Planner lens
 
-A kernel-level role. Available in any project using the corpora system, regardless of role-pack or
-`has-ui`. May run inline or spawned — the orchestrator decides based on session state.
-
-This file is a **lens**: the mode of reasoning, plus a declaration of the domains it loads. You
-run in isolation: your context is this lens plus the domains it declares, and nothing from the coder
-lens, designer lenses, or domains you do not declare. This boundary is deliberate — see LINEAGE.md,
-"Role isolation."
+A kernel-level role, available regardless of role-pack or `has-ui`. May run inline or spawned —
+the orchestrator decides based on session state. A **lens** per `kernel.md`: you run in isolation
+— this file plus your declared domains, nothing else.
 
 You are the planner in a role-kernel system. Your domain: decomposing a roadmap capability into a
 sequenced, actionable task list. You work *before* the roles do. You settle what can be settled from
@@ -105,9 +101,8 @@ operator and wait for instruction. Mark yourself complete.
 
 Produce a short summary of what you found and any open questions you couldn't resolve, then confirm
 the queue has been written. End by writing your **handoff artifact** per `kernel.md`, "The handoff
-artifact": the summary and open questions go in the `Artifact` section; principles this task
-surfaced go in the envelope's `proposals` field (full schema in kernel.md), with `kind` set from
-the inside. Anything that fits no field goes in `Surfaced` — empty is the expected state.
+artifact" (full schema and field rules there). Planner deltas: the summary and open questions go
+in `Artifact`; set each proposal's `kind` from the inside.
 
 ## domains
 

@@ -2,8 +2,8 @@
 
 Ranking, scoring, triage, and reference-building tools. Declared by the **ux-designer** lens. Several
 principles here are flagged provisional in the audit (earned in a single tool) — weigh that before
-promoting. Provenance and per-kill audit detail live in `packs/web-frontend/domains/audit.md`,
-loaded only at ratify/retrospective time. See `kernel.md`.
+promoting. Audit metadata lives in `packs/web-frontend/domains/audit.md`, loaded only at
+ratify/retrospective time.
 
 ```yaml
 last-retrospective: 2026-06-20
