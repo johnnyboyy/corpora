@@ -144,10 +144,12 @@ the current session before starting.
 1. **Audit the output against existing principles.** Read the role's output against each ratified
    principle in the domains it declared; flag violations (output contradicts a rule under its
    stated condition) to the operator. Do not silently correct — the operator decides whether to
-   send back or accept the deviation. **As a byproduct, record what the pass observed** in the
-   layer's audit file: per audited principle, increment `fired` / `violated` / `idle`; update the
-   domain's `counters:` block; if the handoff carries `ui-drift: yes`, increment `library-drift`
-   (`kernel.md`, "Storage: working vs audit").
+   send back or accept the deviation. **Record what the pass observed via the script** — you
+   classify (fired / violated / idle per audited principle); the script counts and writes:
+   `python3 ~/.claude/skills/corpora/scripts/corpus.py record-gate --domain <d> --ratified N
+   --killed N --violations N [--ui-drift] --fired <ids> --violated <ids> --idle <ids>`.
+   Lint the handoff first: `corpus.py lint-handoff <file>`. Never update the counters block by
+   hand (`kernel.md`, "Storage: working vs audit").
 2. **Check reading candidates.** If `reading/candidates.md` in the corpora skill repo has entries
    whose `domains` match a domain this project declares, surface them alongside session proposals,
    marked `[reading pipeline: <source URL>]`. Same ratify/kill decision; ratified or killed
@@ -176,10 +178,11 @@ the current session before starting.
 7. **Offer the reviewer** if coder work happened this session: "Run the reviewer against the diff
    before committing?" Spawn it with the diff as scope (always spawned when the session holds the
    work under review — evaluator independence). Skip if declined or no coder work occurred.
-8. **Check triggers.** Against the updated counters, check the retrospective and library-sync
-   thresholds (`kernel.md`, "The retrospective") and suggest any that fire. Suggestions only.
+8. **Check triggers.** `record-gate` prints fired triggers automatically (or run `corpus.py
+   triggers`). Relay any that fire as suggestions to the operator. Suggestions only.
 9. Commit the corpus — domain working files and the audit file together — alongside the code
-   change so they don't drift.
+   change so they don't drift. Run `corpus.py verify` first; a discrepancy means a gate went
+   unrecorded — heal it with a retroactive `record-gate` before committing.
 
 **UI library upkeep:** `direction` filings update the library directly at the gate. Coder-side
 drift is mechanical: handoffs self-report `ui-drift`, the gate counts it, and the `library-drift`
@@ -198,7 +201,9 @@ gate, so exploration never triggers a sync.
 On `retrospective <domain>` (or `retrospective <role>`, covering its declared domains), surface
 domain-tension fork candidates, declaration drift, and convergence signals as proposals — never
 automatic. This is an **audit-mode load**: the relevant domain working files plus the layer
-`domains/audit.md`. See `kernel.md` for the signals.
+`domains/audit.md`. See `kernel.md` for the signals. When it completes, run
+`corpus.py retro-done --domain <d>` (resets counters, re-baselines tokens); after a UI-library
+sync, `corpus.py sync-done`.
 
 ---
 

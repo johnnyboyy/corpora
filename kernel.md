@@ -66,6 +66,9 @@ because the audit load is *broad* (the orchestrator pulls the whole layer at onc
       killed: 1
       gate-violations: 2           # violations flagged at ratify-gate audit passes
       working-file-tokens: 3100    # measured at the most recent gate
+      baseline-tokens: 2100        # measured at the last retrospective (growth reference)
+      principles-at-baseline: 12   # entry counts at the last retrospective — ground truth
+      kills-at-baseline: 4         #   for `verify` (ledger must reconcile with the files)
 
   efficacy:                        # per-principle, incremented at each gate's audit pass
     - id: some-principle
@@ -80,6 +83,20 @@ because the audit load is *broad* (the orchestrator pulls the whole layer at onc
   Efficacy counts must never enter a working file — a role that sees them will start writing
   principles that fire often instead of principles that are right. They are audit-layer signals,
   consumed only by the retrospective.
+
+  These blocks are **script-maintained**: `scripts/corpus.py` (in the skill repo) owns a
+  marker-delimited section of the project's audit file and does all counting, measuring, and
+  threshold math (`record-gate`, `measure`, `triggers`, `lint-handoff`, `retro-done`,
+  `sync-done`). The model supplies judgments as arguments — fired/violated/idle classification,
+  ratify counts — and never does the arithmetic or the YAML writing by hand. Bookkeeping done by
+  attention is bookkeeping that silently stops.
+
+  Completeness is enforced by **reconciliation**, not interception: `corpus.py verify` checks
+  that each working file's entry counts equal its baseline plus the gates recorded since — an
+  unrecorded gate (or any write that bypassed the gate) surfaces as a named discrepancy. A
+  project-level SessionStart hook (`scripts/session-start.sh`) runs `verify` at every session
+  start and announces the project as corpora-managed, so an omission at session end — where
+  attention is weakest — is caught at the next session start, where it is strongest.
 
 The `killed:` log lives in the working file because it is active guidance — it tells the role what
 has already been tried and rejected, prevents the same pattern from re-emerging, and opens new

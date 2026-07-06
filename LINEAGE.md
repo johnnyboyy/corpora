@@ -949,3 +949,51 @@ SkillOpt's opaque single-document optimization, which trades away exactly the in
 principle schema exists to provide. The falsifier for the loosened seam is named in the proposal:
 a rise in `attribution-noise` kills or misfiled proposals from stance-clean inline chains — which
 the new counters would surface — tightens the length threshold before the old seam returns.
+
+---
+
+## Bookkeeping moved to a script — and why this shipped an implementation, not a spec
+
+*Decided 2026-07-06, same day as the empirical-signal pass it hardens. Verify current state
+against `scripts/corpus.py`, `kernel.md` "Storage: working vs audit," and the gate steps in
+`skill.md`.*
+
+The counters and efficacy counts landed as instructions to the orchestrator — a model
+incrementing integers and rewriting YAML at gate time. The evaluation that same day named the
+flaw: the counters existed to replace fallible operator attention but were *maintained* by
+fallible orchestrator attention, in a system whose own lineage documents that models shortcut
+under context pressure. Bookkeeping done by attention is bookkeeping that silently stops — and a
+counter that silently stops is worse than no counter, because it looks like evidence.
+
+The fix drew the line at judgment vs arithmetic: the model classifies (fired/violated/idle,
+ratify decisions) and passes its judgments as arguments; `scripts/corpus.py` does all counting,
+token measurement, threshold evaluation, envelope linting, and writing, inside a
+marker-delimited block of the audit file it alone owns. This also picked up a schema refinement
+the thresholds forced: token *growth* needs a reference point, so `baseline-tokens` (measured at
+the last retrospective) joined the counters block.
+
+One precedent had to be consciously distinguished rather than followed. The color utility
+shipped as a *spec* in `bootstrap.md`, not an implementation — because its output was
+project-specific (Tailwind values vs CSS custom properties vs hex). The bookkeeping script is
+the opposite case: the counters schema is kernel-defined and identical in every project, so a
+reference implementation in the skill repo is correct and a per-project spec would just be N
+copies of the same code drifting apart. The rule of thumb the pair suggests: ship a spec when
+the *output* varies by project; ship an implementation when the *schema* is the kernel's.
+
+*Extended later the same day (2026-07-06): reconciliation over interception.* The script
+guaranteed the ledger was *accurate* but not *complete* — nothing forced `record-gate` to run,
+and in this system a silently stale counter is worse than none, because low activity reads as
+convergence: absence mimics the healthiest signal the retrospective knows. The considered fix —
+a Stop hook blocking session end until the gate was recorded — was rejected because it would
+put judgment ("did this session need a gate?") into the one component whose value is having
+none. The adopted fix exploits the corpus files being append-only ledgers themselves: `verify`
+counts entries per working file and requires them to equal baseline-plus-recorded, so an
+unrecorded gate — or any write bypassing the gate, including a hand-edit — surfaces as a named
+discrepancy. The check runs from a SessionStart hook rather than at session end, deliberately:
+session end is where discipline dies (fullest context), session start is where attention peaks
+— you can forget to record a gate, but you cannot start the next session without being told.
+The same hook announces the project as corpora-managed, closing a second gap: skill activation
+itself had been operator-remembered, so a coding session begun without `/corpora` loaded no
+lens and no domains. The hook cannot force the load, but it makes the instruction deterministic
+and present in every session's opening context. This is the system's first executable
+enforcement — the deterministic shell around the probabilistic core.
