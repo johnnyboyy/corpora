@@ -1,13 +1,13 @@
 ---
 name: corpora:bootstrap
-description: Bootstrap a project's config and UI library. Run once, before any feature design work. Works from existing design documentation, brand guidelines, aesthetic references, or from scratch with operator guidance. Outputs corpora/config.md (project shape + tool surface), corpora/ui-library.md, and proposed design principles ratified into the project's design domains. Text-only — no screenshots or image exports (see LINEAGE.md for why).
+description: Bootstrap a project's config, UI library, and UX library. Run once, before any feature design work. Works from existing design documentation, brand guidelines, aesthetic references, or from scratch with operator guidance. Outputs corpora/config.md (project shape + tool surface), corpora/ui-library.md, corpora/ux-library.md, and proposed design principles ratified into the project's design domains. Text-only — no screenshots or image exports (see LINEAGE.md for why).
 ---
 
 # Project Bootstrap
 
 Reference for the orchestrator's bootstrap flow, run when `corpora/config.md` is absent — Phase 1
-inline, Phase 2 by spawning the UI designer with the Phase 2 section as the task. Not a standalone
-skill.
+inline, Phase 2 by spawning the UI designer with the Phase 2 section as the task, Phase 3 by
+spawning the UX designer with the Phase 3 section. Not a standalone skill.
 
 - **Phase 1 — always, run inline.** Detect the project's shape and tool surface; write
   **`corpora/config.md`** (schema below: shape — language, framework, package manager, `has-ui`,
@@ -21,6 +21,10 @@ skill.
   domains (`corpora/domains/<domain>.md`), assigning each a domain at the gate. This is the UI
   designer's foundational work — get it right and every subsequent designer session starts with
   real constraints; get it wrong and every session invents in a vacuum.
+- **Phase 3 — only when `has-ui: yes`, spawned UX designer, after Phase 2.** Bootstrap the
+  experience reference: **`corpora/ux-library.md`** plus proposed principles/directions, same
+  gate. UI runs first deliberately — the divergent lens sets identity before the convergent lens
+  documents constraints (see LINEAGE.md, "UI/UX seam settled").
 
 The library and corpus are text-only. See LINEAGE.md for why text outperforms design artifacts
 for this purpose.
@@ -38,7 +42,7 @@ Determine, and ask the operator only for what you cannot infer:
 - **Package manager** — pnpm, npm, bun, uv, cargo, go, etc.
 - **`has-ui`** — does this project render a user interface a person looks at? A web app, an
   Electron app, a TUI → yes. A CLI that prints text, a library, a backend service → no. This
-  single field decides whether Phase 2 runs.
+  single field decides whether Phases 2 and 3 run.
 - **Styling approach** — tailwind, css-modules, vanilla-css, none, etc. (`none` is correct for
   non-UI projects.)
 - **`role-pack`** — which role pack the project's roles should overlay. A web/Electron UI on a
@@ -56,7 +60,7 @@ try to use something that isn't there. When unsure, write `none` and note it as 
 no design principles, no designer roles for this project. Note to the operator that design-phase
 roles are inactive and the project runs on the kernel (orchestrator + base coder).
 
-**If `has-ui: yes`, continue to Phase 2.**
+**If `has-ui: yes`, continue to Phases 2 and 3.**
 
 ---
 
@@ -340,8 +344,11 @@ future designer sessions can weigh them rather than re-derive them. You propose 
 orchestrator assigns each ratified principle to a design domain at the gate (e.g. a color decision
 to `color`, a documentation rule to `design-method`) and writes it to `corpora/domains/<domain>.md`.
 
-Aim for 5–10 principles. Do not encode every detail of the library — only the decisions
-that involve real tradeoffs and where the reason matters for future work.
+There is no target count — propose what the work genuinely surfaced, and none is a valid
+outcome when the library captured everything as direction. Most foundational choices are
+`kind: direction` (identity decisions; the gate files them into the library itself). A
+*principle* needs a real tradeoff whose reason will bind future weighing — do not dress a
+direction up as one to fill a quota, and do not encode every detail of the library.
 
 ---
 
@@ -362,10 +369,36 @@ transcribe the relevant values and add the sections the source document missed
 
 ---
 
+## Phase 3 — UX library (only when `has-ui: yes`, after Phase 2)
+
+You are now the UX designer bootstrapping the project's experience reference. The UI designer has
+already run — identity is set; your job is convergent documentation of how the product *works* as
+an experience, so future UX sessions weigh established patterns instead of re-deriving them.
+
+Write `corpora/ux-library.md` (or the path config names under `ux-library`) covering, as they
+exist in the project:
+
+- **Navigation model** — how users move between surfaces; what is global vs contextual
+- **Flow inventory** — the primary user journeys, each in a few lines: entry, steps, exit,
+  what state persists
+- **Interaction conventions** — selection, editing, confirmation, dismissal; where the project
+  asks vs acts
+- **State and feedback patterns** — loading, empty, error, success; how progress and failure
+  are communicated
+- **Recoverability conventions** — which actions are undoable, where recovery surfaces live
+
+Document what exists or was decided — from the codebase, the UI library's behavioral notes, and
+any operator-provided product documentation. Do not invent aspirational patterns; a greenfield
+project gets a short library that grows with the work. The same restraint as Phase 2 applies to
+proposals: no target count, most foundational choices are `kind: direction`.
+
+---
+
 ## Proposed principles output
 
-End by writing your **handoff artifact** per `kernel.md`, "The handoff artifact": the library
-goes in the `Artifact` section (set `ui-drift: yes` — bootstrap defines the visual system);
+Applies to Phases 2 and 3. End by writing your **handoff artifact** per `kernel.md`, "The handoff
+artifact": the library goes in the `Artifact` section (Phase 2 sets `ui-drift: yes` — it defines
+the rendered visual system; Phase 3 documents experience and does not);
 foundational design decisions go in the envelope's `proposals` field with `kind` set from the
 inside. Expect a mix: seed *principles* (weighable rules — `kind: judgment`) and *directions*
 (identity choices the gate files into the library itself rather than a domain — `kind:

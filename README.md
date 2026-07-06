@@ -37,14 +37,14 @@ For each domain a lens declares, both apply when the role runs — seed first, t
 - `kernel.md` — the schema, lens+declaration model, ratify gate, write-back format, two load modes, retrospective signals, and role lifecycle. Reference document.
 - `domains/` — kernel-seed domains: `coding-general.md`, `orchestrator-routing.md`, plus `audit.md` (provenance/promoted/kill detail for the layer, loaded only at ratify/retrospective time).
 - `packs/web-frontend/` — the web-frontend pack: lens overlays (`coder.md`, `reviewer.md`, `ux-designer.md`, `ui-designer.md`) and `domains/` (stack-specific coding + design domains, plus the layer `audit.md`). Loaded only when `role-pack: web-frontend`.
-- `bootstrap.md` — one-time project setup. Phase 1 detects project shape and writes `corpora/config.md`. Phase 2 (UI projects only) generates `corpora/ui-library.md` and proposes seed design principles.
+- `bootstrap.md` — one-time project setup. Phase 1 detects project shape and writes `corpora/config.md`. Phases 2 and 3 (UI projects only) generate `corpora/ui-library.md` (UI designer) then `corpora/ux-library.md` (UX designer) and propose seed design principles.
 - `LINEAGE.md` — intellectual history: why conventions became law, key kills, design decisions.
 - `reader-tax-and-the-model.md` — a living, multi-model assessment of whether Explicit by Default helps the model itself, not only the human reviewer.
 
 ## Using in a project
 
 1. Symlink or clone into `~/.claude/skills/corpora` to install as a Claude Code skill.
-2. Invoke `/corpora` on an unbootstrapped project. The orchestrator detects that `corpora/config.md` is absent and runs bootstrap automatically — Phase 1 inline (detects project shape, writes `corpora/config.md`), Phase 2 by spawning the UI designer if `has-ui: yes` (generates `corpora/ui-library.md` and proposes seed design principles).
+2. Invoke `/corpora` on an unbootstrapped project. The orchestrator detects that `corpora/config.md` is absent and runs bootstrap automatically — Phase 1 inline (detects project shape, writes `corpora/config.md`), then if `has-ui: yes`, Phase 2 spawns the UI designer (`corpora/ui-library.md`) and Phase 3 spawns the UX designer (`corpora/ux-library.md`), each proposing seed design principles.
 3. On any subsequent invocation, `/corpora` enters orchestrator mode. The orchestrator routes tasks, runs inline coder work, spawns designers when needed, and drives the ratify gate after any session that produces ratifiable decisions.
 4. `corpora/domains/<domain>.md` in the project holds project-specific principles. The orchestrator creates a domain file on first ratification into it, and assigns each proposal a domain at the gate.
 

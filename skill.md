@@ -58,7 +58,11 @@ is the only fallback; the lens files carry no other "if missing" logic:
 - **Phase 2 (spawned, only if `has-ui: yes`):** spawn the UI designer. Pass the Phase 2 section of
   `bootstrap.md` as the task, the full content of the `corpora/config.md` just written, and any
   operator-provided aesthetic references or brand documentation. Ratify its output
-  (`corpora/ui-library.md` and the project's seed design domains) as usual before role work.
+  (`corpora/ui-library.md` and the project's seed design domains) as usual.
+- **Phase 3 (spawned, only if `has-ui: yes`, after Phase 2):** spawn the UX designer with the
+  Phase 3 section of `bootstrap.md` as the task, plus config and the ratified UI library. Ratify
+  its output (`corpora/ux-library.md` + proposals) as usual before role work. UI before UX is
+  deliberate — divergent identity before convergent documentation.
   If `has-ui: no`, Phase 1 was the whole job.
 
 Before any role work, for each domain the lens declares, load the seed working file
