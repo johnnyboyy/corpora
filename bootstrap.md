@@ -394,6 +394,25 @@ proposals: no target count, most foundational choices are `kind: direction`.
 
 ---
 
+## Findings — bugs and gaps are not proposals
+
+Applies to Phases 2 and 3. Documenting an existing project will surface defects: treatments that
+contradict the system's own evident intent (three border radii where the system clearly wants
+one), states with no defined behavior, broken or missing affordances. These are **findings, not
+principles** — a defect observation is not earned judgment, and proposing it pollutes the
+handoff's `proposals` field with entries the gate can only kill.
+
+Route findings to the handoff's `Surfaced` section, one line each: what was observed, where, and
+why it reads as unintended rather than chosen. The orchestrator relays `Surfaced` verbatim; the
+operator triages — fix now, queue as coder work, or declare it intended (at which point it may
+become a direction).
+
+The library records the **intended** pattern, not the defect: where the dominant convention is
+clear, document that and note the deviation as a deviation. Documenting a bug as if it were a
+convention re-teaches it to every future session.
+
+---
+
 ## Proposed principles output
 
 Applies to Phases 2 and 3. End by writing your **handoff artifact** per `kernel.md`, "The handoff
