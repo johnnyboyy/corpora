@@ -56,7 +56,10 @@ because the audit load is *broad* (the orchestrator pulls the whole layer at onc
   per-principle `provenance` keyed by `id` (each entry noting its `domain`), the `promoted:` block,
   and per-kill audit metadata. Loaded only at ratify and retrospective time, by the orchestrator —
   never in a role's working context. The audit file also carries the layer's **counters** — the
-  mechanical signals that replace operator feel:
+  mechanical signals that replace operator feel. **Never write or edit these by hand, including
+  when creating a fresh audit file**: `scripts/corpus.py` alone creates them (`measure`) and
+  updates them (`record-gate`), inside a marker-delimited block it owns. Shown here for
+  reference only:
 
   ```yaml
   counters:
@@ -84,12 +87,12 @@ because the audit load is *broad* (the orchestrator pulls the whole layer at onc
   principles that fire often instead of principles that are right. They are audit-layer signals,
   consumed only by the retrospective.
 
-  These blocks are **script-maintained**: `scripts/corpus.py` (in the skill repo) owns a
-  marker-delimited section of the project's audit file and does all counting, measuring, and
-  threshold math (`record-gate`, `measure`, `triggers`, `lint-handoff`, `retro-done`,
-  `sync-done`). The model supplies judgments as arguments — fired/violated/idle classification,
-  ratify counts — and never does the arithmetic or the YAML writing by hand. Bookkeeping done by
-  attention is bookkeeping that silently stops.
+  The script (in the skill repo: `record-gate`, `measure`, `triggers`, `lint-handoff`,
+  `retro-done`, `sync-done`) does all counting, measuring, and threshold math. The model supplies
+  judgments as arguments — fired/violated/idle classification, ratify counts — and never does the
+  arithmetic or the YAML writing. Bookkeeping done by attention is bookkeeping that silently
+  stops. Hand-written provenance, promotions, and per-kill detail live in the same file, outside
+  the script's markers — that part of the audit file remains the model's to write.
 
   Completeness is enforced by **reconciliation**, not interception: `corpus.py verify` checks
   that each working file's entry counts equal its baseline plus the gates recorded since — an

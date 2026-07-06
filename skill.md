@@ -144,12 +144,12 @@ the current session before starting.
 1. **Audit the output against existing principles.** Read the role's output against each ratified
    principle in the domains it declared; flag violations (output contradicts a rule under its
    stated condition) to the operator. Do not silently correct — the operator decides whether to
-   send back or accept the deviation. **Record what the pass observed via the script** — you
-   classify (fired / violated / idle per audited principle); the script counts and writes:
-   `python3 ~/.claude/skills/corpora/scripts/corpus.py record-gate --domain <d> --ratified N
-   --killed N --violations N [--ui-drift] --fired <ids> --violated <ids> --idle <ids>`.
-   Lint the handoff first: `corpus.py lint-handoff <file>`. Never update the counters block by
-   hand (`kernel.md`, "Storage: working vs audit").
+   send back or accept the deviation. Classify each audited principle now (fired / violated /
+   idle); lint the handoff: `python3 ~/.claude/skills/corpora/scripts/corpus.py lint-handoff
+   <file>`. The counts are recorded by the script *after write-back* (step 5), once the ratify
+   numbers exist: `corpus.py record-gate --domain <d> --ratified N --killed N --violations N
+   [--ui-drift] --fired <ids> --violated <ids> --idle <ids>`. Never write the counters block by
+   hand — not even when creating a fresh audit file (`kernel.md`, "Storage: working vs audit").
 2. **Check reading candidates.** If `reading/candidates.md` in the corpora skill repo has entries
    whose `domains` match a domain this project declares, surface them alongside session proposals,
    marked `[reading pipeline: <source URL>]`. Same ratify/kill decision; ratified or killed

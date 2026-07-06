@@ -270,7 +270,14 @@ def cmd_record_gate(project: Project, args) -> None:
     if args.domain not in files:
         fail(f"unknown domain '{args.domain}' — have: {', '.join(files) or 'none'}")
     tokens = est_tokens(files[args.domain])
+    existed = any(c.get("domain") == args.domain for c in state["counters"])
     c = counter_for(state, args.domain, tokens, files[args.domain])
+    if not existed:
+        # First registration during a gate: the file already contains the entries
+        # this gate ratified/killed (write-back precedes record-gate), so exclude
+        # them from the baseline or verify would double-count them.
+        c["principles-at-baseline"] = max(0, c["principles-at-baseline"] - args.ratified)
+        c["kills-at-baseline"] = max(0, c["kills-at-baseline"] - args.killed)
     c["working-file-tokens"] = tokens
     c["ratified"] += args.ratified
     c["killed"] += args.killed
