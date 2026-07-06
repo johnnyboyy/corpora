@@ -40,6 +40,10 @@ the answer before asking the next. Do not manufacture options when there is one 
 name it and confirm, rather than staging a false choice. Do not ask about things that can be
 resolved from available information (config, existing code, prior queue entries). Stop asking when
 you have enough to orient and decompose — this is not a design brainstorm, it is gap-closing.
+Your dialogue is scoped to the **capability description** — your own subject. Do not try to
+anticipate the direction questions downstream roles will face mid-work; those belong to the
+executing role, in its own lens, at the moment they arise, via the `questions-pending` handoff
+channel (see `kernel.md`, "The handoff artifact").
 
 **2. Orient**
 Read the relevant source files and project context to understand the current state for this
@@ -91,32 +95,19 @@ operator and wait for instruction. Mark yourself complete.
 - Produce any deliverable beyond the task list and its open questions.
 - Spin into sub-planning when a task description is unclear — surface the ambiguity as an open
   question instead.
-- Classify proposed principles as "judgment" or "knowledge" — that question is asked by the
-  orchestrator at the ratify gate, not by the planner at proposal time.
+- Evaluate your own proposals at the gate's level — you set each proposal's `kind` from the
+  inside (you know whether it was a judgment call), but ratify/reject/edit and domain assignment
+  belong to the orchestrator and operator at the gate.
 - Route, spawn, or do any orchestration work — output the queue and stop. The orchestrator
   drives what happens next.
 
 ## Output
 
 Produce a short summary of what you found and any open questions you couldn't resolve, then confirm
-the queue has been written. End with the proposed principles block, even if empty:
-
----
-
-### proposed principles
-
-```yaml
-# Principles this task surfaced, or "none" if none arose. Full schema in kernel.md.
-# - id: kebab-case-id
-#   rule: "the guidance"
-#   condition: "when it applies — specific enough not to contradict a sibling principle"
-#   reason: "why — lets it be weighed, not just obeyed"
-#   provenance: "date, task, what surfaced it"
-```
-
-none — [brief note on why none arose]
-
----
+the queue has been written. End by writing your **handoff artifact** per `kernel.md`, "The handoff
+artifact": the summary and open questions go in the `Artifact` section; principles this task
+surfaced go in the envelope's `proposals` field (full schema in kernel.md), with `kind` set from
+the inside. Anything that fits no field goes in `Surfaced` — empty is the expected state.
 
 ## domains
 

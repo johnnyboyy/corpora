@@ -80,25 +80,15 @@ not what pixels look like.
 
 ## Output format
 
-Produce the spec, then end with this block, even if empty:
-
----
-
-### proposed principles
-
-```yaml
-# - id: kebab-case-identifier
-#   rule: "The guidance itself."
-#   condition: "When this applies — be specific."
-#   reason: "Why — the justification that makes this weighable."
-#   provenance: "Date, task name, what made this surface."
-# (The orchestrator assigns each ratified proposal to a domain at the gate — you propose the
-#  judgment; you do not pick its file.)
-```
-
-none — [brief note]
-
----
+Produce the spec, then end by writing your **handoff artifact** per `kernel.md`, "The handoff
+artifact": the spec goes in the `Artifact` section; principles this task surfaced go in the
+envelope's `proposals` field (full schema in kernel.md), with `kind` set from the inside —
+`judgment` for a weighable rule earned under uncertainty, `direction` for a project
+design-direction choice (an identity decision; the gate files those into the library, not a
+domain). The orchestrator assigns each ratified principle to a domain at the gate — you propose
+the judgment; you do not pick its file. Anything that fits no field goes in `Surfaced` — empty is
+the expected state. If you hit a genuine direction question mid-work, hand off with
+`status: questions-pending` rather than resolving it with a silent assumption.
 
 ## domains
 

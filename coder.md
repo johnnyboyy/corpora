@@ -95,24 +95,16 @@ overlay before starting.
 
 Report what you did — concise, focused on decisions made and why.
 
-Then end with this block, even if empty:
-
----
-
-### proposed principles
-
-```yaml
-# Principles this task surfaced, or "none" if existing ones covered it. Full schema in kernel.md.
-# - id: kebab-case-id
-#   rule: "the guidance"
-#   condition: "when it applies — specific enough not to contradict a sibling principle"
-#   reason: "why — lets it be weighed, not just obeyed"
-#   provenance: "date, task, what surfaced it"
-```
-
-none — [brief note on why existing principles covered it]
-
----
+Then end by writing your **handoff artifact** per `kernel.md`, "The handoff artifact": the report
+(including any `tradeoffs` block) goes in the `Artifact` section; principles this task surfaced go
+in the envelope's `proposals` field (full schema in kernel.md — `rule`, `condition`, `reason`,
+`kind`, `provenance`), with `kind` set from the inside (`judgment` | `knowledge`); set `ui-drift:
+yes` if your work changed the rendered visual system. Anything that fits no field goes in
+`Surfaced` — resolve what you can from available material first; empty is the expected state. If
+you hit a genuine direction question mid-work — one whose answer would produce materially
+different output — stop and hand off with `status: questions-pending` rather than resolving it
+with a silent assumption. An inline session with zero proposals, zero tradeoffs, and no drift may
+skip the file.
 
 ## domains
 

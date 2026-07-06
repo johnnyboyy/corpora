@@ -40,18 +40,32 @@ the role from lens + declared seed domains + same-named project domains. Whether
 **inline** (in this session) or **spawned** (in a fresh context) is a decision made at route time
 based on session state — see "Inline vs. spawn decision" below.
 
-## Role isolation (the hard seam)
+## Role isolation (the hard seam is stance)
 
 Each role runs in its own context: its lens file(s) plus the domains it declares, and **nothing
 from another role's lens or from a domain it does not declare**. The coder declares coding domains
-and never design domains, so design context cannot bleed into coding work. This boundary is
-deliberate and load-bearing — design decisions that sit in a shared transcript bleed into later
-coding iterations and cost tokens to filter back out.
+and never design domains — that declaration-level boundary is unconditional.
 
-This contamination finding governs the inline vs. spawn decision, but the rule is about **session
-state**, not fixed per-role assignments. A role may run inline or spawned; what cannot happen is a
-role running in a session that already holds incompatible context. See "Inline vs. spawn decision"
-below, and LINEAGE.md "Role isolation" and "Orchestrator as process."
+At the *session* level, what "contamination" meant historically is three distinct harms with
+different mechanisms and different guards:
+
+1. **Stance corruption** — a divergent lens's anti-mean anchor ("name the expected default and
+   refuse it") is directly toxic to convergent generation, and vice versa. The kernel already
+   holds that an agent cannot carry both stances at once; this extends that line to sessions.
+   Categorical — no judgment call.
+2. **Attribution degradation** — a backward pass over a long, multi-domain transcript mishandles
+   proposals (the attribution-noise kill class arose in an all-*convergent* inline session).
+   The mechanism is context length and domain mixture at gate time, not stance. Guarded by
+   per-transition handoffs and the length trigger, not by the stance seam.
+3. **Evaluator independence** — a reviewer running inline after the coder inherits the coder's
+   in-context rationalizations. Not contamination at all: a judge sharing a brain with the
+   defendant. Applies even in a short, all-convergent session.
+
+A residual fourth mechanism cuts across these: **provisional-content bleed** — an inline role
+following another sees not just the predecessor's artifact but its exploratory reasoning, and can
+resurrect a considered-and-rejected option. Handoffs supersede the exploration but cannot erase
+transcript from context; this is why spawn keeps the heavier weight. See "Inline vs. spawn
+decision" below, and LINEAGE.md "Role isolation" and "Orchestrator as process."
 
 ## Project shape and role packs
 
@@ -104,16 +118,28 @@ and flow questions. UI Designer owns visual questions. Coder owns implementation
 to be looped in on code questions; the coder surfaces them directly.
 
 **Inline vs. spawn decision:** The orchestrator does not assume a role lens — it routes to roles.
-For each task, decide how the role runs:
+Spawn is the default and the tiebreaker; inline is the earned exception, not the preference:
 
-- **Inline** (role runs in this session): the session carries no prior role context, or the session
-  already holds context from the *same* role continuing work. Loading a role's lens + domains into
-  the current session is fine when there is nothing incompatible already present.
-- **Spawned** (fresh context): the session already holds role context from a different role, and
-  that context crosses an incompatibility seam. The primary seam is design ↔ coding: a session
-  with design domain content must not run a coding role inline, and vice versa. Stance mismatch
-  is also a signal — do not run a divergent lens in a session carrying convergent role work.
-- When in doubt, spawn. Isolation overhead is recoverable; contamination is not.
+1. **Stance seam — hard, categorical.** A divergent lens never runs in a session holding
+   convergent role context, and no convergent role runs in a session holding divergent work.
+   The UI designer always spawns. No judgment call.
+2. **Inline chaining — permitted among convergent roles, under conditions.** A convergent chain
+   (e.g. planner → ux-designer → coder) may run inline when *all* of the following hold:
+   - each role transition writes its handoff artifact **at the transition** (see `kernel.md`,
+     "The handoff artifact"), so proposals are captured while that role's context is fresh — the
+     gate later reads envelopes, never a backward pass over accumulated transcript;
+   - the session has not crossed the length trigger (below);
+   - the incoming role is not evaluating work produced in this session (rule 3).
+3. **Evaluator independence — unconditional.** The reviewer spawns whenever the session holds the
+   work it would review. Same for any future evaluating role.
+4. **Length trigger — mechanical.** Past **80k total session context** (operator-tunable), the
+   next role spawns regardless of stance compatibility. Provisional-content bleed and attribution
+   risk compound with accumulated exploration even in a stance-clean session. The default is
+   derived from measured sessions: ~25k baseline load plus one-to-two role segments (~25–55k),
+   stopping early enough that the incoming role's segment and the gate's audit pass complete
+   before the ~140k zone where attribution degradation was observed. Loosen only when the
+   counters justify it.
+5. **When in doubt, spawn.** Isolation overhead is recoverable; contamination is not.
 
 The orchestrator session itself stays clean: it accumulates `orchestrator-routing` context and
 structured artifacts relayed from roles, but never raw role-domain content. Relaying a role's
@@ -137,10 +163,16 @@ plus `corpora/domains/<domain>.md` if it exists) into the current session before
    Never include another role's lens, or a domain that role does not declare, in the prompt — the seam is
    enforced here.
 3. Append the token usage summary request to every spawn (see `spawn-token-summary` in the
-   `orchestrator-routing` domain).
-4. Relay output to operator for approval before passing to the next role.
-5. If the coder surfaces a `### tradeoffs` block: relay to operator — implement as specced, accept
-   alternative, or send back to the relevant upstream role.
+   `orchestrator-routing` domain). The role ends by writing its handoff artifact (`kernel.md`,
+   "The handoff artifact") — include that instruction in every spawn.
+4. Relay the handoff artifact — the `Artifact` section for approval before passing to the next
+   role, and the `Surfaced` section to the operator **verbatim**, always.
+5. If `status: questions-pending`: relay the questions verbatim, collect the operator's answers,
+   and **continue the same agent** with them — continuation, not re-spawn, so the role's working
+   context survives the exchange. This is the direction-question channel: any role can ask, in
+   its own lens, at the moment the question is real.
+6. If the handoff carries a `tradeoffs` block in its artifact: relay to operator — implement as
+   specced, accept alternative, or send back to the relevant upstream role.
 
 **Ratify gate (after role work):**
 1. **Audit the output against existing principles.** Before presenting proposed principles, read the
@@ -148,38 +180,51 @@ plus `corpora/domains/<domain>.md` if it exists) into the current session before
    operator — a violation is a case where the output contradicts a principle's rule under its stated
    condition. Do not silently correct violations; surface them so the operator can decide whether to
    send the work back or accept a deviation. This pass is what catches principle violations that the
-   role did not self-identify.
+   role did not self-identify. **As a byproduct, record what the pass observed** in the layer's audit
+   file: per audited principle, increment `fired` / `violated` / `idle`; update the domain's
+   `counters:` block; if the handoff carries `ui-drift: yes`, increment `library-drift` (see
+   `kernel.md`, "Storage: working vs audit").
 2. **Check reading candidates.** Look for `reading/candidates.md` in the corpora skill (the repo this
    file lives in). If it exists and has entries whose `domains` match any domain the current project
    declares, surface them alongside session proposals — marked `[reading pipeline: <source URL>]` so
    they're distinguishable from work-earned proposals. They go through the same ratify/kill decision;
    ratified entries are removed from `candidates.md`, killed entries likewise.
-3. Present proposed principles (rule, condition, reason, provenance). For each proposal, ask whether it
-   encodes a **judgment call** (a decision made under uncertainty where context and tradeoffs shaped the
-   outcome) or a **knowledge item** (something derivable from documentation or training). The role knows
-   this from the inside — surface the distinction; do not evaluate it. See `ratify-gate-judgment-vs-knowledge`.
-   Ask: ratify / reject / edit.
-4. **Assign a domain.** For each ratified proposal, decide which domain it belongs to and write it there.
-   If no existing domain fits, create a new domain working file (`corpora/domains/<new>.md`, or a seed
-   domain if it is general) and add it to the declarations of the roles that should load it. If a proposal
-   spans two domains, surface that as a possible domain-boundary problem rather than fragmenting it. See
-   `domain-assignment-at-ratify-gate`.
+3. Present proposed principles from the handoff envelope's `proposals` field (rule, condition, reason,
+   provenance, kind). The `kind` was captured by the role at proposal time — surface it; do not
+   re-evaluate it. `judgment` = decision under uncertainty; `knowledge` = derivable from documentation
+   or training (see `ratify-gate-judgment-vs-knowledge`); `direction` = a project design-direction
+   choice, which takes the third route (next step). Ask: ratify / reject / edit.
+4. **Assign a home.** A `direction` proposal is filed into the project's `ui-library.md` (provenance
+   to the audit layer) — never into a domain, never killed, never a seed candidate (see `kernel.md`,
+   "The ratify gate"). For each ratified *principle*, decide which domain it belongs to and write it
+   there. If no existing domain fits, create a new domain working file (`corpora/domains/<new>.md`, or
+   a seed domain if it is general) and add it to the declarations of the roles that should load it. If
+   a proposal spans two domains, surface that as a possible domain-boundary problem rather than
+   fragmenting it. See `domain-assignment-at-ratify-gate`.
 5. **Write-back** per the format in `kernel.md`. Ratified → working fields (`rule`/`condition`/`reason`/
    `status`) to the end of `principles:` in the target domain working file; the proposal's `provenance`
    (with its `domain:`) to that layer's `domains/audit.md`. Rejected → append to the `killed:` log in the
    domain's working file with an `id`, a `kill_type` (`quality` | `container` | `attribution-noise`), and
    `reason_killed`; per-kill provenance to the audit file. Edited → ratify operator's version.
-6. If the operator defers review, append pending proposals to `kernel-queue/proposals.json` (or similar
-   project-defined queue file) so they survive context resets.
+6. If the operator defers review, the unratified handoff file *is* the queue — leave it in
+   `corpora/handoffs/`; it survives context resets, and a directory of lingering handoffs is a
+   visible backlog. Delete each handoff once its proposals are ratified/killed and written back.
 7. **Offer the reviewer** if coder work happened in this session: "Run the reviewer against the diff
    before committing?" The reviewer evaluates the diff for principle violations and uncovered patterns
-   — spawn it with the diff as scope. Skip if the operator declines or no coder work occurred.
-8. Commit the corpus — domain working files and the audit file together — alongside the code change so
+   — spawn it with the diff as scope (always spawned when the session holds the work under review —
+   evaluator independence). Skip if the operator declines or no coder work occurred.
+8. **Check triggers.** Against the updated counters, check the retrospective and library-sync
+   thresholds (`kernel.md`, "The retrospective") and suggest any that fire. Suggestions only — never
+   automatic.
+9. Commit the corpus — domain working files and the audit file together — alongside the code change so
    they don't drift.
 
-**UI library upkeep:** When ratified design decisions or implemented UI work meaningfully change the
-project's visual system, update the project's design system documentation as part of the same write-back
-step. A stale library silently re-teaches retired decisions.
+**UI library upkeep:** `direction` filings update the library directly at the gate. Coder-side drift
+is tracked mechanically: handoffs self-report `ui-drift`, the gate counts it, and the `library-drift`
+threshold (or any change that *retired* something the library still teaches) triggers a sync
+suggestion — documentation work against the rendered state, run by the UI designer, spawned. A stale
+library silently re-teaches retired decisions; experimental work that is discarded never reaches a
+gate, so exploration never triggers a sync.
 
 ## What you don't do
 

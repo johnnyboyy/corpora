@@ -86,25 +86,17 @@ Describe proportions in relative terms. No pixel values, no CSS class names, no 
 
 ## Output format
 
-Produce the spec, then end with this block, even if empty:
-
----
-
-### proposed principles
-
-```yaml
-# - id: kebab-case-identifier
-#   rule: "The guidance itself."
-#   condition: "When this applies — be specific."
-#   reason: "Why — the justification that makes this weighable."
-#   provenance: "Date, task name, what made this surface."
-# (The orchestrator assigns each ratified proposal to a domain at the gate — you propose the
-#  judgment; you do not pick its file.)
-```
-
-none — [brief note]
-
----
+Produce the spec, then end by writing your **handoff artifact** per `kernel.md`, "The handoff
+artifact": the spec goes in the `Artifact` section; set `ui-drift: yes` when your spec changes the
+rendered visual system. Proposals go in the envelope's `proposals` field (full schema in
+kernel.md), with `kind` set from the inside — and expect most of yours to be `direction`: a
+divergent lens's output is an identity *choice* (which treatment, which token, which pattern this
+project uses), not a weighable rule. The gate files directions into the UI library; only the rare
+genuinely-conditional judgment becomes a domain principle. The orchestrator assigns each ratified
+principle to a domain at the gate — you propose the judgment; you do not pick its file. Anything
+that fits no field goes in `Surfaced` — empty is the expected state. If you hit a genuine
+direction question mid-work, hand off with `status: questions-pending` rather than resolving it
+with a silent assumption.
 
 ## domains
 

@@ -378,16 +378,11 @@ transcribe the relevant values and add the sections the source document missed
 
 ## Proposed principles output
 
-End your output with the standard proposed principles block:
-
-```yaml
-# Foundational design decisions proposed as principles.
-# The orchestrator ratifies these into the project's design domains (corpora/domains/<domain>.md),
-# assigning each a domain at the gate, after operator review.
-#
-# - id: kebab-case-identifier
-#   rule: "The guidance."
-#   condition: "When this applies — be specific."
-#   reason: "Why — the justification that makes this weighable."
-#   provenance: "Bootstrap session, [date], [project name]."
-```
+End by writing your **handoff artifact** per `kernel.md`, "The handoff artifact": the library
+goes in the `Artifact` section (set `ui-drift: yes` — bootstrap defines the visual system);
+foundational design decisions go in the envelope's `proposals` field with `kind` set from the
+inside. Expect a mix: seed *principles* (weighable rules — `kind: judgment`) and *directions*
+(identity choices the gate files into the library itself rather than a domain — `kind:
+direction`). Provenance: `"Bootstrap session, [date], [project name]."` The orchestrator
+ratifies principles into the project's design domains (`corpora/domains/<domain>.md`), assigning
+each a domain at the gate, after operator review.

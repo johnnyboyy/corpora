@@ -838,3 +838,114 @@ principle is proposed in `planning`. None were ratified outright — one project
 domain corpus not having kept up with the failure modes that expanded scope introduces is
 where the gap lived. The principle additions are the corpus catching up, not a constraint on
 scope. Whether these principles hold across a second project is the condition for ratification.
+
+---
+
+## The empirical-signal pass — handoffs, counters, harvest, and stance as the seam
+
+*Decided 2026-07-05, executed 2026-07-06, pre-commit. Provoked by a comparison against two
+external systems: microsoft/SkillOpt (validation-gated skill-document optimization) and
+uditgoenka/autoresearch (bounded metric-loop iteration). The four `*-proposal.md` files at the
+repo root hold the reasoning at length; they follow the `redesign-proposal.md` convention and are
+removed once resolved. Verify current state against `kernel.md` and `skill.md`.*
+
+SkillOpt's thesis is a standing critique of this system: self-revision without an empirical gate
+does not reliably improve over its starting point. The ratify gate filters what *enters* the
+corpus; nothing measured what a principle did *after* it entered, and the decision of when to run
+a retrospective rested on the operator manually watching token counts. The pass adopted the
+critique's spirit under this system's constraint — judgment calls cannot be scored on a held-out
+benchmark, but one can *count* whether a principle ever does work, and let the still-human-gated
+retrospective act on counts instead of memory. Four changes landed together:
+
+**The handoff artifact.** A role's terminal output became a file with a fixed envelope: what the
+gate and relay mechanically consume (status, proposals with proposal-time provenance and a
+role-assigned `kind`, violations, `ui-drift`) plus a freeform artifact body. The relay rule
+("structured artifact, not raw transcript") had been an instruction the orchestrator interpreted;
+the file made it a mechanism. The operator's worry — that a rigid schema might suppress what it
+didn't anticipate — became the central design decision: a mandatory `Surfaced` section, relayed
+verbatim, so the schema can under-fit but cannot suppress; recurring traffic of one kind in
+`Surfaced` is itself the signal that the schema needs a field — evolution from accumulated
+tension, like domain boundaries. The 2026-06-23 lesson ("Open questions — from required to
+conditional") shaped its discipline: the section is always present but *expected empty*, never
+filled from weak material. The unratified handoff also subsumed the deferred-proposals queue —
+a lingering handoff file is a visible backlog. One prior decision was knowingly reversed: the
+2026-06-23 planner entry had made "classify judgment vs knowledge" gate-time work, forbidding
+roles from pre-classifying. The gate's own instruction had always admitted the tension — "the
+role knows this from the inside — surface the distinction; do not evaluate it" — and the envelope
+resolved it: the role *captures* `kind` at proposal time (when it knows), while evaluation and
+ratification stay at the gate. The 2026-06-23 prohibition was aimed at the planner doing the
+gate's job; the envelope keeps that boundary while moving the capture to where the knowledge is.
+
+**Counters and the retrospective trigger.** Per-domain counters (ratified / killed /
+gate-violations / working-file tokens since last retrospective) and per-principle efficacy counts
+(fired / violated / idle), recorded as a byproduct of the gate's existing audit pass, in the audit
+layer only. Thresholds *suggest* retrospectives; they never cap ratification — accumulation is
+deliberate, because meta-principles condense out of piled-up specific ones (Explicit by Default
+itself condensed that way). Co-firing clusters are meta-principle candidates detected from data
+rather than noticed by luck; idle-dominant principles become retirement candidates instead of
+invisible token cost. One hard line: efficacy counts never enter a working file, or roles would
+learn to write principles that fire often instead of principles that are right.
+
+**The `direction` route and mechanical library upkeep.** The gate had two exits — ratify into a
+domain, or kill — and the stance model predicts a third category it couldn't file: a divergent
+lens's output is an identity *choice*, not a weighable rule. The evidence was already in the
+FAMOUS audit log (the RecencyBadge kill: "Component specification, not a principle… Substance
+documented in UI library" — a sound direction processed as a failed principle, the library update
+done as a workaround inside a kill reason; the container-kill pattern one level up). `kind:
+direction` now files into the project's UI library at the gate. Coder-side library staleness got
+its mechanical signal the same way: handoffs self-report `ui-drift`, counted only at gate time —
+so experimental work that is discarded never reaches a gate and never triggers a sync, resolving
+the tension between keeping the library current and not disturbing exploratory sessions. The
+FAMOUS `design-queue.md` and Blog's pre-redesign `proposal-queue.md` were removed as subsumed.
+
+**Stance became the session seam.** "Contamination" had bundled three harms. Untangling them:
+(1) *stance corruption* — divergent anchoring is toxic to convergent generation and vice versa;
+categorical, and now the hard seam (the UI designer always spawns). (2) *attribution degradation*
+— the attribution-noise kill class arose in an all-*convergent* long session, so stance theory
+alone would have called that session clean; the guard is per-transition handoffs (the gate reads
+envelopes captured while each role's context was fresh, never a backward pass over accumulated
+transcript) plus a mechanical length trigger. (3) *evaluator independence* — the reviewer's spawn
+rule was never about contamination; a judge must not share a brain with the defendant. A residual
+fourth — provisional-content bleed, an inline role resurrecting a predecessor's
+considered-and-rejected option — is why spawn kept the heavier weight and "when in doubt, spawn"
+survived as tiebreaker. This completes the trajectory begun in "Orchestrator as process": that
+entry had already moved from per-role assignments to session-state routing but left "incompatible
+context" underspecified; stance is the rule it was reaching for. The practical loosening:
+convergent chains (planner → ux-designer → coder) became inline-eligible under the handoff and
+length conditions. The length trigger's initial value (80k total session context) was not guessed
+— it was derived 2026-07-06 from the transcript record of 91 FAMOUS and Blog sessions: baseline
+load measured ~24–28k, a single role segment ~20–30k (the two corpus-recorded work units agree),
+median session growth 59–106k beyond baseline, and sessions saturating at the ~166k compaction
+ceiling — the zone the attribution-noise kills came from. 80k stops chaining early enough that
+the incoming role's segment plus the gate's audit pass complete before that zone; roughly half of
+the measured sessions would have been forced to spawn mid-way, which is the intended
+conservatism. Verify the operative value against `skill.md` — this records only how the first
+number was chosen.
+
+**The engagement channel — the planner's flaw named.** The operator's real reason for preferring
+inline was never token economy: it was the ability to engage a role about direction mid-work,
+where a spawned role was fire-and-forget. The planner was the first attempt at this, and its flaw
+became nameable: it moved dialogue *before* the work into a *different lens*, so it could only ask
+decomposition-shaped questions, while the questions that matter arise inside the executing role's
+lens mid-work. The fix is a channel, not co-location: `status: questions-pending` — a spawned role
+stops, puts its direction questions in `Surfaced`, the orchestrator relays them verbatim, and the
+*same agent is continued* with the answers. This extends `route-questions-not-roles` from
+route-time to mid-work. The planner survives, rescoped to its own subject: gap-closing on the
+capability description.
+
+**Session harvest.** A third source for the reading pipeline: mining the project's own past
+transcripts for judgment exercised but never proposed (operator corrections, retry chains,
+reverts, ungated inline decisions), adapted from SkillOpt-Sleep's finding that correction chains
+are the highest-precision failure signal available without an evaluator. It passes the
+Laws-of-UX-kill test that bulk imports failed — harvested candidates are earned in real work, not
+imported knowledge — and dedupes against active principles *and* kill logs before emitting. With
+handoffs capturing proposals at the source, the harvester's steady state is backfill over the
+pre-handoff era; the harvester finding little is the system working.
+
+**What was deliberately not taken** from the comparison: autoresearch's thin-router token
+architecture (the working/audit split already solves that problem, with the added property that
+the orchestrator *feels* domain weight — see "Why the orchestrator inlines domain content"), and
+SkillOpt's opaque single-document optimization, which trades away exactly the inspectability the
+principle schema exists to provide. The falsifier for the loosened seam is named in the proposal:
+a rise in `attribution-noise` kills or misfiled proposals from stance-clean inline chains — which
+the new counters would surface — tightens the length threshold before the old seam returns.

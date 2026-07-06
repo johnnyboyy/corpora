@@ -55,7 +55,31 @@ because the audit load is *broad* (the orchestrator pulls the whole layer at onc
 - **Audit file** (`domains/audit.md`, one per layer — kernel-seed, each pack, and each project) —
   per-principle `provenance` keyed by `id` (each entry noting its `domain`), the `promoted:` block,
   and per-kill audit metadata. Loaded only at ratify and retrospective time, by the orchestrator —
-  never in a role's working context.
+  never in a role's working context. The audit file also carries the layer's **counters** — the
+  mechanical signals that replace operator feel:
+
+  ```yaml
+  counters:
+    - domain: coding-general
+      since: 2026-06-20            # last retrospective
+      ratified: 3                  # new principles since
+      killed: 1
+      gate-violations: 2           # violations flagged at ratify-gate audit passes
+      working-file-tokens: 3100    # measured at the most recent gate
+
+  efficacy:                        # per-principle, incremented at each gate's audit pass
+    - id: some-principle
+      fired: 4                     # was relevant and the output followed it
+      violated: 1                  # was relevant and the output contradicted it
+      idle: 9                      # domain was loaded, principle never relevant
+
+  library-drift:                   # project layer only, when has-ui: yes
+    since-last-sync: 2             # gates where a handoff carried ui-drift: yes
+  ```
+
+  Efficacy counts must never enter a working file — a role that sees them will start writing
+  principles that fire often instead of principles that are right. They are audit-layer signals,
+  consumed only by the retrospective.
 
 The `killed:` log lives in the working file because it is active guidance — it tells the role what
 has already been tried and rejected, prevents the same pattern from re-emerging, and opens new
@@ -97,9 +121,12 @@ adds a new role).
 
 Role isolation is enforced at this level: the coder declares coding domains and never design
 domains, so design context cannot bleed into coding work. Two *design* lenses sharing a design
-domain is allowed and intended — that is the point of domain-scoping. The seam that matters
-(design decisions contaminating later coding) is preserved because no coding lens declares a
-design domain. See LINEAGE.md, "Role isolation."
+domain is allowed and intended — that is the point of domain-scoping. The hard session seam is
+**stance** (a divergent lens never shares a session with convergent work — see `skill.md`,
+"Inline vs. spawn decision"); in a convergent inline chain, the working-load isolation guarantee
+holds per *role segment*, with the transition handoff as the segment boundary — each role's
+proposals and violations are captured while its context is fresh, so the gate never depends on a
+backward pass over accumulated multi-role transcript. See LINEAGE.md, "Role isolation."
 
 ### Generative stance
 
@@ -140,6 +167,11 @@ Every cross-boundary change is **propose → ratify → promote**, never write-d
 - **Rejections are kept** with their reason. The kill log is the highest-signal training data.
 - Structural changes (split a domain, fork a role, add an explorer, change a route) go through the
   same gate.
+- A proposal of `kind: direction` takes a **third route**: filed into the project's
+  `ui-library.md` (provenance to the audit layer as usual) — never ratified into a domain, never
+  killed, never a seed-promotion candidate. A direction is an identity decision, not a weighable
+  rule; it carries no condition/reason obligation, and the library is the project's identity
+  record. Processing a sound direction as a failed principle is a container-kill in new clothes.
 
 ### Domain assignment at the gate
 
@@ -226,6 +258,73 @@ Per-kill audit detail (`provenance`, `killed:` date) goes in the layer's audit f
 
 ---
 
+## The handoff artifact
+
+A role's terminal output is a **handoff artifact**: one file per role session, written by the role
+as its final act, at `corpora/handoffs/<date>-<role>-<slug>.md`. The orchestrator relays this file
+— never raw transcript — and the ratify gate reads proposals from its fields instead of parsing
+prose. The schema structures the *envelope* (what the gate and relay mechanically consume), not the
+*thinking*: the artifact body stays freeform in the lens's own form.
+
+```yaml
+---
+role: ux-designer            # which lens produced this
+status: complete             # complete | tradeoffs-pending | questions-pending | blocked
+domains-loaded: [ux-design, recoverability]
+proposals:                   # principle proposals, provenance attached at proposal time
+  - id: proposed-slug
+    rule: "..."
+    condition: "..."
+    reason: "..."
+    kind: judgment           # judgment | knowledge | direction
+    provenance: "date, task, context"
+violations-noted: []         # existing principles this work knowingly deviated from, with why
+ui-drift: no                 # yes | no — did this work change the rendered visual system
+                             #   (new component, changed treatment, retired pattern)
+token-usage: "..."           # per spawn-token-summary
+---
+
+## Artifact
+
+[The spec / audit / tradeoff block — freeform, in the lens's own form.]
+
+## Surfaced
+
+[Anything that fits no field above: a gap noticed, a domain tension, a tooling problem.
+Relayed to the operator verbatim. Expected empty most sessions — resolve what you can from
+available material first, and never manufacture content to fill it. The section header is
+always present; an empty section is a statement, a missing one is a schema violation.]
+```
+
+Field notes:
+
+- **`kind`** is captured when the role knows it from the inside, not reconstructed at the gate.
+  `judgment` = a decision made under uncertainty where context and tradeoffs shaped the outcome;
+  `knowledge` = derivable from documentation or training; `direction` = a project design-direction
+  choice — an identity decision, not a weighable rule. The stance model predicts `direction`: a
+  divergent lens's output is a choice, so most UI-designer proposals are direction, not principle.
+- **`status: questions-pending`** — the role hit a genuine direction question mid-work: it stops,
+  puts the questions in `Surfaced` (each with what has been established so far and what turns on
+  the answer), and the orchestrator relays them and *continues the same agent* with the operator's
+  answers — continuation, not re-spawn, so working context survives the exchange. Same bar as
+  gap-closing dialogue: only questions whose answers would produce materially different outputs.
+- **`ui-drift`** is the mechanical staleness signal for the project's UI library, self-reported
+  while the role's context is fresh. It is *counted at the ratify gate* (see the `library-drift`
+  counter below), so experimental work that is discarded never reaches a gate and never triggers
+  a library sync.
+- **`Surfaced`** is the schema's escape valve: the envelope can under-fit but cannot suppress.
+  Recurring traffic of the same *kind* in `Surfaced` is a retrospective signal that the schema
+  needs a field — schema evolution from accumulated tension, through the gate, never speculative.
+
+Lifecycle: handoff files are working state, not corpus. Once the gate has ratified, killed, or
+filed each proposal and written back, the file is deleted; the audit layer holds the durable
+record. An unratified handoff file *is* the deferred-proposal queue — a directory of lingering
+handoffs is a visible backlog. Inline sessions producing zero proposals, zero tradeoffs, and no
+drift may skip the file; the session-harvest pipeline is the backstop for what that exemption
+misses.
+
+---
+
 ## Project corpora
 
 In any project using this system, project-specific accumulated judgment lives under
@@ -277,6 +376,26 @@ against contamination — is the working context holding domains from another mo
 **Anti-overfitting (any domain whose principles were earned in a single project shape):** surface
 which ratified principles should stay provisional — weighable, not promoted — until tested against
 another shape. A principle pressure-tested in only one climate is a promotion risk, not a default.
+Sharpened by efficacy counts: a provisional principle with real `fired` counts under a *second*
+project shape has earned its promotion case; one that has only ever fired in its birth project
+stays provisional.
+
+**Triggers (mechanical, checked by the orchestrator at every ratify gate; always a suggestion,
+never automatic):** suggest `retrospective <domain>` when, since the last one, `ratified ≥ 6`, or
+`working-file-tokens` grew by ≥ 50%, or `gate-violations ≥ 3`. Suggest a **UI-library sync** when
+`library-drift.since-last-sync ≥ 3`, or immediately when a drifting change *retired* something the
+library still teaches — a stale-but-wrong library is worse than an incomplete one. Thresholds are
+operator-tunable and deliberately coarse: the trigger replaces "am I watching carefully enough,"
+not the retrospective's judgment. These are *triggers, not caps* — accumulation is the point; the
+bet is that meta-principles condense out of accumulated specific ones, and a fired trigger means
+"there is enough new material that condensation is worth attempting."
+
+**Efficacy readings (inputs to the signals above):** `idle` dominant across many gates →
+retirement candidate, or the condition is scoped to situations the project never produces.
+`violated` recurring → the principle is load-bearing (it keeps catching real drift) *or* badly
+conditioned — the counts cannot distinguish these; the retrospective can, which is why counts feed
+the retrospective instead of acting alone. A cluster that always `fired` together → meta-principle
+candidate: co-firing is the empirical trace of a shared root justification.
 
 Each domain working file carries `last-retrospective: <date>` at the top to make convergence measurable.
 

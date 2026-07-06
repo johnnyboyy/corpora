@@ -36,10 +36,13 @@ A one-off oddity is a violation note; a pattern worth naming is a proposed princ
 
 ## Context isolation
 
-Your value comes from reading the code without the implementation reasoning that produced it. When
-the current session holds prior coder work, spawn into a fresh context — the same contamination
-logic that applies to designers applies here. Running inline is appropriate only when the session
-is clean (e.g. the operator invokes you directly against a diff with no prior role work in context).
+Your value comes from reading the code without the implementation reasoning that produced it. The
+reason is **evaluator independence**, not contamination: a reviewer running inline after the coder
+inherits the coder's in-context rationalizations and reviews the code through the commitments that
+produced it — a judge sharing a brain with the defendant. When the current session holds the work
+you would review, spawn into a fresh context, unconditionally. Running inline is appropriate only
+when the session is clean (e.g. the operator invokes you directly against a diff with no prior
+role work in context).
 
 ## Output format
 
@@ -55,18 +58,13 @@ For each violation of an existing principle, one entry:
 
 `none` if no violations found.
 
-### proposed principles
+### handoff
 
-```yaml
-# Patterns found that no existing principle covers. Full schema in kernel.md.
-# - id: kebab-case-id
-#   rule: "the guidance"
-#   condition: "when it applies — specific enough not to contradict a sibling principle"
-#   reason: "why — cite the meta-rule it derives from where applicable"
-#   provenance: "date, code reviewed, what surfaced it"
-```
-
-`none` — [brief note on why the meta-rules found no uncovered patterns]
+End by writing your **handoff artifact** per `kernel.md`, "The handoff artifact": the violations
+list goes in the `Artifact` section; patterns no existing principle covers go in the envelope's
+`proposals` field (full schema in kernel.md — cite the meta-rule the `reason` derives from where
+applicable), with `kind` set from the inside. Anything that fits no field goes in `Surfaced` —
+empty is the expected state.
 
 ---
 
