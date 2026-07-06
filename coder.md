@@ -85,9 +85,13 @@ has to reconstruct intent can at least see that something needs reconstructing.
 
 Their stack-agnostic applications live in `coding-general` as explicit principles. Language-specific
 instances live in the relevant pack overlay (block arrow bodies, null-first ternary, if/else over
-guard clauses for JS/React). For all other language- and framework-specific conventions (style,
-idioms, type system, formatting, import order), read the project's CLAUDE.md and any pack coder
-overlay before starting.
+guard clauses for JS/React). One standing convention applies in any language:
+
+- **No peer re-exports** — import from the authoritative module, not a peer that happens to re-export
+  it. Barrel index files that explicitly aggregate a public surface are the only exception.
+
+For all other language- and framework-specific conventions (style, idioms, type system, formatting,
+import order), read the project's CLAUDE.md and any pack coder overlay before starting.
 
 ## Output format
 

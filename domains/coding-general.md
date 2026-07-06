@@ -73,5 +73,10 @@ principles:
   condition: "When a consumer has or would have a switch/if-chain over sibling cases (steps, sections, tabs), and each case's logic is self-contained."
   reason: "A consumer switch grows linearly with siblings and must be updated in two places (the data and the branch) when a sibling is added or changed. A config record concentrates each sibling's identity and logic in one object; the consumer stays fixed. Adding a sibling is a single-site edit: append to the array."
 
+- id: structural-examination-at-working-checkpoint
+  rule: "Before committing a working implementation, do a one-pass structural examination. Look for: (1) implicit coupling via string selectors or attribute names used as DOM contracts, (2) thin wrappers whose only job is bundling two things with no identity of their own, (3) logic blocks with a clear purpose but no explicit name — candidates for extraction to a named hook or function, (4) emergent groupings — types, functions, and hooks that belong together but ended up separated during implementation."
+  condition: "After any multi-file or multi-component implementation reaches a working state (feature correct, typecheck and lint pass) but before creating the commit."
+  reason: "Running code reveals structural seams that planning cannot predict. The implementation session surfaces what talks to what and via what contract. Examining before commit costs minutes; the same issues discovered later cost full context reconstruction. Thin wrappers and implicit string contracts are especially invisible during planning — they emerge from solving the problem, not from designing the solution."
+
 killed:
 ```

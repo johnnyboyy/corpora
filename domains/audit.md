@@ -54,6 +54,11 @@ provenance:
   domain: coding-general
   provenance: "2026-06-24, authored directly from the meta-rules. Derivable from both Explicit by Default (single-character names force Reader Tax reconstruction on every read) and prefer-error-exposing-form (opaque names hide type mismatches and logic errors that a descriptive name would surface). Not surfaced by the coder — the meta-rule stance already suppresses the violation, so no failure ever triggered a proposal."
 
+- id: structural-examination-at-working-checkpoint
+  domain: coding-general
+  kind: judgment
+  provenance: "Promoted from FAMOUS project domain 2026-07-06. Surfaced 2026-07-05, FAMOUS lens system refactoring session: after implementing view transitions + scroll restoration + typed ref registry, the examination pass surfaced the thin useScrollLensRef wrapper, an anonymous scroll-restoration useLayoutEffect, string-selector coupling, and the emergent LensRowEntry grouping. Promoted from FAMOUS to seed — condition makes no reference to FAMOUS-specific structure."
+
 # domain: orchestrator-routing
 - id: brief-ends-at-what
   domain: orchestrator-routing
@@ -127,6 +132,11 @@ provenance:
 promoted:
 
 # domain: coding-general
+- id: no-re-export-from-peer-module
+  domain: coding-general
+  promoted_to: coder lens — "General conventions" section (one-liner convention bullet)
+  provenance: "Promoted 2026-07-06 from both Blog and FAMOUS project coding-general domains (Blog: 2026-06-28, hiragana quiz reviewer; FAMOUS: 2026-07-01, cross-project review). Two-project exposure via cross-project review. Promoted directly to lens convention — rule is near-unconditional (barrel exception is short enough to state inline) and needs no condition-weighing."
+
 - id: explicit-by-default
   domain: coding-general
   promoted_to: coder lens — "General conventions" section

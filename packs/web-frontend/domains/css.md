@@ -9,11 +9,6 @@ last-retrospective: 2026-06-18
 
 principles:
 
-- id: mobile-fixed-bar-bottom-gap
-  rule: "Set `bottom: -1px` (not `bottom: 0`) on a mobile fixed bottom bar to prevent a subpixel gap at the bottom of the viewport on some devices."
-  condition: "When positioning a fixed bar at the bottom of the viewport on mobile."
-  reason: "Subpixel rendering on some devices leaves a 1–2px sliver between bottom: 0 and the screen edge. Overlapping by 1px eliminates it without visible effect."
-
 - id: imports-before-tailwind-directives
   rule: "When splitting a Tailwind CSS entry file into multiple files imported via @import, put the @import statements before the @tailwind directives."
   condition: "When restructuring Tailwind CSS into multiple files via @import."
@@ -24,10 +19,15 @@ principles:
   condition: "When migrating literal CSS values to tokens during a token-introduction refactor."
   reason: "A token for a single consumer is a rename with extra indirection — the value's meaning is clearer inline next to its only use. Token sprawl makes the token file harder to skim."
 
-- id: table-row-color-override
-  rule: "To allow row-level text color overrides inside a scoped table, set the base color on the scope's thead (via inheritance) rather than directly on th. A direct `th` selector wins over anything placed on a `<tr>`, but an inherited color from `thead` loses to a class on `<tr>`."
-  condition: "When a table scope needs group-level text color overrides on specific header rows."
-  reason: "CSS specificity: a direct element selector (`th`) outranks an inherited value from a parent class, so `className` on a `<tr>` can't win. Moving the default to `thead` keeps it as inheritance, which any descendant class can override."
-
 killed:
+
+- id: mobile-fixed-bar-bottom-gap
+  rule: "Set `bottom: -1px` on a mobile fixed bottom bar to prevent a subpixel gap at the bottom of the viewport on some devices."
+  kill_type: knowledge
+  reason_killed: "CSS browser rendering behavior — a lookup fact, not a judgment call. A coder hits this once via testing, searches it, finds the fix. No project-specific context encoded."
+
+- id: table-row-color-override
+  rule: "To allow row-level text color overrides inside a scoped table, set the base color on the scope's thead (via inheritance) rather than directly on th."
+  kill_type: knowledge
+  reason_killed: "CSS specificity: inherited color loses to a direct element selector. Derivable from the CSS spec. Same class as preserve-3d-on-every-ancestor — a spec fact, not a judgment call."
 ```

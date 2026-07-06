@@ -66,6 +66,41 @@ provenance:
 - id: hook-returns-own-handlers
   domain: coding-js-react
   provenance: "2026-07-04, reading kyleshevlin.com/use-encapsulation/. Bundled-handler pattern shown in useOnOff and useInput examples — no existing principle covered it. Judgment call: complete hook interface vs. consumer flexibility."
+  history:
+    - date: 2026-07-06
+      type: merged
+      reason: "Merged with extract-named-concern-into-custom-hook into custom-hook-owns-its-concern. Extraction and interface completeness are co-decisions."
+
+- id: extract-named-concern-into-custom-hook
+  domain: coding-js-react
+  provenance: "2026-07-04, reading kyleshevlin.com/use-encapsulation/. Identified gap between coordinated-setters-signal-reducer (threshold-based) and the article's broader claim: the extraction signal is a nameable concern, not a setter count. Judgment call: extraction overhead vs. readability gain."
+  history:
+    - date: 2026-07-06
+      type: merged
+      reason: "Merged with hook-returns-own-handlers into custom-hook-owns-its-concern. See that entry."
+
+- id: hook-callsite-legibility
+  domain: coding-js-react
+  kind: judgment
+  provenance: "2026-07-06, retrospective consolidation. Merged from hook-params-named-for-hook-concern (2026-06-15, Blog useHistoryState) and hook-options-object-for-named-args (same session). Both addressed hook callsite legibility and always co-fired. Judgment: naming params for the hook's concern and wrapping ambiguous primitives in an options object are two expressions of the same rule."
+
+- id: custom-hook-owns-its-concern
+  domain: coding-js-react
+  kind: judgment
+  provenance: "2026-07-06, retrospective consolidation. Merged from extract-named-concern-into-custom-hook (2026-07-04, kyleshevlin.com) and hook-returns-own-handlers (same source). Judgment: extraction and handler-return are co-decisions — separating them invites partial application."
+
+- id: nan-serializes-to-null-in-json
+  domain: coding-js-react
+  kind: judgment
+  provenance: "Promoted from project domains 2026-07-06. Surfaced in Blog (2026-06-20, load calculator NaN incident); ported to FAMOUS (2026-07-01, cross-project review — no FAMOUS incident yet, but condition is easy to hit unknowingly). Two-project exposure via cross-project review justifies seed promotion. Condition broadened to cover any JSON serialization boundary, not only localStorage."
+
+- id: behavior-flags-in-refs
+  domain: coding-js-react
+  provenance: "2026-07-01, cross-project Blog→FAMOUS deep review. Surfaced from load calculator useAutosave (isMountRef, pendingRef) and hiragana useSpellQueue (errorInRoundRef). All are boolean flags that gate logic without affecting rendered output. Written to seed domain."
+  history:
+    - date: 2026-07-06
+      type: generalized
+      reason: "Retrospective: absorbed timer-handles-in-refs-not-state. Timer IDs are behavioral flags; the dep-cascade concern is now part of this principle's reason. Rule and condition extended to name timer handles explicitly."
 
 # ---- domain: css ----
 - id: mobile-fixed-bar-bottom-gap
