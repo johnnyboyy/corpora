@@ -19,5 +19,11 @@ principles:
   condition: "Any section that intercepts scroll to drive a narrative animation — sticky full-viewport sections, scroll-driven SVG animations, parallax-driven reveals."
   reason: "When scroll is the primary input and nothing visibly reacts, users lose their mental model of control. They don't know if they've scrolled far enough, if something is broken, or if they should try something else."
 
+- id: back-navigation-is-faster-than-forward
+  rule: "Back navigation transitions run at 60–70% of the forward duration, with --ease-out replacing --ease-in-out on the shared element."
+  condition: "Any shared-element view transition with a defined forward direction."
+  reason: "Returning to a known context should feel like release, not a reversal of the forward arrival's intentional weight. The easing asymmetry — no front-weighted acceleration on back — signals return rather than deliberate arrival."
+  status: ratified
+
 killed:
 ```
