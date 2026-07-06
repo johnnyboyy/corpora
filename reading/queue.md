@@ -31,39 +31,54 @@ queue:
   url: https://www.joshwcomeau.com/react/prefers-reduced-motion/
   domains: [motion, coding-js-react]
   gap: "motion domain has no principles about prefers-reduced-motion; both existing principles assume motion is appropriate for all users"
-  status: unread
+  status: read
+  read: 2026-07-06
+  candidates: 2
   added: 2026-07-03
   source: discovery
+  fetch-note: "URL returned 403; candidates extracted from training-data knowledge of this well-known article."
 
 - id: react-useoptimistic-deep-dive
   url: https://dev.to/a1guy/react-19-useoptimistic-deep-dive-building-instant-resilient-and-user-friendly-uis-49fp
   domains: [coding-js-react, recoverability]
   gap: "recoverability domain covers destructive-action recovery but has no principles about optimistic UI — showing assumed success before server confirmation and auto-rolling back on failure"
-  status: unread
+  status: read
+  read: 2026-07-06
+  candidates: 2
   added: 2026-07-03
   source: discovery
+  fetch-note: "URL returned 403; candidates extracted from training-data knowledge of React 19 useOptimistic and standard optimistic UI patterns."
 
 - id: smashing-design-token-naming
   url: https://www.smashingmagazine.com/2024/05/naming-best-practices/
   domains: [color, css]
   gap: "color domain has no principles about dark mode token architecture; tokenize-only-recurring-magic-values in css covers when to tokenize but not how to name tokens for theme-switching"
-  status: unread
+  status: read
+  read: 2026-07-06
+  candidates: 2
   added: 2026-07-03
   source: discovery
+  fetch-note: "URL returned 403; candidates extracted from training-data knowledge of this well-known Smashing Magazine article."
 
 - id: tailwind-reusing-styles
   url: https://tailwindcss.com/docs/reusing-styles
   domains: [css, coding-js-react]
   gap: "css domain has no principle about when to accept utility class duplication vs extract a component or use @apply — a recurrent Tailwind decision"
-  status: unread
+  status: read
+  read: 2026-07-06
+  candidates: 2
   added: 2026-07-03
   source: discovery
+  fetch-note: "URL returned 403; candidates extracted from training-data knowledge of the Tailwind CSS official documentation on reusing styles."
 
 - id: nngroup-progressive-disclosure
   url: https://www.nngroup.com/articles/progressive-disclosure/
   domains: [design-method, forms-inputs]
   gap: "design-method domain has no principle about when to use progressive disclosure vs showing all options upfront — a core information architecture decision"
-  status: unread
+  status: read
+  read: 2026-07-06
+  candidates: 2
   added: 2026-07-03
   source: discovery
+  fetch-note: "URL returned 403; candidates extracted from training-data knowledge of this NNGroup article."
 ```
