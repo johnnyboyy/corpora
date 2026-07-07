@@ -102,6 +102,43 @@ provenance:
       type: generalized
       reason: "Retrospective: absorbed timer-handles-in-refs-not-state. Timer IDs are behavioral flags; the dep-cascade concern is now part of this principle's reason. Rule and condition extended to name timer handles explicitly."
 
+- id: nested-conditional-signals-sub-component
+  domain: coding-js-react
+  kind: judgment
+  provenance: "2026-07-04, FAMOUS Discover refactor — operator refactored the chained isHydrated × data.length ternary into a binary skeleton/content switch at the parent level, with DiscoveryList owning its own empty/populated states. Judgment call: whether to extend generic-defers-to-consumer or stand alone — standalone chosen because generic-defers-to-consumer requires a reusable-unit framing that wouldn't fire on specific components. Originally ratified into FAMOUS project domain 2026-07-04."
+  history:
+    - date: 2026-07-06
+      type: moved
+      reason: "Promoted from FAMOUS project domain to web-frontend pack seed at retrospective. Condition makes no reference to FAMOUS-specific structure — universal React/JSX judgment."
+
+- id: named-exports-over-default
+  domain: coding-js-react
+  kind: knowledge
+  provenance: "2026-07-06, FAMOUS Expo migration gate. Surfaced from reading pipeline (basarat/typescript-book). Originally ratified into FAMOUS project domain."
+  history:
+    - date: 2026-07-06
+      type: moved
+      reason: "Promoted from FAMOUS project domain to web-frontend pack seed at retrospective. Universal JS/TS module pattern; no FAMOUS-specific condition."
+
+# ---- domain: coding-nextjs (new domain, forked from coding-js-react at retrospective 2026-07-06) ----
+- id: suspense-not-needed-for-sync-client-components
+  domain: coding-nextjs
+  kind: judgment
+  provenance: "2026-07-05, FAMOUS discover misc polish session. DiscoverPage wrapped Discover in Suspense with no fallback; operator reported intermittent back-button misdirection. Removing Suspense was the fix. Judgment call: the Suspense was a no-op for loading UX but a live variable in Next.js App Router's router cache handling on back navigation. Originally ratified into FAMOUS coding-js-react project domain."
+  history:
+    - date: 2026-07-06
+      type: moved
+      reason: "Moved from FAMOUS project coding-js-react to coding-nextjs seed domain at retrospective. Condition is Next.js App Router-specific; FAMOUS migrated to Expo Router. Principle travels with the framework, not the project."
+
+- id: view-transition-scope-at-page-slot-not-layout
+  domain: coding-nextjs
+  kind: judgment
+  provenance: "2026-07-05, FAMOUS view transitions technology research session. Coder evaluated CSS View Transitions API, Framer Motion AnimatePresence, React 19 experimental ViewTransition. Judgment call: the risk of misapplying route-keying at the layout level (which would unmount a persistent audio player) is non-obvious. Originally ratified into FAMOUS coding-js-react project domain."
+  history:
+    - date: 2026-07-06
+      type: moved
+      reason: "Moved from FAMOUS project coding-js-react to coding-nextjs seed domain at retrospective. Condition is Next.js App Router-specific; FAMOUS migrated to Expo Router."
+
 # ---- domain: css ----
 - id: mobile-fixed-bar-bottom-gap
   domain: css

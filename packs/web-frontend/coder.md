@@ -32,6 +32,9 @@ Added to the coder lens's declaration (load order per `kernel.md` — pack-seed 
 
 - `coding-js-react` — `packs/web-frontend/domains/coding-js-react.md`. JS/TS/React code patterns.
 - `css` — `packs/web-frontend/domains/css.md`. CSS/Tailwind authoring and specificity.
+- `coding-nextjs` — `packs/web-frontend/domains/coding-nextjs.md`. Next.js App Router patterns.
+  Loaded only when `corpora/config.md` declares `framework: nextjs` — skip for Expo Router,
+  Vite, or other frameworks.
 
 Audit metadata (`packs/web-frontend/domains/audit.md`) is reached only at ratify/retrospective
 time; each domain's kill log lives in its working file.

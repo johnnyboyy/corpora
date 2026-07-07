@@ -35,6 +35,23 @@ principles:
   condition: "When two types have parallel state fields that map to identical visual output, differing only in the name of the base/default state."
   reason: "Separate names for the same visual concept force either a translation layer or casts at the merge point. Renaming removes the impedance mismatch and makes the subset relationship structurally visible to TypeScript — the narrower type becomes assignable to the wider one without casting."
 
+- id: nested-conditional-signals-sub-component
+  rule: "When a render contains a nested conditional (A ? (B ? X : Y) : Z), treat the inner
+    conditional as a strong signal that branches X and Y have a narrower consumer than the outer
+    condition — extract them into a sub-component that owns that decision. Exception: short,
+    self-evident inner branches that add no reader overhead."
+  condition: "When reviewing JSX where a ternary's truthy or falsy branch is itself a ternary."
+  reason: "A nested conditional encodes two distinct concerns at the same level. The outer condition
+    gates access to the inner one, which means the inner branches have a narrower scope. Extracting
+    the inner decision to a sub-component makes each layer's responsibility legible and prevents the
+    parent from accumulating branching logic that belongs to its children. The test is reader overhead:
+    if the nesting costs the reader nothing to parse, extraction is optional."
+
+- id: named-exports-over-default
+  rule: "Prefer named exports over export default. Export a binding under the name it's defined with, and import it by that same name."
+  condition: "When adding or refactoring a JS/TS module's exports."
+  reason: "A default export lets every importer choose its own local name for the same binding, so the same value can appear under different names across the codebase, and find-references / auto-import tooling has no canonical name to anchor on. Named exports fix the name at the source, so grep and IDE find-references locate every consumer reliably."
+
 - id: stable-ref-for-document-listeners
   rule: "When a document-level event handler (visibilitychange, blur, beforeunload) must read current React state, shadow each reactive value with a ref updated on every render. The handler reads the ref, not the closure. Do not add the state to the effect's deps array as a workaround."
   condition: "When a useEffect registers a document-level listener that needs to observe current React state — and re-registering on every state change is incorrect or undesirable."

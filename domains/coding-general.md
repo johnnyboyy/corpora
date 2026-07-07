@@ -55,7 +55,7 @@ principles:
 
 - id: color-utility-over-guesswork
   rule: "When working with colors, use the project's color utility or script rather than guessing values. If none exists, ask for one or suggest building one before proceeding."
-  condition: "When computing or selecting color values — perceptual variants, palette stops, opacity blends over a backdrop, or any case where color relationships need to be derived rather than chosen arbitrarily."
+  condition: "When computing or selecting color values — perceptual variants, palette stops, opacity blends over a backdrop, or any case where color relationships need to be derived rather than chosen arbitrarily. In React Native, CSS custom properties are unavailable to component props at runtime (tintColor, tabBarActiveTintColor, inline style.color, etc.) — for those contexts, reference values from a JS token module rather than hardcoding hex literals."
   reason: "LCH color relationships are not intuitive to reason about arithmetically. Guessing produces inaccurate results and burns many tokens iterating toward something correct. A small script does this exactly for near-zero token cost."
 
 - id: scripts-over-hand-editing-structured-data
