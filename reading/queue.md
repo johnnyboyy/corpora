@@ -81,4 +81,40 @@ queue:
   added: 2026-07-03
   source: discovery
   fetch-note: "URL returned 403; candidates extracted from training-data knowledge of this NNGroup article."
+
+- id: henney-modular-monoliths-ndc2026
+  url: https://www.youtube.com/watch?v=4qfsmE11Ejo
+  domains: [coding-general]
+  gap: "coding-general has principles about code placement at the file/module level but none about when to establish and enforce module boundary contracts — when internal dependencies are clean enough to justify separation"
+  status: unread
+  added: 2026-07-10
+  source: discovery
+  author-note: "Listed author (Kevlin Henney), NDC London 2026. Core arguments from search summaries: 'Modularity is not a deployment choice; it is an architectural discipline.' 'If you cannot draw clean internal boundaries, you are not ready for microservices.' 'Dependencies reveal your real architecture better than diagrams.' Bypasses topic-match; argument density confirmed."
+
+- id: smashing-inline-validation-ux
+  url: https://www.smashingmagazine.com/2022/09/inline-validation-web-forms-ux/
+  domains: [forms-inputs, validation-feedback]
+  gap: "forms-inputs covers default/empty states and persistent controls but has no principle about validation timing — when to show errors relative to user input events (on blur vs. on change vs. on submit)"
+  status: unread
+  added: 2026-07-10
+  source: discovery
+  fetch-note: "URL returned 403; argument extracted from search result summaries. Core claim: validate on blur on first field interaction; switch to on-change only when the field is already in an error state. Because: on-change validation before an error has occurred feels accusatory — telling users they are wrong before they have finished typing. The hybrid approach (blur → error → live) is supported by research showing on-blur validation reduces errors vs. submit-time validation without increasing completion time."
+
+- id: developerway-discriminated-unions-react
+  url: https://www.developerway.com/posts/advanced-typescript-for-react-developers-discriminated-unions
+  domains: [coding-js-react]
+  gap: "coding-js-react covers state management patterns (useReducer, refs) and hook encapsulation but has no principle about TypeScript type design for component props with mutually exclusive variants"
+  status: unread
+  added: 2026-07-10
+  source: discovery
+  fetch-note: "URL returned 403; argument extracted from search result summaries of this and closely related articles (Total TypeScript, oneuptime.com Jan 2026). Core claim: when a component has N variants whose props are mutually exclusive, use a discriminated union rather than a flat interface with optional props. Because: a flat interface with optionals allows invalid combinations that TypeScript cannot catch; a discriminated union makes the variants enumerable, narrows props per variant, and forces call sites to update when a new variant is added."
+
+- id: logrocket-flexbox-vs-grid
+  url: https://blog.logrocket.com/css-flexbox-vs-css-grid/
+  domains: [css]
+  gap: "css domain has no layout methodology principle — when to choose flexbox vs. grid is a recurrent structural decision with no guidance in the corpus"
+  status: unread
+  added: 2026-07-10
+  source: discovery
+  fetch-note: "URL returned 403; argument extracted from search result summaries of multiple 2025-2026 sources on this topic. Core claim: Flexbox works content-outward (items size themselves from content, Flexbox distributes remaining space); Grid works layout-inward (tracks are defined first, placement is independent of source order). Because: mixing the mental models produces layouts where content fighting the grid or grid fighting content creates unpredictable reflow. Decision rule: use Grid when elements must align across both axes or when placement must be independent of document source order; use Flexbox when item count is dynamic or items should size from their own content."
 ```
