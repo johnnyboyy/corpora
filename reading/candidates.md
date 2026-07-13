@@ -146,4 +146,61 @@ candidates:
     extracted: 2026-07-06
     fetch-note: "Source URL returned 403; extracted from training-data knowledge of this NNGroup article."
   see-also: [progressive-disclosure-for-primary-advanced-split, persistent-controls-not-conditional]
+
+- id: module-boundaries-precede-deployment-separation
+  rule: "Before splitting code into separately-deployed services or packages, verify that the equivalent module boundaries are already clean in the existing codebase — no cycles, no cross-module access to internals. Deploy the boundary only after the code already respects it."
+  condition: "When planning a migration from a monolith to microservices, separate repositories, or separately-deployed packages — at the point of deciding whether the split is ready to make."
+  reason: "Deployment separation enforces physical isolation; it cannot create logical isolation. If module A depends on module B's internal functions rather than its exported API, the same entanglement persists after separation as a network call or inter-package import. The coupling is not resolved — it is made harder to refactor. Physical separation of clean logical boundaries is a deployment decision; separation of entangled code instantiates the coupling as a distributed-systems dependency."
+  domains: [coding-general]
+  provenance:
+    source: https://www.youtube.com/watch?v=4qfsmE11Ejo
+    gap: "coding-general has principles about code placement at the file/module level but none about when to establish and enforce module boundary contracts — when internal dependencies are clean enough to justify separation"
+    extracted: 2026-07-13
+  see-also: [code-lives-at-consumer-level]
+
+- id: dependency-graph-over-architecture-diagrams
+  rule: "When auditing or enforcing architectural boundaries, derive them from the actual import/dependency graph of the code, not from architectural diagrams or intent statements."
+  condition: "When verifying that two modules are genuinely isolated — before any structural separation such as package extraction, service split, or repository division — or when a stated architecture diverges from observed runtime or import behavior."
+  reason: "An architecture diagram captures intent, not implementation. Two modules can be depicted as isolated boxes with a single interface arrow while one has twelve files importing from eight internal files of the other. The dependency graph is always current; a diagram is only current until the next unreviewed commit. If clean boundaries are the goal, the test is the dependency graph — a diagram that agrees with it is a summary, not evidence."
+  domains: [coding-general]
+  provenance:
+    source: https://www.youtube.com/watch?v=4qfsmE11Ejo
+    gap: "coding-general has principles about code placement at the file/module level but none about when to establish and enforce module boundary contracts — when internal dependencies are clean enough to justify separation"
+    extracted: 2026-07-13
+  see-also: [code-lives-at-consumer-level, module-boundaries-precede-deployment-separation]
+
+- id: validate-on-blur-then-on-change
+  rule: "Validate a field on `blur` the first time the user leaves it. Once the field is in an error state, switch to `change` events so corrections are acknowledged immediately. Never show validation errors while the user is still typing in a field that has not yet been in error."
+  condition: "When implementing inline form validation — specifically choosing which DOM event (`blur`, `change`, `input`, `submit`) triggers showing a field-level error message."
+  reason: "On-change validation that fires before a field has ever errored is accusatory — it flags the user as wrong before they have finished entering a value. On-blur waits for the user to declare they are done with a field, which is the earliest natural moment for a correctness check. Once an error has already been shown, on-change feedback is helpful rather than accusatory: the user is now attempting to fix a known problem and deserves immediate acknowledgment of their corrections. Research shows blur-first validation reduces error rates versus submit-time validation without increasing form completion time."
+  domains: [forms-inputs, validation-feedback]
+  provenance:
+    source: https://www.smashingmagazine.com/2022/09/inline-validation-web-forms-ux/
+    gap: "forms-inputs covers default/empty states and persistent controls but has no principle about validation timing — when to show errors relative to user input events (on blur vs. on change vs. on submit)"
+    extracted: 2026-07-13
+    fetch-note: "Source URL returned 403; extracted from search-result summaries of this well-known Smashing Magazine article and corroborating UX research."
+  see-also: [warning-colocated-with-resolution]
+
+- id: discriminated-union-for-mutually-exclusive-props
+  rule: "When a component has N variants whose prop sets are mutually exclusive, model the prop type as a discriminated union, not a flat interface with optional fields. Each union member carries the discriminant field and the props that are required — not optional — for that variant."
+  condition: "When designing or refactoring the TypeScript prop interface of a component that has two or more distinct usage modes, each requiring different props, where mixing props from two modes should be a compile-time error."
+  reason: "A flat interface with all variant props marked optional allows every combination, including impossible ones (icon and label together, or neither). TypeScript cannot flag these because all props are optional. A discriminated union narrows props at every discriminant check site, makes each variant's required fields explicit, and forces call sites to handle a new variant when one is added — exhaustiveness checks surface missing cases at compile time, not at runtime."
+  domains: [coding-js-react]
+  provenance:
+    source: https://www.developerway.com/posts/advanced-typescript-for-react-developers-discriminated-unions
+    gap: "coding-js-react covers state management patterns (useReducer, refs) and hook encapsulation but has no principle about TypeScript type design for component props with mutually exclusive variants"
+    extracted: 2026-07-13
+    fetch-note: "Source URL returned 403; extracted from search-result summaries of this article and closely related sources (Total TypeScript, oneuptime.com Jan 2026)."
+  see-also: [unified-representation-no-type-leakage]
+
+- id: grid-for-layout-flexbox-for-flow
+  rule: "Use CSS Grid when elements must align on two axes simultaneously or when their visual order must differ from source order. Use Flexbox when item count is dynamic or when items should size from their own content with the container distributing remaining space."
+  condition: "When choosing between `display: grid` and `display: flex` for a new layout container."
+  reason: "The two models have opposite starting points: Flexbox is content-outward (the container adapts to its items' content; remaining space is then distributed) and Grid is layout-inward (tracks are declared first; items are placed into them, independently of source order). Using Grid where content-first sizing is needed forces explicit track definitions for what could be automatic; using Flexbox where two-axis alignment is needed requires nested containers or duplicate sizing rules. Match the model to what the layout actually requires."
+  domains: [css]
+  provenance:
+    source: https://blog.logrocket.com/css-flexbox-vs-css-grid/
+    gap: "css domain has no layout methodology principle — when to choose flexbox vs. grid is a recurrent structural decision with no guidance in the corpus"
+    extracted: 2026-07-13
+    fetch-note: "Source URL returned 403; extracted from search-result summaries of multiple 2025–2026 sources on this topic."
 ```
