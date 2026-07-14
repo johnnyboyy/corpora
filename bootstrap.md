@@ -1,27 +1,27 @@
 ---
 name: corpora:bootstrap
-description: Bootstrap a project's config, UI library, and UX library. Run once, before any feature design work. Works from existing design documentation, brand guidelines, aesthetic references, or from scratch with operator guidance. Outputs corpora/config.md (project shape + tool surface), corpora/ui-library.md, corpora/ux-library.md, and proposed design principles ratified into the project's design domains. Text-only — no screenshots or image exports (see LINEAGE.md for why).
+description: Bootstrap a project's config, UI library, and UX library. Run once, before any feature design work. Works from existing design documentation, brand guidelines, aesthetic references, or from scratch with operator guidance. Outputs corpora/config.md (project shape, commands, and registered utilities), corpora/ui-library.md, corpora/ux-library.md, and proposed design principles ratified into the project's design domains. Text-only — no screenshots or image exports (see LINEAGE.md for why).
 ---
 
 # Project Bootstrap
 
 Reference for the orchestrator's bootstrap flow, run when `corpora/config.md` is absent — Phase 1
-inline, Phase 2 by spawning the UI designer with the Phase 2 section as the task, Phase 3 by
-spawning the UX designer with the Phase 3 section. Not a standalone skill.
+inline, Phase 2 by routing the UI designer with the Phase 2 section as the task, Phase 3 by routing
+the UX designer with the Phase 3 section. Not a standalone skill.
 
-- **Phase 1 — always, run inline.** Detect the project's shape and tool surface; write
+- **Phase 1 — always, run inline.** Detect the project's shape, commands, and existing utilities; write
   **`corpora/config.md`** (schema below: shape — language, framework, package manager, `has-ui`,
-  styling, `role-pack`; tool surface — browser automation, image generation, color utility, UI
-  library location, verification commands). This flips the project to "bootstrapped" and runs for
+  styling, `role-pack`; project resources — registered utilities, UI library location, verification
+  commands). This flips the project to "bootstrapped" and runs for
   every project type.
-- **Phase 2 — only when `has-ui: yes`, spawned UI designer.** Bootstrap the design system:
+- **Phase 2 — only when `has-ui: yes`, UI designer workstream.** Bootstrap the design system:
   **`corpora/ui-library.md`** (or the project's chosen path — the living design system reference)
   plus **proposed design principles** distilled from the foundational decisions and surfaced in
   the standard proposed-principles block; the orchestrator ratifies them into the project's design
   domains (`corpora/domains/<domain>.md`), assigning each a domain at the gate. This is the UI
   designer's foundational work — get it right and every subsequent designer session starts with
   real constraints; get it wrong and every session invents in a vacuum.
-- **Phase 3 — only when `has-ui: yes`, spawned UX designer, after Phase 2.** Bootstrap the
+- **Phase 3 — only when `has-ui: yes`, UX designer workstream, after Phase 2.** Bootstrap the
   experience reference: **`corpora/ux-library.md`** plus proposed principles/directions, same
   gate. UI runs first deliberately — the divergent lens sets identity before the convergent lens
   documents constraints (see LINEAGE.md, "UI/UX seam settled").
@@ -33,9 +33,13 @@ for this purpose.
 
 ## Phase 1 — Project shape and config (always)
 
-Detect the project's shape before anything else. Read the project's CLAUDE.md, README,
-package manifest (`package.json`, `pyproject.toml`, `Cargo.go`, `go.mod`, etc.), and lockfiles.
-Determine, and ask the operator only for what you cannot infer:
+Detect the project's shape before anything else. Read the platform's applicable project agent
+instructions (`AGENTS.md` under Codex; `CLAUDE.md` under Claude Code), package manifest
+(`package.json`, `pyproject.toml`, `Cargo.go`, `go.mod`, etc.), lockfiles, and relevant codebase
+structure. If both agent-instruction files exist, read both; use the current platform's native file
+for runtime-specific instructions and surface any substantive conflict in project requirements.
+A project README is optional supporting evidence when present and useful, never a required or
+authoritative instruction source. Determine, and ask the operator only for what you cannot infer:
 
 - **Language(s)** — typescript, python, rust, go, etc.
 - **Framework** — next.js, astro, electron, fastapi, none, etc.
@@ -51,16 +55,22 @@ Determine, and ask the operator only for what you cannot infer:
 - **Verification commands** — the project's lint, type-check, build, and/or test commands. Run
   what the project actually has; not every ecosystem separates these, and some have none.
 
-Detect the tool surface too (browser automation, image generation, color utility — see §6 and
-the schema below). Then **write `corpora/config.md`** using the schema at the end of this file.
-Detect, don't assume: a wrong `available`/`role-pack` is worse than `none`, because a role will
-try to use something that isn't there. When unsure, write `none` and note it as a follow-up.
+Record existing project-owned utilities and exact verification commands using the schema below.
+Do not search for predetermined utility categories or persist environment-owned capabilities; the
+runtime already exposes browser automation, image generation, delegation, and similar tools. Then
+**write `corpora/config.md`**. Detect, don't assume: an incorrect role pack, command, or utility is
+worse than `none` because a role will try to use something that is not there.
 
 **If `has-ui: no`, Phase 1 is the whole job.** Write `corpora/config.md` and stop — no UI library,
 no design principles, no designer roles for this project. Note to the operator that design-phase
 roles are inactive and the project runs on the kernel (orchestrator + base coder).
 
 **If `has-ui: yes`, continue to Phases 2 and 3.**
+
+For a UI project, also create `corpora/deferred-decisions.md` from `kernel.md`, "Deferred UI/UX
+decisions," with an empty `decisions: []` list. This queue is project working state, not corpus.
+For every project, create `corpora/utility-candidates.md` from `kernel.md`, "Project utilities,"
+with an empty `candidates: []` list.
 
 ---
 
@@ -73,7 +83,7 @@ what's missing only if it blocks a foundational decision:
 - Existing design documentation (brand guidelines, style guides, Figma exports as text)
 - Token or variable files from an existing codebase (`tokens.css`, design tokens JSON, etc.)
 - Aesthetic references (described or linked — e.g., "like Linear", "like Notion", "like a Bloomberg terminal")
-- Audience and use context (from the project's CLAUDE.md or operator description)
+- Audience and use context (from applicable project context or operator description)
 
 If none of this was provided, ask the operator two questions before proceeding — no more than two
 (stack is already known from Phase 1):
@@ -174,64 +184,14 @@ enough to rule things out. Avoid generic words like "clean" or "modern" without
 qualification. Instead: "Low saturation throughout. Motion is used sparingly and only
 to mark state changes. No decorative elements. Data reads as the hero; chrome recedes."
 
-### 6. Color utility
+### 6. Project utilities
 
-Check whether the project already has a color utility script. If it does, read how to
-invoke it and record it under the color-utility entry in `corpora/config.md` (schema below).
-
-If it doesn't, assess whether one is worth building. It is worth building when:
-- The design uses material-based, category-based, or temperature-graded color palettes
-  where multiple related tints need to be derived from a single base color
-- The project has sticky or elevated surfaces where translucent tints bleed through on
-  scroll and need premixed solid equivalents
-- Palette derivation will recur across multiple design sessions
-
-If it's worth building, use the inline coder to implement it now. Provide the following
-spec to the coder:
-
----
-
-**Color utility spec**
-
-A small CLI script that computes perceptual color relationships precisely, so the designer
-and coder aren't guessing at LCH-space values.
-
-Core operations needed:
-
-1. **adjust** — given an input color and LCH deltas (hue rotation, chroma shift,
-   lightness shift), output the resulting color. This is how you derive a "cooler" or
-   "warmer" variant of a base color without guessing: LCH is a perceptually uniform space
-   where equal numeric steps produce equal perceived differences.
-
-2. **blend** — given an input color, an opacity, and the project's backdrop color(s),
-   output the premixed solid equivalent. This is needed whenever a translucent tint is
-   used on a sticky or elevated surface: translucent backgrounds let page content bleed
-   through on scroll.
-
-3. **palette** (optional, add if the project derives palettes from base colors) — given
-   a base color, output a set of variants using predefined LCH deltas appropriate to the
-   project's palette logic. What "a set of variants" means is project-specific: temperature
-   stops, lightness scale, semantic tints, etc.
-
-Output format must match the project's CSS approach. For Tailwind: arbitrary-value class
-strings. For CSS custom properties: the computed RGB values and a suggested variable name.
-For plain CSS: hex values. The utility is only useful if its output is directly pasteable.
-
-Recommended library: `chroma-js` for full LCH support in Node.js. For modern projects
-preferring native CSS OKLCH, the utility may not be needed at all — OKLCH arithmetic
-can happen directly in the stylesheet.
-
-Wire it to a named script via the project's package manager (e.g., `pnpm color adjust "205 127 50"
---hue -8`) and record the invocation under the color-utility entry in `corpora/config.md` (schema below)
-so future designer and coder sessions find it without reading the role prompts. Mirroring the
-command into CLAUDE.md is optional; `corpora/config.md` is the source of truth roles read.
-
----
-
-If building the utility is out of scope for this bootstrap session, note it as a
-recommended follow-up and describe the project's palette derivation approach manually
-in the library so designers can at least document the intended relationships, even if
-they can't compute them precisely yet.
+Use existing registered utilities when their `use-when` conditions match. Do not invent utilities
+during bootstrap or search for named categories. If this work itself exposes a deterministic,
+precision-sensitive, or disproportionately token-expensive operation, surface it as a utility
+candidate using the handoff schema. Color math is one example: a project may register a script for
+OKLCH adjustment or alpha compositing because exact computation is cheaper than repeated inference.
+The observed burden earns the proposal; the category does not.
 
 ### 7. Interaction and motion
 
@@ -250,16 +210,15 @@ where to find the canonical reference.
 
 ## The config file (`corpora/config.md`)
 
-The file every role reads to learn the project's shape and tool surface — without it the project
-is "not bootstrapped." Two halves: **project shape** (Phase 1; governs which roles and pack apply)
-and **tool surface** (which project-specific tools exist and how to invoke them). Detect each
-capability rather than assuming it:
+The file every role reads to learn stable project facts — without it the project is "not
+bootstrapped." It records **project shape**, **project-owned utilities**, library locations, and
+verification commands. Runtime-owned capabilities are discovered each session and never persisted.
+When updating a legacy config, remove browser/image runtime entries and migrate any project-owned
+color or other deterministic script into the general utility registry.
 
-- **Browser automation** — is a browser automation tool available in this environment (a skill, an
-  MCP server, a CLI)? Name it and how to invoke it. If none, write `none`.
-- **Image generation** — is an image generation tool available? Name it. If none, write `none`.
-- **Color utility** — does the project have (or did this session build) a color utility script?
-  Record its path and the exact command form. If none, write `none`.
+- **Utilities** — deterministic project-owned tools that replace recurring inference. Record their
+  purpose, triggering condition, exact invocation, operations, and output shape. An empty registry
+  is normal; do not speculate during bootstrap.
 - **UI library** — where does the design system reference live? Default `corpora/ui-library.md`;
   only note a path here if it's non-standard. `none` for projects with no UI.
 - **Verification commands** — the project's lint, type-check, build, and/or test commands. Record
@@ -268,16 +227,15 @@ capability rather than assuming it:
 ### Schema
 
 Human-readable and edited by hand as the project changes; machine-read by every role at session
-start. Every value is either a concrete value/invocation or the literal word `none` — a role treats
-`none` as "unavailable; do not attempt it or substitute another tool." Keep it terse; this file
-loads into context on every role invocation.
+start. Keep it terse because it loads on every role invocation. Project-shape and command values
+are concrete or `none`; utilities are an explicit list or `utilities: []`.
 
 ```markdown
 # Config
 
-Read this file at the start of any role session. It declares the project's shape and which
-project-specific tools exist and how to invoke them. Generated by `corpora:bootstrap`; edit by hand
-as the project changes. A value of `none` means unavailable — do not attempt it or substitute another.
+Read this file at the start of any role session. It declares the project's shape, registered
+project utilities, libraries, and verification commands. Generated by `corpora:bootstrap`; edit by
+hand as the project changes. Discover environment-owned capabilities from the current runtime.
 
 ## project-shape
 language: <e.g. typescript, python, rust, go>
@@ -287,19 +245,17 @@ has-ui: <yes | no>
 styling: <e.g. tailwind, css-modules, vanilla-css, none>
 role-pack: <e.g. web-frontend, or none>
 
-## browser-automation
-status: available
-invoke: <tool name + how to call it, e.g. "agent-browser skill — see its docs for subcommands">
+## utilities
+utilities:
+  - id: <e.g. color-math>
+    purpose: <the deterministic inference burden it replaces>
+    use-when: <condition under which a role should invoke it>
+    invoke: <exact command form>
+    operations: [<supported operations>]
+    output: <paste-ready or machine-readable output shape>
+    provenance: <workstream and date that demonstrated its value>
 
-## image-generation
-status: available
-invoke: <tool name, e.g. "generate-image skill">
-
-## color-utility
-status: available
-script: <path, e.g. scripts/color.js>
-invoke: <command form, e.g. {package-manager} color <op> "<r g b>" [--hue N] [--chroma N] [--lightness N]>
-ops: <e.g. blend, adjust, palette>
+Use `utilities: []` when the project has none.
 
 ## ui-library
 path: corpora/ui-library.md
@@ -311,19 +267,39 @@ build: <the project's build command, or none>
 test: <the project's test command, or none>
 ```
 
-For any capability that is unavailable, collapse its section to a single `status: none` line (the
-`project-shape` block is always written in full):
-
-```markdown
-## image-generation
-status: none
-```
-
 ## Output format
 
 ### corpora/config.md
 
 Write the config file using the schema above (detect, don't assume — see Phase 1).
+
+### corpora/deferred-decisions.md
+
+For `has-ui: yes`, create the queue with its explanatory heading and an empty YAML list:
+
+````markdown
+# Deferred decisions
+
+Only non-blocking UI/UX questions belong here. Blocking questions are surfaced immediately.
+
+```yaml
+decisions: []
+```
+````
+
+For `has-ui: no`, do not create a queue.
+
+### corpora/utility-candidates.md
+
+Create the persistent candidate ledger for every project:
+
+````markdown
+# Utility candidates
+
+```yaml
+candidates: []
+```
+````
 
 ### corpora/ui-library.md
 

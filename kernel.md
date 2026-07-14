@@ -88,7 +88,8 @@ because the audit load is *broad* (the orchestrator pulls the whole layer at onc
   consumed only by the retrospective.
 
   The script (in the skill repo: `record-gate`, `measure`, `triggers`, `lint-handoff`,
-  `retro-done`, `sync-done`) does all counting, measuring, and threshold math. The model supplies
+  `lint-deferred`, `deferred`, `lint-utility-candidates`, `utility-candidates`, `retro-done`,
+  `sync-done`) does all counting, measuring, validation, and threshold math. The model supplies
   judgments as arguments — fired/violated/idle classification, ratify counts — and never does the
   arithmetic or the YAML writing. Bookkeeping done by attention is bookkeeping that silently
   stops. Hand-written provenance, promotions, and per-kill detail live in the same file, outside
@@ -133,20 +134,17 @@ adds a new role).
 
 ### Two load modes
 
-- **Working load** (generation, hard isolation): a role's declared domains, *working files only*.
-  Lean and contamination-safe. This is every spawn and every inline role session.
+- **Working load** (generation): a role's declared domains, *working files only*. Lean and
+  inspectable. This is every new isolated role agent and every inline role segment.
 - **Audit load** (synthesis, human-gated): the orchestrator loads relevant domains *broadly,
   including audit and kill metadata*, at ratify and retrospective time. Breadth is safe here
   because it is not constrained generation and it is gated by the operator.
 
-Role isolation is enforced at this level: the coder declares coding domains and never design
-domains, so design context cannot bleed into coding work. Two *design* lenses sharing a design
-domain is allowed and intended — that is the point of domain-scoping. The hard session seam is
-**stance** (a divergent lens never shares a session with convergent work — see `skill.md`,
-"Inline vs. spawn decision"); in a convergent inline chain, the working-load isolation guarantee
-holds per *role segment*, with the transition handoff as the segment boundary — each role's
-proposals and violations are captured while its context is fresh, so the gate never depends on a
-backward pass over accumulated multi-role transcript. See LINEAGE.md, "Role isolation."
+Declarations enforce load boundaries: the coder declares coding domains and never design domains.
+Whether two role segments may share a context is routing judgment, informed by stance, prior
+exploration, evaluator independence, context length, and cost. A handoff captures proposals and
+violations at a transition, but is a checkpoint rather than automatic agent termination. See
+`SKILL.md`, "Inline, resume, or isolate," and LINEAGE.md, "Role isolation."
 
 ### Generative stance
 
@@ -191,6 +189,20 @@ Every cross-boundary change is **propose → ratify → promote**, never write-d
   killed, never a seed-promotion candidate. A direction is an identity decision, not a weighable
   rule; it carries no condition/reason obligation, and the library is the project's identity
   record. Processing a sound direction as a failed principle is a container-kill in new clothes.
+
+### The genuine-fork test
+
+Before ratifying a `judgment` proposal, ask: is there a plausible alternative choice — one a
+competent role would actually reach for in the moment — that this principle rules out? If no
+realistic version of "the wrong way" exists, the proposal isn't recording judgment; it's
+decorating an outcome that was never at risk. Reject these by default, even when the rule is true
+and harmless — a principle earns its permanent slot by guarding against a real wrong turn, not by
+being correct. The common failure shape is generic good practice restated as project-specific
+guidance: watch for a `reason` that names no specific failure mechanism and no plausible competing
+choice, only a restatement of the rule itself. This is a different rejection than a `knowledge`
+kill (which fires because the answer is derivable from training/docs regardless of whether a fork
+exists) — the fork test asks whether a fork exists at all, prior to asking where the answer came
+from.
 
 ### Domain assignment at the gate
 
@@ -288,6 +300,8 @@ prose. The schema structures the *envelope* (what the gate and relay mechanicall
 ```yaml
 ---
 role: ux-designer            # which lens produced this
+workstream: checkout-redesign # stable across checkpoints and revisions
+agent-continuity: new        # new | continued | replacement
 status: complete             # complete | tradeoffs-pending | questions-pending | blocked
 domains-loaded: [ux-design, recoverability]
 proposals:                   # principle proposals, provenance attached at proposal time
@@ -297,10 +311,12 @@ proposals:                   # principle proposals, provenance attached at propo
     reason: "..."
     kind: judgment           # judgment | knowledge | direction
     provenance: "date, task, context"
+utility-candidates: []       # plausible deterministic shortcuts observed during work
 violations-noted: []         # existing principles this work knowingly deviated from, with why
 ui-drift: no                 # yes | no — did this work change the rendered visual system
                              #   (new component, changed treatment, retired pattern)
 token-usage: "..."           # per spawn-token-summary
+delegated-workers: []        # worker scopes, if this role delegated execution
 ---
 
 ## Artifact
@@ -317,15 +333,25 @@ always present; an empty section is a statement, a missing one is a schema viola
 
 Field notes:
 
+- **`workstream`** stays stable across implementation, operator testing, and revisions. A new plan
+  or unrelated intended outcome receives a new identifier. **`agent-continuity`** makes a context
+  discontinuity visible: `new` starts the workstream, `continued` resumes its owning agent, and
+  `replacement` reconstructs from the complete role load and structured artifacts because the
+  prior agent could not continue.
 - **`kind`** is captured when the role knows it from the inside, not reconstructed at the gate.
   `judgment` = a decision made under uncertainty where context and tradeoffs shaped the outcome;
   `knowledge` = derivable from documentation or training; `direction` = a project design-direction
   choice — an identity decision, not a weighable rule. The stance model predicts `direction`: a
   divergent lens's output is a choice, so most UI-designer proposals are direction, not principle.
+- **`utility-candidates`** is deliberately liberal. Each entry names an observed inference burden
+  and concrete deterministic operation shape; it need not prove recurrence or specify a finished
+  CLI. The orchestrator transfers it to the persistent project ledger before deleting the handoff.
 - **`status: questions-pending`** — the role hit a genuine direction question mid-work: it stops,
   puts the questions in `Surfaced` (each with what has been established so far and what turns on
-  the answer), and the orchestrator relays them and *continues the same agent* with the operator's
-  answers — continuation, not re-spawn, so working context survives the exchange. Same bar as
+  the answer), and the orchestrator relays them and resumes the same workstream agent with the
+  operator's answers when available, so working context survives the exchange. If continuation is
+  unavailable, use the structured replacement protocol in
+  `SKILL.md`; never rebuild from raw transcript. Same bar as
   gap-closing dialogue: only questions whose answers would produce materially different outputs.
 - **`ui-drift`** is the mechanical staleness signal for the project's UI library, self-reported
   while the role's context is fresh. It is *counted at the ratify gate* (see the `library-drift`
@@ -334,6 +360,10 @@ Field notes:
 - **`Surfaced`** is the schema's escape valve: the envelope can under-fit but cannot suppress.
   Recurring traffic of the same *kind* in `Surfaced` is a retrospective signal that the schema
   needs a field — schema evolution from accumulated tension, through the gate, never speculative.
+- **`delegated-workers`** lists each worker scope. When direct worker-to-orchestrator relay is not
+  available, append a `## Delegated handoffs` section containing every worker's questions,
+  tradeoffs, proposals, violations, and routing requests verbatim; the parent may not filter or
+  ratify them.
 
 Lifecycle: handoff files are working state, not corpus. Once the gate has ratified, killed, or
 filed each proposal and written back, the file is deleted; the audit layer holds the durable
@@ -341,6 +371,83 @@ record. An unratified handoff file *is* the deferred-proposal queue — a direct
 handoffs is a visible backlog. Inline sessions producing zero proposals, zero tradeoffs, and no
 drift may skip the file; the session-harvest pipeline is the backstop for what that exemption
 misses.
+
+---
+
+## Deferred UI/UX decisions
+
+`corpora/deferred-decisions.md` is a project working queue for unresolved design questions that do
+not block current implementation. It is not a substitute for a handoff or a place to hide blockers.
+Every queued item names a narrow reversible provisional treatment so the coder can proceed without
+turning that treatment into settled direction.
+
+````markdown
+# Deferred decisions
+
+Only non-blocking UI/UX questions belong here. Blocking questions are surfaced immediately.
+
+```yaml
+decisions:
+  - id: results-empty-state
+    role: ux-designer
+    domain: validation-feedback
+    question: "Should an empty filtered result preserve filters or offer a reset action?"
+    context: "Results panel introduced by the search workstream."
+    source-workstream: search
+    created: 2026-07-14
+    blocking: no
+    provisional-treatment: "Preserve filters; add no reset action yet."
+    related-files: [src/components/results.tsx]
+    status: queued
+```
+````
+
+The schema is deliberately flat so `scripts/corpus.py lint-deferred` can validate it without a YAML
+dependency. `role` is `ui-designer` or `ux-designer`; `status` is `queued` or `resolved`; `blocking`
+must always be `no`. Group items by owning role and related surface, not count alone. Route a role
+workstream when several items need coherent judgment, an item becomes blocking, provisional work
+would create material rework, or the operator requests it. Pass the relevant entries to the role.
+Mark them `resolved` only after the operator ratifies the role's handoff, then remove them; durable
+direction and judgment live in the UI/UX libraries and corpora, not this queue.
+
+---
+
+## Project utilities
+
+Active utilities live tersely in the `utilities` section of `corpora/config.md` because every role
+may need them. They are project-owned deterministic tools that replace recurring, precision-sensitive,
+or disproportionately token-expensive inference. Environment-owned tools are discovered from the
+current runtime instead.
+
+Candidates live separately in `corpora/utility-candidates.md` so cheap denials and recurrence
+evidence survive handoff deletion without taxing every role load:
+
+````markdown
+# Utility candidates
+
+```yaml
+candidates:
+  - id: color-math
+    operation-shape: "Deterministic perceptual color transformation and compositing."
+    status: denied
+    first-seen: 2026-07-14
+    last-seen: 2026-07-14
+    sightings: 1
+    evidence:
+      - workstream: settings-redesign
+        burden: "Several rounds of manual color derivation."
+    disposition:
+      reason: "Not enough expected reuse yet."
+```
+````
+
+Surface a plausible candidate whenever denial is cheap. Before recording it, check the standard
+library, installed dependencies, current runtime tools, and active project utilities. The operator
+accepts, denies, or defers it. On recurrence, merge by operation shape, increment `sightings`, append
+evidence, update `last-seen`, and resurface the prior disposition. Only an accepted utility that is
+implemented and tested enters config. Denied candidates remain historical memory; retrospectives
+may consolidate duplicates or obsolete entries. Candidate status is `open`, `deferred`, `denied`,
+`accepted`, or `implemented`.
 
 ---
 

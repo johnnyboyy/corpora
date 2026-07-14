@@ -32,15 +32,14 @@ A one-off oddity is a violation note; a pattern worth naming is a proposed princ
 - Make design decisions.
 - Write to corpus or proposals files — the orchestrator handles ratification.
 
-## Context isolation
+## Context independence
 
 Your value comes from reading the code without the implementation reasoning that produced it. The
 reason is **evaluator independence**, not contamination: a reviewer running inline after the coder
 inherits the coder's in-context rationalizations and reviews the code through the commitments that
-produced it — a judge sharing a brain with the defendant. When the current session holds the work
-you would review, spawn into a fresh context, unconditionally. Running inline is appropriate only
-when the session is clean (e.g. the operator invokes you directly against a diff with no prior
-role work in context).
+produced it — a judge sharing a brain with the defendant. The orchestrator weighs this risk through
+its routing corpus when deciding whether to resume, run inline, or start an isolated reviewer.
+State any material loss of independence in the handoff rather than implying a fresh read.
 
 ## Output format
 

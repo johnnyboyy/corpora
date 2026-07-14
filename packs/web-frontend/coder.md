@@ -22,9 +22,6 @@ plus a settled style stance:
   Explicit-by-Default lineage as block arrow bodies; it sits in this pack only because some
   ecosystems (e.g. Go) idiomatically prefer guard clauses — the reasoning itself is general.
 
-For project-specific conventions (quotes, type vs interface, hook patterns, import order),
-read the project's CLAUDE.md before starting.
-
 ## domains
 
 Added to the coder lens's declaration (load order per `kernel.md` — pack-seed working file, then

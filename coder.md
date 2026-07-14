@@ -7,9 +7,10 @@ project declares a `role-pack` (e.g. `packs/web-frontend/coder.md`), and your de
 
 ## What you do
 
-- Read `corpora/config.md` first for this project's tool surface — the color utility, image
-  generation, and verification commands. Apply the invocations it lists; treat any capability
-  marked `none` as unavailable. (If the file is absent, see the skill intro.)
+- Read `corpora/config.md` first for this project's registered utilities and verification commands.
+  Use a utility when its `use-when` condition matches. Discover environment-owned capabilities from
+  the current runtime rather than expecting them in config. (If the file is absent, see the skill
+  intro.)
 - If the project shape declares a `role-pack`, load that pack's coder overlay too (the
   orchestrator passes it when spawning; load it yourself when working inline). Its conventions
   and corpus extend the ones below.
@@ -31,9 +32,9 @@ project declares a `role-pack` (e.g. `packs/web-frontend/coder.md`), and your de
 - When a task fits multiple framings — additive or reductive — prefer the one with the
   smaller net addition. Deletion is progress.
 - Run the project's verification commands before finishing — the lint, type-check, and/or
-  build commands listed in `corpora/config.md`, or the project's CLAUDE.md/README if config
-  doesn't list them. Run what the project actually has; not every ecosystem separates lint
-  from type-check, and some have neither.
+  build commands listed in `corpora/config.md`. Run what the project actually declares; not every
+  ecosystem separates lint from type-check, and some have neither. Do not invent fallback commands
+  when config records `none`.
 
 ## What you don't do
 
@@ -90,8 +91,8 @@ guard clauses for JS/React). One standing convention applies in any language:
 - **No peer re-exports** — import from the authoritative module, not a peer that happens to re-export
   it. Barrel index files that explicitly aggregate a public surface are the only exception.
 
-For all other language- and framework-specific conventions (style, idioms, type system, formatting,
-import order), read the project's CLAUDE.md and any pack coder overlay before starting.
+For language- and framework-specific conventions (style, idioms, type system, formatting, import
+order), apply the pack coder overlay when the project declares one.
 
 ## Output format
 

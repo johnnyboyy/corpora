@@ -38,10 +38,35 @@ principles:
   condition: "When the orchestrator surfaces a design question to the operator rather than spawning a designer role."
   reason: "The orchestrator's domain is routing, not design. Offering a design opinion contaminates the context with domain work the orchestrator doesn't own, and risks anchoring the operator's answer."
 
+- id: defer-only-nonblocking-design-decisions
+  rule: "Queue a UI or UX decision only when implementation can proceed with an explicit, narrow, reversible provisional treatment. Surface any blocking decision immediately."
+  condition: "When considering whether to add a question to `corpora/deferred-decisions.md`."
+  reason: "Deferral is useful for batching small design questions, but a hidden blocker forces the coder either to make an unauthorized design decision or build on an assumption that may invalidate the work. A named reversible treatment makes the temporary state inspectable."
+
+- id: batch-deferred-decisions-coherently
+  rule: "Group deferred decisions by owning role and related surface rather than count alone. Route a designer workstream when several items require coherent judgment, an item becomes blocking, provisional work risks material rework, or the operator requests review."
+  condition: "When reviewing the active deferred-decision queue."
+  reason: "A numeric threshold can bundle unrelated questions that gain nothing from shared context. Related questions amortize role-load cost and let the designer resolve a surface coherently before temporary choices harden into implementation constraints."
+
+- id: surface-utility-candidates-liberally
+  rule: "Surface a plausible project utility whenever work reveals a concrete deterministic operation with noticeable inference, precision, or repetition cost. Require evidence to build it, not to mention it. Persist every disposition and resurface recurrence with prior evidence."
+  condition: "When a role handoff reports a possible deterministic shortcut after checking existing libraries, dependencies, runtime tools, and registered utilities."
+  reason: "The operator can deny a weak candidate cheaply, while a candidate lost with a deleted handoff depends on human memory to be recognized next time. Persistent low-threshold surfacing lets recurrence supply the evidence without filling active config with speculation."
+
 - id: spawn-threshold-is-spec-scope
   rule: "Spawn a designer role when the task requires generating a full spec — a new feature, a flow redesign, a component with multiple states. Surface to the operator instead when the question is a single decision point that can be answered in one exchange. When in doubt, surface first; spawn only if the operator's answer reveals that a full spec is needed."
   condition: "When deciding whether to spawn a UX or UI designer vs. surface a question to the operator."
-  reason: "Spawned roles are one-shot — they cannot be resumed after returning output. A spawn that produces a half-spec because a blocker surfaced mid-way is worse than asking the operator the blocker question first and never spawning."
+  reason: "A full designer workstream carries substantial lens, domain, and review cost. A single direction question is often cheaper for the operator to resolve directly; a full spec earns the isolated role context because several related decisions need coherent judgment."
+
+- id: persist-role-by-workstream
+  rule: "Resume the role agent that owns an active workstream for questions, operator testing feedback, and revisions. Start a new role workstream when the operator supplies a new plan, requests an unrelated outcome, the role changes, or accumulated context makes continuation unsafe. Treat a handoff as a checkpoint, not automatic termination."
+  condition: "When routing follow-up work after a role has returned a handoff."
+  reason: "Small revisions benefit from the role's live understanding of the implementation and prior decisions. Replacing it at every handoff discards useful context, while carrying it into a new planned outcome risks reviving settled or rejected work through pattern matching."
+
+- id: prefer-independent-evaluation
+  rule: "Prefer a fresh isolated context when a role evaluates work produced by the current agent or context."
+  condition: "When routing review or other evaluative work."
+  reason: "Producer context carries prior rationale and commitments that can make the evaluator less likely to recognize faults. For small mechanical checks, the orchestrator may judge that isolation cost outweighs this risk."
 
 - id: inline-coder-session-protocol
   rule: "Before any inline coder work: load the coder lens and its declared domains (plus the project's pack overlay if its shape declares one) plus the project domains if not already in context, then apply its constraints throughout. During the session: flag interesting decisions in-flight as potential principles. At the natural seam (feature complete, direction approved, conversation shifts away from code): ask 'any of these decisions worth encoding as a principle?' Don't defer to end of session — the seam is the close."
@@ -59,14 +84,14 @@ principles:
   reason: "A list of known problems is not an audit. An operator naming specific issues still benefits from a designer's fresh-eyes pass, which surfaces issues the operator didn't know to name."
 
 - id: spawn-token-summary
-  rule: "Append the following section to every role spawn prompt, after the task: '## Token usage summary\nAt the end of your output, add a `### token usage` section listing: every file you read and its approximate line count, how many corpus principles you referenced, and your estimate of the single heaviest cost item.'"
-  condition: "Every subagent spawn (UI Designer, UX Designer, Coder)."
+  rule: "Append the following section to every new isolated role-agent prompt, after the task: '## Token usage summary\nAt the end of your output, add a `### token usage` section listing: every file you read and its approximate line count, how many corpus principles you referenced, and your estimate of the single heaviest cost item.'"
+  condition: "Every new isolated role agent (UI Designer, UX Designer, Coder)."
   reason: "The orchestrator only receives an aggregate token count from the runtime — no per-operation breakdown. Self-reporting by the role is the only way to identify which reads or outputs drove cost."
 
 - id: full-corpus-on-spawn
-  rule: "Always pass every domain the role declares, in full, when spawning a designer or coder subagent. Do not excerpt or filter a domain by perceived task relevance. This bars dropping *principles* by relevance — it does not bar the working/audit storage split (see kernel.md), which removes audit metadata uniformly, nor the declaration itself (loading only the domains a lens declares is not a relevance judgment — it is a fixed, inspectable contract)."
-  condition: "Any subagent spawn where the role declares one or more domains."
-  reason: "Selective inclusion within a declared domain requires the orchestrator to judge which principles are relevant from the task framing — a judgment it cannot make reliably. A missed principle silently degrades the spec or implementation without any signal it was missed. The storage split and the declaration are exempt: neither makes a per-task relevance judgment."
+  rule: "Always pass every domain the role declares, in full, when starting an isolated designer or coder agent. Do not excerpt or filter a domain by perceived task relevance. This bars dropping *principles* by relevance — it does not bar the working/audit storage split (see kernel.md), which removes audit metadata uniformly, nor the declaration itself (loading only the domains a lens declares is not a relevance judgment — it is a fixed, inspectable contract)."
+  condition: "Any new isolated role agent whose role declares one or more domains."
+  reason: "Selective inclusion within a declared domain requires the orchestrator to judge which principles are relevant from the task framing — a judgment it cannot make reliably. A missed principle silently degrades the spec or implementation without any signal it was missed. The duplicate transmission cost is tolerated for this completeness guarantee, not desired or used as corpus-size control."
 
 - id: ratify-gate-judgment-vs-knowledge
   rule: "At the ratify gate, ask for each proposal whether it encodes a judgment call (a decision made under uncertainty where context and tradeoffs shaped the outcome) or a knowledge item (something derivable from documentation or training). Surface this distinction with the proposal — the role knows it from the inside. Do not evaluate it as the orchestrator."
@@ -83,5 +108,25 @@ principles:
   condition: "When ratifying a proposal that arrived without a home domain."
   reason: "Proposals surface from work, not from a domain. The gate is the one human-gated point where domain assignment judgment belongs. A split-domain proposal is a signal the boundaries may be wrong — a fork candidate to surface, not a principle to duplicate."
 
+- id: decompose-large-tasks-before-spawning
+  rule: "When a task's scope spans many independent workstreams, decide their ownership in the orchestrator. Within one assigned workstream and stance, allow the owning role to create autonomous scope-bounded workers."
+  condition: "When routing a task whose scope spans many independent files or units."
+  reason: "Workstream boundaries affect routing, role ownership, and operator visibility, so they belong to the orchestrator. Local execution decomposition does not change ownership and is cheaper for the role closest to the work to manage."
+
+- id: worker-handoffs-reach-orchestrator
+  rule: "Allow a role to create autonomous, scope-bounded workers within its assigned task and stance. Work results return to the parent; questions, tradeoffs, proposals, violations, and routing requests go directly to the orchestrator when supported, or are relayed by the parent verbatim under `Delegated handoffs`. Cross-role and deeper delegation return to the orchestrator."
+  condition: "When a role agent delegates part of its assigned work."
+  reason: "Local decomposition can reduce execution cost without changing role ownership. The failure mode is not delegation itself but allowing the parent to filter a child's orchestration-relevant handoff, which hides questions and corpus signals from the only role authorized to route and ratify them."
+
+- id: operator-ratifies-routing-corpus
+  rule: "The orchestrator may surface observations about its own routing behavior, but it must not promote them into `orchestrator-routing` without explicit operator ratification."
+  condition: "When work suggests a new or revised routing principle."
+  reason: "The orchestrator cannot independently evaluate and ratify the policy governing its own choices. Operator ratification supplies the missing external gate; repeated role-independent evidence may later justify promotion into the skill or kernel as a meta-principle."
+
 killed:
+
+- id: surface-nested-handoffs-verbatim
+  rule: "If a spawned role's own transcript shows it invoked the Agent/Task tool, retrieve and relay that nested handoff to the operator directly and verbatim rather than trusting the parent role's summary."
+  kill_type: quality
+  reason_killed: "Treats nested delegation as an accepted contingency worth building a recovery procedure around, rather than something no-unilateral-sub-spawn should prevent outright. If prevention holds, there's nothing to detect; if it doesn't, that's a violation to investigate directly, not a routine step. Writing this normalized the failure instead of insisting on prevention."
 ```

@@ -17,6 +17,10 @@ Commands:
   triggers                         evaluate thresholds; print what fires
   lint-handoff FILE                validate a handoff artifact's envelope
   handoffs                         list lingering handoff files with age
+  lint-deferred                    validate the non-blocking UI/UX decision queue
+  deferred                         list queued decisions grouped by owning role
+  lint-utility-candidates          validate the persistent utility-candidate ledger
+  utility-candidates               list candidates with status and sighting count
   retro-done --domain D            reset counters after a retrospective
   sync-done                        reset library-drift after a UI-library sync
 
@@ -42,6 +46,9 @@ SYNC_DRIFT = 3
 
 STATUS_ENUM = {"complete", "tradeoffs-pending", "questions-pending", "blocked"}
 KIND_ENUM = {"judgment", "knowledge", "direction"}
+DEFERRED_ROLE_ENUM = {"ui-designer", "ux-designer"}
+DEFERRED_STATUS_ENUM = {"queued", "resolved"}
+UTILITY_STATUS_ENUM = {"open", "deferred", "denied", "accepted", "implemented"}
 
 
 def today() -> str:
@@ -65,6 +72,8 @@ class Project:
         self.domains_dir = os.path.join(root, "corpora", "domains")
         self.audit_path = os.path.join(self.domains_dir, "audit.md")
         self.handoffs_dir = os.path.join(root, "corpora", "handoffs")
+        self.deferred_path = os.path.join(root, "corpora", "deferred-decisions.md")
+        self.utility_candidates_path = os.path.join(root, "corpora", "utility-candidates.md")
         if not os.path.isdir(self.domains_dir):
             fail(f"no corpora/domains under {root} — run from a bootstrapped project root, or pass --root")
 
@@ -391,6 +400,212 @@ def cmd_handoffs(project: Project, _args) -> None:
         print(f"  - {name}  status={sm.group(1) if sm else '?'}  age={age}d")
 
 
+def parse_deferred(path: str) -> list:
+    """Parse the queue's deliberately flat YAML subset without a YAML dependency."""
+    entries = []
+    item = None
+    in_decisions = False
+    for raw in open(path):
+        line = raw.rstrip()
+        stripped = line.strip()
+        if in_decisions and stripped == "```":
+            break
+        if stripped == "decisions:" or stripped == "decisions: []":
+            in_decisions = True
+            continue
+        if not in_decisions or not stripped or stripped.startswith(("#", "```")):
+            continue
+        if re.match(r"^\s*-\s+id:\s*", line):
+            item = {}
+            entries.append(item)
+            stripped = re.sub(r"^-\s+", "", stripped)
+        if item is not None and ":" in stripped:
+            key, _, value = stripped.partition(":")
+            item[key.strip()] = value.strip().strip('"').strip("'")
+    return entries
+
+
+def deferred_problems(entries: list) -> list:
+    required = ("id", "role", "domain", "question", "context", "source-workstream",
+                "created", "blocking", "provisional-treatment", "status")
+    problems = []
+    seen = set()
+    for index, entry in enumerate(entries, 1):
+        label = entry.get("id") or f"entry {index}"
+        for field in required:
+            if not entry.get(field):
+                problems.append(f"{label}: missing {field}")
+        if entry.get("id") in seen:
+            problems.append(f"{label}: duplicate id")
+        seen.add(entry.get("id"))
+        if entry.get("role") not in DEFERRED_ROLE_ENUM:
+            problems.append(f"{label}: role must be one of {sorted(DEFERRED_ROLE_ENUM)}")
+        if entry.get("status") not in DEFERRED_STATUS_ENUM:
+            problems.append(f"{label}: status must be one of {sorted(DEFERRED_STATUS_ENUM)}")
+        if entry.get("blocking") != "no":
+            problems.append(f"{label}: blocking must be 'no' — surface blockers immediately")
+        created = entry.get("created", "")
+        if created and not re.fullmatch(r"\d{4}-\d{2}-\d{2}", created):
+            problems.append(f"{label}: created must be YYYY-MM-DD")
+    return problems
+
+
+def cmd_lint_deferred(project: Project, _args) -> None:
+    if not os.path.exists(project.deferred_path):
+        config = os.path.join(project.root, "corpora", "config.md")
+        config_text = open(config).read() if os.path.exists(config) else ""
+        if re.search(r"^has-ui:\s*yes\s*$", config_text, re.MULTILINE):
+            fail("UI project has no corpora/deferred-decisions.md — create it from the kernel schema")
+        print("no deferred-decision queue needed (project has no UI)")
+        return
+    entries = parse_deferred(project.deferred_path)
+    problems = deferred_problems(entries)
+    if problems:
+        print(f"FAIL {project.deferred_path}")
+        for problem in problems:
+            print(f"  - {problem}")
+        sys.exit(1)
+    resolved = [entry["id"] for entry in entries if entry.get("status") == "resolved"]
+    print(f"PASS {project.deferred_path} ({len(entries)} entries)")
+    if resolved:
+        print("  warning: resolved entries should be removed after ratification: " + ", ".join(resolved))
+
+
+def cmd_deferred(project: Project, _args) -> None:
+    if not os.path.exists(project.deferred_path):
+        print("deferred decision queue: absent")
+        return
+    entries = parse_deferred(project.deferred_path)
+    problems = deferred_problems(entries)
+    if problems:
+        print("deferred decision queue is invalid; run `lint-deferred`")
+        sys.exit(1)
+    queued = [entry for entry in entries if entry.get("status") == "queued"]
+    if not queued:
+        print("deferred decision queue: empty")
+        return
+    print("deferred non-blocking decisions:")
+    for role in sorted(DEFERRED_ROLE_ENUM):
+        owned = [entry for entry in queued if entry["role"] == role]
+        if not owned:
+            continue
+        print(f"  {role} ({len(owned)}):")
+        for entry in owned:
+            print(f"    - {entry['id']}  domain={entry['domain']}  workstream={entry['source-workstream']}")
+            print(f"      {entry['question']}")
+
+
+def parse_utility_candidates(path: str) -> list:
+    """Parse candidate top-level fields and count nested evidence records."""
+    entries = []
+    item = None
+    in_candidates = False
+    in_evidence = False
+    in_disposition = False
+    for raw in open(path):
+        line = raw.rstrip()
+        stripped = line.strip()
+        if in_candidates and stripped == "```":
+            break
+        if stripped in {"candidates:", "candidates: []"}:
+            in_candidates = True
+            continue
+        if not in_candidates or not stripped or stripped.startswith(("#", "```")):
+            continue
+        if re.match(r"^\s{2}-\s+id:\s*", line):
+            item = {"_evidence_count": 0, "_disposition_reason": ""}
+            entries.append(item)
+            item["id"] = stripped.partition(":")[2].strip().strip('"').strip("'")
+            in_evidence = False
+            in_disposition = False
+            continue
+        if item is None:
+            continue
+        top = re.match(r"^\s{4}([a-z][a-z0-9-]*):\s*(.*)$", line)
+        if top:
+            key, value = top.groups()
+            item[key] = value.strip().strip('"').strip("'")
+            in_evidence = key == "evidence"
+            in_disposition = key == "disposition"
+            continue
+        if in_evidence and re.match(r"^\s{6}-\s+workstream:\s*\S+", line):
+            item["_evidence_count"] += 1
+        if in_disposition:
+            reason = re.match(r"^\s{6}reason:\s*(.*)$", line)
+            if reason:
+                item["_disposition_reason"] = reason.group(1).strip().strip('"').strip("'")
+    return entries
+
+
+def utility_candidate_problems(entries: list) -> list:
+    required = ("id", "operation-shape", "status", "first-seen", "last-seen", "sightings")
+    problems = []
+    seen = set()
+    for index, entry in enumerate(entries, 1):
+        label = entry.get("id") or f"entry {index}"
+        for field in required:
+            if not entry.get(field):
+                problems.append(f"{label}: missing {field}")
+        if entry.get("id") in seen:
+            problems.append(f"{label}: duplicate id")
+        seen.add(entry.get("id"))
+        if entry.get("status") not in UTILITY_STATUS_ENUM:
+            problems.append(f"{label}: status must be one of {sorted(UTILITY_STATUS_ENUM)}")
+        dates = []
+        for field in ("first-seen", "last-seen"):
+            value = entry.get(field, "")
+            try:
+                dates.append(datetime.date.fromisoformat(value))
+            except ValueError:
+                if value:
+                    problems.append(f"{label}: {field} must be a valid YYYY-MM-DD date")
+        if len(dates) == 2 and dates[1] < dates[0]:
+            problems.append(f"{label}: last-seen cannot precede first-seen")
+        try:
+            sightings = int(entry.get("sightings", ""))
+            if sightings < 1:
+                raise ValueError
+        except ValueError:
+            problems.append(f"{label}: sightings must be a positive integer")
+        if entry.get("_evidence_count", 0) < 1:
+            problems.append(f"{label}: requires at least one evidence workstream")
+        if entry.get("status") in {"deferred", "denied"} and not entry.get("_disposition_reason"):
+            problems.append(f"{label}: {entry.get('status')} status requires disposition reason")
+    return problems
+
+
+def cmd_lint_utility_candidates(project: Project, _args) -> None:
+    path = project.utility_candidates_path
+    if not os.path.exists(path):
+        fail("no corpora/utility-candidates.md — create it from the kernel schema")
+    entries = parse_utility_candidates(path)
+    problems = utility_candidate_problems(entries)
+    if problems:
+        print(f"FAIL {path}")
+        for problem in problems:
+            print(f"  - {problem}")
+        sys.exit(1)
+    print(f"PASS {path} ({len(entries)} entries)")
+
+
+def cmd_utility_candidates(project: Project, _args) -> None:
+    path = project.utility_candidates_path
+    if not os.path.exists(path):
+        print("utility candidate ledger: absent")
+        return
+    entries = parse_utility_candidates(path)
+    if utility_candidate_problems(entries):
+        print("utility candidate ledger is invalid; run `lint-utility-candidates`")
+        sys.exit(1)
+    if not entries:
+        print("utility candidate ledger: empty")
+        return
+    print("utility candidates:")
+    for entry in entries:
+        print(f"  - {entry['id']}  status={entry['status']}  sightings={entry['sightings']}")
+        print(f"    {entry['operation-shape']}")
+
+
 def cmd_retro_done(project: Project, args) -> None:
     state = load(project)
     for c in state["counters"]:
@@ -436,6 +651,10 @@ def main() -> None:
     lh = sub.add_parser("lint-handoff")
     lh.add_argument("file")
     sub.add_parser("handoffs")
+    sub.add_parser("lint-deferred")
+    sub.add_parser("deferred")
+    sub.add_parser("lint-utility-candidates")
+    sub.add_parser("utility-candidates")
     r = sub.add_parser("retro-done")
     r.add_argument("--domain", required=True)
     sub.add_parser("sync-done")
@@ -443,6 +662,9 @@ def main() -> None:
     project = Project(os.path.abspath(args.root))
     {"measure": cmd_measure, "verify": cmd_verify, "record-gate": cmd_record_gate, "triggers": cmd_triggers,
      "lint-handoff": cmd_lint_handoff, "handoffs": cmd_handoffs,
+     "lint-deferred": cmd_lint_deferred, "deferred": cmd_deferred,
+     "lint-utility-candidates": cmd_lint_utility_candidates,
+     "utility-candidates": cmd_utility_candidates,
      "retro-done": cmd_retro_done, "sync-done": cmd_sync_done}[args.cmd](project, args)
 
 

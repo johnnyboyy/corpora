@@ -1,14 +1,14 @@
 # Lineage
 
 This document explains how the system and its conventions came to be — not what they are
-(that's `skill.md` and `kernel.md`), but why they are. It's for someone fresh to the repo
+(that's `SKILL.md` and `kernel.md`), but why they are. It's for someone fresh to the repo
 who finds a convention and wonders whether it's arbitrary, or for anyone returning after
 a gap who wants the reasoning rather than just the rule.
 
 Because it is a history, it records *decisions and their reasoning as dated events* — the
 form of claim that stays true even after the code moves on. It is deliberately not the
 authority on current state: where an entry explains why something was decided, whether that
-decision still holds is answered by `kernel.md`/`skill.md`, not here. A present-tense state
+decision still holds is answered by `kernel.md`/`SKILL.md`, not here. A present-tense state
 claim ("X is in the kernel") is a defect in this document — it rots silently the moment the
 code diverges. The durable form is "on `<date>`, we reasoned toward X, because…": verifiable,
 and immune to staleness when the code later moves on.
@@ -469,7 +469,7 @@ own physical boundary.
 *Decided and executed 2026-06-22, across the skill and both projects (Blog, FAMOUS), in one pass.
 The pre-redesign system is preserved at git tag `v1-alpha`; `redesign-proposal.md` (and
 `redesign-proposal.v1.md`) hold the reasoning at length. Verify the current shape against
-`kernel.md`, `skill.md`, and the `domains/` directories — this entry records why the move was made,
+`kernel.md`, `SKILL.md`, and the `domains/` directories — this entry records why the move was made,
 not a guarantee of present state.*
 
 The original system welded two things into the **role**: a *reasoning lens* (how an agent thinks)
@@ -847,7 +847,7 @@ scope. Whether these principles hold across a second project is the condition fo
 external systems: microsoft/SkillOpt (validation-gated skill-document optimization) and
 uditgoenka/autoresearch (bounded metric-loop iteration). The four `*-proposal.md` files at the
 repo root hold the reasoning at length; they follow the `redesign-proposal.md` convention and are
-removed once resolved. Verify current state against `kernel.md` and `skill.md`.*
+removed once resolved. Verify current state against `kernel.md` and `SKILL.md`.*
 
 SkillOpt's thesis is a standing critique of this system: self-revision without an empirical gate
 does not reliably improve over its starting point. The ratify gate filters what *enters* the
@@ -919,7 +919,7 @@ median session growth 59–106k beyond baseline, and sessions saturating at the 
 ceiling — the zone the attribution-noise kills came from. 80k stops chaining early enough that
 the incoming role's segment plus the gate's audit pass complete before that zone; roughly half of
 the measured sessions would have been forced to spawn mid-way, which is the intended
-conservatism. Verify the operative value against `skill.md` — this records only how the first
+conservatism. Verify the operative value against `SKILL.md` — this records only how the first
 number was chosen.
 
 **The engagement channel — the planner's flaw named.** The operator's real reason for preferring
@@ -956,7 +956,7 @@ the new counters would surface — tightens the length threshold before the old 
 
 *Decided 2026-07-06, same day as the empirical-signal pass it hardens. Verify current state
 against `scripts/corpus.py`, `kernel.md` "Storage: working vs audit," and the gate steps in
-`skill.md`.*
+`SKILL.md`.*
 
 The counters and efficacy counts landed as instructions to the orchestrator — a model
 incrementing integers and rewriting YAML at gate time. The evaluation that same day named the
