@@ -14,10 +14,10 @@ principles:
   condition: "When an active/selected indicator must orient the user in a list where items have low visual differentiation — e.g., all items show only timestamps."
   reason: "A dot works as a secondary signal when items have rich content to anchor it. In a sparse list, the dot can read as decoration. Full-row treatment is the established selection affordance users already know."
 
-- id: active-row-is-inert
-  rule: "The currently active entry in a selection list must suppress its hover state and produce no action on click. Do not give the active row an interactive cursor or hover background."
-  condition: "When a list allows switching the active item by clicking a row, and one row represents the currently active item."
-  reason: "An interactive hover state on the active row implies that clicking does something. When nothing happens, the user loses confidence in the UI. Inert treatment communicates 'you are already here' without needing to explain it."
+- id: active-row-is-inert-exact-route-only
+  rule: "The currently active entry in a selection list must suppress its hover state and produce no action on click ONLY when its active state corresponds to the exact current page/state — clicking it would navigate to exactly where the user already is. When an item's active state is determined by a broader match spanning multiple distinct pages/routes (a section/prefix match, e.g. a nav item highlighted across an entire route subtree), keep it a normal interactive element — real hover feedback, real click behavior — and use the active indicator (tint, accent bar) only to signal 'you're in this section,' not 'clicking does nothing.'"
+  condition: "When a list or nav allows switching the active item by clicking a row, and one row represents the currently active item. Before applying full inertness, check whether 'active' means the exact current route/state or a broader section match — only the former is inert."
+  reason: "Discovered via a real defect (Meridian project, 2026-07-10): a sidebar nav item's 'active' state was defined as a route-prefix match spanning both a list screen and every one of its detail sub-pages. Applying blanket inertness made a real, meaningful click (returning from a detail page to the list) silently do nothing — the exact confidence-breaking failure this principle exists to prevent, just inverted: the coder trusted the label 'active' without checking whether it meant 'exact page' or 'entire section.' The original rule's core insight (an item meaning 'you are exactly here' should not offer false affordance) is still correct; it was applied past its actual scope. The distinction is the current-route/current-section split spelled out above."
 
 - id: section-level-explanation-not-row-level
   rule: "Explanatory tooltips or help text that apply uniformly to all rows in a list belong on the section header, not repeated per row."
@@ -25,4 +25,9 @@ principles:
   reason: "Per-row repetition of identical explanatory content adds visual noise without adding information. A single tooltip on the section heading correctly signals that the concept applies to the section as a class."
 
 killed:
+
+- id: active-row-is-inert
+  rule: "The currently active entry in a selection list must suppress its hover state and produce no action on click. Do not give the active row an interactive cursor or hover background."
+  kill_type: quality
+  reason_killed: "Superseded by active-row-is-inert-exact-route-only. The condition 'one row represents the currently active item' didn't distinguish exact-route match from section/prefix match, so a coder applying it to a multi-route nav section (Meridian's Sidebar: a Clients item active across both the list screen and every client-detail sub-page) suppressed a real, meaningful click. Refined 2026-07-10 rather than discarded — the core insight about false affordance on a true no-op item still holds, narrowed to where it actually applies."
 ```

@@ -277,6 +277,15 @@ provenance:
 - id: active-row-is-inert
   domain: lists-selection
   provenance: "2026-06-16, load calculator history redesign."
+  history:
+    - date: 2026-07-10
+      type: killed
+      reason: "Superseded by active-row-is-inert-exact-route-only, promoted directly from the Meridian project (operator-approved cross-project edit, not a retrospective promotion) — see that entry below for the discovered defect."
+
+- id: active-row-is-inert-exact-route-only
+  domain: lists-selection
+  kind: judgment
+  provenance: "Meridian project, coder, 2026-07-10, top-bar rewrite pass. A Sidebar nav item's active state (`pathname.startsWith('/clients')`) spanned both the Clients list screen and every client-detail sub-page. Applying active-row-is-inert's blanket 'no hover, no click' treatment made a real, meaningful click (returning to the list from a detail page) silently do nothing, breaking tests/replay/runCase.ts's persistent-chrome recovery path (30 tests failed, confirmed via git stash bisection against the untouched baseline). Operator reviewed the coder's fix (keep it a real Link, styled to look inert) and pushed back: the styling itself was wrong too, not just an implementation detail — a section-spanning active item should stay visually and functionally interactive, since a click there does something real. Refined and edited directly into the shared pack seed at the operator's explicit request, rather than deferred to a project-level override or a future retrospective promotion."
 
 - id: section-level-explanation-not-row-level
   domain: lists-selection
