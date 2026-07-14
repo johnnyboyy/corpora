@@ -1052,3 +1052,10 @@ Finally, runtime portability became structural rather than forked: `SKILL.md`, r
 resources, platform-appropriate project instructions at bootstrap, shared role files, and one
 repository symlinked into both skill directories. Platform differences stay at activation and
 runtime capability discovery; accumulated judgment stays singular.
+
+*Extended the same day: derived recurrence, not attention-maintained counters.* The first utility
+ledger schema stored `sightings`, `first-seen`, and `last-seen` beside its evidence, recreating the
+bookkeeping defect this pass claimed to avoid: a missed increment looked like no recurrence. Those
+fields were removed. The model still judges candidate identity and operator disposition;
+`record-utility-candidate` appends evidence, while the script derives counts and dates and signals
+when prior denial or recurrence should be resurfaced.

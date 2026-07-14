@@ -88,8 +88,9 @@ because the audit load is *broad* (the orchestrator pulls the whole layer at onc
   consumed only by the retrospective.
 
   The script (in the skill repo: `record-gate`, `measure`, `triggers`, `lint-handoff`,
-  `lint-deferred`, `deferred`, `lint-utility-candidates`, `utility-candidates`, `retro-done`,
-  `sync-done`) does all counting, measuring, validation, and threshold math. The model supplies
+  `lint-deferred`, `deferred`, `lint-utility-candidates`, `utility-candidates`,
+  `record-utility-candidate`, `set-utility-status`, `retro-done`, `sync-done`) does all counting,
+  measuring, validation, and threshold math. The model supplies
   judgments as arguments — fired/violated/idle classification, ratify counts — and never does the
   arithmetic or the YAML writing. Bookkeeping done by attention is bookkeeping that silently
   stops. Hand-written provenance, promotions, and per-kill detail live in the same file, outside
@@ -430,11 +431,9 @@ candidates:
   - id: color-math
     operation-shape: "Deterministic perceptual color transformation and compositing."
     status: denied
-    first-seen: 2026-07-14
-    last-seen: 2026-07-14
-    sightings: 1
     evidence:
-      - workstream: settings-redesign
+      - date: 2026-07-14
+        workstream: settings-redesign
         burden: "Several rounds of manual color derivation."
     disposition:
       reason: "Not enough expected reuse yet."
@@ -443,8 +442,9 @@ candidates:
 
 Surface a plausible candidate whenever denial is cheap. Before recording it, check the standard
 library, installed dependencies, current runtime tools, and active project utilities. The operator
-accepts, denies, or defers it. On recurrence, merge by operation shape, increment `sightings`, append
-evidence, update `last-seen`, and resurface the prior disposition. Only an accepted utility that is
+accepts, denies, or defers it. Record evidence with `corpus.py record-utility-candidate`; the script
+derives sighting count and first/last dates and resurfaces recurrence or a prior denial. Record the
+operator's disposition with `corpus.py set-utility-status`. Only an accepted utility that is
 implemented and tested enters config. Denied candidates remain historical memory; retrospectives
 may consolidate duplicates or obsolete entries. Candidate status is `open`, `deferred`, `denied`,
 `accepted`, or `implemented`.

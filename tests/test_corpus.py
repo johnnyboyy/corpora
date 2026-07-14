@@ -36,8 +36,9 @@ class DeferredDecisionCommandsTest(unittest.TestCase):
         )
 
     def run_command(self, command):
+        command = [command] if isinstance(command, str) else command
         return subprocess.run(
-            [sys.executable, str(SCRIPT), "--root", str(self.root), command],
+            [sys.executable, str(SCRIPT), "--root", str(self.root), *command],
             text=True,
             capture_output=True,
             check=False,
@@ -61,7 +62,7 @@ class DeferredDecisionCommandsTest(unittest.TestCase):
         """
 
     @staticmethod
-    def candidate(identifier="color-math", status="open", sightings=1, reason=""):
+    def candidate(identifier="color-math", status="open", reason="", second_evidence=False):
         disposition = (
             f'\n            disposition:\n              reason: "{reason}"' if reason else ""
         )
@@ -70,12 +71,10 @@ class DeferredDecisionCommandsTest(unittest.TestCase):
           - id: {identifier}
             operation-shape: "Deterministic perceptual color transformation."
             status: {status}
-            first-seen: 2026-07-14
-            last-seen: 2026-07-14
-            sightings: {sightings}
             evidence:
-              - workstream: settings-redesign
-                burden: "Repeated manual color derivation."{disposition}
+              - date: 2026-07-14
+                workstream: settings-redesign
+                burden: "Repeated manual color derivation."{'\n              - date: 2026-08-03\n                workstream: reporting-redesign\n                burden: "Manual compositing recurred."' if second_evidence else ''}{disposition}
         """
 
     def test_valid_queue_passes(self):
@@ -204,18 +203,20 @@ class DeferredDecisionCommandsTest(unittest.TestCase):
         self.assertEqual(result.returncode, 2)
         self.assertIn("no corpora/utility-candidates.md", result.stderr)
 
-    def test_invalid_utility_candidate_status_and_sightings_fail(self):
-        self.write_candidates(self.candidate(status="maybe", sightings=0))
+    def test_invalid_utility_candidate_status_and_date_fail(self):
+        self.write_candidates(
+            self.candidate(status="maybe").replace("date: 2026-07-14", "date: today")
+        )
 
         result = self.run_command("lint-utility-candidates")
 
         self.assertEqual(result.returncode, 1)
         self.assertIn("status must be", result.stdout)
-        self.assertIn("sightings must be a positive integer", result.stdout)
+        self.assertIn("date must be valid YYYY-MM-DD", result.stdout)
 
     def test_utility_candidate_requires_evidence(self):
         candidate = self.candidate().replace(
-            '            evidence:\n              - workstream: settings-redesign\n                burden: "Repeated manual color derivation."',
+            '            evidence:\n              - date: 2026-07-14\n                workstream: settings-redesign\n                burden: "Repeated manual color derivation."',
             "",
         )
         self.write_candidates(candidate)
@@ -223,7 +224,7 @@ class DeferredDecisionCommandsTest(unittest.TestCase):
         result = self.run_command("lint-utility-candidates")
 
         self.assertEqual(result.returncode, 1)
-        self.assertIn("requires at least one evidence workstream", result.stdout)
+        self.assertIn("requires at least one evidence record", result.stdout)
 
     def test_denied_utility_candidate_requires_reason(self):
         self.write_candidates(self.candidate(status="denied"))
@@ -244,12 +245,79 @@ class DeferredDecisionCommandsTest(unittest.TestCase):
         self.assertIn("duplicate id", result.stdout)
 
     def test_utility_candidates_lists_status_and_sightings(self):
-        self.write_candidates(self.candidate(status="denied", sightings=2, reason="Wait for recurrence."))
+        self.write_candidates(
+            self.candidate(status="denied", reason="Wait for recurrence.", second_evidence=True)
+        )
 
         result = self.run_command("utility-candidates")
 
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
         self.assertIn("color-math  status=denied  sightings=2", result.stdout)
+        self.assertIn("first=2026-07-14  last=2026-08-03", result.stdout)
+
+    def test_record_utility_candidate_creates_and_resurfaces_recurrence(self):
+        self.write_candidates()
+        base = [
+            "record-utility-candidate",
+            "--id", "color-math",
+            "--operation-shape", "Deterministic perceptual color transformation.",
+            "--workstream", "settings-redesign",
+            "--burden", "Repeated manual color derivation.",
+        ]
+
+        first = self.run_command([*base, "--date", "2026-07-14"])
+        second = self.run_command([
+            "record-utility-candidate",
+            "--id", "color-math",
+            "--operation-shape", "Deterministic perceptual color transformation.",
+            "--workstream", "reporting-redesign",
+            "--burden", "Manual compositing recurred.",
+            "--date", "2026-08-03",
+        ])
+        listing = self.run_command("utility-candidates")
+
+        self.assertEqual(first.returncode, 0, first.stderr + first.stdout)
+        self.assertIn("recorded sighting 1", first.stdout)
+        self.assertEqual(second.returncode, 0, second.stderr + second.stdout)
+        self.assertIn("RESURFACE", second.stdout)
+        self.assertIn("sightings=2", listing.stdout)
+        self.assertIn("first=2026-07-14  last=2026-08-03", listing.stdout)
+
+    def test_record_utility_candidate_deduplicates_identical_evidence(self):
+        self.write_candidates()
+        command = [
+            "record-utility-candidate",
+            "--id", "color-math",
+            "--operation-shape", "Deterministic perceptual color transformation.",
+            "--workstream", "settings-redesign",
+            "--burden", "Repeated manual color derivation.",
+            "--date", "2026-07-14",
+        ]
+        self.run_command(command)
+
+        duplicate = self.run_command(command)
+        listing = self.run_command("utility-candidates")
+
+        self.assertEqual(duplicate.returncode, 0, duplicate.stderr + duplicate.stdout)
+        self.assertIn("identical evidence already recorded", duplicate.stdout)
+        self.assertIn("sightings=1", listing.stdout)
+
+    def test_set_utility_status_requires_and_persists_denial_reason(self):
+        self.write_candidates(self.candidate())
+
+        missing = self.run_command([
+            "set-utility-status", "--id", "color-math", "--status", "denied"
+        ])
+        saved = self.run_command([
+            "set-utility-status", "--id", "color-math", "--status", "denied",
+            "--reason", "Wait for recurrence.",
+        ])
+        linted = self.run_command("lint-utility-candidates")
+
+        self.assertEqual(missing.returncode, 2)
+        self.assertIn("requires --reason", missing.stderr)
+        self.assertEqual(saved.returncode, 0, saved.stderr + saved.stdout)
+        self.assertEqual(linted.returncode, 0, linted.stderr + linted.stdout)
 
 
 if __name__ == "__main__":

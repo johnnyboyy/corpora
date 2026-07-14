@@ -21,6 +21,8 @@ Commands:
   deferred                         list queued decisions grouped by owning role
   lint-utility-candidates          validate the persistent utility-candidate ledger
   utility-candidates               list candidates with status and sighting count
+  record-utility-candidate [...]   append dated evidence to a candidate
+  set-utility-status [...]         record the operator's candidate disposition
   retro-done --domain D            reset counters after a retrospective
   sync-done                        reset library-drift after a UI-library sync
 
@@ -496,9 +498,10 @@ def cmd_deferred(project: Project, _args) -> None:
 
 
 def parse_utility_candidates(path: str) -> list:
-    """Parse candidate top-level fields and count nested evidence records."""
+    """Parse the kernel-defined utility candidate ledger."""
     entries = []
     item = None
+    evidence = None
     in_candidates = False
     in_evidence = False
     in_disposition = False
@@ -513,7 +516,7 @@ def parse_utility_candidates(path: str) -> list:
         if not in_candidates or not stripped or stripped.startswith(("#", "```")):
             continue
         if re.match(r"^\s{2}-\s+id:\s*", line):
-            item = {"_evidence_count": 0, "_disposition_reason": ""}
+            item = {"evidence": [], "disposition-reason": ""}
             entries.append(item)
             item["id"] = stripped.partition(":")[2].strip().strip('"').strip("'")
             in_evidence = False
@@ -524,21 +527,37 @@ def parse_utility_candidates(path: str) -> list:
         top = re.match(r"^\s{4}([a-z][a-z0-9-]*):\s*(.*)$", line)
         if top:
             key, value = top.groups()
-            item[key] = value.strip().strip('"').strip("'")
             in_evidence = key == "evidence"
             in_disposition = key == "disposition"
+            if in_evidence:
+                evidence = None
+                continue
+            if in_disposition:
+                continue
+            item[key] = value.strip().strip('"').strip("'")
             continue
         if in_evidence and re.match(r"^\s{6}-\s+workstream:\s*\S+", line):
-            item["_evidence_count"] += 1
+            # Legacy order is rejected by validation but parsed so the error is useful.
+            evidence = {"workstream": stripped.partition(":")[2].strip().strip('"').strip("'")}
+            item["evidence"].append(evidence)
+        dated = re.match(r"^\s{6}-\s+date:\s*(.*)$", line)
+        if in_evidence and dated:
+            evidence = {"date": dated.group(1).strip().strip('"').strip("'")}
+            item["evidence"].append(evidence)
+            continue
+        evidence_field = re.match(r"^\s{8}(workstream|burden):\s*(.*)$", line)
+        if in_evidence and evidence is not None and evidence_field:
+            key, value = evidence_field.groups()
+            evidence[key] = value.strip().strip('"').strip("'")
         if in_disposition:
             reason = re.match(r"^\s{6}reason:\s*(.*)$", line)
             if reason:
-                item["_disposition_reason"] = reason.group(1).strip().strip('"').strip("'")
+                item["disposition-reason"] = reason.group(1).strip().strip('"').strip("'")
     return entries
 
 
 def utility_candidate_problems(entries: list) -> list:
-    required = ("id", "operation-shape", "status", "first-seen", "last-seen", "sightings")
+    required = ("id", "operation-shape", "status")
     problems = []
     seen = set()
     for index, entry in enumerate(entries, 1):
@@ -551,27 +570,56 @@ def utility_candidate_problems(entries: list) -> list:
         seen.add(entry.get("id"))
         if entry.get("status") not in UTILITY_STATUS_ENUM:
             problems.append(f"{label}: status must be one of {sorted(UTILITY_STATUS_ENUM)}")
-        dates = []
-        for field in ("first-seen", "last-seen"):
-            value = entry.get(field, "")
+        evidence_seen = set()
+        if not entry.get("evidence"):
+            problems.append(f"{label}: requires at least one evidence record")
+        for evidence_index, evidence in enumerate(entry.get("evidence", []), 1):
+            for field in ("date", "workstream", "burden"):
+                if not evidence.get(field):
+                    problems.append(f"{label}: evidence {evidence_index} missing {field}")
+            value = evidence.get("date", "")
             try:
-                dates.append(datetime.date.fromisoformat(value))
+                datetime.date.fromisoformat(value)
             except ValueError:
                 if value:
-                    problems.append(f"{label}: {field} must be a valid YYYY-MM-DD date")
-        if len(dates) == 2 and dates[1] < dates[0]:
-            problems.append(f"{label}: last-seen cannot precede first-seen")
-        try:
-            sightings = int(entry.get("sightings", ""))
-            if sightings < 1:
-                raise ValueError
-        except ValueError:
-            problems.append(f"{label}: sightings must be a positive integer")
-        if entry.get("_evidence_count", 0) < 1:
-            problems.append(f"{label}: requires at least one evidence workstream")
-        if entry.get("status") in {"deferred", "denied"} and not entry.get("_disposition_reason"):
+                    problems.append(f"{label}: evidence {evidence_index} date must be valid YYYY-MM-DD")
+            signature = tuple(evidence.get(field, "") for field in ("date", "workstream", "burden"))
+            if signature in evidence_seen:
+                problems.append(f"{label}: duplicate evidence record {evidence_index}")
+            evidence_seen.add(signature)
+        if entry.get("status") in {"deferred", "denied"} and not entry.get("disposition-reason"):
             problems.append(f"{label}: {entry.get('status')} status requires disposition reason")
     return problems
+
+
+def yaml_quote(value: str) -> str:
+    return '"' + value.replace("\\", "\\\\").replace('"', '\\"') + '"'
+
+
+def save_utility_candidates(path: str, entries: list) -> None:
+    lines = ["# Utility candidates", "", "```yaml"]
+    if not entries:
+        lines.append("candidates: []")
+    else:
+        lines.append("candidates:")
+        for entry in entries:
+            lines.extend([
+                f"  - id: {entry['id']}",
+                f"    operation-shape: {yaml_quote(entry['operation-shape'])}",
+                f"    status: {entry['status']}",
+                "    evidence:",
+            ])
+            for evidence in entry["evidence"]:
+                lines.extend([
+                    f"      - date: {evidence['date']}",
+                    f"        workstream: {evidence['workstream']}",
+                    f"        burden: {yaml_quote(evidence['burden'])}",
+                ])
+            reason = entry.get("disposition-reason", "")
+            if reason:
+                lines.extend(["    disposition:", f"      reason: {yaml_quote(reason)}"])
+    lines.extend(["```", ""])
+    open(path, "w").write("\n".join(lines))
 
 
 def cmd_lint_utility_candidates(project: Project, _args) -> None:
@@ -602,8 +650,61 @@ def cmd_utility_candidates(project: Project, _args) -> None:
         return
     print("utility candidates:")
     for entry in entries:
-        print(f"  - {entry['id']}  status={entry['status']}  sightings={entry['sightings']}")
+        dates = [evidence["date"] for evidence in entry["evidence"]]
+        print(f"  - {entry['id']}  status={entry['status']}  sightings={len(dates)}  "
+              f"first={min(dates)}  last={max(dates)}")
         print(f"    {entry['operation-shape']}")
+
+
+def cmd_record_utility_candidate(project: Project, args) -> None:
+    path = project.utility_candidates_path
+    if not os.path.exists(path):
+        fail("no corpora/utility-candidates.md — create it from the kernel schema")
+    entries = parse_utility_candidates(path)
+    problems = utility_candidate_problems(entries)
+    if problems:
+        fail("utility candidate ledger is invalid — run `lint-utility-candidates`")
+    entry = next((candidate for candidate in entries if candidate["id"] == args.id), None)
+    if entry is None:
+        entry = {"id": args.id, "operation-shape": args.operation_shape, "status": "open",
+                 "evidence": [], "disposition-reason": ""}
+        entries.append(entry)
+    elif entry["operation-shape"] != args.operation_shape:
+        fail(f"candidate '{args.id}' has a different operation-shape")
+    evidence_date = args.date or today()
+    try:
+        datetime.date.fromisoformat(evidence_date)
+    except ValueError:
+        fail("--date must be a valid YYYY-MM-DD date")
+    evidence = {"date": evidence_date, "workstream": args.workstream, "burden": args.burden}
+    if evidence in entry["evidence"]:
+        print(f"utility candidate {args.id}: identical evidence already recorded")
+        return
+    entry["evidence"].append(evidence)
+    save_utility_candidates(path, entries)
+    sightings = len(entry["evidence"])
+    print(f"utility candidate {args.id}: recorded sighting {sightings}")
+    if sightings > 1 or entry["status"] in {"deferred", "denied"}:
+        print(f"RESURFACE {args.id}: status={entry['status']} with {sightings} sightings")
+
+
+def cmd_set_utility_status(project: Project, args) -> None:
+    path = project.utility_candidates_path
+    if not os.path.exists(path):
+        fail("no corpora/utility-candidates.md — create it from the kernel schema")
+    entries = parse_utility_candidates(path)
+    problems = utility_candidate_problems(entries)
+    if problems:
+        fail("utility candidate ledger is invalid — run `lint-utility-candidates`")
+    entry = next((candidate for candidate in entries if candidate["id"] == args.id), None)
+    if entry is None:
+        fail(f"unknown utility candidate '{args.id}'")
+    if args.status in {"deferred", "denied"} and not args.reason:
+        fail(f"status '{args.status}' requires --reason")
+    entry["status"] = args.status
+    entry["disposition-reason"] = args.reason or ""
+    save_utility_candidates(path, entries)
+    print(f"utility candidate {args.id}: status={args.status}")
 
 
 def cmd_retro_done(project: Project, args) -> None:
@@ -655,6 +756,16 @@ def main() -> None:
     sub.add_parser("deferred")
     sub.add_parser("lint-utility-candidates")
     sub.add_parser("utility-candidates")
+    uc = sub.add_parser("record-utility-candidate")
+    uc.add_argument("--id", required=True)
+    uc.add_argument("--operation-shape", required=True)
+    uc.add_argument("--workstream", required=True)
+    uc.add_argument("--burden", required=True)
+    uc.add_argument("--date", default="", help="YYYY-MM-DD; defaults to today")
+    us = sub.add_parser("set-utility-status")
+    us.add_argument("--id", required=True)
+    us.add_argument("--status", required=True, choices=sorted(UTILITY_STATUS_ENUM))
+    us.add_argument("--reason", default="")
     r = sub.add_parser("retro-done")
     r.add_argument("--domain", required=True)
     sub.add_parser("sync-done")
@@ -665,6 +776,8 @@ def main() -> None:
      "lint-deferred": cmd_lint_deferred, "deferred": cmd_deferred,
      "lint-utility-candidates": cmd_lint_utility_candidates,
      "utility-candidates": cmd_utility_candidates,
+     "record-utility-candidate": cmd_record_utility_candidate,
+     "set-utility-status": cmd_set_utility_status,
      "retro-done": cmd_retro_done, "sync-done": cmd_sync_done}[args.cmd](project, args)
 
 

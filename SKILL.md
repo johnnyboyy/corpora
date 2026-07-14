@@ -116,8 +116,10 @@ candidate needs a concrete operation shape and observed inference burden, not pr
 a finished CLI design. Before proposing, check the standard library, installed dependencies,
 current runtime tools, and registered project utilities. Transfer every candidate from the handoff
 to `corpora/utility-candidates.md` before deleting the handoff. Record accept, deny, or defer. When
-the same operation returns, append the evidence and resurface it with its prior disposition and
-sighting count. Only an accepted, implemented, and tested utility enters `corpora/config.md`.
+the same operation returns, use `corpus.py record-utility-candidate` to append evidence and derive
+its dates and sighting count; the command reports when it must be resurfaced. Record operator
+disposition with `corpus.py set-utility-status`. Only an accepted, implemented, and tested utility
+enters `corpora/config.md`.
 
 **Inline, resume, or isolate:** Decide through the `orchestrator-routing` corpus; role names alone
 do not determine the answer. Weigh workstream ownership, stance change, prior exploratory or
@@ -197,9 +199,10 @@ the orchestrator.
    marked `[reading pipeline: <source URL>]`. Same ratify/kill decision; ratified or killed
    entries are removed from `candidates.md`.
 3. **Persist utility candidates.** For every `utility-candidates` entry, match by operation shape
-   against `corpora/utility-candidates.md`. Create or update the entry before deleting the handoff,
-   then surface it to the operator for accept / deny / defer. A recurrence increments sightings,
-   appends evidence, and includes the prior disposition. Acceptance authorizes a scoped coder
+   against `corpora/utility-candidates.md`, then call `corpus.py record-utility-candidate` before
+   deleting the handoff. Surface it to the operator for accept / deny / defer and persist that
+   judgment with `corpus.py set-utility-status`. The script derives counts and dates and identifies
+   recurrence. Acceptance authorizes a scoped coder
    workstream, not config registration; register it only after implementation and tests prove useful.
 4. Present proposals from the handoff envelope's `proposals` field (rule, condition, reason,
    provenance, kind). Surface the `kind` the role captured — do not re-evaluate it. `judgment` =
