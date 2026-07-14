@@ -997,3 +997,58 @@ itself had been operator-remembered, so a coding session begun without `/corpora
 lens and no domains. The hook cannot force the load, but it makes the instruction deterministic
 and present in every session's opening context. This is the system's first executable
 enforcement — the deterministic shell around the probabilistic core.
+
+---
+
+## Cross-runtime portability — separating invariants from old tool constraints
+
+*Decided and executed 2026-07-14 (`edf8b29`), while adapting the skill to run from the same
+repository under Claude Code and Codex. Verify current state against `SKILL.md`, `kernel.md`,
+`domains/orchestrator-routing.md`, and `scripts/corpus.py`; this entry records why the earlier
+spawn and tool-surface conclusions changed.*
+
+The portability review exposed a recurring category error in the system's history: a real concern
+had become fused to the only mechanism the tooling offered at the time. Fresh spawning served
+three purposes — keeping incompatible reasoning out of a role context, forcing the complete lens
+and domains into the spawned prompt, and making corpus growth expensive because the orchestrator
+paid to read and transmit it. Only the second is still a hard construction guarantee. Full role
+content is still assembled and injected because a file path is not proof that an agent absorbed
+the file. But paying twice was a necessary cost, never a desirable corpus budget; corpus size must
+be measured and governed directly. The earlier lineage claim that duplicate load was a useful
+forcing function remains historically true, but no longer states the design goal.
+
+Agent continuation made the handoff boundary similarly visible as an implementation artifact.
+A handoff is now a checkpoint, not agent death. A role agent persists through implementation,
+operator testing, and small revisions inside one recognizable workstream; a new plan, unrelated
+outcome, role change, unsafe context, or failed continuation starts a new instance. This preserves
+the engagement channel without making the orchestrator absorb follow-up coding inline. Stance
+interference, provisional-content bleed, evaluator bias, and context length remain routing evidence,
+but none is an unconditional per-role spawn table. They live as weighable judgment in
+`orchestrator-routing` and can harden into a kernel invariant later only if repeated evidence earns
+that promotion. This supersedes the hard-seam and mechanical 80k conclusions in "The
+empirical-signal pass" as operative policy, not as observations about the sessions that produced
+them.
+
+Delegation changed for the same reason. The old prohibition on a role spawning workers protected
+the orchestrator from losing a child's handoff through parent summarization. The failure was relay,
+not decomposition. Roles may now create same-stance scoped workers autonomously; implementation
+results return to the parent, while questions, tradeoffs, proposals, violations, and routing
+requests reach the orchestrator directly or verbatim through a `Delegated handoffs` envelope.
+Cross-role and deeper delegation still return to the orchestrator because they change ownership.
+
+The project config also stopped pretending to be a catalog of the runtime. Browser automation,
+image generation, and delegation belong to the current environment and are discovered there.
+Config now records stable project facts and project-owned deterministic utilities: small programs
+that replace recurring precision-sensitive or disproportionately expensive inference. The color
+utility was the motivating case, not a privileged category. Utility proposals deliberately have a
+low surfacing threshold and a higher build threshold; accepted, denied, and deferred candidates
+persist in `corpora/utility-candidates.md`, so a deleted handoff does not make recurrence depend on
+operator memory. Non-blocking UI/UX questions gained the parallel
+`corpora/deferred-decisions.md` queue: provisional treatments must be explicit and reversible,
+while blockers still surface immediately. Both ledgers are validated by the deterministic script,
+extending the judgment-versus-bookkeeping boundary established on 2026-07-06.
+
+Finally, runtime portability became structural rather than forked: `SKILL.md`, relative bundled
+resources, platform-appropriate project instructions at bootstrap, shared role files, and one
+repository symlinked into both skill directories. Platform differences stay at activation and
+runtime capability discovery; accumulated judgment stays singular.
