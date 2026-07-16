@@ -6,6 +6,17 @@ Format: url, domains, gap addressed, status (unread | read), source (discovery |
 ```yaml
 queue:
 
+- id: react-you-might-not-need-an-effect
+  url: https://react.dev/learn/you-might-not-need-an-effect
+  domains: [coding-js-react]
+  gap: "effect-necessity patterns beyond the already-killed 'no-read-after-set-in-same-scope' knowledge item"
+  status: read
+  read: 2026-07-15
+  candidates: 0
+  added: 2026-07-15
+  source: manual
+  note: "Reviewed while fixing PlayerBarContent's ref+effect track-change reset (moved to render body). The specific pattern hit (adjusting one piece of state when a prop changes) is knowledge-tier like the sibling kill no-read-after-set-in-same-scope — doc-worked-example, no project judgment. Other patterns in the article (key-based full reset, collapsing effect chains, notifying parents from the handler not a watching effect) are more judgment-flavored but have zero observed occurrences in FAMOUS or Blog yet — same bar that killed stable-id-not-position-for-deferred-ops and frequent-state-in-callback-deps-triggers-cascade. Re-check if one of those patterns actually appears in a future session."
+
 - id: shevlin-use-encapsulation
   url: https://kyleshevlin.com/use-encapsulation
   domains: [coding-js-react]

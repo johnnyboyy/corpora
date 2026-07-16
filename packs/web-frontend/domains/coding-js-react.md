@@ -80,6 +80,11 @@ principles:
   reason: "Inline hook mechanics interleave concerns at the component level, forcing the reader to reconstruct concern boundaries from proximity and naming. A named custom hook makes each boundary structural. A hook that owns state but requires consumers to write handlers breaks encapsulation: consumers must understand internal state structure to mutate it correctly. Returning handlers keeps mutation logic co-located with the state and lets the implementation change without consumer edits."
   see-also: coordinated-setters-signal-reducer
 
+- id: effect-only-derived-state-belongs-in-render
+  rule: "When a useEffect's entire body only computes or adjusts local state from a prop or another piece of state's current value — no subscription, timer, listener, fetch, or other external interaction — do the comparison and setState call directly in the render body (a ref holding the 'previous value' is fine to mutate there), not inside useEffect."
+  condition: "When reviewing a useEffect whose body contains zero external interaction and whose only effect is one or more setState calls gated by a dependency-array change."
+  reason: "The effect only defers a derivable computation to a second render pass for no benefit — an extra render plus an unneeded node in the effect dependency graph. Confirmed as a recurring miss, not a one-off: found independently in FAMOUS (PlayerBarContent's track-change scrubber reset) and Blog (ResultBar's useResultFlash throttled counter), both effects existing purely to adjust local state with no external interaction."
+
 killed:
 
 - id: hook-params-named-for-hook-concern

@@ -63,6 +63,11 @@ provenance:
 - id: extract-named-concern-into-custom-hook
   domain: coding-js-react
   provenance: "2026-07-04, reading kyleshevlin.com/use-encapsulation/. Identified gap between coordinated-setters-signal-reducer (threshold-based) and the article's broader claim: the extraction signal is a nameable concern, not a setter count. Judgment call: extraction overhead vs. readability gain."
+- id: effect-only-derived-state-belongs-in-render
+  domain: coding-js-react
+  kind: judgment
+  provenance: "2026-07-15, FAMOUS PlayerBarContent review (operator flagged a coder principle possibly too web-specific for an unrelated hook-encapsulation question; while fixing the hook extraction, a separate useEffect surfaced that only reset scrubberOpen on track-id change via a ref comparison — moved to render body). Operator asked whether the sibling knowledge-tier kill no-read-after-set-in-same-scope was wrongly killed given this miss; on inspection the two patterns are unrelated (that kill concerns reading state synchronously after its own setter, this concerns an effect used purely for derivable state with no external interaction) but the miss itself prompted an audit of FAMOUS and Blog for recurrence. FAMOUS had only the one instance; Blog's ResultBar.tsx useResultFlash showed the identical shape independently (throttled setFlashKey bump keyed off prop-derived label/delta, no external interaction). Two independent hits across two different project shapes (Expo/RN, Next.js) in one pass — satisfies the cross-project-shape bar for promotion straight to seed rather than starting provisional in one project's working file."
+
 - id: hook-returns-own-handlers
   domain: coding-js-react
   provenance: "2026-07-04, reading kyleshevlin.com/use-encapsulation/. Bundled-handler pattern shown in useOnOff and useInput examples — no existing principle covered it. Judgment call: complete hook interface vs. consumer flexibility."
