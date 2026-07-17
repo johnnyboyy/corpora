@@ -136,4 +136,49 @@ queue:
   added: 2026-07-10
   source: discovery
   fetch-note: "URL returned 403; argument extracted from search result summaries of multiple 2025-2026 sources on this topic. Core claim: Flexbox works content-outward (items size themselves from content, Flexbox distributes remaining space); Grid works layout-inward (tracks are defined first, placement is independent of source order). Because: mixing the mental models produces layouts where content fighting the grid or grid fighting content creates unpredictable reflow. Decision rule: use Grid when elements must align across both axes or when placement must be independent of document source order; use Flexbox when item count is dynamic or items should size from their own content."
+
+- id: henney-restrict-mutability-of-state
+  url: https://kevlinhenney.medium.com/restrict-mutability-of-state-1ac69d1ec5fe
+  domains: [coding-general]
+  gap: "coding-general has no principle about preferring immutable/const declarations when state does not need to change — the mutability-as-correctness-discipline angle of prefer-error-exposing-form"
+  status: unread
+  added: 2026-07-17
+  source: discovery
+  author-note: "Listed author (Kevlin Henney), Medium, Feb 2025. Also published in Overload 34(191), Feb 2026. Core argument from search summaries and LinkedIn posts: 'A great many software defects arise from the incorrect modification of state; if there is less opportunity for code to change state, there will be fewer defects that arise from state change.' Techniques discussed: const, readonly, freeze, value types, immutable-by-default patterns. Bypasses topic-match; argument density confirmed — specific, reasoned claim with a because."
+
+- id: henney-code-cleanliness
+  url: https://kevlinhenney.medium.com/code-cleanliness-9400f263ae49
+  domains: [coding-general]
+  gap: "coding-general has principles about structure and naming but no principle about what code cleanliness actually means — whether it is cosmetic or structural"
+  status: unread
+  added: 2026-07-17
+  source: discovery
+  author-note: "Listed author (Kevlin Henney), Medium, Jan 2026. Title and known Henney style indicate a definitional argument: 'cleanliness' in code is not about formatting or cosmetic tidiness but structural clarity. URL returned 403 on fetch; included on listed-author basis with argument density expected from Henney's essay form. Will confirm on read."
+
+- id: developerway-use-transition
+  url: https://www.developerway.com/posts/use-transition
+  domains: [coding-js-react]
+  gap: "coding-js-react has no principle about React concurrent mode hooks — when to use useTransition vs useDeferredValue for de-prioritizing renders"
+  status: unread
+  added: 2026-07-17
+  source: discovery
+  fetch-note: "URL returned 403; argument extracted from search result summaries referencing this article. Core claim: use useTransition when you own the state update code (wrap the setter); use useDeferredValue when you don't have access to the setter (value comes from props). Because: both hooks de-prioritize a render pass, but they operate at different levels — the hook that wraps a setter requires setter access, so the access level is the decision signal. Also argues: don't apply either hook preemptively — only when the UI actually exhibits lag that simpler memoization can't fix."
+
+- id: logrocket-container-vs-media-queries
+  url: https://blog.logrocket.com/choose-between-media-container-queries/
+  domains: [css]
+  gap: "css domain has no principle about when to use container queries vs media queries — a recurrent decision for component-level vs. viewport-level responsive behavior"
+  status: unread
+  added: 2026-07-17
+  source: discovery
+  fetch-note: "URL returned 403; argument extracted from search result summaries across multiple 2025-2026 sources on this topic. Core claim: use container queries when a component's layout should change based on its own available space; use media queries for page-level layout switches and feature detection. Because: a media-queried component responds to viewport width — which doesn't change when the component moves from a wide content area to a narrow sidebar — while a container query responds to the component's own allocated width, making it context-portable. Both can coexist: media queries govern top-level column layout; container queries govern how individual components render inside those columns."
+
+- id: vercel-nextjs-app-router-mistakes
+  url: https://vercel.com/blog/common-mistakes-with-the-next-js-app-router-and-how-to-fix-them
+  domains: [coding-nextjs]
+  gap: "coding-nextjs has only 2 principles and no retrospective — the domain is thin; this Vercel post covers multiple judgment-level App Router pitfalls not yet in the corpus"
+  status: unread
+  added: 2026-07-17
+  source: discovery
+  fetch-note: "URL returned 403; argument extracted from search result summaries. Post covers App Router mistakes including: fetching data inside Client Components when Server Components would serve the data directly (adding a round-trip for no reason); wrapping non-suspending client components in Suspense (which coding-nextjs already has a principle for); using revalidatePath vs revalidateTag incorrectly; treating Server Actions as general-purpose API endpoints when they can only return void or updated state. Each mistake carries a because. Multiple candidate principles expected on read."
 ```
