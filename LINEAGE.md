@@ -1064,7 +1064,7 @@ when prior denial or recurrence should be resurfaced.
 
 ## Cutting the standing reviewer role
 
-*Decided 2026-07-17, `3da3658`. Verify current state against `SKILL.md`, `README.md`, and
+*Decided 2026-07-17, `0122c5d`. Verify current state against `SKILL.md`, `README.md`, and
 `domains/orchestrator-routing.md`; this entry records why the base and pack-overlay reviewer
 lenses were removed, not that a reviewer role is absent — check those files directly.*
 
