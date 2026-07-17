@@ -64,9 +64,9 @@ principles:
   reason: "Small revisions benefit from the role's live understanding of the implementation and prior decisions. Replacing it at every handoff discards useful context, while carrying it into a new planned outcome risks reviving settled or rejected work through pattern matching."
 
 - id: prefer-independent-evaluation
-  rule: "Prefer a fresh isolated context when a role evaluates work produced by the current agent or context."
+  rule: "Prefer a fresh isolated context when a role evaluates work produced by the current agent or context. There is no standing reviewer role — when code review is warranted, spawn a fresh coder agent scoped to the review, not the coder that produced the work."
   condition: "When routing review or other evaluative work."
-  reason: "Producer context carries prior rationale and commitments that can make the evaluator less likely to recognize faults. For small mechanical checks, the orchestrator may judge that isolation cost outweighs this risk."
+  reason: "Producer context carries prior rationale and commitments that can make the evaluator less likely to recognize faults. A standing reviewer lens was cut (2026-07-17) for low uptake relative to its cost — an independent coder instance gets the same fresh-context benefit without a rarely-invoked dedicated role. For small mechanical checks, the orchestrator may judge that isolation cost outweighs this risk."
 
 - id: inline-coder-session-protocol
   rule: "Before any inline coder work: load the coder lens and its declared domains (plus the project's pack overlay if its shape declares one) plus the project domains if not already in context, then apply its constraints throughout. During the session: flag interesting decisions in-flight as potential principles. At the natural seam (feature complete, direction approved, conversation shifts away from code): ask 'any of these decisions worth encoding as a principle?' Don't defer to end of session — the seam is the close."
@@ -122,6 +122,11 @@ principles:
   rule: "The orchestrator may surface observations about its own routing behavior, but it must not promote them into `orchestrator-routing` without explicit operator ratification."
   condition: "When work suggests a new or revised routing principle."
   reason: "The orchestrator cannot independently evaluate and ratify the policy governing its own choices. Operator ratification supplies the missing external gate; repeated role-independent evidence may later justify promotion into the skill or kernel as a meta-principle."
+
+- id: artifact-points-to-persisted-file-not-full-reproduction
+  rule: "When a role's deliverable is a write to a file the orchestrator can already read (a synced library doc, an edited source file, an updated config), the handoff's Artifact section states a diff/changelog plus a pointer to the file — it does not reproduce the full post-edit document. Reserve full reproduction for content with no other persisted home yet: a spec about to be handed to another role, a tradeoff block, a fresh audit."
+  condition: "When a role writes its Artifact section and the underlying deliverable already exists as a file the orchestrator can open directly."
+  reason: "The schema's 'freeform' Artifact field left an implicit default of pasting the whole document, which pays real token cost once and is then discarded when the handoff file is deleted after ratification — the diff is what the audit trail actually needs going forward. A pointer plus a diff gives the orchestrator everything the ratify gate's audit-against-principles step requires, without the throwaway cost."
 
 killed:
 

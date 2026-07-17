@@ -33,10 +33,9 @@ For each domain a lens declares, both apply when the role runs — seed first, t
 
 - `SKILL.md` — the shared orchestrator entrypoint for Claude Code (`/corpora`) and Codex (`$corpora`): routes workstreams, assembles complete role loads, relays handoffs, and drives the ratify gate.
 - `coder.md` — base coder lens. Declares `coding-general`. Loaded for every project.
-- `reviewer.md` — base reviewer lens. Declares `coding-general`. Evaluates operator-defined scopes against principles and meta-rules; the orchestrator weighs evaluator independence when choosing its context.
 - `kernel.md` — the schema, lens+declaration model, ratify gate, write-back format, two load modes, retrospective signals, and role lifecycle. Reference document.
 - `domains/` — kernel-seed domains: `coding-general.md`, `orchestrator-routing.md`, plus `audit.md` (provenance/promoted/kill detail for the layer, loaded only at ratify/retrospective time).
-- `packs/web-frontend/` — the web-frontend pack: lens overlays (`coder.md`, `reviewer.md`, `ux-designer.md`, `ui-designer.md`) and `domains/` (stack-specific coding + design domains, plus the layer `audit.md`). Loaded only when `role-pack: web-frontend`.
+- `packs/web-frontend/` — the web-frontend pack: lens overlays (`coder.md`, `ux-designer.md`, `ui-designer.md`) and `domains/` (stack-specific coding + design domains, plus the layer `audit.md`). Loaded only when `role-pack: web-frontend`.
 - `bootstrap.md` — one-time project setup. Phase 1 detects project shape and writes `corpora/config.md`. Phases 2 and 3 (UI projects only) generate `corpora/ui-library.md` (UI designer) then `corpora/ux-library.md` (UX designer) and propose seed design principles.
 - `LINEAGE.md` — intellectual history: why conventions became law, key kills, design decisions.
 - `reader-tax-and-the-model.md` — a living, multi-model assessment of whether Explicit by Default helps the model itself, not only the human reviewer.

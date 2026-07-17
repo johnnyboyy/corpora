@@ -1059,3 +1059,25 @@ bookkeeping defect this pass claimed to avoid: a missed increment looked like no
 fields were removed. The model still judges candidate identity and operator disposition;
 `record-utility-candidate` appends evidence, while the script derives counts and dates and signals
 when prior denial or recurrence should be resurfaced.
+
+---
+
+## Cutting the standing reviewer role
+
+*Decided 2026-07-17, commit pending. Verify current state against `SKILL.md`, `README.md`, and
+`domains/orchestrator-routing.md`; this entry records why the base and pack-overlay reviewer
+lenses were removed, not that a reviewer role is absent — check those files directly.*
+
+The base `reviewer.md` and its `packs/web-frontend/reviewer.md` overlay were removed, along with
+the ratify gate's "offer the reviewer" step. Two observations converged, surfaced in a Meridian
+project retrospective conversation: the standing role was rarely invoked — the offer at the ratify
+gate went declined often enough that its ongoing cost (a lens plus `coding-general` kept in step
+with the coder's) wasn't earning its keep — and on the occasions review actually mattered, the
+operator found a fresh, independent *coder* instance did the job better than the dedicated
+reviewer lens. The dedicated lens added a name and a file without adding distinct judgment: the
+evaluator-independence value that motivated it in the first place (see "Stance became the session
+seam," above) comes from a fresh context evaluating producer work, not from that fresh context
+running a reviewer-specific prompt. `prefer-independent-evaluation` in `orchestrator-routing` now
+states the mechanism directly — spawn a fresh coder agent scoped to the review — rather than
+pointing at a role that no longer exists. This is a narrower claim than deleting review itself:
+the capability is intact, routed through the coder lens instead of a parallel one.

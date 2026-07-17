@@ -11,15 +11,13 @@ is the canonical reference: schema, lens+declaration model, generative stance, r
 write-back, handoff artifact, retrospective.
 
 **Layer 1 — kernel (stack-agnostic, always available):** the **orchestrator** lens (this file;
-declares `orchestrator-routing`), the **base coder** (`coder.md`) and **base reviewer**
-(`reviewer.md`) — both declare `coding-general`; the reviewer evaluates code against principles
-and meta-rules at operator checkpoints, not on every task. Kernel-seed domains live in `domains/`
-with one `domains/audit.md` for the layer.
+declares `orchestrator-routing`) and the **base coder** (`coder.md`), which declares
+`coding-general`. Kernel-seed domains live in `domains/` with one `domains/audit.md` for the layer.
 
 **Layer 2 — role packs (stack-specific):** a pack lives under `packs/<name>/` — one lens file per
 role plus a `domains/` directory (with its own `audit.md`). It loads when the project's
 `corpora/config.md` declares `role-pack: <name>`. The only pack here is `packs/web-frontend/`
-(coder + reviewer overlays, ux-designer, ui-designer; coding + design domains). A pack **overlays
+(coder overlay, ux-designer, ui-designer; coding + design domains). A pack **overlays
 the kernel**: it extends lenses and adds domains to declarations — never new roles. One coder, one
 UX designer, one UI designer per project; a role splits into scoped instances only when a
 retrospective surfaces a fork signal from a domain's own accumulated tension (see `kernel.md`),
@@ -225,12 +223,9 @@ the orchestrator.
 7. If the operator defers review, the unratified handoff file *is* the queue — leave it in
    `corpora/handoffs/`; a directory of lingering handoffs is a visible backlog. Delete each
    handoff once its proposals are ratified/killed and written back.
-8. **Offer the reviewer** if coder work happened this session: "Run the reviewer against the diff
-   before committing?" Route it with the diff as scope, weighing evaluator independence through
-   `orchestrator-routing`. Skip if declined or no coder work occurred.
-9. **Check triggers.** `record-gate` prints fired triggers automatically (or run `corpus.py
+8. **Check triggers.** `record-gate` prints fired triggers automatically (or run `corpus.py
    triggers`). Relay any that fire as suggestions to the operator. Suggestions only.
-10. Commit the corpus — domain working files and the audit file together — alongside the code
+9. Commit the corpus — domain working files and the audit file together — alongside the code
    change so they don't drift. Run `corpus.py verify` first; a discrepancy means a gate went
    unrecorded — heal it with a retroactive `record-gate` before committing.
 

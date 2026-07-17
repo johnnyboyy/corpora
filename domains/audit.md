@@ -124,6 +124,10 @@ provenance:
   domain: orchestrator-routing
   provenance: "2026-06-22, corpus redesign. Domain-scoping moved corpus ownership off roles; the ratify gate became the point where a proposal is assigned a domain (or a new domain is born). Exercised in practice 2026-06-28 (HiraganaQuiz ratify session)."
 
+- id: artifact-points-to-persisted-file-not-full-reproduction
+  domain: orchestrator-routing
+  provenance: "Meridian project, 2026-07-17, retrospective conversation. Operator flagged that UI-library sync handoffs reproduced the whole ui-library.md document in the Artifact section despite the role having written directly to the file — real token cost paid once and then discarded when the handoff is deleted post-ratify. The schema's 'freeform' Artifact field never mandated full reproduction; this names the actual dividing line (does the content already have a persisted home the orchestrator can read) that the freeform language left implicit."
+
 # domain: planning
 - id: task-describes-output-not-implementation
   domain: planning
