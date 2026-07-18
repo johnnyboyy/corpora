@@ -1,18 +1,15 @@
-# Domain: coding-js-react (web-frontend pack)
+# Domain: coding-react (web-frontend pack)
 
-JS/TS/React code patterns. Declared by the coder lens when `role-pack: web-frontend`. Audit
-metadata lives in `packs/web-frontend/domains/audit.md`, loaded only at ratify/retrospective
-time.
+React-specific code patterns — JSX, hooks, refs, and component prop-typing. Declared by the coder
+lens when `role-pack: web-frontend`. Split from `coding-js-react` 2026-07-18 once the domain's
+framework-agnostic JS/TS principles were carved into their own `coding-js` domain — see
+`packs/web-frontend/domains/audit.md` for the migration note. Audit metadata lives in
+`packs/web-frontend/domains/audit.md`, loaded only at ratify/retrospective time.
 
 ```yaml
-last-retrospective: 2026-07-06
+last-retrospective: 2026-07-18
 
 principles:
-
-- id: undefined-check-by-source
-  rule: "Match the equality operator to the source of the value: optional props (T | undefined) use === undefined / !== undefined; array element access and Array.find() also use !== undefined. Never == null for either."
-  condition: "When guarding any value that may be absent — optional props, array element access, or Array.find() results."
-  reason: "Strict equality is a common codebase convention. Both sources yield undefined (not null), but distinguishing them by name keeps intent clear. A loose == null silently absorbs both, hiding contract violations."
 
 - id: null-first-ternary
   rule: "Use null-first ternary (`condition ? null : <Component />`) for conditional rendering; never `condition && <Component />`."
@@ -30,11 +27,6 @@ principles:
   condition: "When reviewing a hook's event handlers and finding that 3+ setters always fire together, especially when the groups represent named transitions (answer submitted, question advanced, item loaded)."
   reason: "Scattered setters in a handler are a decomposed state machine — the transitions exist but aren't named. useReducer makes them explicit, consolidates mutation to one place, and lets a reader understand all valid state changes from a single function."
 
-- id: same-state-same-name
-  rule: "When two sibling types have states that produce the same visual output, unify the state vocabulary before extracting a shared renderer. A naming mismatch signals the same concept split across two types — rename first, then the shared function compiles without casting."
-  condition: "When two types have parallel state fields that map to identical visual output, differing only in the name of the base/default state."
-  reason: "Separate names for the same visual concept force either a translation layer or casts at the merge point. Renaming removes the impedance mismatch and makes the subset relationship structurally visible to TypeScript — the narrower type becomes assignable to the wider one without casting."
-
 - id: nested-conditional-signals-sub-component
   rule: "When a render contains a nested conditional (A ? (B ? X : Y) : Z), treat the inner
     conditional as a strong signal that branches X and Y have a narrower consumer than the outer
@@ -46,11 +38,6 @@ principles:
     the inner decision to a sub-component makes each layer's responsibility legible and prevents the
     parent from accumulating branching logic that belongs to its children. The test is reader overhead:
     if the nesting costs the reader nothing to parse, extraction is optional."
-
-- id: named-exports-over-default
-  rule: "Prefer named exports over export default. Export a binding under the name it's defined with, and import it by that same name."
-  condition: "When adding or refactoring a JS/TS module's exports."
-  reason: "A default export lets every importer choose its own local name for the same binding, so the same value can appear under different names across the codebase, and find-references / auto-import tooling has no canonical name to anchor on. Named exports fix the name at the source, so grep and IDE find-references locate every consumer reliably."
 
 - id: prefers-reduced-motion-requires-js-hook
   rule: "For JS-driven animations, detect `prefers-reduced-motion` via a custom hook reading `window.matchMedia('(prefers-reduced-motion: reduce)')` and subscribing to its `change` event. Apply the result to conditionally set duration to zero or skip the animation call. Do not rely on CSS media query overrides alone."
@@ -68,12 +55,6 @@ principles:
   rule: "Ephemeral values that control behavior but don't affect rendering — boolean flags (mount guards, pending-write trackers, round-error bits), timer handles (setTimeout/setInterval return values), any 'did-X-happen-in-this-session' value, or a mirror of current state read only by an external handler (a document-level listener, an imperative ref method) — belong in refs, not useState. Never include timer IDs or behavioral flags in a useCallback or useMemo dependency array. For a document-level event handler (visibilitychange, blur, beforeunload) that must read current React state, shadow the reactive value with a ref updated on every render and have the handler read the ref — not the closure — rather than adding the state to the effect's dependency array as a workaround."
   condition: "When adding any value whose purpose is gating or tracking a side-effect rather than driving rendered output — including a ref that exists only so an external listener or imperative method can read current state without a stale closure. Test: would the UI look different if this value changed? If no, it belongs in a ref."
   reason: "A value in state causes a re-render when changed and enters the dependency surface of any memo or callback. A ref has zero rendering cost and zero dep-cascade cost. Timer IDs especially: they change on every start/clear, so a dep array that includes one recreates the callback each time — propagating recreation to every hook and effect that depends on it, potentially re-firing effects that should not have run. The same test explains document-level listeners: registering one with reactive state in its dependency array re-registers it on every change, which is often wrong for events like visibilitychange, while a closure captured once goes stale if it isn't. Mirroring the state into a ref read by the handler avoids both failure modes, because the mirrored value never drives a render and therefore never needs to appear in a dependency array."
-
-- id: nan-serializes-to-null-in-json
-  rule: "Never store NaN in state that will be JSON-serialized. Use undefined for 'not yet entered' — JSON.stringify omits it; NaN becomes null and silently corrupts reads. The ?? operator does not catch NaN (NaN is not null/undefined)."
-  condition: "Any controlled numeric input whose onChange handler parses with parseFloat or parseInt, or any state that is JSON.stringify'd to a serialization boundary."
-  reason: "JSON.stringify(NaN) === 'null'. An input cleared to '' → parseFloat('') → NaN → ??(default) still evaluates to NaN. That NaN reaches localStorage as null, breaking any consumer that assumes the TypeScript number type."
-  see-also: numeric-inputs-start-empty-not-zero
 
 - id: hook-callsite-legibility
   rule: "Hook parameters should be named for what the hook does with them, not the caller's state variable. Wrap boolean and other ambiguous primitive params in a single options object so the callsite reads as named arguments: useX({ shouldRefresh: isOpen }) not useX(isOpen)."
@@ -128,20 +109,10 @@ killed:
   kill_type: knowledge
   reason_killed: "React's setState is async/enqueued is a first-day React fact derivable from training data. No project-specific judgment encoded — same class as preserve-3d-on-every-ancestor. A coder who needs the reminder will find it in the React docs."
 
-- id: stable-id-not-position-for-deferred-ops
-  rule: "When recording state for a deferred operation (undo, redo, queue, bookmark), store the item's stable identity, never its current position in a filtered, sorted, or paginated view."
-  kill_type: quality
-  reason_killed: "Zero fires across Blog and FAMOUS. Condition (undo/redo/queue/bookmark) has not appeared in either project. A principle that never fires is ambient noise."
-
 - id: css-var-over-mapped-class-for-dynamic-color
   rule: "When a component's fill color must track a CSS custom property that changes based on an ancestor's data attribute, use an inline style rather than a Record mapping prop values to utility class names."
   kill_type: quality
   reason_killed: "Fired once (Blog WireCircle, 2026-06-13). Condition requires ancestor data-attribute scoping plus static class-map — not recurred in FAMOUS. Too narrow for a seed principle after two projects."
-
-- id: font-mono-at-element-not-container
-  rule: "Apply font-mono to the individual element containing code-register data — not to a wrapper div."
-  kill_type: quality
-  reason_killed: "Fired once (Blog FixedBottomResultsBar, 2026-06-13). Has not recurred in FAMOUS. A correct choice a coder makes from first principles when they see the symptom."
 
 - id: frequent-state-in-callback-deps-triggers-cascade
   rule: "Before including a state value in a useCallback or useMemo dependency array, check whether that value is updated by the same interactions the callback serves."

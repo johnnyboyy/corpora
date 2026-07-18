@@ -123,7 +123,8 @@ declaration of the domains it loads:
 ## domains
 stance: convergent        # convergent | divergent — the lens's generative stance (see below)
 - coding-general          # always
-- coding-js-react         # when role-pack: web-frontend
+- coding-js               # when role-pack: web-frontend
+- coding-react            # when role-pack: web-frontend
 - css                     # when role-pack: web-frontend
 ```
 

@@ -14,37 +14,39 @@ working files.)
 ```yaml
 provenance:
 
-# ---- domain: coding-js-react ----
+# ---- domains: coding-js, coding-react (split from coding-js-react 2026-07-18; see LINEAGE.md,
+#      "The coding-js / coding-react split") ----
 - id: undefined-check-by-source
-  domain: coding-js-react
+  domain: coding-js-react   # PENDING: operator to decide coding-js vs coding-react; held out of both
+                            # working files until then — see LINEAGE.md for the split writeup.
   provenance: "Merged from strict-undefined-check-in-arrays + array-access-undefined-not-null, Blog project, 2026-06-01."
 
 - id: null-first-ternary
-  domain: coding-js-react
+  domain: coding-react
   provenance: "2026-06-18, Blog project explicit-by-default post review."
 
 - id: css-var-over-mapped-class-for-dynamic-color
-  domain: coding-js-react
+  domain: coding-react
   provenance: "2026-06-13, Blog project WireCircle refactor."
 
 - id: font-mono-at-element-not-container
-  domain: coding-js-react
+  domain: coding-js
   provenance: "2026-06-13, Blog project FixedBottomResultsBar refactor."
 
 - id: hook-params-named-for-hook-concern
-  domain: coding-js-react
+  domain: coding-react
   provenance: "2026-06-15, Blog project useHistoryState."
 
 - id: hook-options-object-for-named-args
-  domain: coding-js-react
+  domain: coding-react
   provenance: "2026-06-15, Blog project useHistoryState."
 
 - id: wizard-callbacks-unconditional
-  domain: coding-js-react
+  domain: coding-react
   provenance: "2026-06-14, Blog project load-calculator, Issue 19. see-also wizard-output-consistent-regardless-of-path (wizards-flows) — the implementation and UX faces of one concern, now legibly linked across domains."
 
 - id: coordinated-setters-signal-reducer
-  domain: coding-js-react
+  domain: coding-react
   kind: judgment
   provenance: "2026-06-28, HiraganaQuiz refactor. useQuizQueue had 8 useState calls; submitAnswer fired 5 setters and the advance timer fired 6. These groups mapped cleanly to 'submit' and 'advance' action types. Recognizing the grouped setters as an unnamed state machine — not just a large hook — is the non-obvious judgment."
   history:
@@ -53,7 +55,7 @@ provenance:
       reason: "Promoted from Blog project domain to web-frontend pack seed — condition makes no reference to Blog-specific structure; general React hook wisdom."
 
 - id: same-state-same-name
-  domain: coding-js-react
+  domain: coding-js
   kind: judgment
   provenance: "2026-06-28, HiraganaQuiz refactor. TileState 'resting' vs SpellTile 'idle' — same visual concept, two names. Decision to rename before extracting rather than casting or adding a translation layer. Renaming made SpellTile['state'] a structurally valid subset of TileState, eliminating buildSpellTileClass."
   history:
@@ -61,15 +63,15 @@ provenance:
       type: moved
       reason: "Promoted from Blog project domain to web-frontend pack seed — general TypeScript/React structural wisdom, no Blog-specific framing."
 - id: extract-named-concern-into-custom-hook
-  domain: coding-js-react
+  domain: coding-react
   provenance: "2026-07-04, reading kyleshevlin.com/use-encapsulation/. Identified gap between coordinated-setters-signal-reducer (threshold-based) and the article's broader claim: the extraction signal is a nameable concern, not a setter count. Judgment call: extraction overhead vs. readability gain."
 - id: effect-only-derived-state-belongs-in-render
-  domain: coding-js-react
+  domain: coding-react
   kind: judgment
   provenance: "2026-07-15, FAMOUS PlayerBarContent review (operator flagged a coder principle possibly too web-specific for an unrelated hook-encapsulation question; while fixing the hook extraction, a separate useEffect surfaced that only reset scrubberOpen on track-id change via a ref comparison — moved to render body). Operator asked whether the sibling knowledge-tier kill no-read-after-set-in-same-scope was wrongly killed given this miss; on inspection the two patterns are unrelated (that kill concerns reading state synchronously after its own setter, this concerns an effect used purely for derivable state with no external interaction) but the miss itself prompted an audit of FAMOUS and Blog for recurrence. FAMOUS had only the one instance; Blog's ResultBar.tsx useResultFlash showed the identical shape independently (throttled setFlashKey bump keyed off prop-derived label/delta, no external interaction). Two independent hits across two different project shapes (Expo/RN, Next.js) in one pass — satisfies the cross-project-shape bar for promotion straight to seed rather than starting provisional in one project's working file."
 
 - id: hook-returns-own-handlers
-  domain: coding-js-react
+  domain: coding-react
   provenance: "2026-07-04, reading kyleshevlin.com/use-encapsulation/. Bundled-handler pattern shown in useOnOff and useInput examples — no existing principle covered it. Judgment call: complete hook interface vs. consumer flexibility."
   history:
     - date: 2026-07-06
@@ -77,7 +79,7 @@ provenance:
       reason: "Merged with extract-named-concern-into-custom-hook into custom-hook-owns-its-concern. Extraction and interface completeness are co-decisions."
 
 - id: extract-named-concern-into-custom-hook
-  domain: coding-js-react
+  domain: coding-react
   provenance: "2026-07-04, reading kyleshevlin.com/use-encapsulation/. Identified gap between coordinated-setters-signal-reducer (threshold-based) and the article's broader claim: the extraction signal is a nameable concern, not a setter count. Judgment call: extraction overhead vs. readability gain."
   history:
     - date: 2026-07-06
@@ -85,22 +87,22 @@ provenance:
       reason: "Merged with hook-returns-own-handlers into custom-hook-owns-its-concern. See that entry."
 
 - id: hook-callsite-legibility
-  domain: coding-js-react
+  domain: coding-react
   kind: judgment
   provenance: "2026-07-06, retrospective consolidation. Merged from hook-params-named-for-hook-concern (2026-06-15, Blog useHistoryState) and hook-options-object-for-named-args (same session). Both addressed hook callsite legibility and always co-fired. Judgment: naming params for the hook's concern and wrapping ambiguous primitives in an options object are two expressions of the same rule."
 
 - id: custom-hook-owns-its-concern
-  domain: coding-js-react
+  domain: coding-react
   kind: judgment
   provenance: "2026-07-06, retrospective consolidation. Merged from extract-named-concern-into-custom-hook (2026-07-04, kyleshevlin.com) and hook-returns-own-handlers (same source). Judgment: extraction and handler-return are co-decisions — separating them invites partial application."
 
 - id: nan-serializes-to-null-in-json
-  domain: coding-js-react
+  domain: coding-js
   kind: judgment
   provenance: "Promoted from project domains 2026-07-06. Surfaced in Blog (2026-06-20, load calculator NaN incident); ported to FAMOUS (2026-07-01, cross-project review — no FAMOUS incident yet, but condition is easy to hit unknowingly). Two-project exposure via cross-project review justifies seed promotion. Condition broadened to cover any JSON serialization boundary, not only localStorage."
 
 - id: behavior-flags-in-refs
-  domain: coding-js-react
+  domain: coding-react
   provenance: "2026-07-01, cross-project Blog→FAMOUS deep review. Surfaced from load calculator useAutosave (isMountRef, pendingRef) and hiragana useSpellQueue (errorInRoundRef). All are boolean flags that gate logic without affecting rendered output. Written to seed domain."
   history:
     - date: 2026-07-06
@@ -111,7 +113,7 @@ provenance:
       reason: "Structural-kinship retrospective signal: absorbed stable-ref-for-document-listeners. Both were instances of the same ref-vs-state test — mirroring current state for an external listener is a specific case of 'does this value drive rendered output.' Rule and reason extended to name the document-listener case explicitly."
 
 - id: stable-ref-for-document-listeners
-  domain: coding-js-react
+  domain: coding-react
   provenance: "No provenance was ever recorded for this principle when it was originally ratified — a pre-existing gap found while executing the 2026-07-18 structural-kinship merge, backfilled here rather than left permanently orphaned. Its rule concerned mirroring current React state into a ref for document-level event handlers to avoid stale closures."
   killed: 2026-07-18
   history:
@@ -120,7 +122,7 @@ provenance:
       reason: "Merged into behavior-flags-in-refs — see that entry's history."
 
 - id: nested-conditional-signals-sub-component
-  domain: coding-js-react
+  domain: coding-react
   kind: judgment
   provenance: "2026-07-04, FAMOUS Discover refactor — operator refactored the chained isHydrated × data.length ternary into a binary skeleton/content switch at the parent level, with DiscoveryList owning its own empty/populated states. Judgment call: whether to extend generic-defers-to-consumer or stand alone — standalone chosen because generic-defers-to-consumer requires a reusable-unit framing that wouldn't fire on specific components. Originally ratified into FAMOUS project domain 2026-07-04."
   history:
@@ -129,7 +131,7 @@ provenance:
       reason: "Promoted from FAMOUS project domain to web-frontend pack seed at retrospective. Condition makes no reference to FAMOUS-specific structure — universal React/JSX judgment."
 
 - id: named-exports-over-default
-  domain: coding-js-react
+  domain: coding-js
   kind: knowledge
   provenance: "2026-07-06, FAMOUS Expo migration gate. Surfaced from reading pipeline (basarat/typescript-book). Originally ratified into FAMOUS project domain."
   history:
@@ -138,13 +140,13 @@ provenance:
       reason: "Promoted from FAMOUS project domain to web-frontend pack seed at retrospective. Universal JS/TS module pattern; no FAMOUS-specific condition."
 
 - id: prefers-reduced-motion-requires-js-hook
-  domain: coding-js-react
+  domain: coding-react
   kind: knowledge
   provenance: "2026-07-18, FAMOUS strip-comments-and-biome-ignores gate. Surfaced from reading pipeline (joshwcomeau.com/react/prefers-reduced-motion — source URL returned 403 at extraction time, content pulled from training-data knowledge of this well-known article). Ratified directly to seed as the implementation-mechanics half of the reduced-motion pair; see reduced-motion-instant-not-absent (motion domain) for the design-judgment half."
   see-also: reduced-motion-instant-not-absent
 
 - id: discriminated-union-for-mutually-exclusive-props
-  domain: coding-js-react
+  domain: coding-react
   kind: judgment
   provenance: "2026-07-18, FAMOUS strip-comments-and-biome-ignores gate. Surfaced from reading pipeline (developerway.com/posts/advanced-typescript-for-react-developers-discriminated-unions — source URL returned 403, extracted from search-result summaries of this and closely related sources). Ratified directly to seed — genuine recurring TS/React prop-typing decision, applicable to any project on this pack with variant-prop components."
   see-also: unified-representation-no-type-leakage
@@ -384,7 +386,7 @@ provenance:
 
 - id: wizard-output-consistent-regardless-of-path
   domain: wizards-flows
-  provenance: "2026-06-14, load-calculator UX audit. see-also wizard-callbacks-unconditional (coding-js-react)."
+  provenance: "2026-06-14, load-calculator UX audit. see-also wizard-callbacks-unconditional (coding-react)."
 
 - id: optional-step-must-be-labeled-optional
   domain: wizards-flows
@@ -454,14 +456,14 @@ promoted:
   promoted_to: ui-designer lens — "Generative stance — divergent" section
   provenance: "Originated as the UI designer 'Anti-regression-to-the-mean' role instruction; extracted to the design-method corpus 2026-06-22, then promoted back to the ui-designer lens later the same day when the generative-stance model showed anti-mean is a *lens stance*, not a domain principle — a 'resist the standard' instruction cannot coherently share a domain with convergent process rules (clarity-over-polish, documentation discipline). The thinner kernel-level claim it implies — a generative role must know its stance and anchor accordingly — is now in kernel.md, 'Generative stance.' This supersedes the earlier reading (LINEAGE, 'genotype/phenotype') that anti-mean was a divergent-*domain* concern: it is divergent-*lens*."
 
-# ---- domain: coding-js-react ----
+# ---- domain: coding-js ----
 - id: arrow-block-body
-  domain: coding-js-react
+  domain: coding-js
   promoted_to: web-frontend coder overlay — "Conventions" section
   provenance: "2026-06-18, Blog project. {} ambiguity + single consistent style removes per-function judgment call. A JS instance of the base prefer-error-exposing-form meta-rule."
 
 - id: no-early-returns
-  domain: coding-js-react
+  domain: coding-js
   promoted_to: web-frontend coder overlay — "Conventions" section
   provenance: "2026-06-17, Blog project, 'Explicit by Default' post (content/posts/coding/explicit-by-default.mdx). Derived from Crockford's heuristic, not style: indentation-as-grammar (Henney) means early returns let a multi-condition line sit at base indentation as if unconditional; the guard-clause exception reintroduces a per-function 'still simple enough?' judgment a block body removes; the strong counterexample (a flat row of order-independent guards) resolves to extraction-and-naming, not exception. Scoped to this pack because some ecosystems (Go) idiomatically prefer guard clauses; the reasoning is general."
 ```

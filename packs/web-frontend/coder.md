@@ -27,7 +27,9 @@ plus a settled style stance:
 Added to the coder lens's declaration (load order per `kernel.md` — pack-seed working file, then
 `corpora/domains/<domain>.md` if it exists):
 
-- `coding-js-react` — `packs/web-frontend/domains/coding-js-react.md`. JS/TS/React code patterns.
+- `coding-js` — `packs/web-frontend/domains/coding-js.md`. Framework-agnostic JS/TS patterns.
+- `coding-react` — `packs/web-frontend/domains/coding-react.md`. React-specific patterns (JSX,
+  hooks, refs, prop-typing).
 - `css` — `packs/web-frontend/domains/css.md`. CSS/Tailwind authoring and specificity.
 - `coding-nextjs` — `packs/web-frontend/domains/coding-nextjs.md`. Next.js App Router patterns.
   Loaded only when `corpora/config.md` declares `framework: nextjs` — skip for Expo Router,

@@ -8,7 +8,7 @@ queue:
 
 - id: react-you-might-not-need-an-effect
   url: https://react.dev/learn/you-might-not-need-an-effect
-  domains: [coding-js-react]
+  domains: [coding-react]
   gap: "effect-necessity patterns beyond the already-killed 'no-read-after-set-in-same-scope' knowledge item"
   status: read
   read: 2026-07-15
@@ -19,8 +19,8 @@ queue:
 
 - id: shevlin-use-encapsulation
   url: https://kyleshevlin.com/use-encapsulation
-  domains: [coding-js-react]
-  gap: "encapsulation patterns in React hooks — not yet addressed in coding-js-react"
+  domains: [coding-react]
+  gap: "encapsulation patterns in React hooks — not yet addressed in coding-react"
   status: read
   read: 2026-06-30
   candidates: 1
@@ -40,7 +40,7 @@ queue:
 
 - id: joshwcomeau-prefers-reduced-motion
   url: https://www.joshwcomeau.com/react/prefers-reduced-motion/
-  domains: [motion, coding-js-react]
+  domains: [motion, coding-react]
   gap: "motion domain has no principles about prefers-reduced-motion; both existing principles assume motion is appropriate for all users"
   status: read
   read: 2026-07-06
@@ -51,7 +51,7 @@ queue:
 
 - id: react-useoptimistic-deep-dive
   url: https://dev.to/a1guy/react-19-useoptimistic-deep-dive-building-instant-resilient-and-user-friendly-uis-49fp
-  domains: [coding-js-react, recoverability]
+  domains: [coding-react, recoverability]
   gap: "recoverability domain covers destructive-action recovery but has no principles about optimistic UI — showing assumed success before server confirmation and auto-rolling back on failure"
   status: read
   read: 2026-07-06
@@ -73,7 +73,7 @@ queue:
 
 - id: tailwind-reusing-styles
   url: https://tailwindcss.com/docs/reusing-styles
-  domains: [css, coding-js-react]
+  domains: [css, coding-react]
   gap: "css domain has no principle about when to accept utility class duplication vs extract a component or use @apply — a recurrent Tailwind decision"
   status: read
   read: 2026-07-06
@@ -117,8 +117,8 @@ queue:
 
 - id: developerway-discriminated-unions-react
   url: https://www.developerway.com/posts/advanced-typescript-for-react-developers-discriminated-unions
-  domains: [coding-js-react]
-  gap: "coding-js-react covers state management patterns (useReducer, refs) and hook encapsulation but has no principle about TypeScript type design for component props with mutually exclusive variants"
+  domains: [coding-react]
+  gap: "coding-react covers state management patterns (useReducer, refs) and hook encapsulation but has no principle about TypeScript type design for component props with mutually exclusive variants"
   status: read
   read: 2026-07-13
   candidates: 1
@@ -157,8 +157,8 @@ queue:
 
 - id: developerway-use-transition
   url: https://www.developerway.com/posts/use-transition
-  domains: [coding-js-react]
-  gap: "coding-js-react has no principle about React concurrent mode hooks — when to use useTransition vs useDeferredValue for de-prioritizing renders"
+  domains: [coding-react]
+  gap: "coding-react has no principle about React concurrent mode hooks — when to use useTransition vs useDeferredValue for de-prioritizing renders"
   status: unread
   added: 2026-07-17
   source: discovery

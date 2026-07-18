@@ -52,7 +52,7 @@ For each source that clears the filter, append to `reading/queue.md` inside the 
 ```yaml
 - id: [kebab-case-slug]
   url: [full URL]
-  domains: [domain names this addresses, e.g. coding-general, coding-js-react]
+  domains: [domain names this addresses, e.g. coding-general, coding-react]
   gap: "[one sentence: the gap this addresses]"
   status: unread
   added: [YYYY-MM-DD]

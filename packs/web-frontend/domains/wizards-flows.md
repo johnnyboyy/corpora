@@ -1,7 +1,7 @@
 # Domain: wizards-flows (web-frontend pack)
 
 Multi-step wizards, navigation, and step state. Declared by the **ux-designer** lens (the coder's
-`wizard-callbacks-unconditional` in `coding-js-react` is the implementation counterpart and links
+`wizard-callbacks-unconditional` in `coding-react` is the implementation counterpart and links
 here via see-also). Audit metadata lives in `packs/web-frontend/domains/audit.md`, loaded only at
 ratify/retrospective time.
 

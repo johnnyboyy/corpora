@@ -1155,3 +1155,39 @@ project's `corpora/domains/` layout, which the skill repo's own seed layer (`dom
 layer (`packs/<pack>/domains/`) don't have. Retrospective consolidation happens in the shared seed
 and pack corpora as much as in any downstream project, so the tooling needed a path that works for
 both rather than being hardwired to the project-only assumption.
+
+---
+
+## The coding-js / coding-react split
+
+*Decided 2026-07-18. Verify current state against `packs/web-frontend/coder.md`'s domain
+declaration and the two domain files directly — this entry records why the split happened, not
+its present contents.*
+
+A full retrospective pass applying the structural-kinship signal (see above) across every domain in
+both the kernel-seed and web-frontend pack layers surfaced two candidates for a domain *split*
+rather than a merge — a cluster within a domain that answers a genuinely different decision class
+than the rest of it, the fork signal `kernel.md`'s retrospective section already names but had never
+been applied. The first candidate proposed, `react-hooks` carved out of `coding-js-react`, was
+reconsidered once the operator asked a sharper question: split JS from React first, and see whether
+hooks still needed a *further* cut once that happened. It didn't. Once the 3-4 framework-agnostic
+principles (module exports, JSON/NaN serialization, cross-type naming unification) were separated
+from the 10-11 genuinely React-specific ones (JSX, hooks, refs, prop-typing), "React" itself read as
+one coherent subject — the same shape `css.md` already has (layout + Tailwind + import-order, never
+further split). The original `react-hooks` proposal was solving a real problem (an oversized domain
+mixing two different subjects) with the wrong incision; the JS/React boundary was the actual seam.
+
+`coding-js-react.md` was retired; `coding-js.md` (framework-agnostic: `named-exports-over-default`,
+`same-state-same-name`, `nan-serializes-to-null-in-json`) and `coding-react.md` (JSX/hooks/refs/props:
+the remaining 10 principles) replace it. Kills were split the same way by what they actually
+depended on, not by where they happened to be filed. `packs/web-frontend/coder.md`'s domain
+declaration, `coder.md`'s load-order documentation, `kernel.md`'s example declaration block, the
+reading-pipeline agent instructions, and every affected `reading/queue.md` entry were updated to the
+new names. `undefined-check-by-source` was held out of both new files — its condition is framed
+around "optional props" (component-flavored) but its actual test (match the equality operator to a
+value's source) is general TS/JS semantics, and it was left for the operator to place rather than
+guessed.
+
+The second split candidate from the same pass — carving a `ratify-gate` domain out of
+`orchestrator-routing`'s gate-mechanics cluster — was not yet acted on as of this entry; see
+`orchestrator-routing.md` directly for current state.
