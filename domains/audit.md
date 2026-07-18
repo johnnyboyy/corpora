@@ -59,6 +59,16 @@ provenance:
   kind: judgment
   provenance: "Promoted from FAMOUS project domain 2026-07-06. Surfaced 2026-07-05, FAMOUS lens system refactoring session: after implementing view transitions + scroll restoration + typed ref registry, the examination pass surfaced the thin useScrollLensRef wrapper, an anonymous scroll-restoration useLayoutEffect, string-selector coupling, and the emergent LensRowEntry grouping. Promoted from FAMOUS to seed — condition makes no reference to FAMOUS-specific structure."
 
+- id: module-boundaries-precede-deployment-separation
+  domain: coding-general
+  kind: judgment
+  provenance: "2026-07-18, FAMOUS strip-comments-and-biome-ignores gate. Surfaced from reading pipeline (youtube.com/watch?v=4qfsmE11Ejo). Ratified directly to seed — stack-agnostic architecture judgment with no FAMOUS-specific condition; FAMOUS itself (single Expo app) has no current use case, but the principle is written for any project considering a monolith-to-services split."
+
+- id: dependency-graph-over-architecture-diagrams
+  domain: coding-general
+  kind: judgment
+  provenance: "2026-07-18, FAMOUS strip-comments-and-biome-ignores gate. Surfaced from reading pipeline (youtube.com/watch?v=4qfsmE11Ejo), companion to module-boundaries-precede-deployment-separation from the same source. Ratified directly to seed for the same reason."
+
 # domain: orchestrator-routing
 - id: brief-ends-at-what
   domain: orchestrator-routing
@@ -87,6 +97,10 @@ provenance:
 - id: spawn-threshold-is-spec-scope
   domain: orchestrator-routing
   provenance: "2026-06-12, operator noted spawn cost often exceeds decision value."
+
+- id: planner-over-brainstorming-for-scope
+  domain: orchestrator-routing
+  provenance: "2026-07-18, operator observation: the orchestrator already splits steps and roles well informally, but ambiguous-scope requests were often absorbed by the superpowers:brainstorming skill where the planner would be the better-fit reach — brainstorming has no corpus artifact, so that path leaves the planning domain permanently thin (planning had never had a retrospective at the time this was surfaced)."
 
 - id: inline-coder-session-protocol
   domain: orchestrator-routing

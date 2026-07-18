@@ -58,6 +58,11 @@ principles:
   condition: "When deciding whether to spawn a UX or UI designer vs. surface a question to the operator."
   reason: "A full designer workstream carries substantial lens, domain, and review cost. A single direction question is often cheaper for the operator to resolve directly; a full spec earns the isolated role context because several related decisions need coherent judgment."
 
+- id: planner-over-brainstorming-for-scope
+  rule: "When ambiguous scope surfaces in a corpora-managed project, route to the planner rather than reaching for the brainstorming skill."
+  condition: "Any time the orchestrator (or an inline session) would otherwise invoke superpowers:brainstorming to resolve what a request decomposes into."
+  reason: "Brainstorming's dialogue is valuable but produces no corpus artifact — no queue, no ratify gate, no planning-domain growth. The planner does the same ambiguity-resolving dialogue and captures the result as accumulated judgment, growing the very corpus this system depends on."
+
 - id: persist-role-by-workstream
   rule: "Resume the role agent that owns an active workstream for questions, operator testing feedback, and revisions. Start a new role workstream when the operator supplies a new plan, requests an unrelated outcome, the role changes, or accumulated context makes continuation unsafe. Treat a handoff as a checkpoint, not automatic termination."
   condition: "When routing follow-up work after a role has returned a handoff."
