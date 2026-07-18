@@ -512,6 +512,13 @@ against contamination — is the working context holding domains from another mo
 5. **Seed promotion candidate** — a project domain principle whose condition makes no reference to
    this project's stack, domain, or specifics, and has held across enough tasks to read as general.
    Surface it as a candidate for promotion to the seed domain of the same name in the skill repo.
+6. **Structural kinship → condensation candidate** — active principles that state the same
+   underlying test in different words, evidenced by existing `see-also` links or found by reading a
+   domain's principles side by side rather than sequentially. Proposal: state the shared test once
+   as an umbrella, with the specific cases named as instances — the shape `coder.md`'s General
+   Conventions already uses for its own meta-conventions. Complementary to co-firing, below: kinship
+   is visible from the text alone and doesn't need firing history to accumulate first, so it can
+   surface a candidate before co-firing ever would.
 
 **Anti-overfitting (any domain whose principles were earned in a single project shape):** surface
 which ratified principles should stay provisional — weighable, not promoted — until tested against
@@ -535,7 +542,8 @@ retirement candidate, or the condition is scoped to situations the project never
 `violated` recurring → the principle is load-bearing (it keeps catching real drift) *or* badly
 conditioned — the counts cannot distinguish these; the retrospective can, which is why counts feed
 the retrospective instead of acting alone. A cluster that always `fired` together → meta-principle
-candidate: co-firing is the empirical trace of a shared root justification.
+candidate: co-firing is the empirical trace of a shared root justification — see structural kinship,
+above, for the same candidate found from the text alone rather than firing counts.
 
 Each domain working file carries `last-retrospective: <date>` at the top to make convergence measurable.
 

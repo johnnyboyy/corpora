@@ -1081,3 +1081,38 @@ running a reviewer-specific prompt. `prefer-independent-evaluation` in `orchestr
 states the mechanism directly — spawn a fresh coder agent scoped to the review — rather than
 pointing at a role that no longer exists. This is a narrower claim than deleting review itself:
 the capability is intact, routed through the coder lens instead of a parallel one.
+
+---
+
+## Structural kinship as a second condensation signal
+
+*Added 2026-07-18, `kernel.md`, "The retrospective," item 6. Verify current state against that
+section directly — this entry records why the signal was added, not its present wording.*
+
+Assembled a full web-frontend coder spawn prompt end to end (lens + pack overlay + all four
+declared domains + inlined handoff schema) against a small, realistic task, to see how much of it
+was actually pulling weight. Of ~50 total principle/kill entries loaded, maybe 3-5 could plausibly
+fire against that specific task — the rest idle by the design's own admission
+(`full-corpus-on-spawn`'s "duplicate transmission cost is tolerated for this completeness
+guarantee, not desired"). Domain-level scoping by a planner was considered as a fix and set aside:
+its ceiling was small (~13% of spawn size, concentrated in domains that are conditionally loaded
+per project config rather than per task) and it reintroduced the same silent-omission risk
+`full-corpus-on-spawn` was written to prevent, just at coarser grain — an excluded domain is
+invisible to the coder in a way an idle principle inside a loaded domain is not.
+
+The retrospective's existing meta-principle-candidate signal only fires on co-occurrence: "a
+cluster that always `fired` together." That's real but empirical — it requires firing history to
+accumulate across enough real sessions before the candidate becomes visible, and cannot surface
+before that history exists. Re-reading `coding-js-react`'s active principles side by side (rather
+than one at a time, which is how they're normally encountered — proposed and ratified one at a
+time from separate incidents) surfaced condensation candidates the co-firing signal hasn't caught
+yet: `stable-ref-for-document-listeners`, `behavior-flags-in-refs`, and
+`effect-only-derived-state-belongs-in-render` are three instances of one test (distinguish
+render-driving state from behavioral state; understand closure staleness), and
+`same-state-same-name` / `discriminated-union-for-mutually-exclusive-props` /
+`unified-representation-no-type-leakage` already cross-reference each other via `see-also` without
+anything ever asking whether that cluster should collapse into one umbrella. The `see-also` field
+already existed as a hint the corpus recorded at proposal time; nothing in the retrospective ever
+revisited it. Structural kinship is a static, textual signal alongside the empirical one — it can
+surface a candidate the moment principles are read together, not only after enough sessions have
+made them fire together.
