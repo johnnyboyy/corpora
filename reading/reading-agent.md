@@ -16,8 +16,8 @@ Runs weeknights at 2 AM PST. Self-contained — no prior session context needed.
 
 From the entry's `domains` field, select the lens:
 - `coding-general` → load `coder.md` + `domains/coding-general.md`
-- `coding-js` → load `coder.md` + `packs/web-frontend/coder.md` +
-  `domains/coding-general.md` + `packs/web-frontend/domains/coding-js.md`
+- `coding-ts` → load `coder.md` + `packs/web-frontend/coder.md` +
+  `domains/coding-general.md` + `packs/web-frontend/domains/coding-ts.md`
 - `coding-react` → load `coder.md` + `packs/web-frontend/coder.md` +
   `domains/coding-general.md` + `packs/web-frontend/domains/coding-react.md`
 - `ux-design`, `interaction`, or similar → load `packs/web-frontend/ux-designer.md`

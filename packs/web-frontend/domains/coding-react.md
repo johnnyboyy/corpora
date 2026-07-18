@@ -2,7 +2,7 @@
 
 React-specific code patterns — JSX, hooks, refs, and component prop-typing. Declared by the coder
 lens when `role-pack: web-frontend`. Split from `coding-js-react` 2026-07-18 once the domain's
-framework-agnostic JS/TS principles were carved into their own `coding-js` domain — see
+framework-agnostic JS/TS principles were carved into their own `coding-ts` domain — see
 `packs/web-frontend/domains/audit.md` for the migration note. Audit metadata lives in
 `packs/web-frontend/domains/audit.md`, loaded only at ratify/retrospective time.
 

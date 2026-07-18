@@ -1158,7 +1158,7 @@ both rather than being hardwired to the project-only assumption.
 
 ---
 
-## The coding-js / coding-react split
+## The coding-ts / coding-react split
 
 *Decided 2026-07-18. Verify current state against `packs/web-frontend/coder.md`'s domain
 declaration and the two domain files directly — this entry records why the split happened, not
@@ -1177,16 +1177,24 @@ one coherent subject — the same shape `css.md` already has (layout + Tailwind 
 further split). The original `react-hooks` proposal was solving a real problem (an oversized domain
 mixing two different subjects) with the wrong incision; the JS/React boundary was the actual seam.
 
-`coding-js-react.md` was retired; `coding-js.md` (framework-agnostic: `named-exports-over-default`,
-`same-state-same-name`, `nan-serializes-to-null-in-json`) and `coding-react.md` (JSX/hooks/refs/props:
-the remaining 10 principles) replace it. Kills were split the same way by what they actually
-depended on, not by where they happened to be filed. `packs/web-frontend/coder.md`'s domain
-declaration, `coder.md`'s load-order documentation, `kernel.md`'s example declaration block, the
-reading-pipeline agent instructions, and every affected `reading/queue.md` entry were updated to the
-new names. `undefined-check-by-source` was held out of both new files — its condition is framed
-around "optional props" (component-flavored) but its actual test (match the equality operator to a
-value's source) is general TS/JS semantics, and it was left for the operator to place rather than
-guessed.
+`coding-js-react.md` was retired; `coding-react.md` (JSX/hooks/refs/props: 10 principles) and the
+framework-agnostic remainder (`named-exports-over-default`, `same-state-same-name`,
+`nan-serializes-to-null-in-json`) replace it. That framework-agnostic domain was named `coding-ts`,
+not `coding-js` — every project on this pack writes TypeScript in practice, so the TS name matches
+actual usage even where a given principle's underlying fact would also hold in plain JS. Kills were
+split the same way by what they actually depended on, not by where they happened to be filed.
+`packs/web-frontend/coder.md`'s domain declaration, `coder.md`'s load-order documentation,
+`kernel.md`'s example declaration block, the reading-pipeline agent instructions, and every affected
+`reading/queue.md` entry were updated to the new names.
+
+`undefined-check-by-source` was held out of both new files at first — its condition read "optional
+props" (component-flavored), leaving it unclear whether it belonged with JSX/hooks or the
+framework-agnostic set. Placed in `coding-ts` once its actual test (match the equality operator to a
+value's source) was recognized as general TS/JS semantics, not React-specific. Tightened for its new
+seed-level home in the same pass: the single-letter generic `T` in its rule became `Value` (this
+corpus's own `no-single-char-names` applies to its own examples), and the reason's "common codebase
+convention" framing — appropriate at project level, where a convention really is local — was
+replaced with the general undefined-vs-null distinction the rule actually rests on.
 
 The second split candidate from the same pass — carving a `ratify-gate` domain out of
 `orchestrator-routing`'s gate-mechanics cluster — was not yet acted on as of this entry; see

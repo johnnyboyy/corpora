@@ -1,14 +1,20 @@
-# Domain: coding-js (web-frontend pack)
+# Domain: coding-ts (web-frontend pack)
 
 Framework-agnostic JS/TS code patterns — language and module-system judgment that holds regardless
-of which UI framework the project uses. Declared by the coder lens when `role-pack: web-frontend`.
-Audit metadata lives in `packs/web-frontend/domains/audit.md`, loaded only at ratify/retrospective
-time.
+of which UI framework the project uses. Named for TypeScript rather than JS: every project on this
+pack writes TypeScript in practice, even where a given principle's underlying fact would also hold
+in plain JS. Declared by the coder lens when `role-pack: web-frontend`. Audit metadata lives in
+`packs/web-frontend/domains/audit.md`, loaded only at ratify/retrospective time.
 
 ```yaml
 last-retrospective: 2026-07-18
 
 principles:
+
+- id: undefined-check-by-source
+  rule: "Match the equality operator to the source of the value: an optional object field typed `Value | undefined` uses `=== undefined` / `!== undefined`; array element access and `Array.find()` results also use `!== undefined`. Never `== null` for either."
+  condition: "When guarding any value that may be absent — an optional object field, array element access, or `Array.find()` results."
+  reason: "Both sources yield `undefined`, not `null` — distinguishing them by name keeps intent clear at the point of use. A loose `== null` silently absorbs both, hiding which case actually occurred."
 
 - id: named-exports-over-default
   rule: "Prefer named exports over export default. Export a binding under the name it's defined with, and import it by that same name."

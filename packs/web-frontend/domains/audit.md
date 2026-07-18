@@ -14,12 +14,15 @@ working files.)
 ```yaml
 provenance:
 
-# ---- domains: coding-js, coding-react (split from coding-js-react 2026-07-18; see LINEAGE.md,
-#      "The coding-js / coding-react split") ----
+# ---- domains: coding-ts, coding-react (split from coding-js-react 2026-07-18; see LINEAGE.md,
+#      "The coding-ts / coding-react split") ----
 - id: undefined-check-by-source
-  domain: coding-js-react   # PENDING: operator to decide coding-js vs coding-react; held out of both
-                            # working files until then — see LINEAGE.md for the split writeup.
+  domain: coding-ts
   provenance: "Merged from strict-undefined-check-in-arrays + array-access-undefined-not-null, Blog project, 2026-06-01."
+  history:
+    - date: 2026-07-18
+      type: generalized
+      reason: "Placed in coding-ts (not coding-react) once its actual test — matching the equality operator to a value's source — was recognized as general TS/JS semantics despite its 'optional props' framing. Tightened for seed level: the single-letter generic T became Value (this corpus's own no-single-char-names applies to its own examples), and the reason's project-level 'common codebase convention' framing was replaced with the general undefined-vs-null distinction the rule actually rests on."
 
 - id: null-first-ternary
   domain: coding-react
@@ -30,7 +33,7 @@ provenance:
   provenance: "2026-06-13, Blog project WireCircle refactor."
 
 - id: font-mono-at-element-not-container
-  domain: coding-js
+  domain: coding-ts
   provenance: "2026-06-13, Blog project FixedBottomResultsBar refactor."
 
 - id: hook-params-named-for-hook-concern
@@ -55,7 +58,7 @@ provenance:
       reason: "Promoted from Blog project domain to web-frontend pack seed — condition makes no reference to Blog-specific structure; general React hook wisdom."
 
 - id: same-state-same-name
-  domain: coding-js
+  domain: coding-ts
   kind: judgment
   provenance: "2026-06-28, HiraganaQuiz refactor. TileState 'resting' vs SpellTile 'idle' — same visual concept, two names. Decision to rename before extracting rather than casting or adding a translation layer. Renaming made SpellTile['state'] a structurally valid subset of TileState, eliminating buildSpellTileClass."
   history:
@@ -97,7 +100,7 @@ provenance:
   provenance: "2026-07-06, retrospective consolidation. Merged from extract-named-concern-into-custom-hook (2026-07-04, kyleshevlin.com) and hook-returns-own-handlers (same source). Judgment: extraction and handler-return are co-decisions — separating them invites partial application."
 
 - id: nan-serializes-to-null-in-json
-  domain: coding-js
+  domain: coding-ts
   kind: judgment
   provenance: "Promoted from project domains 2026-07-06. Surfaced in Blog (2026-06-20, load calculator NaN incident); ported to FAMOUS (2026-07-01, cross-project review — no FAMOUS incident yet, but condition is easy to hit unknowingly). Two-project exposure via cross-project review justifies seed promotion. Condition broadened to cover any JSON serialization boundary, not only localStorage."
 
@@ -131,7 +134,7 @@ provenance:
       reason: "Promoted from FAMOUS project domain to web-frontend pack seed at retrospective. Condition makes no reference to FAMOUS-specific structure — universal React/JSX judgment."
 
 - id: named-exports-over-default
-  domain: coding-js
+  domain: coding-ts
   kind: knowledge
   provenance: "2026-07-06, FAMOUS Expo migration gate. Surfaced from reading pipeline (basarat/typescript-book). Originally ratified into FAMOUS project domain."
   history:
@@ -456,14 +459,14 @@ promoted:
   promoted_to: ui-designer lens — "Generative stance — divergent" section
   provenance: "Originated as the UI designer 'Anti-regression-to-the-mean' role instruction; extracted to the design-method corpus 2026-06-22, then promoted back to the ui-designer lens later the same day when the generative-stance model showed anti-mean is a *lens stance*, not a domain principle — a 'resist the standard' instruction cannot coherently share a domain with convergent process rules (clarity-over-polish, documentation discipline). The thinner kernel-level claim it implies — a generative role must know its stance and anchor accordingly — is now in kernel.md, 'Generative stance.' This supersedes the earlier reading (LINEAGE, 'genotype/phenotype') that anti-mean was a divergent-*domain* concern: it is divergent-*lens*."
 
-# ---- domain: coding-js ----
+# ---- domain: coding-ts ----
 - id: arrow-block-body
-  domain: coding-js
+  domain: coding-ts
   promoted_to: web-frontend coder overlay — "Conventions" section
   provenance: "2026-06-18, Blog project. {} ambiguity + single consistent style removes per-function judgment call. A JS instance of the base prefer-error-exposing-form meta-rule."
 
 - id: no-early-returns
-  domain: coding-js
+  domain: coding-ts
   promoted_to: web-frontend coder overlay — "Conventions" section
   provenance: "2026-06-17, Blog project, 'Explicit by Default' post (content/posts/coding/explicit-by-default.mdx). Derived from Crockford's heuristic, not style: indentation-as-grammar (Henney) means early returns let a multi-condition line sit at base indentation as if unconditional; the guard-clause exception reintroduces a per-function 'still simple enough?' judgment a block body removes; the strong counterexample (a flat row of order-independent guards) resolves to extraction-and-naming, not exception. Scoped to this pack because some ecosystems (Go) idiomatically prefer guard clauses; the reasoning is general."
 ```

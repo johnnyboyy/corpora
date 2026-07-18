@@ -113,8 +113,8 @@ stance: convergent
 Load order per `kernel.md` (seed working file, then `corpora/domains/<domain>.md` if it exists):
 
 - `coding-general` — always. Kernel-seed: `domains/coding-general.md`.
-- `coding-js` — when `role-pack: web-frontend`. Pack-seed:
-  `packs/web-frontend/domains/coding-js.md` (via the pack overlay).
+- `coding-ts` — when `role-pack: web-frontend`. Pack-seed:
+  `packs/web-frontend/domains/coding-ts.md` (via the pack overlay).
 - `coding-react` — when `role-pack: web-frontend`. Pack-seed:
   `packs/web-frontend/domains/coding-react.md` (via the pack overlay).
 - `css` — when `role-pack: web-frontend`. Pack-seed: `packs/web-frontend/domains/css.md`.
