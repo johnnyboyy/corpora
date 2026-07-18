@@ -1116,3 +1116,42 @@ already existed as a hint the corpus recorded at proposal time; nothing in the r
 revisited it. Structural kinship is a static, textual signal alongside the empirical one — it can
 surface a candidate the moment principles are read together, not only after enough sessions have
 made them fire together.
+
+Executing against `coding-js-react` immediately calibrated the new signal against a false positive:
+the same side-by-side read had also flagged `same-state-same-name`, `discriminated-union-for-
+mutually-exclusive-props`, and `unified-representation-no-type-leakage` (already linked via
+`see-also`) as a merge candidate. Closer inspection showed they answer three different design
+questions — naming alignment before extraction, explicit unions for mutually-exclusive props, and
+flattening internal variants out of a return value — two of which are near-opposite mechanisms
+(union vs. flatten) that happen to serve a similar sensibility. Merging them would have blurred
+distinct decision points a coder needs to keep separate. Declined; the `see-also` links stand as
+cross-references, not a pending merge. `behavior-flags-in-refs` and `stable-ref-for-document-
+listeners` held up as a real candidate and were merged (the document-listener case became a named
+instance in the general principle's rule and reason); the merge also surfaced that
+`stable-ref-for-document-listeners` had never had a `provenance` entry in the pack audit file at
+all — backfilled rather than left orphaned.
+
+---
+
+## Kill-log graduation
+
+*Added 2026-07-18, `kernel.md`, "Killed entries" and "The retrospective" item 7. Verify current
+state against `scripts/corpus.py`'s `kill-report`/`graduate-kill` commands directly.*
+
+`kernel.md` already documented that a kill's date belongs in the layer's audit file — but no kill
+entry across either the kernel-seed or web-frontend pack audit file had ever actually recorded one;
+the schema was written and never enforced. Rather than guess historical dates (several `reason_
+killed` strings embed one in prose, but not reliably enough to parse with confidence, and a wrong
+backfilled date is worse than an honest gap), the field was left for `kill-report` to surface as its
+own finding — "missing killed-date" — alongside the graduation signal itself, so the tool reports
+the gap rather than silently working around it. Dogfooded against this repo's own domains
+immediately: every pre-existing kill in both audit files reported as missing a date; only the new
+`stable-ref-for-document-listeners` kill (recorded with a `killed:` date as part of this same pass)
+came back clean.
+
+The commands (`kill-report`, `graduate-kill`) take explicit `--domains-dir`/`--audit` paths rather
+than the usual `--root` project convention, deliberately: `corpus.py`'s existing commands assume a
+project's `corpora/domains/` layout, which the skill repo's own seed layer (`domains/`) and pack
+layer (`packs/<pack>/domains/`) don't have. Retrospective consolidation happens in the shared seed
+and pack corpora as much as in any downstream project, so the tooling needed a path that works for
+both rather than being hardwired to the project-only assumption.

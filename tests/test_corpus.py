@@ -1,3 +1,4 @@
+import datetime
 import subprocess
 import sys
 import tempfile
@@ -371,6 +372,133 @@ class AdoptCommandTest(CorpusCommandTestCase):
 
         self.assertEqual(result.returncode, 2)
         self.assertIn("already forked", result.stderr)
+
+
+class KillGraduationTest(unittest.TestCase):
+    def setUp(self):
+        self.tempdir = tempfile.TemporaryDirectory()
+        self.root = Path(self.tempdir.name)
+        self.domains_dir = self.root / "domains"
+        self.domains_dir.mkdir()
+        self.audit_path = self.root / "audit.md"
+        today = datetime.date.today()
+        self.old_date = (today - datetime.timedelta(days=200)).isoformat()
+        self.recent_date = (today - datetime.timedelta(days=5)).isoformat()
+
+    def tearDown(self):
+        self.tempdir.cleanup()
+
+    def write_domain(self, killed_ids):
+        killed_block = "\n\n".join(
+            f'- id: {kid}\n  rule: "Some rejected rule."\n  kill_type: quality\n  reason_killed: "Reason."'
+            for kid in killed_ids
+        )
+        (self.domains_dir / "test-domain.md").write_text(
+            "# Domain: test-domain\n\n```yaml\nprinciples:\n\n"
+            '- id: active-one\n  rule: "R"\n  condition: "C"\n  reason: "Why."\n\n'
+            f"killed:\n\n{killed_block}\n```\n"
+        )
+
+    def write_audit(self, entries):
+        lines = ["# Audit", "", "```yaml", "provenance:", ""]
+        for kid, fields in entries.items():
+            lines.append(f"- id: {kid}")
+            lines.append("  domain: test-domain")
+            lines.append('  provenance: "Some provenance."')
+            for key, value in fields.items():
+                lines.append(f"  {key}: {value}")
+            lines.append("")
+        lines += ["promoted:", "```", ""]
+        self.audit_path.write_text("\n".join(lines))
+
+    def run_command(self, command):
+        return subprocess.run(
+            [sys.executable, str(SCRIPT), *command],
+            text=True, capture_output=True, check=False,
+        )
+
+    def test_reports_missing_killed_date(self):
+        self.write_domain(["undated-kill"])
+        self.write_audit({"undated-kill": {}})
+
+        result = self.run_command([
+            "kill-report", "--domains-dir", str(self.domains_dir), "--audit", str(self.audit_path),
+        ])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("missing killed-date for: undated-kill", result.stdout)
+
+    def test_reports_graduation_candidate_past_threshold(self):
+        self.write_domain(["old-kill"])
+        self.write_audit({"old-kill": {"killed": self.old_date}})
+
+        result = self.run_command([
+            "kill-report", "--domains-dir", str(self.domains_dir), "--audit", str(self.audit_path),
+            "--min-age-days", "90",
+        ])
+
+        self.assertIn("'old-kill' killed", result.stdout)
+        self.assertIn("graduation candidate", result.stdout)
+
+    def test_does_not_report_recent_kill_or_already_graduated(self):
+        self.write_domain(["recent-kill", "graduated-kill"])
+        self.write_audit({
+            "recent-kill": {"killed": self.recent_date},
+            "graduated-kill": {"killed": self.old_date, "graduated": self.old_date},
+        })
+
+        result = self.run_command([
+            "kill-report", "--domains-dir", str(self.domains_dir), "--audit", str(self.audit_path),
+            "--min-age-days", "90",
+        ])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertNotIn("recent-kill", result.stdout)
+        self.assertNotIn("graduated-kill", result.stdout)
+        self.assertIn("no kills missing a date", result.stdout)
+
+    def test_graduate_kill_removes_from_working_file_and_annotates_audit(self):
+        self.write_domain(["old-kill", "other-kill"])
+        self.write_audit({
+            "old-kill": {"killed": self.old_date},
+            "other-kill": {"killed": self.old_date},
+        })
+
+        result = self.run_command([
+            "graduate-kill", "--domains-dir", str(self.domains_dir), "--audit", str(self.audit_path),
+            "--domain", "test-domain", "--id", "old-kill",
+        ])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        domain_text = (self.domains_dir / "test-domain.md").read_text()
+        self.assertNotIn("old-kill", domain_text)
+        self.assertIn("other-kill", domain_text)
+        audit_text = self.audit_path.read_text()
+        self.assertIn("graduated:", audit_text)
+
+    def test_graduate_kill_refuses_without_recorded_date(self):
+        self.write_domain(["undated-kill"])
+        self.write_audit({"undated-kill": {}})
+
+        result = self.run_command([
+            "graduate-kill", "--domains-dir", str(self.domains_dir), "--audit", str(self.audit_path),
+            "--domain", "test-domain", "--id", "undated-kill",
+        ])
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("no recorded killed-date", result.stderr)
+
+    def test_graduate_kill_refuses_when_already_graduated(self):
+        self.write_domain(["old-kill"])
+        self.write_audit({"old-kill": {"killed": self.old_date, "graduated": self.old_date}})
+
+        result = self.run_command([
+            "graduate-kill", "--domains-dir", str(self.domains_dir), "--audit", str(self.audit_path),
+            "--domain", "test-domain", "--id", "old-kill",
+        ])
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("already graduated", result.stderr)
 
 
 if __name__ == "__main__":

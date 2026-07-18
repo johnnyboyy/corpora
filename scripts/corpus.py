@@ -800,6 +800,169 @@ def cmd_adopt(project: Project, args) -> None:
           "From then on this domain loads only the project file; the seed is no longer consulted.")
 
 
+# ── kill-log graduation: age out killed entries with a recorded, stale kill date ─────────────
+#
+# Works on any domains-dir + its audit.md pair — project layer (<root>/corpora/domains), the
+# kernel-seed layer (domains/), or a pack layer (packs/<pack>/domains/) — not only project layers,
+# since retrospective consolidation happens in the skill repo's own seed/pack corpora too.
+
+KILL_GRADUATION_DAYS = 90
+
+
+def list_killed_ids(domain_path: str) -> list:
+    ids = []
+    section = None
+    for raw in open(domain_path):
+        line = raw.strip()
+        if re.fullmatch(r"principles:\s*", line):
+            section = "p"
+        elif re.fullmatch(r"killed:\s*", line):
+            section = "k"
+        elif section == "k":
+            m = re.match(r"-\s*id:\s*(\S+)", line)
+            if m:
+                ids.append(m.group(1))
+    return ids
+
+
+def parse_audit_entries(audit_path: str) -> dict:
+    """Tolerant parser for the hand-maintained `provenance:` list in a layer's audit.md.
+
+    Extracts only top-level (2-space-indented) scalar fields per entry — id, domain, killed,
+    graduated. Nested `history:` sub-blocks (4-space indented) are deliberately not parsed; this
+    reads just enough structure for kill-age accounting, not a general YAML parser.
+    """
+    entries = {}
+    current = None
+    in_provenance = False
+    for raw in open(audit_path):
+        line = raw.rstrip("\n")
+        stripped = line.strip()
+        if re.fullmatch(r"provenance:", stripped):
+            in_provenance = True
+            continue
+        if re.fullmatch(r"promoted:", stripped):
+            in_provenance = False
+            current = None
+            continue
+        if not in_provenance:
+            continue
+        m_id = re.match(r"-\s*id:\s*(\S+)", stripped)
+        if m_id:
+            current = m_id.group(1)
+            entries[current] = {"id": current}
+            continue
+        if current is None or not stripped:
+            continue
+        if line.startswith("  ") and not line.startswith("    "):
+            m_field = re.match(r"([\w-]+):\s*(.*)$", stripped)
+            if m_field:
+                entries[current][m_field.group(1)] = m_field.group(2).strip()
+    return entries
+
+
+def cmd_kill_report(args) -> None:
+    threshold = args.min_age_days
+    entries = parse_audit_entries(args.audit)
+    reported = False
+    for name in sorted(os.listdir(args.domains_dir)):
+        if not name.endswith(".md") or name == "audit.md":
+            continue
+        domain = name[:-3]
+        killed_ids = list_killed_ids(os.path.join(args.domains_dir, name))
+        missing, candidates = [], []
+        for kid in killed_ids:
+            entry = entries.get(kid)
+            if entry is None or "killed" not in entry:
+                missing.append(kid)
+                continue
+            if "graduated" in entry:
+                continue
+            try:
+                killed_date = datetime.date.fromisoformat(entry["killed"])
+            except ValueError:
+                missing.append(kid)
+                continue
+            age = (datetime.date.today() - killed_date).days
+            if age >= threshold:
+                candidates.append((kid, age))
+        if missing:
+            reported = True
+            print(f"{domain}: missing killed-date for: {', '.join(missing)}")
+        for kid, age in candidates:
+            reported = True
+            print(f"{domain}: '{kid}' killed {age}d ago (>= {threshold}) — graduation candidate")
+    if not reported:
+        print("no kills missing a date, and none old enough to graduate")
+
+
+def remove_killed_entry(domain_path: str, kill_id: str) -> bool:
+    text = open(domain_path).read()
+    if "\nkilled:" not in text and not text.startswith("killed:"):
+        return False
+    head, tail = text.split("killed:", 1)
+    fence_idx = tail.find("```", 0)
+    body = tail[:fence_idx] if fence_idx != -1 else tail
+    footer = tail[fence_idx:] if fence_idx != -1 else ""
+    blocks = re.split(r"\n\s*\n", body)
+    kept = []
+    removed = False
+    for block in blocks:
+        if re.search(rf"^\s*-\s*id:\s*{re.escape(kill_id)}\s*$", block, re.MULTILINE):
+            removed = True
+            continue
+        kept.append(block)
+    if not removed:
+        return False
+    new_body = "\n\n".join(b for b in kept if b.strip())
+    new_tail = ("\n" + new_body + "\n" if new_body.strip() else "\n") + footer
+    open(domain_path, "w").write(head + "killed:" + new_tail)
+    return True
+
+
+def annotate_graduated(audit_path: str, kill_id: str) -> bool:
+    lines = open(audit_path).read().split("\n")
+    out = []
+    current = None
+    in_provenance = False
+    annotated = False
+    for line in lines:
+        stripped = line.strip()
+        if re.fullmatch(r"provenance:", stripped):
+            in_provenance = True
+        if re.fullmatch(r"promoted:", stripped):
+            in_provenance = False
+        if in_provenance:
+            m = re.match(r"-\s*id:\s*(\S+)", stripped)
+            if m:
+                current = m.group(1)
+        out.append(line)
+        if in_provenance and current == kill_id and re.match(r"killed:\s*\S+", stripped):
+            out.append(f"  graduated: {today()}")
+            annotated = True
+    if annotated:
+        open(audit_path, "w").write("\n".join(out))
+    return annotated
+
+
+def cmd_graduate_kill(args) -> None:
+    domain_path = os.path.join(args.domains_dir, f"{args.domain}.md")
+    if not os.path.exists(domain_path):
+        fail(f"no domain file '{args.domain}' under {args.domains_dir}")
+    entries = parse_audit_entries(args.audit)
+    entry = entries.get(args.id)
+    if entry is None or "killed" not in entry:
+        fail(f"'{args.id}' has no recorded killed-date in {args.audit} — record one before "
+             "graduating (kill-report lists entries missing it)")
+    if "graduated" in entry:
+        fail(f"'{args.id}' was already graduated on {entry['graduated']}")
+    if not remove_killed_entry(domain_path, args.id):
+        fail(f"no killed entry '{args.id}' found in {domain_path}")
+    if not annotate_graduated(args.audit, args.id):
+        fail(f"removed '{args.id}' from {domain_path} but could not annotate {args.audit} — fix by hand")
+    print(f"graduated '{args.id}': removed from {domain_path}'s killed log, annotated in {args.audit}")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--root", default=".", help="project root (contains corpora/)")
@@ -838,7 +1001,22 @@ def main() -> None:
     sub.add_parser("sync-done")
     ad = sub.add_parser("adopt")
     ad.add_argument("--domain", required=True)
+    kr = sub.add_parser("kill-report", help="works on any domains-dir + audit.md pair, not only a project's corpora/domains")
+    kr.add_argument("--domains-dir", required=True)
+    kr.add_argument("--audit", required=True)
+    kr.add_argument("--min-age-days", type=int, default=KILL_GRADUATION_DAYS)
+    gk = sub.add_parser("graduate-kill", help="works on any domains-dir + audit.md pair, not only a project's corpora/domains")
+    gk.add_argument("--domains-dir", required=True)
+    gk.add_argument("--audit", required=True)
+    gk.add_argument("--domain", required=True)
+    gk.add_argument("--id", required=True)
     args = ap.parse_args()
+
+    no_project = {"kill-report": cmd_kill_report, "graduate-kill": cmd_graduate_kill}
+    if args.cmd in no_project:
+        no_project[args.cmd](args)
+        return
+
     project = Project(os.path.abspath(args.root))
     {"measure": cmd_measure, "verify": cmd_verify, "record-gate": cmd_record_gate, "triggers": cmd_triggers,
      "lint-handoff": cmd_lint_handoff, "handoffs": cmd_handoffs,

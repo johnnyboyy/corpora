@@ -286,7 +286,29 @@ a `kill_type`:
   merit. A *false* kill. The retrospective should surface `container` and `attribution-noise` kills
   for re-examination rather than treating them as settled.
 
-Per-kill audit detail (`provenance`, `killed:` date) goes in the layer's audit file, keyed by `id`.
+Per-kill audit detail goes in the layer's audit file, keyed by `id`, alongside its `provenance`:
+
+```yaml
+- id: rejected-rule-id
+  domain: the-domain
+  provenance: "Where this principle came from, before it was killed."
+  killed: 2026-07-18     # the date this kill was recorded — required; enables graduation, below
+  graduated: 2026-10-20  # OPTIONAL — set only once graduate-kill has demoted this entry
+```
+
+**Graduation.** A kill's job is to stop the same rejected idea from being re-proposed. That value
+decays: a kill nobody has come near re-proposing across several retrospectives is no longer live
+guidance, and its continued presence in the working file is a small, permanent reader-tax paid by
+every future role session for a risk that has stopped materializing. `scripts/corpus.py kill-report
+--domains-dir <dir> --audit <audit-file>` lists, per domain, every killed entry with no recorded
+`killed:` date (a bookkeeping gap to fix) and every one old enough (default 90 days, `--min-age-days`
+to override) to be a graduation candidate. The operator/retrospective judges whether it is actually
+safe — has anything resembling it resurfaced — then `corpus.py graduate-kill --domains-dir <dir>
+--audit <audit-file> --domain <domain> --id <id>` does the mechanical part: removes the entry from
+the working file's `killed:` log and stamps `graduated:` on its audit-file record. Works on any
+domains-dir + audit.md pair — a project's `corpora/domains/`, the kernel-seed `domains/`, or a pack's
+`packs/<pack>/domains/` — since retrospective consolidation happens in the skill repo's own seed and
+pack corpora too, not only in downstream projects.
 
 ---
 
@@ -519,6 +541,10 @@ against contamination — is the working context holding domains from another mo
    Conventions already uses for its own meta-conventions. Complementary to co-firing, below: kinship
    is visible from the text alone and doesn't need firing history to accumulate first, so it can
    surface a candidate before co-firing ever would.
+7. **Kill graduation** — a killed entry old enough with no sign of recurrence is paying reader-tax
+   for a risk that has stopped materializing. Mechanically surfaced by `corpus.py kill-report`
+   (see "Killed entries," above); the retrospective judges whether it is actually safe to demote,
+   then `corpus.py graduate-kill` does the removal and audit annotation.
 
 **Anti-overfitting (any domain whose principles were earned in a single project shape):** surface
 which ratified principles should stay provisional — weighable, not promoted — until tested against
