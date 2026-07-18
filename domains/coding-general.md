@@ -53,10 +53,10 @@ principles:
   condition: "When a unit returns parallel outputs that differ only by an internal type distinction, or when designing state/storage for any system where one of N items is active."
   reason: "Leaking the internal distinction forces every consumer to replicate the branching logic. The unit already owns the data; it should own the routing too."
 
-- id: color-utility-over-guesswork
-  rule: "When working with colors, use the project's color utility or script rather than guessing values. If none exists, ask for one or suggest building one before proceeding."
-  condition: "When computing or selecting color values — perceptual variants, palette stops, opacity blends over a backdrop, or any case where color relationships need to be derived rather than chosen arbitrarily. In React Native, CSS custom properties are unavailable to component props at runtime (tintColor, tabBarActiveTintColor, inline style.color, etc.) — for those contexts, reference values from a JS token module rather than hardcoding hex literals."
-  reason: "LCH color relationships are not intuitive to reason about arithmetically. Guessing produces inaccurate results and burns many tokens iterating toward something correct. A small script does this exactly for near-zero token cost."
+- id: utility-over-guesswork
+  rule: "When work is deterministic, precision-sensitive, or disproportionately expensive to solve by inference — color/LCH math, date and timezone arithmetic, geometric layout, hashing, unit conversion, and similar — use the project's registered utility for it if one exists. If none exists, propose one as a utility candidate in the handoff rather than solving it by inference every time."
+  condition: "When a task requires computing or verifying a value where getting it right by inference is unreliable, slow, or has recurred across sessions — not for one-off trivial arithmetic. Color is the canonical case: perceptual variants, palette stops, opacity blends over a backdrop, or any case where color relationships need to be derived rather than chosen arbitrarily. In React Native specifically, CSS custom properties are unavailable to component props at runtime (tintColor, tabBarActiveTintColor, inline style.color, etc.) — reference values from a JS token module rather than hardcoding hex literals there."
+  reason: "Color/LCH relationships are the case that founded this principle: guessing produces inaccurate results and burns many tokens iterating toward something correct, while a small script computes the exact answer for near-zero cost. The same logic applies to any deterministic or repeatedly-recurring computation — the operator can deny a weak candidate cheaply; grinding it out by inference every session cannot be undone."
 
 - id: scripts-over-hand-editing-structured-data
   rule: "When generating or modifying structured data files at scale, write a script that produces the output rather than editing the files directly. The script is the artifact; the output file is its build product."
@@ -77,6 +77,18 @@ principles:
   rule: "Before committing a working implementation, do a one-pass structural examination. Look for: (1) implicit coupling via string selectors or attribute names used as DOM contracts, (2) thin wrappers whose only job is bundling two things with no identity of their own, (3) logic blocks with a clear purpose but no explicit name — candidates for extraction to a named hook or function, (4) emergent groupings — types, functions, and hooks that belong together but ended up separated during implementation."
   condition: "After any multi-file or multi-component implementation reaches a working state (feature correct, typecheck and lint pass) but before creating the commit."
   reason: "Running code reveals structural seams that planning cannot predict. The implementation session surfaces what talks to what and via what contract. Examining before commit costs minutes; the same issues discovered later cost full context reconstruction. Thin wrappers and implicit string contracts are especially invisible during planning — they emerge from solving the problem, not from designing the solution."
+
+- id: module-boundaries-precede-deployment-separation
+  rule: "Before splitting code into separately-deployed services or packages, verify that the equivalent module boundaries are already clean in the existing codebase — no cycles, no cross-module access to internals. Deploy the boundary only after the code already respects it."
+  condition: "When planning a migration from a monolith to microservices, separate repositories, or separately-deployed packages — at the point of deciding whether the split is ready to make."
+  reason: "Deployment separation enforces physical isolation; it cannot create logical isolation. If module A depends on module B's internal functions rather than its exported API, the same entanglement persists after separation as a network call or inter-package import. The coupling is not resolved — it is made harder to refactor. Physical separation of clean logical boundaries is a deployment decision; separation of entangled code instantiates the coupling as a distributed-systems dependency."
+  see-also: dependency-graph-over-architecture-diagrams
+
+- id: dependency-graph-over-architecture-diagrams
+  rule: "When auditing or enforcing architectural boundaries, derive them from the actual import/dependency graph of the code, not from architectural diagrams or intent statements."
+  condition: "When verifying that two modules are genuinely isolated — before any structural separation such as package extraction, service split, or repository division — or when a stated architecture diverges from observed runtime or import behavior."
+  reason: "An architecture diagram captures intent, not implementation. Two modules can be depicted as isolated boxes with a single interface arrow while one has twelve files importing from eight internal files of the other. The dependency graph is always current; a diagram is only current until the next unreviewed commit. If clean boundaries are the goal, the test is the dependency graph — a diagram that agrees with it is a summary, not evidence."
+  see-also: module-boundaries-precede-deployment-separation, code-lives-at-consumer-level
 
 killed:
 ```
