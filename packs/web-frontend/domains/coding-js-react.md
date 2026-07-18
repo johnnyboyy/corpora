@@ -52,16 +52,22 @@ principles:
   condition: "When adding or refactoring a JS/TS module's exports."
   reason: "A default export lets every importer choose its own local name for the same binding, so the same value can appear under different names across the codebase, and find-references / auto-import tooling has no canonical name to anchor on. Named exports fix the name at the source, so grep and IDE find-references locate every consumer reliably."
 
-- id: stable-ref-for-document-listeners
-  rule: "When a document-level event handler (visibilitychange, blur, beforeunload) must read current React state, shadow each reactive value with a ref updated on every render. The handler reads the ref, not the closure. Do not add the state to the effect's deps array as a workaround."
-  condition: "When a useEffect registers a document-level listener that needs to observe current React state — and re-registering on every state change is incorrect or undesirable."
-  reason: "React closures capture state at the time the effect ran. A document-level listener registered once sees stale state. Adding state to deps fixes the staleness but re-registers the listener on every change — often wrong for events like visibilitychange. A ref updated each render is always current without forcing re-registration."
-  see-also: behavior-flags-in-refs
+- id: prefers-reduced-motion-requires-js-hook
+  rule: "For JS-driven animations, detect `prefers-reduced-motion` via a custom hook reading `window.matchMedia('(prefers-reduced-motion: reduce)')` and subscribing to its `change` event. Apply the result to conditionally set duration to zero or skip the animation call. Do not rely on CSS media query overrides alone."
+  condition: "When implementing any animation whose parameters — duration, keyframes, or whether it fires at all — are configured in JavaScript, including use of Framer Motion, React Spring, GSAP, Reanimated, or manual Web Animations API calls."
+  reason: "CSS `@media (prefers-reduced-motion: reduce)` only overrides CSS animation and transition properties. JS animation libraries read configuration from JS objects at runtime; no CSS rule can reach those values. A hook reading `window.matchMedia` is the only way to honor the OS preference for JS-controlled animations. Subscribing to the `change` event rather than reading once at mount ensures the preference stays current if the user toggles the OS setting during the session."
+  see-also: reduced-motion-instant-not-absent
+
+- id: discriminated-union-for-mutually-exclusive-props
+  rule: "When a component has N variants whose prop sets are mutually exclusive, model the prop type as a discriminated union, not a flat interface with optional fields. Each union member carries the discriminant field and the props that are required — not optional — for that variant."
+  condition: "When designing or refactoring the TypeScript prop interface of a component that has two or more distinct usage modes, each requiring different props, where mixing props from two modes should be a compile-time error."
+  reason: "A flat interface with all variant props marked optional allows every combination, including impossible ones (icon and label together, or neither). TypeScript cannot flag these because all props are optional. A discriminated union narrows props at every discriminant check site, makes each variant's required fields explicit, and forces call sites to handle a new variant when one is added — exhaustiveness checks surface missing cases at compile time, not at runtime."
+  see-also: unified-representation-no-type-leakage
 
 - id: behavior-flags-in-refs
-  rule: "Ephemeral values that control behavior but don't affect rendering — boolean flags (mount guards, pending-write trackers, round-error bits), timer handles (setTimeout/setInterval return values), any 'did-X-happen-in-this-session' value — belong in refs, not useState. Never include timer IDs or behavioral flags in a useCallback or useMemo dependency array."
-  condition: "When adding any value whose purpose is gating or tracking a side-effect rather than driving rendered output. Test: would the UI look different if this value changed? If no, it belongs in a ref."
-  reason: "A value in state causes a re-render when changed and enters the dependency surface of any memo or callback. A ref has zero rendering cost and zero dep-cascade cost. Timer IDs especially: they change on every start/clear, so a dep array that includes one recreates the callback each time — propagating recreation to every hook and effect that depends on it, potentially re-firing effects that should not have run."
+  rule: "Ephemeral values that control behavior but don't affect rendering — boolean flags (mount guards, pending-write trackers, round-error bits), timer handles (setTimeout/setInterval return values), any 'did-X-happen-in-this-session' value, or a mirror of current state read only by an external handler (a document-level listener, an imperative ref method) — belong in refs, not useState. Never include timer IDs or behavioral flags in a useCallback or useMemo dependency array. For a document-level event handler (visibilitychange, blur, beforeunload) that must read current React state, shadow the reactive value with a ref updated on every render and have the handler read the ref — not the closure — rather than adding the state to the effect's dependency array as a workaround."
+  condition: "When adding any value whose purpose is gating or tracking a side-effect rather than driving rendered output — including a ref that exists only so an external listener or imperative method can read current state without a stale closure. Test: would the UI look different if this value changed? If no, it belongs in a ref."
+  reason: "A value in state causes a re-render when changed and enters the dependency surface of any memo or callback. A ref has zero rendering cost and zero dep-cascade cost. Timer IDs especially: they change on every start/clear, so a dep array that includes one recreates the callback each time — propagating recreation to every hook and effect that depends on it, potentially re-firing effects that should not have run. The same test explains document-level listeners: registering one with reactive state in its dependency array re-registers it on every change, which is often wrong for events like visibilitychange, while a closure captured once goes stale if it isn't. Mirroring the state into a ref read by the handler avoids both failure modes, because the mirrored value never drives a render and therefore never needs to appear in a dependency array."
 
 - id: nan-serializes-to-null-in-json
   rule: "Never store NaN in state that will be JSON-serialized. Use undefined for 'not yet entered' — JSON.stringify omits it; NaN becomes null and silently corrupts reads. The ?? operator does not catch NaN (NaN is not null/undefined)."
@@ -96,6 +102,11 @@ killed:
   rule: "Wrap hook boolean (and other ambiguous primitive) parameters in a single options object so the callsite reads as named arguments."
   kill_type: quality
   reason_killed: "Merged into hook-callsite-legibility alongside hook-params-named-for-hook-concern. See that entry."
+
+- id: stable-ref-for-document-listeners
+  rule: "When a document-level event handler (visibilitychange, blur, beforeunload) must read current React state, shadow each reactive value with a ref updated on every render. The handler reads the ref, not the closure. Do not add the state to the effect's deps array as a workaround."
+  kill_type: quality
+  reason_killed: "Merged into behavior-flags-in-refs (structural-kinship retrospective signal, 2026-07-18). Both answered the same test — does this value drive rendered output; if not, it belongs in a ref, not state — this one is the document-listener instance of it. Absorbed as a named case in the general principle's rule and reason rather than kept as a separate entry."
 
 - id: extract-named-concern-into-custom-hook
   rule: "When hook calls in a component manage a single named concern, extract them into a custom hook named for that concern."
