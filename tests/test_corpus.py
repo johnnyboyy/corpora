@@ -9,7 +9,7 @@ from pathlib import Path
 SCRIPT = Path(__file__).parents[1] / "scripts" / "corpus.py"
 
 
-class DeferredDecisionCommandsTest(unittest.TestCase):
+class CorpusCommandTestCase(unittest.TestCase):
     def setUp(self):
         self.tempdir = tempfile.TemporaryDirectory()
         self.root = Path(self.tempdir.name)
@@ -77,6 +77,7 @@ class DeferredDecisionCommandsTest(unittest.TestCase):
                 burden: "Repeated manual color derivation."{'\n              - date: 2026-08-03\n                workstream: reporting-redesign\n                burden: "Manual compositing recurred."' if second_evidence else ''}{disposition}
         """
 
+class DeferredAndUtilityCommandsTest(CorpusCommandTestCase):
     def test_valid_queue_passes(self):
         self.write_config()
         self.write_queue(self.entry())
@@ -318,6 +319,58 @@ class DeferredDecisionCommandsTest(unittest.TestCase):
         self.assertIn("requires --reason", missing.stderr)
         self.assertEqual(saved.returncode, 0, saved.stderr + saved.stdout)
         self.assertEqual(linted.returncode, 0, linted.stderr + linted.stdout)
+
+
+class AdoptCommandTest(CorpusCommandTestCase):
+    def test_adopt_finds_kernel_seed_domain(self):
+        result = self.run_command(["adopt", "--domain", "coding-general"])
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        self.assertIn("domains/coding-general.md", result.stdout)
+        self.assertIn("ask-before-architecture", result.stdout)
+        self.assertIn("fork-status: forked", result.stdout)
+
+    def test_adopt_finds_pack_domain_when_role_pack_declared(self):
+        (self.root / "corpora" / "config.md").write_text(
+            "# Config\n\nhas-ui: yes\nrole-pack: web-frontend\n"
+        )
+
+        result = self.run_command(["adopt", "--domain", "css"])
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        self.assertIn("packs/web-frontend/domains/css.md", result.stdout)
+
+    def test_adopt_fails_without_role_pack_for_pack_only_domain(self):
+        result = self.run_command(["adopt", "--domain", "css"])
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("nothing to fork from", result.stderr)
+
+    def test_adopt_fails_for_domain_with_no_seed_counterpart(self):
+        result = self.run_command(["adopt", "--domain", "not-a-real-domain"])
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("nothing to fork from", result.stderr)
+
+    def test_adopt_refuses_audit_which_is_the_ledger_not_a_domain(self):
+        result = self.run_command(["adopt", "--domain", "audit"])
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("nothing to fork from", result.stderr)
+
+    def test_adopt_refuses_to_resync_an_already_forked_domain(self):
+        (self.root / "corpora" / "domains" / "coding-general.md").write_text(
+            "# Domain: coding-general\n\n```yaml\n"
+            "fork-status: forked\n"
+            "forked-from: domains/coding-general.md\n"
+            "forked-date: 2026-07-18\n\n"
+            "principles:\n\nkilled:\n```\n"
+        )
+
+        result = self.run_command(["adopt", "--domain", "coding-general"])
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("already forked", result.stderr)
 
 
 if __name__ == "__main__":

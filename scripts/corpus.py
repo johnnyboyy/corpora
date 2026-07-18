@@ -25,6 +25,8 @@ Commands:
   set-utility-status [...]         record the operator's candidate disposition
   retro-done --domain D            reset counters after a retrospective
   sync-done                        reset library-drift after a UI-library sync
+  adopt --domain D                 locate D's seed/pack file and print it for curation into a
+                                   project-local fork (fork-status: forked)
 
 Thresholds (kernel.md, "The retrospective"): retrospective when ratified >= 6,
 or tokens grew >= 50% over baseline, or gate-violations >= 3; library sync when
@@ -733,6 +735,71 @@ def cmd_sync_done(project: Project, _args) -> None:
     print("library-drift reset to 0")
 
 
+# ── adopt: fork a seed/pack domain into the project layer ──────────────────
+
+def skill_root() -> str:
+    return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def read_role_pack(project: Project) -> str:
+    config_path = os.path.join(project.root, "corpora", "config.md")
+    if not os.path.exists(config_path):
+        return "none"
+    for raw in open(config_path):
+        m = re.match(r"role-pack:\s*(\S+)", raw.strip())
+        if m:
+            return m.group(1)
+    return "none"
+
+
+def seed_domain_path(project: Project, domain: str) -> str:
+    if domain == "audit":
+        return ""
+    root = skill_root()
+    kernel_path = os.path.join(root, "domains", f"{domain}.md")
+    if os.path.exists(kernel_path):
+        return kernel_path
+    pack = read_role_pack(project)
+    if pack != "none":
+        pack_path = os.path.join(root, "packs", pack, "domains", f"{domain}.md")
+        if os.path.exists(pack_path):
+            return pack_path
+    return ""
+
+
+def fork_info(path: str) -> dict:
+    info = {}
+    for raw in open(path):
+        line = raw.strip()
+        if re.fullmatch(r"principles:\s*", line):
+            break
+        m = re.match(r"(fork-status|forked-from|forked-date):\s*(.+)", line)
+        if m:
+            info[m.group(1)] = m.group(2).strip()
+    return info
+
+
+def cmd_adopt(project: Project, args) -> None:
+    domain = args.domain
+    seed_path = seed_domain_path(project, domain)
+    if not seed_path:
+        fail(f"no seed or pack file for domain '{domain}' — nothing to fork from")
+    project_path = os.path.join(project.domains_dir, f"{domain}.md")
+    if os.path.exists(project_path):
+        info = fork_info(project_path)
+        if info.get("fork-status") == "forked":
+            fail(f"'{domain}' is already forked (forked-from {info.get('forked-from', '?')}) "
+                 "— adopt is one-way, not a resync")
+    print(f"seed file for '{domain}': {seed_path}\n")
+    print(open(seed_path).read())
+    rel_seed = os.path.relpath(seed_path, skill_root())
+    print(f"---\nPropose which principles above are project-relevant vs. droppable (with a reason "
+          f"each). After operator approval, write the curated result to {project_path} — merged by "
+          f"`id` with any principles already there — with this preamble:\n"
+          f"  fork-status: forked\n  forked-from: {rel_seed}\n  forked-date: {today()}\n"
+          "From then on this domain loads only the project file; the seed is no longer consulted.")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--root", default=".", help="project root (contains corpora/)")
@@ -769,6 +836,8 @@ def main() -> None:
     r = sub.add_parser("retro-done")
     r.add_argument("--domain", required=True)
     sub.add_parser("sync-done")
+    ad = sub.add_parser("adopt")
+    ad.add_argument("--domain", required=True)
     args = ap.parse_args()
     project = Project(os.path.abspath(args.root))
     {"measure": cmd_measure, "verify": cmd_verify, "record-gate": cmd_record_gate, "triggers": cmd_triggers,
@@ -778,7 +847,8 @@ def main() -> None:
      "utility-candidates": cmd_utility_candidates,
      "record-utility-candidate": cmd_record_utility_candidate,
      "set-utility-status": cmd_set_utility_status,
-     "retro-done": cmd_retro_done, "sync-done": cmd_sync_done}[args.cmd](project, args)
+     "retro-done": cmd_retro_done, "sync-done": cmd_sync_done,
+     "adopt": cmd_adopt}[args.cmd](project, args)
 
 
 if __name__ == "__main__":

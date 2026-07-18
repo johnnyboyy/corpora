@@ -462,8 +462,22 @@ Seed domain = general judgment that travels across projects (lives in the skill:
 `domains/` and pack-level `packs/<pack>/domains/`).
 Project domain = judgment earned in this specific project.
 Both apply when a role runs: for each domain the role declares, load the seed domain (if any) then
-the project domain (if any) of the same name. A project may also have domains with no seed
-counterpart (project-specific subjects, e.g. `spatial-metaphor`).
+the project domain (if any) of the same name — unless the project domain file's preamble declares
+`fork-status: forked`, in which case load only the project file; the seed is no longer consulted
+for that domain. A project may also have domains with no seed counterpart (project-specific
+subjects, e.g. `spatial-metaphor`).
+
+### Forking a domain
+
+A project can adopt a seed or pack domain instead of always merging live with it — useful once a
+domain has diverged enough, or has principles that don't fit the project, that the live merge is
+more noise than signal. Run `corpus.py adopt --domain <domain>` (skill-repo script, project root as
+`--root`): it locates the domain's seed or pack file and prints its principles — mechanics only, no
+judgment. From there: propose which principles are project-relevant vs. droppable with a reason
+each, get operator approval, then write the curated result to `corpora/domains/<domain>.md` —
+merged by `id` with any principles already there — with `fork-status: forked`, `forked-from: <seed
+path>`, and `forked-date: <date>` in its preamble. Forking is one-way: it stops the live merge for
+that domain going forward. Re-syncing a fork against later seed changes is not yet supported.
 
 Two layers supply the seed: a stack-agnostic kernel layer (orchestrator + base coder + their
 domains) always present, and an optional role pack selected by `corpora/config.md` (`role-pack:`)
