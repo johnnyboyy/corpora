@@ -156,9 +156,22 @@ provenance:
   provenance: "Meridian project, 2026-07-17, retrospective conversation. Operator flagged that UI-library sync handoffs reproduced the whole ui-library.md document in the Artifact section despite the role having written directly to the file — real token cost paid once and then discarded when the handoff is deleted post-ratify. The schema's 'freeform' Artifact field never mandated full reproduction; this names the actual dividing line (does the content already have a persisted home the orchestrator can read) that the freeform language left implicit."
 
 # domain: planning
+- id: open-questions-are-explicit
+  domain: planning
+  provenance: "No provenance was ever recorded for this principle — a pre-existing gap found while executing the 2026-07-18 structural-kinship merge, backfilled here rather than left orphaned."
+  history:
+    - date: 2026-07-18
+      type: generalized
+      reason: "Absorbed surface-shared-concept-before-implementation as a named instance — a shared runtime concept two tasks would each touch is exactly 'information the planner doesn't have.'"
+
 - id: task-describes-output-not-implementation
   domain: planning
   provenance: "2026-06-22, FAMOUS disc-02. Planner described the implementation path (files to touch, data to thread) rather than the observable output. Operator noticed and flagged it; principle surfaced through operator investigation, not through the planner's self-check."
+
+- id: surface-shared-concept-before-implementation
+  domain: planning
+  provenance: "No provenance was ever recorded for this principle — same pre-existing gap as open-questions-are-explicit, backfilled here rather than left orphaned."
+  killed: 2026-07-18
 
 promoted:
 

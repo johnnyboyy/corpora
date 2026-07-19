@@ -76,19 +76,19 @@ principles:
   reason: "Role order (UX before UI before coder) is a heuristic, not a law. It breaks when tasks within a capability don't align with that order. Output dependency is the correct sequencing signal — it holds regardless of who does the work."
 
 - id: open-questions-are-explicit
-  rule: "A question the planner cannot resolve from available information must appear as an explicit open question in the queue, with the tasks it blocks listed. Do not make an assumption and proceed silently."
-  condition: "When a decomposition decision hinges on information the planner does not have."
-  reason: "Silent assumptions compound. An unresolved question that travels silently into a task produces a deliverable built on an unknown foundation. Making the question explicit lets the orchestrator surface it to the operator before work begins."
+  rule: "A question the planner cannot resolve from available information must appear as an explicit open question in the queue, with the tasks it blocks listed — never a silent assumption. This includes a shared runtime concept (a current position, a selection, a history, a running count) that two or more decomposed tasks would each need to read or mutate: name the concept, state the conflict, and block every affected task rather than letting them independently decide how it behaves."
+  condition: "When a decomposition decision hinges on information the planner does not have — including when a capability description implies multiple tasks will operate on the same underlying runtime concept (e.g. undo + filter, pagination + sort, bookmark + search)."
+  reason: "Silent assumptions compound: an unresolved question that travels silently into a task produces a deliverable built on an unknown foundation. This is especially costly for a shared concept — tasks that independently decide how it behaves are locally correct but globally inconsistent, and the conflict only surfaces at runtime, where it's expensive to fix. Making it explicit at planning time moves that cost to where it's cheap — one operator answer becomes context for every affected task."
 
 - id: task-describes-output-not-implementation
   rule: "A task description states the observable output and its acceptance condition. It does not name files, functions, types, or data paths the role should touch."
   condition: "When writing or reviewing any task description in the queue."
   reason: "Naming implementation details couples the plan to a specific approach before the coder has seen the code. It narrows the solution space unnecessarily and makes the queue wrong the moment the code diverges from the assumption — without any signal that it has. The coder's job is to decide how; the planner's job is to decide what."
 
+killed:
+
 - id: surface-shared-concept-before-implementation
   rule: "When orientation reveals that two or more tasks in the decomposition will operate on the same runtime concept — a current position, a selection, a history, a running count — add an open question naming that concept, stating the conflict or ambiguity, and blocking all affected tasks. Do not decompose into tasks that will independently decide how a shared concept behaves."
-  condition: "When a capability description mentions multiple features (e.g. undo + filter, pagination + sort, bookmark + search) that imply a shared underlying concept the tasks will each need to read or mutate."
-  reason: "Tasks that independently decide how a shared runtime concept behaves produce implementations that are locally correct but globally inconsistent. The conflict only appears at runtime, where it is expensive to fix. Surfacing it as a blocked open question moves the cost to planning time, where it is cheap — one operator answer becomes context for every affected task."
-
-killed:
+  kill_type: quality
+  reason_killed: "Merged into open-questions-are-explicit as a named instance — a shared concept two tasks would each touch is exactly 'information the planner doesn't have.' The lens itself already states the general test in prose (step 3, 'Settle open questions')."
 ```
