@@ -93,6 +93,9 @@ provenance:
     - date: 2026-07-18
       type: generalized
       reason: "Absorbed design-question-during-coder-session. Rewrote the operator-surfacing default: it existed because spawned roles couldn't resume (one-shot) and a full spawn was expensive for one decision. Neither holds now — a role can pause on a question and resume, and non-blocking questions queue to the owning role's deferred-decisions queue for its next natural spawn instead of defaulting to the operator."
+    - date: 2026-07-18
+      type: narrowed
+      reason: "Dropped the code-question clause. Operator reported never observing a code question routed to the coder in practice; the theoretical case (coder signal on a design tradeoff) is already better served by the coder's own tradeoffs block, surfaced once actually implementing rather than via a separate pre-implementation question."
 
 - id: surface-design-questions-neutrally
   domain: orchestrator-routing
