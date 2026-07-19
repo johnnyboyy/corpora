@@ -89,6 +89,10 @@ provenance:
 - id: route-questions-not-roles
   domain: orchestrator-routing
   provenance: "2026-06-12, operator feedback: established pipeline caused reflex spawning; question-routing better matches actual cost structure."
+  history:
+    - date: 2026-07-18
+      type: generalized
+      reason: "Absorbed design-question-during-coder-session. Rewrote the operator-surfacing default: it existed because spawned roles couldn't resume (one-shot) and a full spawn was expensive for one decision. Neither holds now — a role can pause on a question and resume, and non-blocking questions queue to the owning role's deferred-decisions queue for its next natural spawn instead of defaulting to the operator."
 
 - id: surface-design-questions-neutrally
   domain: orchestrator-routing
@@ -113,6 +117,7 @@ provenance:
 - id: design-question-during-coder-session
   domain: orchestrator-routing
   provenance: "2026-06-17, orchestrator retrospective."
+  killed: 2026-07-18
 
 - id: audit-request-means-spawn-designer
   domain: orchestrator-routing

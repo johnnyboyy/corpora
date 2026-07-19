@@ -27,9 +27,9 @@ principles:
   reason: "Routing judgment is about matching questions to the role that owns them, not following a sequence. Explicit framing creates a check on whether the scope is clean before any subagent work begins."
 
 - id: route-questions-not-roles
-  rule: "Route by question type, not by pipeline position. When a UX question surfaces, route it to the UX designer or surface it to the operator. When a UI question surfaces, route it to the UI designer or surface it to the operator. When a code question surfaces, route it to the coder — the operator does not need to be looped in unless the coder explicitly asks. Never spawn a role when the question can be resolved by the operator in one exchange."
-  condition: "Any time a domain question surfaces during work — whether from the operator, from a coder session, or from within a spawned role's output."
-  reason: "Spawning a full designer session is expensive relative to a single decision. The operator can resolve many UX and UI questions faster than a spawn round-trip. Routing by question (not by pipeline position) keeps the orchestrator from defaulting to a full spawn when a lighter path exists."
+  rule: "Route a question to its owning role, not to the operator by default. A code question always routes to the coder. A UX or UI question: if non-blocking, queue it to the owning role's queue (`corpora/deferred-decisions.md`) for resolution at that role's next natural spawn — including questions raised by a coder session, not only the designer's own self-deferrals. If blocking and the role's judgment is needed now, spawn or resume that role; a live role that hits a genuine question mid-work can pause (`questions-pending`) and resume once answered. Surface to the operator directly only when neither path fits."
+  condition: "Any time a domain question surfaces during work — from the operator, a coder session, or a spawned role's output."
+  reason: "Operator-surfacing became the default when spawned roles were one-shot (no resume) and a full spawn was expensive relative to one decision — asking the operator was the only cheap path. Neither constraint holds now: a role can pause on a genuine question and resume with the answer, and a non-blocking question can wait in the owning role's queue for its next natural spawn instead of forcing an immediate round-trip. The operator is the fallback when neither path fits, not the first resort."
 
 - id: surface-design-questions-neutrally
   rule: "When routing a UX or UI question to the operator instead of spawning, present the question with enough framing to make the answer cheap — the domain (UX or UI), what decision is needed, and what context the answerer needs. Do not include a tentative design opinion or recommendation."
@@ -71,11 +71,6 @@ principles:
   condition: "Any inline coding work in the orchestrator session — small tasks, experiments, pair-programming — where spawning a coder subagent would cost more than the isolation is worth."
   reason: "Corpus loading must happen before constraints are applied. In-flight flagging prevents decisions from evaporating in a long session. Binding the principles question to the natural seam rather than a formal role-exit event makes the check structural."
 
-- id: design-question-during-coder-session
-  rule: "When a UX or UI question surfaces during inline coder work, pause and surface it to the operator: name the domain (UX or UI), the specific decision needed, and the context required to answer it. Present two options explicitly — operator resolves directly (coder continues with that answer), or operator escalates to the appropriate designer (spawn, relay output, coder resumes with spec)."
-  condition: "When any design question surfaces during an inline coder session."
-  reason: "The coder must not silently make design decisions — that bypasses the corpus system for the wrong role. Surfacing to the operator first is cheaper than defaulting to a spawn; many design questions can be resolved in one exchange."
-
 - id: audit-request-means-spawn-designer
   rule: "When the operator uses the phrase 'full audit' or 'UI/UX audit', spawn the UI Designer for a holistic review even if specific operator-stated concerns were also provided. Specific concerns are context for the audit, not a substitute for it."
   condition: "When the operator requests a full or holistic audit of a tool alongside specific known issues."
@@ -92,4 +87,9 @@ principles:
   reason: "Workstream boundaries affect routing, role ownership, and operator visibility, so they belong to the orchestrator. Local execution decomposition does not change ownership and is cheaper for the role closest to the work to manage."
 
 killed:
+
+- id: design-question-during-coder-session
+  rule: "When a UX or UI question surfaces during inline coder work, pause and surface it to the operator: name the domain (UX or UI), the specific decision needed, and the context required to answer it. Present two options explicitly — operator resolves directly (coder continues with that answer), or operator escalates to the appropriate designer (spawn, relay output, coder resumes with spec)."
+  kill_type: quality
+  reason_killed: "Merged into route-questions-not-roles, which now covers this case directly. The two 'operator resolves or operator escalates' options assumed operator-surfacing was the only cheap path — the queue-to-owning-role option didn't exist here at all."
 ```
