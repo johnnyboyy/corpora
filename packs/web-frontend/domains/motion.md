@@ -24,5 +24,11 @@ principles:
   reason: "Returning to a known context should feel like release, not a reversal of the forward arrival's intentional weight. The easing asymmetry — no front-weighted acceleration on back — signals return rather than deliberate arrival."
   status: ratified
 
+- id: reduced-motion-instant-not-absent
+  rule: "When `prefers-reduced-motion` is active, make state-communicating animations instant (duration → 0) rather than absent. Remove only decorative or continuous motion (auto-playing loops, parallax, background animations) entirely."
+  condition: "When adapting animations for the `prefers-reduced-motion` preference. The instant-vs-absent distinction applies to: instant for animations that communicate a state change (item appearing, being removed, reordering); remove entirely for animations that exist only for visual interest with no functional role."
+  reason: "An animation communicating a state change (an item appearing or being removed) conveys meaning through its endpoint, not its motion. Removing it entirely causes the UI to jump without context, which can be as disorienting as the motion itself. Setting duration to zero delivers the same endpoint with no motion. Decorative animations serve no function and add no clarity when instant — they should be removed."
+  see-also: motion-as-accent, prefers-reduced-motion-requires-js-hook
+
 killed:
 ```

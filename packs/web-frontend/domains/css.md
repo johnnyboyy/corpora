@@ -19,6 +19,23 @@ principles:
   condition: "When migrating literal CSS values to tokens during a token-introduction refactor."
   reason: "A token for a single consumer is a rename with extra indirection — the value's meaning is clearer inline next to its only use. Token sprawl makes the token file harder to skim."
 
+- id: tailwind-extract-component-before-apply
+  rule: "When a Tailwind utility pattern needs to be centralized, extract a React component (or template partial) rather than using `@apply`. Reserve `@apply` for contexts where a component abstraction is impossible — CSS-only environments, base-layer overrides for third-party HTML, or legacy non-component templates."
+  condition: "When the same set of Tailwind utility classes appears on multiple independent elements in a React codebase and needs to be deduplicated."
+  reason: "A React component is a structural boundary that accepts props, renders conditionally, and is tracked by IDE find-references. `@apply` in a CSS file creates a hidden coupling between a class name and a utility set, with no mechanism for props or conditions. Centralizing with a component keeps style and behavior co-located and visible; centralizing with `@apply` creates a second source of truth (markup + stylesheet) that can drift."
+  see-also: tailwind-loop-duplication-is-not-a-problem
+
+- id: tailwind-loop-duplication-is-not-a-problem
+  rule: "Repeated Tailwind utility strings inside a template loop do not require extraction. The loop body is the single source of truth; runtime duplication across rendered instances is not authoring duplication."
+  condition: "When reviewing Tailwind markup and finding the same utility class string in multiple iterations of a `map()`, `for`, or template loop."
+  reason: "Extracting a component from a loop to 'remove duplication' creates a component with exactly one callsite — the loop body — adding indirection with no reuse benefit. The authoring-level source of truth is already unique; only the rendered output repeats. The duplication concern that motivates component extraction is when independent elements in different templates share a style — not when one template loop generates identical markup."
+  see-also: tailwind-extract-component-before-apply
+
+- id: grid-for-layout-flexbox-for-flow
+  rule: "Use CSS Grid when elements must align on two axes simultaneously or when their visual order must differ from source order. Use Flexbox when item count is dynamic or when items should size from their own content with the container distributing remaining space."
+  condition: "When choosing between `display: grid` and `display: flex` for a new layout container, in a CSS/DOM rendering context. Does not apply to React Native's native renderer, which has no CSS Grid support — flexbox-only there."
+  reason: "The two models have opposite starting points: Flexbox is content-outward (the container adapts to its items' content; remaining space is then distributed) and Grid is layout-inward (tracks are declared first; items are placed into them, independently of source order). Using Grid where content-first sizing is needed forces explicit track definitions for what could be automatic; using Flexbox where two-axis alignment is needed requires nested containers or duplicate sizing rules. Match the model to what the layout actually requires."
+
 killed:
 
 - id: mobile-fixed-bar-bottom-gap

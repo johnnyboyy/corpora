@@ -29,5 +29,17 @@ principles:
   condition: "When a control disappears based on another field's value, but the underlying concept still applies regardless."
   reason: "Hiding a control because its effect on a specific calculation varies is wrong — that's an internal implementation concern leaking into the UI. A control that disappears as the user changes a sibling field is disorienting."
 
+- id: forms-reveal-conditional-fields
+  rule: "In a form, reveal fields only when a prior answer makes them relevant. Do not show conditional fields disabled or grayed out; keep them hidden until the condition is met, then show them as active."
+  condition: "When a form has fields whose relevance depends on the value of a sibling field — for example, a billing-address section that only applies when 'different from shipping address' is selected, or a 'specify other' field that appears only when 'Other' is chosen."
+  reason: "A form that shows all conditional fields — even disabled — forces every user to parse and consciously skip irrelevant content. This creates confusion (why is this grayed out?), implies the field may later matter, and makes the form appear longer and more complex than the user's actual task requires. Revealing fields on demand minimizes apparent complexity and matches form length to the user's actual data-entry needs. Contrast with `persistent-controls-not-conditional`: that principle covers fields that are always conceptually relevant but vary in effect — this covers fields that are genuinely inapplicable until a prior condition is met."
+  see-also: progressive-disclosure-for-primary-advanced-split, persistent-controls-not-conditional
+
+- id: validate-on-blur-then-on-change
+  rule: "Validate a field on `blur` the first time the user leaves it. Once the field is in an error state, switch to `change` events so corrections are acknowledged immediately. Never show validation errors while the user is still typing in a field that has not yet been in error."
+  condition: "When implementing inline form validation — specifically choosing which DOM event (`blur`, `change`, `input`, `submit`) triggers showing a field-level error message."
+  reason: "On-change validation that fires before a field has ever errored is accusatory — it flags the user as wrong before they have finished entering a value. On-blur waits for the user to declare they are done with a field, which is the earliest natural moment for a correctness check. Once an error has already been shown, on-change feedback is helpful rather than accusatory: the user is now attempting to fix a known problem and deserves immediate acknowledgment of their corrections. Research shows blur-first validation reduces error rates versus submit-time validation without increasing form completion time."
+  see-also: warning-colocated-with-resolution
+
 killed:
 ```
