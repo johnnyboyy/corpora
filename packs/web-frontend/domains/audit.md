@@ -290,10 +290,14 @@ provenance:
     - date: 2026-06-22
       type: moved
       reason: "Re-homed to the recoverability domain, now declared by BOTH ui-designer and ux-designer. The redesign makes structural what the 2026-06-20 consolidation did by hand: this judgment is one concern spanning flow (UX) and visible affordance (UI), and a domain both lenses declare is its natural home."
+    - date: 2026-07-18
+      type: generalized
+      reason: "Absorbed destructive-global-actions-require-confirmation's ~30-second re-entry severity threshold directly into this principle's rule, reason, and condition — both were the same recovery-or-confirmation test, one just naming a concrete bar for when the gate becomes mandatory."
 
 - id: destructive-global-actions-require-confirmation
   domain: recoverability
   provenance: "2026-06-14, load-calculator UX audit."
+  killed: 2026-07-18
 
 - id: destructive-inline-confirmation
   domain: recoverability
