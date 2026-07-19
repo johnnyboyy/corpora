@@ -1180,9 +1180,9 @@ mixing two different subjects) with the wrong incision; the JS/React boundary wa
 `coding-js-react.md` was retired; `coding-react.md` (JSX/hooks/refs/props: 10 principles) and the
 framework-agnostic remainder (`named-exports-over-default`, `same-state-same-name`,
 `nan-serializes-to-null-in-json`) replace it. That framework-agnostic domain was named `coding-ts`,
-not `coding-js` — every project on this pack writes TypeScript in practice, so the TS name matches
-actual usage even where a given principle's underlying fact would also hold in plain JS. Kills were
-split the same way by what they actually depended on, not by where they happened to be filed.
+not `coding-js` — TypeScript is this pack's default language, so the name matches actual usage even
+where a given principle's underlying fact would also hold in plain JS. Kills were split the same
+way by what they actually depended on, not by where they happened to be filed.
 `packs/web-frontend/coder.md`'s domain declaration, `coder.md`'s load-order documentation,
 `kernel.md`'s example declaration block, the reading-pipeline agent instructions, and every affected
 `reading/queue.md` entry were updated to the new names.

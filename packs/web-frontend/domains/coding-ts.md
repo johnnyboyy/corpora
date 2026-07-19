@@ -1,9 +1,9 @@
 # Domain: coding-ts (web-frontend pack)
 
 Framework-agnostic JS/TS code patterns — language and module-system judgment that holds regardless
-of which UI framework the project uses. Named for TypeScript rather than JS: every project on this
-pack writes TypeScript in practice, even where a given principle's underlying fact would also hold
-in plain JS. Declared by the coder lens when `role-pack: web-frontend`. Audit metadata lives in
+of which UI framework the project uses. Named for TypeScript rather than JS: TypeScript is this
+pack's default language, even where a given principle's underlying fact would also hold in plain
+JS. Declared by the coder lens when `role-pack: web-frontend`. Audit metadata lives in
 `packs/web-frontend/domains/audit.md`, loaded only at ratify/retrospective time.
 
 ```yaml
