@@ -53,6 +53,7 @@ KIND_ENUM = {"judgment", "knowledge", "direction"}
 DEFERRED_ROLE_ENUM = {"ui-designer", "ux-designer"}
 DEFERRED_STATUS_ENUM = {"queued", "resolved"}
 UTILITY_STATUS_ENUM = {"open", "deferred", "denied", "accepted", "implemented"}
+UTILITY_STATUS_REQUIRES_REASON = {"deferred", "denied"}
 
 
 def today() -> str:
@@ -157,6 +158,8 @@ def count_entries(path: str) -> tuple:
             elif section == "k":
                 kills += 1
     return principles, kills
+
+
 EFFICACY_FIELDS = ["id", "fired", "violated", "idle"]
 
 
@@ -360,17 +363,16 @@ def cmd_lint_handoff(_project: Project, args) -> None:
     drift = field("ui-drift")
     if drift and drift.split("#")[0].strip() not in {"yes", "no"}:
         problems.append(f"frontmatter: ui-drift '{drift}' must be yes|no")
-    # proposals: each item needs rule/condition/reason/kind/provenance; kind in enum
     prop_block = re.search(r"^proposals:\n((?:[ \t]+.*\n?)*)", front, re.MULTILINE)
     if prop_block and prop_block.group(1).strip() not in ("", "[]"):
         items = re.split(r"^\s*- ", prop_block.group(1), flags=re.MULTILINE)[1:]
-        for i, item in enumerate(items, 1):
+        for position, item in enumerate(items, 1):
             for req in ("rule", "condition", "reason", "kind", "provenance"):
                 if not re.search(rf"^\s*{req}:", "- " + item, re.MULTILINE):
-                    problems.append(f"proposal {i}: missing {req}")
+                    problems.append(f"proposal {position}: missing {req}")
             km = re.search(r"^\s*kind:\s*(\S+)", "- " + item, re.MULTILINE)
             if km and km.group(1) not in KIND_ENUM:
-                problems.append(f"proposal {i}: kind '{km.group(1)}' not in {sorted(KIND_ENUM)}")
+                problems.append(f"proposal {position}: kind '{km.group(1)}' not in {sorted(KIND_ENUM)}")
     if not re.search(r"^## Artifact\s*$", text, re.MULTILINE):
         problems.append("missing '## Artifact' section")
     if not re.search(r"^## Surfaced\s*$", text, re.MULTILINE):
@@ -500,7 +502,6 @@ def cmd_deferred(project: Project, _args) -> None:
 
 
 def parse_utility_candidates(path: str) -> list:
-    """Parse the kernel-defined utility candidate ledger."""
     entries = []
     item = None
     evidence = None
@@ -589,7 +590,7 @@ def utility_candidate_problems(entries: list) -> list:
             if signature in evidence_seen:
                 problems.append(f"{label}: duplicate evidence record {evidence_index}")
             evidence_seen.add(signature)
-        if entry.get("status") in {"deferred", "denied"} and not entry.get("disposition-reason"):
+        if entry.get("status") in UTILITY_STATUS_REQUIRES_REASON and not entry.get("disposition-reason"):
             problems.append(f"{label}: {entry.get('status')} status requires disposition reason")
     return problems
 
@@ -701,7 +702,7 @@ def cmd_set_utility_status(project: Project, args) -> None:
     entry = next((candidate for candidate in entries if candidate["id"] == args.id), None)
     if entry is None:
         fail(f"unknown utility candidate '{args.id}'")
-    if args.status in {"deferred", "denied"} and not args.reason:
+    if args.status in UTILITY_STATUS_REQUIRES_REASON and not args.reason:
         fail(f"status '{args.status}' requires --reason")
     entry["status"] = args.status
     entry["disposition-reason"] = args.reason or ""
