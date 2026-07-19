@@ -10,7 +10,7 @@ Domains, not roles, own corpora — so shared judgment lives once and is declare
 
 **Two layers of lenses:**
 
-- **Kernel** — stack-agnostic, always loaded. One orchestrator (`SKILL.md`, declares `orchestrator-routing`) and one base coder (`coder.md`, declares `coding-general`). Every project starts here, even with no role pack.
+- **Kernel** — stack-agnostic, always loaded. One orchestrator (`SKILL.md`, declares `orchestrator-routing` and `ratify-gate`) and one base coder (`coder.md`, declares `coding-general`). Every project starts here, even with no role pack.
 - **Role pack** — stack-specific lens overlays and domains under `packs/<name>/`, loaded only when a project's `corpora/config.md` declares `role-pack: <name>`. The only pack here is `web-frontend` (coder overlay, UX designer, UI designer; coding + design domains).
 
 A pack adds **depth to existing roles** — more domains on a lens's declaration — not new roles. There is one coder, one UX designer, one UI designer per project. Roles split into scoped instances only when the retrospective surfaces a fork signal (a domain whose conditions partition the space and give opposing advice), never from an org chart.
@@ -34,7 +34,7 @@ For each domain a lens declares, both apply when the role runs — seed first, t
 - `SKILL.md` — the shared orchestrator entrypoint for Claude Code (`/corpora`) and Codex (`$corpora`): routes workstreams, assembles complete role loads, relays handoffs, and drives the ratify gate.
 - `coder.md` — base coder lens. Declares `coding-general`. Loaded for every project.
 - `kernel.md` — the schema, lens+declaration model, ratify gate, write-back format, two load modes, retrospective signals, and role lifecycle. Reference document.
-- `domains/` — kernel-seed domains: `coding-general.md`, `orchestrator-routing.md`, plus `audit.md` (provenance/promoted/kill detail for the layer, loaded only at ratify/retrospective time).
+- `domains/` — kernel-seed domains: `coding-general.md`, `orchestrator-routing.md`, `ratify-gate.md`, `planning.md`, plus `audit.md` (provenance/promoted/kill detail for the layer, loaded only at ratify/retrospective time).
 - `packs/web-frontend/` — the web-frontend pack: lens overlays (`coder.md`, `ux-designer.md`, `ui-designer.md`) and `domains/` (stack-specific coding + design domains, plus the layer `audit.md`). Loaded only when `role-pack: web-frontend`.
 - `bootstrap.md` — one-time project setup. Phase 1 detects project shape and writes `corpora/config.md`. Phases 2 and 3 (UI projects only) generate `corpora/ui-library.md` (UI designer) then `corpora/ux-library.md` (UX designer) and propose seed design principles.
 - `LINEAGE.md` — intellectual history: why conventions became law, key kills, design decisions.

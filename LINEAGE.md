@@ -1199,3 +1199,31 @@ replaced with the general undefined-vs-null distinction the rule actually rests 
 The second split candidate from the same pass — carving a `ratify-gate` domain out of
 `orchestrator-routing`'s gate-mechanics cluster — was not yet acted on as of this entry; see
 `orchestrator-routing.md` directly for current state.
+
+---
+
+## The ratify-gate split
+
+*Decided 2026-07-18. Verify current state against `domains/orchestrator-routing.md`,
+`domains/ratify-gate.md`, and `SKILL.md`'s domain declaration directly.*
+
+A full re-read of `orchestrator-routing`'s 25 principles by decision class (not the earlier
+quick scan, which undercounted) found two genuinely different jobs bundled under one domain:
+**routing** — which role to invoke, when to spawn vs. surface vs. defer, session/workstream
+continuity — and **assembly-and-gate mechanics** — building a complete role invocation
+(pre-scan, full-corpus-on-spawn, spawn-token-summary) and processing what comes back
+(judgment-vs-knowledge classification, domain assignment, worker-handoff relay, operator
+ratification of routing-corpus changes, artifact-vs-pointer reproduction). `SKILL.md` itself
+already treats these as separate procedures — "Starting an isolated role agent" and "Ratify gate
+(after role work)" are two distinct numbered sections — so the split follows a boundary the skill's
+own structure had already drawn, just not yet at the domain level. Named `ratify-gate` rather than
+something narrower like "assembly," since the corpus's own vocabulary already uses "ratify gate" as
+the anchoring term for this whole round-trip (`ratify-gate-judgment-vs-knowledge` and
+`domain-assignment-at-ratify-gate` both used it in their ids before the domain existed).
+
+9 principles (plus the `surface-nested-handoffs-verbatim` kill) moved to `domains/ratify-gate.md`;
+16 stayed in `orchestrator-routing.md`. `SKILL.md`'s orchestrator declaration, its several inline
+mentions of `orchestrator-routing` that actually meant gate mechanics (the `spawn-token-summary`
+cross-reference, the "reasons from" framing), and `README.md`'s file list were updated. Several
+principles on both sides of the split had no audit provenance entry at all — a pre-existing gap
+independent of this split, left as found rather than backfilled with guessed history.

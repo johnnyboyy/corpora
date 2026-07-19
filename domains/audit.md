@@ -86,10 +86,6 @@ provenance:
   domain: orchestrator-routing
   provenance: "2026-06-01, orchestrator corpus setup."
 
-- id: pre-scan-before-spawning
-  domain: orchestrator-routing
-  provenance: "2026-06-02, codebase audit session. Three parallel agents each ran independent discovery; user noted the redundancy."
-
 - id: route-questions-not-roles
   domain: orchestrator-routing
   provenance: "2026-06-12, operator feedback: established pipeline caused reflex spawning; question-routing better matches actual cost structure."
@@ -122,12 +118,17 @@ provenance:
   domain: orchestrator-routing
   provenance: "2026-06-13, load calculator audit session — orchestrator implemented operator-listed concerns as code and skipped the designer spawn."
 
+# domain: ratify-gate (split from orchestrator-routing 2026-07-18; see LINEAGE.md, "The ratify-gate split")
+- id: pre-scan-before-spawning
+  domain: ratify-gate
+  provenance: "2026-06-02, codebase audit session. Three parallel agents each ran independent discovery; user noted the redundancy."
+
 - id: spawn-token-summary
-  domain: orchestrator-routing
+  domain: ratify-gate
   provenance: "2026-06-19, operator requested visibility after aggregate-only reporting made cost analysis opaque."
 
 - id: full-corpus-on-spawn
-  domain: orchestrator-routing
+  domain: ratify-gate
   provenance: "2026-06-19, operator rejected selective inclusion after orchestrator proposed it as a cost-reduction strategy."
   history:
     - date: 2026-06-22
@@ -135,15 +136,15 @@ provenance:
       reason: "Reframed from 'pass the full role corpus' to 'pass every declared domain in full' for the lens+declaration model. Added the explicit note that loading only declared domains is a fixed contract, not a relevance judgment — so domain-scoping does not violate this principle (the central hazard the redesign had to guard)."
 
 - id: ratify-gate-judgment-vs-knowledge
-  domain: orchestrator-routing
+  domain: ratify-gate
   provenance: "2026-06-22, FAMOUS 3D keyboard-key grid ratify session. Orchestrator killed preserve-3d-chain on its own judgment ('a model would know this from training') without routing the distinction to the operator. Post-session reflection surfaced why the role is better positioned to make this call than the orchestrator. Operator confirmed the orchestrator principle is thinner: route the question, don't answer it."
 
 - id: domain-assignment-at-ratify-gate
-  domain: orchestrator-routing
+  domain: ratify-gate
   provenance: "2026-06-22, corpus redesign. Domain-scoping moved corpus ownership off roles; the ratify gate became the point where a proposal is assigned a domain (or a new domain is born). Exercised in practice 2026-06-28 (HiraganaQuiz ratify session)."
 
 - id: artifact-points-to-persisted-file-not-full-reproduction
-  domain: orchestrator-routing
+  domain: ratify-gate
   provenance: "Meridian project, 2026-07-17, retrospective conversation. Operator flagged that UI-library sync handoffs reproduced the whole ui-library.md document in the Artifact section despite the role having written directly to the file — real token cost paid once and then discarded when the handoff is deleted post-ratify. The schema's 'freeform' Artifact field never mandated full reproduction; this names the actual dividing line (does the content already have a persisted home the orchestrator can read) that the freeform language left implicit."
 
 # domain: planning

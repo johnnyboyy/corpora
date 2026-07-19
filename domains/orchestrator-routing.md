@@ -1,10 +1,13 @@
 # Domain: orchestrator-routing
 
-Judgment about routing, spawning, relay, and the ratify gate. Declared by the **orchestrator**
-lens. Audit metadata lives in `domains/audit.md`, loaded only at ratify/retrospective time.
+Judgment about routing, spawning, and relay — which role handles a task, when to spawn vs. surface
+vs. defer, and session/workstream continuity. Declared by the **orchestrator** lens. Assembly and
+gate-processing mechanics live in `ratify-gate` — split out 2026-07-18, see `LINEAGE.md`, "The
+ratify-gate split." Audit metadata lives in `domains/audit.md`, loaded only at ratify/retrospective
+time.
 
 ```yaml
-last-retrospective: 2026-06-29
+last-retrospective: 2026-07-18
 
 principles:
 
@@ -22,11 +25,6 @@ principles:
   rule: "Before routing, frame what each role is being asked to answer, not which pipeline to follow. If that framing reveals ambiguity, ask one clarifying question before spawning rather than routing on assumptions."
   condition: "Any task entering the role-kernel system, especially ambiguous or multi-domain requests."
   reason: "Routing judgment is about matching questions to the role that owns them, not following a sequence. Explicit framing creates a check on whether the scope is clean before any subagent work begins."
-
-- id: pre-scan-before-spawning
-  rule: "Before spawning agents, run codebase discovery (file listings, key greps) in the orchestrator and paste the findings directly into each agent's prompt."
-  condition: "When spawning multiple agents that will each need to understand the same codebase structure."
-  reason: "Each agent starts cold and pays discovery tokens independently. Pre-scanning once in the orchestrator and passing findings forward amortizes that cost — paid once instead of N times per agent."
 
 - id: route-questions-not-roles
   rule: "Route by question type, not by pipeline position. When a UX question surfaces, route it to the UX designer or surface it to the operator. When a UI question surfaces, route it to the UI designer or surface it to the operator. When a code question surfaces, route it to the coder — the operator does not need to be looped in unless the coder explicitly asks. Never spawn a role when the question can be resolved by the operator in one exchange."
@@ -47,11 +45,6 @@ principles:
   rule: "Group deferred decisions by owning role and related surface rather than count alone. Route a designer workstream when several items require coherent judgment, an item becomes blocking, provisional work risks material rework, or the operator requests review."
   condition: "When reviewing the active deferred-decision queue."
   reason: "A numeric threshold can bundle unrelated questions that gain nothing from shared context. Related questions amortize role-load cost and let the designer resolve a surface coherently before temporary choices harden into implementation constraints."
-
-- id: surface-utility-candidates-liberally
-  rule: "Surface a plausible project utility whenever work reveals a concrete deterministic operation with noticeable inference, precision, or repetition cost. Require evidence to build it, not to mention it. Persist every disposition and resurface recurrence with prior evidence."
-  condition: "When a role handoff reports a possible deterministic shortcut after checking existing libraries, dependencies, runtime tools, and registered utilities."
-  reason: "The operator can deny a weak candidate cheaply, while a candidate lost with a deleted handoff depends on human memory to be recognized next time. Persistent low-threshold surfacing lets recurrence supply the evidence without filling active config with speculation."
 
 - id: spawn-threshold-is-spec-scope
   rule: "Spawn a designer role when the task requires generating a full spec — a new feature, a flow redesign, a component with multiple states. Surface to the operator instead when the question is a single decision point that can be answered in one exchange. When in doubt, surface first; spawn only if the operator's answer reveals that a full spec is needed."
@@ -88,55 +81,15 @@ principles:
   condition: "When the operator requests a full or holistic audit of a tool alongside specific known issues."
   reason: "A list of known problems is not an audit. An operator naming specific issues still benefits from a designer's fresh-eyes pass, which surfaces issues the operator didn't know to name."
 
-- id: spawn-token-summary
-  rule: "Append the following section to every new isolated role-agent prompt, after the task: '## Token usage summary\nAt the end of your output, add a `### token usage` section listing: every file you read and its approximate line count, how many corpus principles you referenced, and your estimate of the single heaviest cost item.'"
-  condition: "Every new isolated role agent (UI Designer, UX Designer, Coder)."
-  reason: "The orchestrator only receives an aggregate token count from the runtime — no per-operation breakdown. Self-reporting by the role is the only way to identify which reads or outputs drove cost."
-
-- id: full-corpus-on-spawn
-  rule: "Always pass every domain the role declares, in full, when starting an isolated designer or coder agent. Do not excerpt or filter a domain by perceived task relevance. This bars dropping *principles* by relevance — it does not bar the working/audit storage split (see kernel.md), which removes audit metadata uniformly, nor the declaration itself (loading only the domains a lens declares is not a relevance judgment — it is a fixed, inspectable contract)."
-  condition: "Any new isolated role agent whose role declares one or more domains."
-  reason: "Selective inclusion within a declared domain requires the orchestrator to judge which principles are relevant from the task framing — a judgment it cannot make reliably. A missed principle silently degrades the spec or implementation without any signal it was missed. The duplicate transmission cost is tolerated for this completeness guarantee, not desired or used as corpus-size control."
-
-- id: ratify-gate-judgment-vs-knowledge
-  rule: "At the ratify gate, ask for each proposal whether it encodes a judgment call (a decision made under uncertainty where context and tradeoffs shaped the outcome) or a knowledge item (something derivable from documentation or training). Surface this distinction with the proposal — the role knows it from the inside. Do not evaluate it as the orchestrator."
-  condition: "When presenting principle proposals to the operator at the ratify gate."
-  reason: "The corpus's value is captured judgment, not recalled facts. A principle that only returns a lookup when it fires adds reader-tax without adding decision capacity. The role is better positioned to make the knowledge/judgment distinction than the orchestrator because it has the context of how the decision was made. The orchestrator routes this question; it does not answer it."
-
 - id: design-pattern-application-lighter-path
   rule: "When a design task is pattern-application — applying documented vocabulary from the UI or UX library to a new surface, with no genuine visual judgment under uncertainty — prefer the surface-to-operator path over a full designer spawn: read the library, identify the specific gaps, and surface them as targeted questions. Spawn only if the operator's answers reveal that actual design judgment is needed."
   condition: "When a queued task carries concern: visual or concern: interaction with judgment: settled, or when the orchestrator's own read of the task description and context reveals the library already settles the relevant decisions."
   reason: "A full designer spawn loads the lens, all declared domains, and runs the full ratify gate — 20k+ tokens. That cost is justified when there is genuine visual judgment under uncertainty. Applying established patterns to a new surface mostly isn't that: the useful output is which tokens go where, which the library already answers. The lighter path reaches the same place at a fraction of the cost."
-
-- id: domain-assignment-at-ratify-gate
-  rule: "At the ratify gate, assign each ratified proposal to a domain and write it there. If no existing domain fits, create a new domain (working file + declaration update on the roles that should load it). If a proposal spans two domains, surface that as a possible domain-boundary problem rather than fragmenting the principle across both."
-  condition: "When ratifying a proposal that arrived without a home domain."
-  reason: "Proposals surface from work, not from a domain. The gate is the one human-gated point where domain assignment judgment belongs. A split-domain proposal is a signal the boundaries may be wrong — a fork candidate to surface, not a principle to duplicate."
 
 - id: decompose-large-tasks-before-spawning
   rule: "When a task's scope spans many independent workstreams, decide their ownership in the orchestrator. Within one assigned workstream and stance, allow the owning role to create autonomous scope-bounded workers."
   condition: "When routing a task whose scope spans many independent files or units."
   reason: "Workstream boundaries affect routing, role ownership, and operator visibility, so they belong to the orchestrator. Local execution decomposition does not change ownership and is cheaper for the role closest to the work to manage."
 
-- id: worker-handoffs-reach-orchestrator
-  rule: "Allow a role to create autonomous, scope-bounded workers within its assigned task and stance. Work results return to the parent; questions, tradeoffs, proposals, violations, and routing requests go directly to the orchestrator when supported, or are relayed by the parent verbatim under `Delegated handoffs`. Cross-role and deeper delegation return to the orchestrator."
-  condition: "When a role agent delegates part of its assigned work."
-  reason: "Local decomposition can reduce execution cost without changing role ownership. The failure mode is not delegation itself but allowing the parent to filter a child's orchestration-relevant handoff, which hides questions and corpus signals from the only role authorized to route and ratify them."
-
-- id: operator-ratifies-routing-corpus
-  rule: "The orchestrator may surface observations about its own routing behavior, but it must not promote them into `orchestrator-routing` without explicit operator ratification."
-  condition: "When work suggests a new or revised routing principle."
-  reason: "The orchestrator cannot independently evaluate and ratify the policy governing its own choices. Operator ratification supplies the missing external gate; repeated role-independent evidence may later justify promotion into the skill or kernel as a meta-principle."
-
-- id: artifact-points-to-persisted-file-not-full-reproduction
-  rule: "When a role's deliverable is a write to a file the orchestrator can already read (a synced library doc, an edited source file, an updated config), the handoff's Artifact section states a diff/changelog plus a pointer to the file — it does not reproduce the full post-edit document. Reserve full reproduction for content with no other persisted home yet: a spec about to be handed to another role, a tradeoff block, a fresh audit."
-  condition: "When a role writes its Artifact section and the underlying deliverable already exists as a file the orchestrator can open directly."
-  reason: "The schema's 'freeform' Artifact field left an implicit default of pasting the whole document, which pays real token cost once and is then discarded when the handoff file is deleted after ratification — the diff is what the audit trail actually needs going forward. A pointer plus a diff gives the orchestrator everything the ratify gate's audit-against-principles step requires, without the throwaway cost."
-
 killed:
-
-- id: surface-nested-handoffs-verbatim
-  rule: "If a spawned role's own transcript shows it invoked the Agent/Task tool, retrieve and relay that nested handoff to the operator directly and verbatim rather than trusting the parent role's summary."
-  kill_type: quality
-  reason_killed: "Treats nested delegation as an accepted contingency worth building a recovery procedure around, rather than something no-unilateral-sub-spawn should prevent outright. If prevention holds, there's nothing to detect; if it doesn't, that's a violation to investigate directly, not a routine step. Writing this normalized the failure instead of insisting on prevention."
 ```
