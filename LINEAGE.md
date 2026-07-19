@@ -1084,146 +1084,31 @@ the capability is intact, routed through the coder lens instead of a parallel on
 
 ---
 
-## Structural kinship as a second condensation signal
+## 2026-07-18 session summary
 
-*Added 2026-07-18, `kernel.md`, "The retrospective," item 6. Verify current state against that
-section directly — this entry records why the signal was added, not its present wording.*
+Several mechanism and corpus changes landed in one session; recorded here as a single entry per
+the operator's request rather than one per change (verify current state directly against the
+files named, not this summary):
 
-Assembled a full web-frontend coder spawn prompt end to end (lens + pack overlay + all four
-declared domains + inlined handoff schema) against a small, realistic task, to see how much of it
-was actually pulling weight. Of ~50 total principle/kill entries loaded, maybe 3-5 could plausibly
-fire against that specific task — the rest idle by the design's own admission
-(`full-corpus-on-spawn`'s "duplicate transmission cost is tolerated for this completeness
-guarantee, not desired"). Domain-level scoping by a planner was considered as a fix and set aside:
-its ceiling was small (~13% of spawn size, concentrated in domains that are conditionally loaded
-per project config rather than per task) and it reintroduced the same silent-omission risk
-`full-corpus-on-spawn` was written to prevent, just at coarser grain — an excluded domain is
-invisible to the coder in a way an idle principle inside a loaded domain is not.
+- **`corpus.py adopt`** — lets a downstream project fork a seed/pack domain into its own
+  `corpora/domains/` copy, curated and pruned, instead of always merging live with the seed.
+- **Structural-kinship retrospective signal** (`kernel.md`, item 6) — a static, text-based
+  condensation signal alongside the existing empirical co-firing one; applied across every
+  kernel-seed and pack domain.
+- **Domain splits**: `coding-js-react` → `coding-ts` + `coding-react`; `orchestrator-routing` →
+  `orchestrator-routing` (routing) + `ratify-gate` (assembly/gate mechanics).
+- **Condensations**: `behavior-flags-in-refs` absorbed `stable-ref-for-document-listeners`;
+  `color-utility-over-guesswork` generalized to `utility-over-guesswork`; `recovery-path-replaces-
+  confirmation` absorbed `destructive-global-actions-require-confirmation`; `route-questions-not-
+  roles` absorbed `design-question-during-coder-session` and was rewritten queue-first (a
+  non-blocking question now queues to the owning role's next spawn rather than defaulting to the
+  operator); its code-question clause was dropped as unearned; `open-questions-are-explicit`
+  absorbed `surface-shared-concept-before-implementation`.
+- **Kill-log graduation** (`corpus.py kill-report` / `graduate-kill`) — surfaces killed entries
+  missing a recorded date or old enough to demote from the working file to audit-only.
+- **Planner lens reframed**: opens as "a disambiguator, not a solver" rather than leading with
+  decomposition — the other lenses solve; the planner's job is reducing ambiguity to where they can.
 
-The retrospective's existing meta-principle-candidate signal only fires on co-occurrence: "a
-cluster that always `fired` together." That's real but empirical — it requires firing history to
-accumulate across enough real sessions before the candidate becomes visible, and cannot surface
-before that history exists. Re-reading `coding-js-react`'s active principles side by side (rather
-than one at a time, which is how they're normally encountered — proposed and ratified one at a
-time from separate incidents) surfaced condensation candidates the co-firing signal hasn't caught
-yet: `stable-ref-for-document-listeners`, `behavior-flags-in-refs`, and
-`effect-only-derived-state-belongs-in-render` are three instances of one test (distinguish
-render-driving state from behavioral state; understand closure staleness), and
-`same-state-same-name` / `discriminated-union-for-mutually-exclusive-props` /
-`unified-representation-no-type-leakage` already cross-reference each other via `see-also` without
-anything ever asking whether that cluster should collapse into one umbrella. The `see-also` field
-already existed as a hint the corpus recorded at proposal time; nothing in the retrospective ever
-revisited it. Structural kinship is a static, textual signal alongside the empirical one — it can
-surface a candidate the moment principles are read together, not only after enough sessions have
-made them fire together.
-
-Executing against `coding-js-react` immediately calibrated the new signal against a false positive:
-the same side-by-side read had also flagged `same-state-same-name`, `discriminated-union-for-
-mutually-exclusive-props`, and `unified-representation-no-type-leakage` (already linked via
-`see-also`) as a merge candidate. Closer inspection showed they answer three different design
-questions — naming alignment before extraction, explicit unions for mutually-exclusive props, and
-flattening internal variants out of a return value — two of which are near-opposite mechanisms
-(union vs. flatten) that happen to serve a similar sensibility. Merging them would have blurred
-distinct decision points a coder needs to keep separate. Declined; the `see-also` links stand as
-cross-references, not a pending merge. `behavior-flags-in-refs` and `stable-ref-for-document-
-listeners` held up as a real candidate and were merged (the document-listener case became a named
-instance in the general principle's rule and reason); the merge also surfaced that
-`stable-ref-for-document-listeners` had never had a `provenance` entry in the pack audit file at
-all — backfilled rather than left orphaned.
-
----
-
-## Kill-log graduation
-
-*Added 2026-07-18, `kernel.md`, "Killed entries" and "The retrospective" item 7. Verify current
-state against `scripts/corpus.py`'s `kill-report`/`graduate-kill` commands directly.*
-
-`kernel.md` already documented that a kill's date belongs in the layer's audit file — but no kill
-entry across either the kernel-seed or web-frontend pack audit file had ever actually recorded one;
-the schema was written and never enforced. Rather than guess historical dates (several `reason_
-killed` strings embed one in prose, but not reliably enough to parse with confidence, and a wrong
-backfilled date is worse than an honest gap), the field was left for `kill-report` to surface as its
-own finding — "missing killed-date" — alongside the graduation signal itself, so the tool reports
-the gap rather than silently working around it. Dogfooded against this repo's own domains
-immediately: every pre-existing kill in both audit files reported as missing a date; only the new
-`stable-ref-for-document-listeners` kill (recorded with a `killed:` date as part of this same pass)
-came back clean.
-
-The commands (`kill-report`, `graduate-kill`) take explicit `--domains-dir`/`--audit` paths rather
-than the usual `--root` project convention, deliberately: `corpus.py`'s existing commands assume a
-project's `corpora/domains/` layout, which the skill repo's own seed layer (`domains/`) and pack
-layer (`packs/<pack>/domains/`) don't have. Retrospective consolidation happens in the shared seed
-and pack corpora as much as in any downstream project, so the tooling needed a path that works for
-both rather than being hardwired to the project-only assumption.
-
----
-
-## The coding-ts / coding-react split
-
-*Decided 2026-07-18. Verify current state against `packs/web-frontend/coder.md`'s domain
-declaration and the two domain files directly — this entry records why the split happened, not
-its present contents.*
-
-A full retrospective pass applying the structural-kinship signal (see above) across every domain in
-both the kernel-seed and web-frontend pack layers surfaced two candidates for a domain *split*
-rather than a merge — a cluster within a domain that answers a genuinely different decision class
-than the rest of it, the fork signal `kernel.md`'s retrospective section already names but had never
-been applied. The first candidate proposed, `react-hooks` carved out of `coding-js-react`, was
-reconsidered once the operator asked a sharper question: split JS from React first, and see whether
-hooks still needed a *further* cut once that happened. It didn't. Once the 3-4 framework-agnostic
-principles (module exports, JSON/NaN serialization, cross-type naming unification) were separated
-from the 10-11 genuinely React-specific ones (JSX, hooks, refs, prop-typing), "React" itself read as
-one coherent subject — the same shape `css.md` already has (layout + Tailwind + import-order, never
-further split). The original `react-hooks` proposal was solving a real problem (an oversized domain
-mixing two different subjects) with the wrong incision; the JS/React boundary was the actual seam.
-
-`coding-js-react.md` was retired; `coding-react.md` (JSX/hooks/refs/props: 10 principles) and the
-framework-agnostic remainder (`named-exports-over-default`, `same-state-same-name`,
-`nan-serializes-to-null-in-json`) replace it. That framework-agnostic domain was named `coding-ts`,
-not `coding-js` — TypeScript is this pack's default language, so the name matches actual usage even
-where a given principle's underlying fact would also hold in plain JS. Kills were split the same
-way by what they actually depended on, not by where they happened to be filed.
-`packs/web-frontend/coder.md`'s domain declaration, `coder.md`'s load-order documentation,
-`kernel.md`'s example declaration block, the reading-pipeline agent instructions, and every affected
-`reading/queue.md` entry were updated to the new names.
-
-`undefined-check-by-source` was held out of both new files at first — its condition read "optional
-props" (component-flavored), leaving it unclear whether it belonged with JSX/hooks or the
-framework-agnostic set. Placed in `coding-ts` once its actual test (match the equality operator to a
-value's source) was recognized as general TS/JS semantics, not React-specific. Tightened for its new
-seed-level home in the same pass: the single-letter generic `T` in its rule became `Value` (this
-corpus's own `no-single-char-names` applies to its own examples), and the reason's "common codebase
-convention" framing — appropriate at project level, where a convention really is local — was
-replaced with the general undefined-vs-null distinction the rule actually rests on.
-
-The second split candidate from the same pass — carving a `ratify-gate` domain out of
-`orchestrator-routing`'s gate-mechanics cluster — was not yet acted on as of this entry; see
-`orchestrator-routing.md` directly for current state.
-
----
-
-## The ratify-gate split
-
-*Decided 2026-07-18. Verify current state against `domains/orchestrator-routing.md`,
-`domains/ratify-gate.md`, and `SKILL.md`'s domain declaration directly.*
-
-A full re-read of `orchestrator-routing`'s 25 principles by decision class (not the earlier
-quick scan, which undercounted) found two genuinely different jobs bundled under one domain:
-**routing** — which role to invoke, when to spawn vs. surface vs. defer, session/workstream
-continuity — and **assembly-and-gate mechanics** — building a complete role invocation
-(pre-scan, full-corpus-on-spawn, spawn-token-summary) and processing what comes back
-(judgment-vs-knowledge classification, domain assignment, worker-handoff relay, operator
-ratification of routing-corpus changes, artifact-vs-pointer reproduction). `SKILL.md` itself
-already treats these as separate procedures — "Starting an isolated role agent" and "Ratify gate
-(after role work)" are two distinct numbered sections — so the split follows a boundary the skill's
-own structure had already drawn, just not yet at the domain level. Named `ratify-gate` rather than
-something narrower like "assembly," since the corpus's own vocabulary already uses "ratify gate" as
-the anchoring term for this whole round-trip (`ratify-gate-judgment-vs-knowledge` and
-`domain-assignment-at-ratify-gate` both used it in their ids before the domain existed).
-
-9 principles (plus the `surface-nested-handoffs-verbatim` kill) moved to `domains/ratify-gate.md`;
-16 stayed in `orchestrator-routing.md`. `SKILL.md`'s orchestrator declaration, its several inline
-mentions of `orchestrator-routing` that actually meant gate mechanics (the `spawn-token-summary`
-cross-reference, the "reasons from" framing), and `README.md`'s file list were updated. Several
-principles on both sides of the split had no audit provenance entry at all — a pre-existing gap
-independent of this split, left as found rather than backfilled with guessed history.
+Several pre-existing gaps were found and left as found rather than guess-backfilled: many kills
+and a few active principles across both kernel-seed and pack audit files have no recorded date or
+provenance at all.
