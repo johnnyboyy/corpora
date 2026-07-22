@@ -618,8 +618,8 @@ against contamination — is the working context holding domains from another mo
 6. **Structural kinship → condensation candidate** — active principles that state the same
    underlying test in different words, evidenced by existing `see-also` links or found by reading a
    domain's principles side by side rather than sequentially. Proposal: state the shared test once
-   as an umbrella, with the specific cases named as instances — the shape `coder.md`'s General
-   Conventions already uses for its own meta-conventions. Complementary to co-firing, below: kinship
+   as an umbrella, with the specific cases named as instances — the shape `coding-general.md`'s
+   preamble already uses for its own meta-conventions. Complementary to co-firing, below: kinship
    is visible from the text alone and doesn't need firing history to accumulate first, so it can
    surface a candidate before co-firing ever would.
 7. **Kill graduation** — a killed entry old enough with no sign of recurrence is paying reader-tax

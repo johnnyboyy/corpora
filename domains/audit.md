@@ -1,8 +1,8 @@
 # Audit record — kernel-seed layer
 
-Provenance, promotions, and per-kill audit detail for the kernel-seed domains
+Provenance and per-kill audit detail for the kernel-seed domains
 (`coding-general`, `orchestrator-routing`). Loaded only at ratify/retrospective time — never in a
-role's working context. Keyed by principle `id`, each noting its `domain`. See `kernel.md`,
+spawn's working context. Keyed by principle `id`, each noting its `domain`. See `kernel.md`,
 "Storage: working vs audit." (Kill logs live in the per-domain working files so they are available
 in the working context.)
 
