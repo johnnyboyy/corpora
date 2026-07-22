@@ -1212,3 +1212,97 @@ anticipate downstream direction questions" rule. Phase 2 also picked up the rest
 3 already had ("don't invent aspirational patterns; a greenfield project gets a short library that
 grows with the work"), so a planner-scoped task produces a leaner library instead of the same
 speculative one regardless of path.
+
+---
+
+## 2026-07-21 — v3: stance-composed lenses replace lens + declaration
+
+Full reasoning in `v3-redesign-proposal.md` (kept in-repo as the working proposal this entry
+implements and now supersedes as the historical record). Phases 0–3 only — this repo (kernel,
+`corpus.py`, `SKILL.md`, `bootstrap.md`, `README.md`, the web-frontend pack). Phase 4 (the
+FAMOUS/Blog/Meridian upgrade path) and phase 5 (old-framing cleanup pass) were explicitly not
+started this session.
+
+**What changed.** A role stopped being a persistent named file (`coder.md`, `ux-designer.md`,
+`ui-designer.md`) carrying its own persona prompt plus a fixed domain declaration. A **spawn** is
+now a stance (convergent or divergent — the two frame prompts live in `kernel.md` itself) plus a
+domain subset the orchestrator composes fresh per task. The hard line survived unchanged: no
+stance-mixing inside one spawn. `coder`, `ux-design`, and `ui-design` survive as informal aliases
+in the new `domains/role-aliases.md` — routing shorthand naming a recurring domain-subset, not a
+schema entity and not a file with its own prompt. The **orchestrator and planner are explicitly
+excluded** from this collapse: they are the fixed, named entities doing the composing, not
+domain-consuming working roles.
+
+**Why.** Named lenses created a convenience container. A principle got filed into a lens-shaped
+domain because the container existed and looked plausible, not because it was actually the right
+home — and the old fork-signal mechanism (textual contradiction between two ratified principles)
+structurally cannot see that kind of silent, non-contradicting misplacement. Removing the
+persistent container removes the incentive for the shortcut. Separately, a convergent-only UX
+pass was always redundant with what a coding-stance spawn's own convergent grounding already does
+during implementation — the actual distinguishing value of UX is divergent reasoning ("what
+should this be," no code involved), which is why `ux-design` reclassifies as a composition rather
+than merging into `coder`.
+
+**What else moved, same session:**
+- **Ratify gate** gained an affirmative fit-justification requirement (cite specifically how a
+  proposal matches an existing domain's stated subject, not "plausibly fits") and the
+  genuine-fork test now extends to domain *creation*, not only principle ratification — freer
+  domain creation under composed spawns cuts both ways, and needed a guard against fragmentation
+  into too many narrow domains, not only against force-fitting.
+- **Handoff schema**: `role:` (a `ux-designer`/`ui-designer`/... enum implying pre-approval)
+  replaced by `stance:` + optional `composition:` — a report of what actually ran, immune to
+  declaration drift by construction. Same fix applied to `corpora/deferred-decisions.md`'s
+  `role:` field, found on review to have the identical problem in a section that didn't obviously
+  look role-related.
+- **Retrospective signals #1 and #4** reworded from "the declaration" to "the composition" — a
+  dependency the `applies-to:` tagging mitigation (still deferred to phase 1's task list, not yet
+  carried out) explicitly leans on.
+- **`promoted:` retired as an audit-file section.** A principle stable enough that per-task
+  condition-checking became friction without benefit now folds into the domain's own **preamble**
+  as scene-setting prose, instead of graduating to a separate authority tier — a preamble doesn't
+  read as more authoritative than a principle, and a separate tier would have reintroduced the
+  same ossification risk a persistent lens file's baked prompt text had. The other job
+  `promoted:` did (an outgrown domain) is already covered by the structural-kinship/condensation
+  signal. `corpus.py`'s `parse_audit_entries`/`annotate_graduated` no longer treat `promoted:` as
+  a section boundary; `provenance:` now runs to end of file. Six kernel-seed and three
+  web-frontend-pack formerly-promoted entries were folded into `coding-general.md` and
+  `coding-ts.md` — except the divergent-stance anchor, `reject-safe-defaults`, whose substance
+  already lived in kernel.md's "Generative stance" section and needed no new preamble text.
+- **New spawn brief** (`kernel.md`) — a thin `stance:`/`domains:`/`expected-output:` envelope the
+  orchestrator states before spawning. Visibility, not a new pre-spawn approval gate; judgment
+  stays in `domains/orchestrator-routing.md` as before.
+- **`corpus.py record-gate`** gained `--co-occurs-with` (tallies per-spawn domain co-occurrence as
+  an unordered pair count — feeds the reworded composition-drift signal) and `--origin`
+  (seed/pack/project, default `project`, stronger than directory-inference alone since
+  `record-gate` only ever sees a project's own `corpora/domains/`).
+- **`cmd_adopt` kept as-is**, decision reversed from an earlier same-session read: unused-so-far
+  (`fork-status: forked` has never fired in FAMOUS, Blog, or Meridian, surveyed 2026-07-21) isn't
+  evidence it's unneeded. It answers a distinct question finer-grained domains reduce but don't
+  eliminate — keeping a project-local principle without forcing premature seed promotion.
+
+**Migration mechanics.** Persona/stance prose from the four deleted lens files was discarded where
+it duplicated `kernel.md`'s "Generative stance" section (already covered it before this session).
+Genuinely new judgment prose — not previously captured anywhere — became two new `design-method`
+principles (`check-existing-patterns-before-specifying-new`, generalized from ui-designer.md's
+component-reuse check; `no-readme-or-agent-instructions-as-role-instruction`, from
+ux-designer.md) plus a preamble sentence on the awful-to-perfect iteration scale. Everything else
+in those four files was task-mechanics (spec output format, read-this-first checklists) with no
+domain home — it moved to `domains/role-aliases.md`'s `notes:` field, explicitly non-normative,
+never a ratify-gate target.
+
+**Snapshot markers.** `v1-alpha` (pre-domain-scoping) and `v2-domain-scoped` (this session, before
+the lens collapse) both tagged; diff against either to see exactly what changed at each era
+boundary.
+
+**Left for a later session (see `v3-redesign-proposal.md` phase 1's task list and the "Threads
+this does NOT make moot" section):** the per-principle `applies-to:` tagging idea for
+stance-mixed domains has not been implemented — only its dependency (the retrospective signal
+reword, above) was cleared. The FAMOUS/Blog/Meridian upgrade path (phase 4) has not started; all
+three still run the pre-v3 model with their own `ux-library.md`/`ui-library.md` split unchanged.
+The old-framing comparative narration that leaked into this session's rewritten files (expected,
+per the phase-5 plan) has not yet been swept to clean present-tense description outside this
+entry. The "Bootstrap hands off to the planner" entry immediately above this one predates the v3
+terminology — its prose still says "UI designer"/"lens"; `bootstrap.md` and `SKILL.md`'s actual
+routing text for that feature was updated to composition terminology as part of this merge, but
+the LINEAGE entry describing it is left in its original words since LINEAGE is historical record,
+not living spec.

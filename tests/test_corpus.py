@@ -46,11 +46,11 @@ class CorpusCommandTestCase(unittest.TestCase):
         )
 
     @staticmethod
-    def entry(identifier="empty-state", role="ux-designer", status="queued", blocking="no"):
+    def entry(identifier="empty-state", stance="convergent", status="queued", blocking="no"):
         return f"""
         decisions:
           - id: {identifier}
-            role: {role}
+            stance: {stance}
             domain: validation-feedback
             question: "Should empty results offer a reset action?"
             context: "Search results workstream."
@@ -114,12 +114,12 @@ class DeferredAndUtilityCommandsTest(CorpusCommandTestCase):
         result = self.run_command("lint-deferred")
 
         self.assertEqual(result.returncode, 1)
-        self.assertIn("missing role", result.stdout)
+        self.assertIn("missing stance", result.stdout)
         self.assertIn("missing provisional-treatment", result.stdout)
 
-    def test_invalid_role_status_and_date_fail(self):
+    def test_invalid_stance_status_and_date_fail(self):
         self.write_config()
-        entry = self.entry(role="coder", status="waiting").replace(
+        entry = self.entry(stance="sideways", status="waiting").replace(
             "created: 2026-07-14", "created: today"
         )
         self.write_queue(entry)
@@ -127,7 +127,7 @@ class DeferredAndUtilityCommandsTest(CorpusCommandTestCase):
         result = self.run_command("lint-deferred")
 
         self.assertEqual(result.returncode, 1)
-        self.assertIn("role must be", result.stdout)
+        self.assertIn("stance must be", result.stdout)
         self.assertIn("status must be", result.stdout)
         self.assertIn("created must be YYYY-MM-DD", result.stdout)
 
@@ -151,19 +151,19 @@ class DeferredAndUtilityCommandsTest(CorpusCommandTestCase):
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
         self.assertIn("resolved entries should be removed", result.stdout)
 
-    def test_deferred_groups_active_items_by_role(self):
+    def test_deferred_groups_active_items_by_stance(self):
         self.write_config()
         ux = textwrap.dedent(self.entry(identifier="ux-choice")).strip()
         ui_item = textwrap.dedent(
-            self.entry(identifier="ui-choice", role="ui-designer")
+            self.entry(identifier="ui-choice", stance="divergent")
         ).strip().removeprefix("decisions:\n")
         self.write_queue(ux + "\n" + ui_item)
 
         result = self.run_command("deferred")
 
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
-        self.assertIn("ui-designer (1)", result.stdout)
-        self.assertIn("ux-designer (1)", result.stdout)
+        self.assertIn("divergent (1)", result.stdout)
+        self.assertIn("convergent (1)", result.stdout)
         self.assertIn("ui-choice", result.stdout)
         self.assertIn("ux-choice", result.stdout)
 
@@ -322,6 +322,59 @@ class DeferredAndUtilityCommandsTest(CorpusCommandTestCase):
         self.assertEqual(linted.returncode, 0, linted.stderr + linted.stdout)
 
 
+class RecordGateCoOccurrenceAndOriginTest(CorpusCommandTestCase):
+    def write_domain(self, name):
+        (self.root / "corpora" / "domains" / f"{name}.md").write_text(
+            f'# Domain: {name}\n\n```yaml\nprinciples:\n\n- id: p1\n  rule: "R"\n  condition: "C"\n  reason: "Why."\n```\n'
+        )
+
+    def record_gate(self, extra=()):
+        return self.run_command([
+            "record-gate", "--domain", "color", "--ratified", "0", "--killed", "0",
+            "--violations", "0", *extra,
+        ])
+
+    def test_record_gate_tallies_domain_co_occurrence(self):
+        self.write_domain("color")
+        self.write_domain("motion")
+
+        result = self.record_gate(["--co-occurs-with", "motion"])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        audit_text = (self.root / "corpora" / "domains" / "audit.md").read_text()
+        self.assertIn("domains: [color, motion]", audit_text)
+        self.assertIn("count: 1", audit_text)
+
+    def test_record_gate_co_occurrence_accumulates_across_gates(self):
+        self.write_domain("color")
+        self.write_domain("motion")
+
+        for _ in range(2):
+            result = self.record_gate(["--co-occurs-with", "motion"])
+            self.assertEqual(result.returncode, 0, result.stderr)
+
+        audit_text = (self.root / "corpora" / "domains" / "audit.md").read_text()
+        self.assertIn("count: 2", audit_text)
+
+    def test_record_gate_defaults_origin_to_project(self):
+        self.write_domain("color")
+
+        result = self.record_gate()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        audit_text = (self.root / "corpora" / "domains" / "audit.md").read_text()
+        self.assertIn("origin: project", audit_text)
+
+    def test_record_gate_stamps_explicit_origin(self):
+        self.write_domain("color")
+
+        result = self.record_gate(["--origin", "pack"])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        audit_text = (self.root / "corpora" / "domains" / "audit.md").read_text()
+        self.assertIn("origin: pack", audit_text)
+
+
 class AdoptCommandTest(CorpusCommandTestCase):
     def test_adopt_finds_kernel_seed_domain(self):
         result = self.run_command(["adopt", "--domain", "coding-general"])
@@ -400,6 +453,7 @@ class KillGraduationTest(unittest.TestCase):
         )
 
     def write_audit(self, entries):
+        # No `promoted:` section — retired per v3-redesign-proposal.md. provenance: runs to EOF.
         lines = ["# Audit", "", "```yaml", "provenance:", ""]
         for kid, fields in entries.items():
             lines.append(f"- id: {kid}")
@@ -408,7 +462,7 @@ class KillGraduationTest(unittest.TestCase):
             for key, value in fields.items():
                 lines.append(f"  {key}: {value}")
             lines.append("")
-        lines += ["promoted:", "```", ""]
+        lines += ["```", ""]
         self.audit_path.write_text("\n".join(lines))
 
     def run_command(self, command):
@@ -499,6 +553,24 @@ class KillGraduationTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 2)
         self.assertIn("already graduated", result.stderr)
+
+    def test_parses_last_entry_with_no_promoted_marker(self):
+        # promoted: retired as a section boundary; provenance: now runs to EOF. An entry that
+        # would previously have sat right where a `promoted:` marker used to go must still parse.
+        self.write_domain(["first-kill", "last-kill"])
+        self.write_audit({
+            "first-kill": {"killed": self.old_date},
+            "last-kill": {"killed": self.old_date},
+        })
+
+        result = self.run_command([
+            "kill-report", "--domains-dir", str(self.domains_dir), "--audit", str(self.audit_path),
+            "--min-age-days", "90",
+        ])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("'first-kill' killed", result.stdout)
+        self.assertIn("'last-kill' killed", result.stdout)
 
 
 if __name__ == "__main__":

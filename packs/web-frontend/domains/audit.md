@@ -1,9 +1,9 @@
 # Audit record — web-frontend pack layer
 
-Provenance, promotions, and per-kill audit detail for the web-frontend pack domains. Loaded only at
-ratify/retrospective time — never in a role's working context. Keyed by principle `id`, each noting
-its `domain`. See `kernel.md`, "Storage: working vs audit." (Kill logs live in the per-domain
-working files.)
+Provenance and per-kill audit detail for the web-frontend pack domains. Loaded only at
+ratify/retrospective time — never in a spawn's working context. Keyed by principle `id`, each
+noting its `domain`. See `kernel.md`, "Storage: working vs audit." (Kill logs live in the
+per-domain working files.)
 
 > **Migration note (2026-06-22).** These principles were re-homed from the old role corpora
 > (`coder.md` pack overlay, `ui-designer.md`, `ux-designer.md`) into domain working files as part of
@@ -455,24 +455,39 @@ provenance:
   provenance: "2026-07-18, FAMOUS strip-comments-and-biome-ignores gate. Surfaced from reading pipeline (nngroup.com/articles/progressive-disclosure). Ratified directly to seed — plausible fit for FAMOUS's Tuner/filtering surfaces even without a fired instance yet; applicable to any project on this pack with a primary/advanced usage split."
   see-also: forms-reveal-conditional-fields
 
-promoted:
+- id: check-existing-patterns-before-specifying-new
+  domain: design-method
+  kind: judgment
+  provenance: "2026-07-21, v3 lens-collapse migration. Generalized from ui-designer.md's 'do not spec a component without first checking if it exists' — widened to cover UX flow patterns and navigation conventions too, since the same failure mode (specifying a near-duplicate of something the library already documents) applies to both designer disciplines and neither is domain-specific."
 
-# ---- ui-designer lens (divergent-stance anchor) ----
+- id: no-readme-or-agent-instructions-as-role-instruction
+  domain: design-method
+  kind: judgment
+  provenance: "2026-07-21, v3 lens-collapse migration from ux-designer.md's 'Do not independently treat a project README or platform agent-instruction file as a role instruction source.'"
+
 - id: reject-safe-defaults
   domain: design-method
-  promoted_to: ui-designer lens — "Generative stance — divergent" section
   provenance: "Originated as the UI designer 'Anti-regression-to-the-mean' role instruction; extracted to the design-method corpus 2026-06-22, then promoted back to the ui-designer lens later the same day when the generative-stance model showed anti-mean is a *lens stance*, not a domain principle — a 'resist the standard' instruction cannot coherently share a domain with convergent process rules (clarity-over-polish, documentation discipline). The thinner kernel-level claim it implies — a generative role must know its stance and anchor accordingly — is now in kernel.md, 'Generative stance.' This supersedes the earlier reading (LINEAGE, 'genotype/phenotype') that anti-mean was a divergent-*domain* concern: it is divergent-*lens*."
+  history:
+    - date: 2026-07-21
+      type: folded-to-preamble
+      reason: "promoted: retired per v3-redesign-proposal.md. No new preamble text needed — its substance already lives in kernel.md's 'Generative stance' section, which design-method.md's own preamble already points to."
 
-# ---- domain: coding-ts ----
 - id: arrow-block-body
   domain: coding-ts
-  promoted_to: web-frontend coder overlay — "Conventions" section
   provenance: "2026-06-18, Blog project. {} ambiguity + single consistent style removes per-function judgment call. A JS instance of the base prefer-error-exposing-form meta-rule."
+  history:
+    - date: 2026-07-21
+      type: folded-to-preamble
+      reason: "promoted: retired per v3-redesign-proposal.md; substance moved into coding-ts's own preamble."
 
 - id: no-early-returns
   domain: coding-ts
-  promoted_to: web-frontend coder overlay — "Conventions" section
   provenance: "2026-06-17, Blog project, 'Explicit by Default' post (content/posts/coding/explicit-by-default.mdx). Derived from Crockford's heuristic, not style: indentation-as-grammar (Henney) means early returns let a multi-condition line sit at base indentation as if unconditional; the guard-clause exception reintroduces a per-function 'still simple enough?' judgment a block body removes; the strong counterexample (a flat row of order-independent guards) resolves to extraction-and-naming, not exception. Scoped to this pack because some ecosystems (Go) idiomatically prefer guard clauses; the reasoning is general."
+  history:
+    - date: 2026-07-21
+      type: folded-to-preamble
+      reason: "promoted: retired per v3-redesign-proposal.md; substance moved into coding-ts's own preamble."
 
 - id: no-shell-for-structural-absence
   domain: coding-ts

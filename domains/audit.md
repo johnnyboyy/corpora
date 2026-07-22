@@ -1,8 +1,8 @@
 # Audit record — kernel-seed layer
 
-Provenance, promotions, and per-kill audit detail for the kernel-seed domains
+Provenance and per-kill audit detail for the kernel-seed domains
 (`coding-general`, `orchestrator-routing`). Loaded only at ratify/retrospective time — never in a
-role's working context. Keyed by principle `id`, each noting its `domain`. See `kernel.md`,
+spawn's working context. Keyed by principle `id`, each noting its `domain`. See `kernel.md`,
 "Storage: working vs audit." (Kill logs live in the per-domain working files so they are available
 in the working context.)
 
@@ -129,6 +129,9 @@ provenance:
     - date: 2026-06-22
       type: generalized
       reason: "Reworded from 'load coder.md' to 'load the coder lens and its declared domains' to match the lens+declaration model introduced in the corpus redesign. No change to the judgment."
+    - date: 2026-07-21
+      type: generalized
+      reason: "Reworded from 'load the coder lens and its declared domains' to 'compose the coder alias' to match v3-redesign-proposal.md's stance+composition model — coder.md no longer exists as a file. No change to the judgment."
 
 - id: design-question-during-coder-session
   domain: orchestrator-routing
@@ -138,6 +141,10 @@ provenance:
 - id: audit-request-means-spawn-designer
   domain: orchestrator-routing
   provenance: "2026-06-13, load calculator audit session — orchestrator implemented operator-listed concerns as code and skipped the designer spawn."
+  history:
+    - date: 2026-07-21
+      type: generalized
+      reason: "Reworded from 'spawn the UI Designer' to 'spawn a ui-design-composed spawn' — ui-designer.md no longer exists as a file. No change to the judgment."
 
 # domain: ratify-gate (split from orchestrator-routing 2026-07-18; see LINEAGE.md, "The ratify-gate split")
 - id: pre-scan-before-spawning
@@ -186,36 +193,51 @@ provenance:
   provenance: "No provenance was ever recorded for this principle — same pre-existing gap as open-questions-are-explicit, backfilled here rather than left orphaned."
   killed: 2026-07-18
 
-promoted:
-
-# domain: coding-general
 - id: no-re-export-from-peer-module
   domain: coding-general
-  promoted_to: coder lens — "General conventions" section (one-liner convention bullet)
   provenance: "Promoted 2026-07-06 from both Blog and FAMOUS project coding-general domains (Blog: 2026-06-28, hiragana quiz reviewer; FAMOUS: 2026-07-01, cross-project review). Two-project exposure via cross-project review. Promoted directly to lens convention — rule is near-unconditional (barrel exception is short enough to state inline) and needs no condition-weighing."
+  history:
+    - date: 2026-07-21
+      type: folded-to-preamble
+      reason: "promoted: retired per v3-redesign-proposal.md; substance moved into coding-general's own preamble."
 
 - id: explicit-by-default
   domain: coding-general
-  promoted_to: coder lens — "General conventions" section
   provenance: "Blog project, 'Explicit by Default' post (content/posts/coding/explicit-by-default.mdx). The umbrella the operator's individual coding rules turned out to be instances of — named by Claude Code while it was taught the rules alongside their whys. The realization that the whys mattered more than the rules is what seeded this corpora system. Held as a PEER of prefer-error-exposing-form, not its parent: whether one subsumes the other is a question for a future retrospective to surface from evidence, not a top-down call."
+  history:
+    - date: 2026-07-21
+      type: folded-to-preamble
+      reason: "promoted: retired per v3-redesign-proposal.md; substance moved into coding-general's own preamble."
 
 - id: prefer-error-exposing-form
   domain: coding-general
-  promoted_to: coder lens — "General conventions" section
   provenance: "2026-06-19, Blog project. JSLint/Crockford analysis. A peer of explicit-by-default; its concrete instances live in pack overlays."
+  history:
+    - date: 2026-07-21
+      type: folded-to-preamble
+      reason: "promoted: retired per v3-redesign-proposal.md; substance moved into coding-general's own preamble."
 
 - id: deletion-over-addition
   domain: coding-general
-  promoted_to: coder lens — "What you do" section (prefer smaller net addition)
   provenance: "2026-06-17, Blog project retrospective."
+  history:
+    - date: 2026-07-21
+      type: folded-to-preamble
+      reason: "promoted: retired per v3-redesign-proposal.md; substance moved into coding-general's own preamble."
 
 - id: yagni-gate-before-implementing
   domain: coding-general
-  promoted_to: coder lens — "What you do" section (ask whether it needs to exist, stdlib, installed dep)
   provenance: "2026-06-17, Blog project retrospective."
+  history:
+    - date: 2026-07-21
+      type: folded-to-preamble
+      reason: "promoted: retired per v3-redesign-proposal.md; substance moved into coding-general's own preamble."
 
 - id: verify-build-not-just-lint
   domain: coding-general
-  promoted_to: coder lens — "What you do" section (run the project's verification commands before finishing)
   provenance: "2026-06-17, Blog project retrospective."
+  history:
+    - date: 2026-07-21
+      type: folded-to-preamble
+      reason: "promoted: retired per v3-redesign-proposal.md; substance moved into coding-general's own preamble."
 ```

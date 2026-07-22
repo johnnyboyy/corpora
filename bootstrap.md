@@ -8,29 +8,31 @@ description: Bootstrap a project's config, UI library, and UX library. Run once,
 Reference for the orchestrator's bootstrap flow, run when `corpora/config.md` is absent — Phase 1
 always runs inline. What happens after Phase 1 branches on whether a concrete operator feature
 request accompanied the bootstrap (see "Routing after Phase 1" below): with no feature request,
-Phase 2 (UI designer) then Phase 3 (UX designer) run directly, the original fixed sequence; with a
-feature request, the orchestrator hands off to the planner instead, which decomposes the bootstrap
-need and the feature into one sequenced queue. Not a standalone skill.
+Phase 2 (`ui-design`-composed, divergent stance) then Phase 3 (`ux-design`-composed, convergent
+stance) run directly, the original fixed sequence (see `domains/role-aliases.md` for what each
+composition loads); with a feature request, the orchestrator hands off to the planner instead,
+which decomposes the bootstrap need and the feature into one sequenced queue. Not a standalone
+skill.
 
 - **Phase 1 — always, run inline.** Detect the project's shape, commands, and existing utilities; write
   **`corpora/config.md`** (schema below: shape — language, framework, package manager, `has-ui`,
   styling, `role-pack`; project resources — registered utilities, UI library location, verification
   commands). This flips the project to "bootstrapped" and runs for
   every project type.
-- **Phase 2 — only when `has-ui: yes`, UI designer workstream.** Bootstrap the design system:
-  **`corpora/ui-library.md`** (or the project's chosen path — the living design system reference)
-  plus **proposed design principles** distilled from the foundational decisions and surfaced in
-  the standard proposed-principles block; the orchestrator ratifies them into the project's design
-  domains (`corpora/domains/<domain>.md`), assigning each a domain at the gate. This is the UI
-  designer's foundational work — get it right and every subsequent designer session starts with
+- **Phase 2 — only when `has-ui: yes`, `ui-design`-composed workstream.** Bootstrap the design
+  system: **`corpora/ui-library.md`** (or the project's chosen path — the living design system
+  reference) plus **proposed design principles** distilled from the foundational decisions and
+  surfaced in the standard proposed-principles block; the orchestrator ratifies them into the
+  project's design domains (`corpora/domains/<domain>.md`), assigning each a domain at the gate.
+  This is the foundational work — get it right and every subsequent design session starts with
   real constraints; get it wrong and every session invents in a vacuum.
-- **Phase 3 — only when `has-ui: yes`, UX designer workstream, after Phase 2.** Bootstrap the
-  experience reference: **`corpora/ux-library.md`** plus proposed principles/directions, same
-  gate. UI runs first deliberately — the divergent lens sets identity before the convergent lens
-  documents constraints (see LINEAGE.md, "UI/UX seam settled"). When a planner queue is driving the
-  sequence instead (see below), this ordering falls out on its own: the UX library cites the UI
-  library's tokens and components, so the UX bootstrap task is genuinely blocked-by the UI
-  bootstrap task, not just stylistically sequenced after it.
+- **Phase 3 — only when `has-ui: yes`, `ux-design`-composed workstream, after Phase 2.** Bootstrap
+  the experience reference: **`corpora/ux-library.md`** plus proposed principles/directions, same
+  gate. UI runs first deliberately — the divergent stance sets identity before the convergent
+  stance documents constraints (see LINEAGE.md, "UI/UX seam settled"). When a planner queue is
+  driving the sequence instead (see below), this ordering falls out on its own: the UX library
+  cites the UI library's tokens and components, so the UX bootstrap task is genuinely blocked-by
+  the UI bootstrap task, not just stylistically sequenced after it.
 
 The library and corpus are text-only. See LINEAGE.md for why text outperforms design artifacts
 for this purpose.
@@ -64,17 +66,15 @@ itself is part of the scope being weighed.
   3 already states below to Phase 2 as well when a planner-produced task frames the ask.
 
   **One boundary to hold:** the planner's dialogue step must not ask the audience/aesthetic-direction
-  questions that open Phase 2 below — those are the UI designer's own divergent judgment call, asked
-  when its task actually runs, not decomposition-shaping ambiguity the planner should resolve
-  upfront. The planner lens already states this general rule ("do not try to anticipate the
-  direction questions downstream roles will face mid-work"); this is that rule's bootstrap
-  instance, named here because it's easy to blur in practice.
+  questions that open Phase 2 below — those are the `ui-design`-composed spawn's own divergent
+  judgment call, asked when its task actually runs, not decomposition-shaping ambiguity the
+  planner should resolve upfront. The planner lens already states this general rule ("do not try
+  to anticipate the direction questions downstream roles will face mid-work"); this is that rule's
+  bootstrap instance, named here because it's easy to blur in practice.
 
-  Once the queue is written, the orchestrator executes it per its normal routing judgment — spawning
-  each task's role in sequence (or asking the operator when a task's `judgment: uncertain` and the
-  path isn't obvious), ratifying each handoff before the next task starts.
-
----
+  Once the queue is written, the orchestrator executes it per its normal routing judgment —
+  spawning each task's composition in sequence (or asking the operator when a task's `judgment:
+  uncertain` and the path isn't obvious), ratifying each handoff before the next task starts.
 
 ---
 
@@ -109,11 +109,11 @@ runtime already exposes browser automation, image generation, delegation, and si
 worse than `none` because a role will try to use something that is not there.
 
 **If `has-ui: no` and no concrete feature request accompanied this bootstrap, Phase 1 is the whole
-job.** Write `corpora/config.md` and stop — no UI library, no design principles, no designer roles
-for this project. Note to the operator that design-phase roles are inactive and the project runs on
-the kernel (orchestrator + base coder). (If `has-ui: no` but a feature request *was* given, see
-"Routing after Phase 1" — the planner still decomposes the feature into coder tasks, just with no
-design-system tasks in the queue.)
+job.** Write `corpora/config.md` and stop — no UI library, no design principles, no design spawns
+for this project. Note to the operator that divergent/visual-identity domains are inactive and the
+project runs on the kernel layer (the orchestrator, the planner, and coder-composed spawns only).
+(If `has-ui: no` but a feature request *was* given, see "Routing after Phase 1" — the planner
+still decomposes the feature into coder tasks, just with no design-system tasks in the queue.)
 
 **If `has-ui: yes`, see "Routing after Phase 1" below** to decide whether Phases 2 and 3 run
 directly or via a planner-produced queue.
@@ -127,13 +127,14 @@ with an empty `candidates: []` list.
 
 ## Phase 2 — UI library (only when `has-ui: yes`)
 
-You are now the UI designer bootstrapping a design system for a project that has none yet. When
-this task arrived via a planner-produced queue (see "Routing after Phase 1"), it names a concrete
-feature to scope against — cover the sections below only to the depth that feature actually needs,
-same restraint Phase 3 applies: do not invent aspirational components, sub-systems, or states the
-feature doesn't touch. A greenfield project gets a short library that grows with the work, not a
-fully speculative one authored sight-unseen. When there is no feature to scope against (the direct,
-no-planner path), cover the sections at the depth needed for a foundational first pass.
+You are now a `ui-design`-composed spawn (divergent stance) bootstrapping a design system for a
+project that has none yet. When this task arrived via a planner-produced queue (see "Routing
+after Phase 1"), it names a concrete feature to scope against — cover the sections below only to
+the depth that feature actually needs, same restraint Phase 3 applies: do not invent aspirational
+components, sub-systems, or states the feature doesn't touch. A greenfield project gets a short
+library that grows with the work, not a fully speculative one authored sight-unseen. When there is
+no feature to scope against (the direct, no-planner path), cover the sections at the depth needed
+for a foundational first pass.
 
 The orchestrator should pass any of the following that exist; work with what's provided and ask for
 what's missing only if it blocks a foundational decision:
@@ -403,18 +404,19 @@ transcribe the relevant values and add the sections the source document missed
 
 ---
 
-**Checkpoint — reapply the orchestrator lens.** Phase 2's output is a handoff, not a finished
+**Checkpoint — reapply the orchestrator.** Phase 2's output is a handoff, not a finished
 write-back: it still needs the ratify gate (audit, proposal review, write-back) before Phase 3
-can use it. You are the orchestrator from here on — drop the Phase 2 lens, run the gate on this
-handoff, then route into Phase 3.
+can use it. You are the orchestrator from here on — drop the Phase 2 composition, run the gate on
+this handoff, then route into Phase 3.
 
 ---
 
 ## Phase 3 — UX library (only when `has-ui: yes`, after Phase 2)
 
-You are now the UX designer bootstrapping the project's experience reference. The UI designer has
-already run — identity is set; your job is convergent documentation of how the product *works* as
-an experience, so future UX sessions weigh established patterns instead of re-deriving them.
+You are now a `ux-design`-composed spawn (convergent stance) bootstrapping the project's
+experience reference. The `ui-design`-composed Phase 2 spawn has already run — identity is set;
+your job is convergent documentation of how the product *works* as an experience, so future UX
+sessions weigh established patterns instead of re-deriving them.
 
 Write `corpora/ux-library.md` (or the path config names under `ux-library`) covering, as they
 exist in the project:
@@ -468,6 +470,6 @@ each a domain at the gate, after operator review.
 
 ---
 
-**Checkpoint — reapply the orchestrator lens.** Bootstrap is now complete. Drop whichever lens
+**Checkpoint — reapply the orchestrator.** Bootstrap is now complete. Drop whichever composition
 produced the last handoff, run the ratify gate on it, and resume as the orchestrator for
-everything from here forward — routing, further role work, all of it.
+everything from here forward — routing, further spawn work, all of it.
