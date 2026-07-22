@@ -132,16 +132,15 @@ prompt and a fixed domain list. Two fixed, universal frames exist: convergent an
 (below). Everything else about "what this spawn is" is assembled per task.
 
 The orchestrator decides which domains a task needs and unions them into one working
-declaration, same-stance domains only — the hard line below (no stance-mixing inside one spawn)
-is the one invariant carried over unchanged from the earlier lens-file model. A domain is
-available to any spawn whose stance and subject match; domains are not "declared by" a role.
+declaration, same-stance domains only — a spawn never mixes domains whose principles demand
+opposite generative stances (see "The hard line," below). A domain is available to any spawn
+whose stance and subject match; domains are not "declared by" a role.
 
-**The declaration is still deterministic, not a self-selected runtime relevance call by the
-working agent** — that invariant survives in spirit — but it changes shape: no longer inspectable
-in advance by reading a fixed lens file, it is inspectable *after* spawn via the handoff's
-`domains-loaded:` field (see "The handoff artifact"). The orchestrator's composition choice is
-visible before the spawn runs the same way any other orchestrator action is; see the spawn brief,
-below.
+**The declaration is deterministic, not a self-selected runtime relevance call by the working
+agent.** The orchestrator fixes which domains apply before the spawn runs; the choice is
+inspectable after the fact via the handoff's `domains-loaded:` field (see "The handoff artifact").
+The orchestrator's composition choice is visible before the spawn runs the same way any other
+orchestrator action is; see the spawn brief, below.
 
 **Recurring domain-subsets get an informal alias.** `coder`, `ux-design`, and `ui-design` are the
 first three seeded entries in `domains/role-aliases.md` — a label for a domain-subset +
@@ -150,9 +149,9 @@ An alias is not a schema entity and not a file with its own prompt — it carrie
 New aliases accumulate the same way domains do — from repeated, observed composition, never
 declared up front.
 
-**The orchestrator and the planner are excluded from this collapse.** They are the fixed,
-named entities doing the composing, not domain-consuming working roles — `SKILL.md`'s routing
-logic and `planner.md` keep their own prompts and stay as they are.
+**The orchestrator and the planner do not compose domains.** They are the fixed, named entities
+doing the composing, not domain-consuming working roles — `SKILL.md`'s routing logic and
+`planner.md` keep their own prompts.
 
 Multiple domain-subsets can compose into one spawn when a task's coupling warrants it (a
 gesture-transition task might load `motion` + `wizards-flows` + `ranking-evaluation` together in
@@ -277,9 +276,8 @@ across both.
 A proposal must cite specifically how it matches an existing domain's stated subject — not just
 "plausibly fits." This is a cheap, one-line justification the proposer states at write-back time,
 not a new tier or gate: it exists to stop content being filed into a domain because the container
-looked plausible and was already open, rather than because it is actually the right home — the
-exact failure mode a persistent named lens file used to invite (see LINEAGE.md, the v3 transition
-entry).
+looked plausible and was already open, rather than because it is actually the right home. (History:
+LINEAGE.md, the v3 transition entry.)
 
 ### Write-back format
 
