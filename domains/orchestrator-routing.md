@@ -31,11 +31,6 @@ principles:
   condition: "Any time a UX or UI question surfaces during work — from the operator, a coder session, or a spawned role's output."
   reason: "Operator-surfacing became the default when spawned roles were one-shot (no resume) and a full spawn was expensive relative to one decision — asking the operator was the only cheap path. Neither constraint holds now: a role can pause on a genuine question and resume with the answer, and a non-blocking question can wait in the owning role's queue for its next natural spawn instead of forcing an immediate round-trip. The operator is the fallback when neither path fits, not the first resort. No code-question clause: a coder's signal on a design tradeoff is better captured by its own `tradeoffs` block once actually implementing — grounded in real cost, not a separate paid-for question."
 
-- id: surface-design-questions-neutrally
-  rule: "When routing a UX or UI question to the operator instead of spawning, present the question with enough framing to make the answer cheap — the domain (UX or UI), what decision is needed, and what context the answerer needs. Do not include a tentative design opinion or recommendation."
-  condition: "When the orchestrator surfaces a design question to the operator rather than spawning a designer role."
-  reason: "The orchestrator's domain is routing, not design. Offering a design opinion contaminates the context with domain work the orchestrator doesn't own, and risks anchoring the operator's answer."
-
 - id: defer-only-nonblocking-design-decisions
   rule: "Queue a UI or UX decision only when implementation can proceed with an explicit, narrow, reversible provisional treatment. Surface any blocking decision immediately."
   condition: "When considering whether to add a question to `corpora/deferred-decisions.md`."

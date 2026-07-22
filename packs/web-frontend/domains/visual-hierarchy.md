@@ -1,6 +1,6 @@
 # Domain: visual-hierarchy (web-frontend pack)
 
-Emphasis, grouping, and legibility weight. Declared by the **ui-designer** lens. Audit metadata
+Emphasis, grouping, and legibility weight. Declared by the **ui-design** lens. Audit metadata
 lives in `packs/web-frontend/domains/audit.md`, loaded only at ratify/retrospective time.
 
 ```yaml

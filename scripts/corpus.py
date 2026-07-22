@@ -10,10 +10,13 @@ State lives in a script-owned block inside `corpora/domains/audit.md`, delimited
 by markers — the script never touches anything outside its markers.
 
 Commands:
-  measure                          update working-file-tokens for every domain
-  verify                           reconcile ledger against working files (detects
+  measure [--domains-dir --audit]  update working-file-tokens for every domain (defaults to the
+                                   project layer; override to measure any domains-dir + audit.md
+                                   pair — kernel-seed or a pack layer, same as kill-report/adopt)
+  verify [--domains-dir --audit]   reconcile ledger against working files (detects
                                    unrecorded gates and gate-bypassing writes)
-  record-gate --domain D [...]     record a ratify gate's outcomes
+  record-gate --domain D [...]     record a ratify gate's outcomes (same --domains-dir/--audit
+                                   override)
   triggers                         evaluate thresholds; print what fires
   lint-handoff FILE                validate a handoff artifact's envelope
   handoffs                         list lingering handoff files with age
@@ -27,6 +30,9 @@ Commands:
   sync-done                        reset library-drift after a UI-library sync
   adopt --domain D                 locate D's seed/pack file and print it for curation into a
                                    project-local fork (fork-status: forked)
+  compose-spawn-prompt [...]       mechanically assemble a spawn-ready prompt: stance frame +
+                                   full seed/project domain files + handoff schema + task, no
+                                   summarization step
   screenshot-record [...]          register/update a captured screen variant in the manifest
   screenshot-mark-stale [...]      invalidate screens by direct id or shared-component ripple
   screenshot-status                list current/stale screens in the manifest
@@ -78,22 +84,23 @@ def fail(msg: str) -> None:
 # ── project layout ──────────────────────────────────────────────────────────
 
 class Project:
-    def __init__(self, root: str):
+    def __init__(self, root: str, domains_dir: str = "", audit_path: str = ""):
         self.root = root
-        self.domains_dir = os.path.join(root, "corpora", "domains")
-        self.audit_path = os.path.join(self.domains_dir, "audit.md")
+        self.domains_dir = domains_dir or os.path.join(root, "corpora", "domains")
+        self.audit_path = audit_path or os.path.join(self.domains_dir, "audit.md")
         self.handoffs_dir = os.path.join(root, "corpora", "handoffs")
         self.deferred_path = os.path.join(root, "corpora", "deferred-decisions.md")
         self.utility_candidates_path = os.path.join(root, "corpora", "utility-candidates.md")
         self.screenshots_dir = os.path.join(root, "corpora", "screenshots")
         self.screenshot_manifest_path = os.path.join(self.screenshots_dir, "manifest.md")
         if not os.path.isdir(self.domains_dir):
-            fail(f"no corpora/domains under {root} — run from a bootstrapped project root, or pass --root")
+            fail(f"no domains dir at {self.domains_dir} — run from a bootstrapped project root, or pass --root/--domains-dir")
 
     def domain_files(self) -> dict:
         out = {}
+        audit_name = os.path.basename(self.audit_path)
         for name in sorted(os.listdir(self.domains_dir)):
-            if name.endswith(".md") and name != "audit.md":
+            if name.endswith(".md") and name != audit_name:
                 out[name[:-3]] = os.path.join(self.domains_dir, name)
         return out
 
@@ -410,11 +417,17 @@ def cmd_lint_handoff(_project: Project, args) -> None:
         front = m.group(1)
 
     def field(name: str) -> str:
-        fm = re.search(rf"^{name}:\s*(.*)$", front, re.MULTILINE)
+        fm = re.search(rf"^{name}:[ \t]*(.*)$", front, re.MULTILINE)
         return fm.group(1).strip() if fm else ""
 
-    if not field("role"):
-        problems.append("frontmatter: missing role")
+    def field_present(name: str) -> bool:
+        return re.search(rf"^{name}:[ \t]*.*$", front, re.MULTILINE) is not None
+
+    stance = field("stance")
+    if stance not in ("convergent", "divergent"):
+        problems.append(f"frontmatter: stance '{stance}' not in ['convergent', 'divergent']")
+    if field_present("composition") and not field("composition"):
+        problems.append("frontmatter: composition present but empty")
     status = field("status")
     if status not in STATUS_ENUM:
         problems.append(f"frontmatter: status '{status}' not in {sorted(STATUS_ENUM)}")
@@ -1091,6 +1104,73 @@ def cmd_adopt(project: Project, args) -> None:
           "From then on this domain loads only the project file; the seed is no longer consulted.")
 
 
+# ── compose-spawn-prompt: mechanical, no-summarization spawn-prompt assembly ─────────────────
+#
+# Fix for the exercise's most serious finding: hand-assembled spawn prompts drifted toward
+# summarizing or truncating inlined domain content as a session went on. This command removes the
+# judgment call by concatenating full working files byte-for-byte — nothing here decides what's
+# relevant, so there is nowhere for compression to sneak in.
+
+def extract_section(text: str, heading_pattern: str, source: str) -> str:
+    lines = text.split("\n")
+    start = None
+    for i, line in enumerate(lines):
+        if re.match(heading_pattern, line):
+            start = i
+            break
+    if start is None:
+        fail(f"could not find a section matching {heading_pattern!r} in {source}")
+    end = len(lines)
+    for i in range(start + 1, len(lines)):
+        if re.match(r"^#{1,6}\s", lines[i]) or lines[i].strip() == "---":
+            end = i
+            break
+    return "\n".join(lines[start:end]).rstrip("\n")
+
+
+def cmd_compose_spawn_prompt(project: Project, args) -> None:
+    domains = _ids(args.domains)
+    if not domains:
+        fail("--domains requires at least one comma-separated domain name")
+    if not os.path.exists(args.task_file):
+        fail(f"no such file: {args.task_file}")
+
+    kernel_path = os.path.join(skill_root(), "kernel.md")
+    kernel_text = open(kernel_path).read()
+    stance_frame = extract_section(kernel_text, r"^### Generative stance\s*$", "kernel.md")
+    handoff_schema = extract_section(kernel_text, r"^## The handoff artifact\s*$", "kernel.md")
+
+    parts = [f"stance: {args.stance}", "", stance_frame, "", "## Domains"]
+    for domain in domains:
+        seed_path = seed_domain_path(project, domain)
+        project_path = os.path.join(project.domains_dir, f"{domain}.md")
+        project_exists = os.path.exists(project_path)
+        forked = project_exists and fork_info(project_path).get("fork-status") == "forked"
+        if not seed_path and not project_exists:
+            fail(f"domain '{domain}' has no seed, pack, or project file — nothing to compose")
+        parts.append(f"\n### Domain: {domain}\n")
+        if seed_path and not forked:
+            parts.append(f"<!-- seed: {os.path.relpath(seed_path, skill_root())} -->\n")
+            parts.append(open(seed_path).read().rstrip("\n"))
+        if project_exists:
+            parts.append(f"\n<!-- project: corpora/domains/{domain}.md -->\n")
+            parts.append(open(project_path).read().rstrip("\n"))
+    parts.append("\n" + handoff_schema)
+    parts.append("\n## Task\n")
+    parts.append(open(args.task_file).read().rstrip("\n"))
+    prompt = "\n".join(parts).strip() + "\n"
+
+    if args.output:
+        out_path = args.output
+    else:
+        slug = args.composition or "-".join(domains)
+        out_path = os.path.join(project.root, "corpora", "session-prompts", f"{today()}-{slug}.md")
+    os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
+    open(out_path, "w").write(prompt)
+    print(prompt)
+    print(f"--- wrote {out_path} ---", file=sys.stderr)
+
+
 # ── kill-log graduation: age out killed entries with a recorded, stale kill date ─────────────
 #
 # Works on any domains-dir + its audit.md pair — project layer (<root>/corpora/domains), the
@@ -1255,9 +1335,18 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--root", default=".", help="project root (contains corpora/)")
     sub = ap.add_subparsers(dest="cmd", required=True)
-    sub.add_parser("measure")
-    sub.add_parser("verify")
+    layer_help = "override to work on any domains-dir + audit.md pair — a project's own " \
+                 "corpora/domains, the kernel-seed domains/, or a pack's packs/<pack>/domains/ " \
+                 "— not only a project's own corpora"
+    m = sub.add_parser("measure")
+    m.add_argument("--domains-dir", default="", help=layer_help)
+    m.add_argument("--audit", default="", help=layer_help)
+    v = sub.add_parser("verify")
+    v.add_argument("--domains-dir", default="", help=layer_help)
+    v.add_argument("--audit", default="", help=layer_help)
     g = sub.add_parser("record-gate")
+    g.add_argument("--domains-dir", default="", help=layer_help)
+    g.add_argument("--audit", default="", help=layer_help)
     g.add_argument("--domain", required=True)
     g.add_argument("--ratified", type=int, default=0)
     g.add_argument("--killed", type=int, default=0)
@@ -1293,6 +1382,14 @@ def main() -> None:
     sub.add_parser("sync-done")
     ad = sub.add_parser("adopt")
     ad.add_argument("--domain", required=True)
+    cp = sub.add_parser("compose-spawn-prompt",
+                        help="mechanically concatenate a composition's full domain files, the "
+                             "stance frame, and the handoff schema into one spawn-ready prompt file")
+    cp.add_argument("--stance", required=True, choices=sorted(DEFERRED_STANCE_ENUM))
+    cp.add_argument("--domains", required=True, help="comma-separated domain names")
+    cp.add_argument("--task-file", required=True, help="path to a file containing the task description")
+    cp.add_argument("--composition", default="", help="alias name, for the output filename and label only")
+    cp.add_argument("--output", default="", help="output path; defaults under corpora/session-prompts/")
     sr = sub.add_parser("screenshot-record")
     sr.add_argument("--screen", required=True)
     sr.add_argument("--variant", required=True)
@@ -1321,7 +1418,9 @@ def main() -> None:
         no_project[args.cmd](args)
         return
 
-    project = Project(os.path.abspath(args.root))
+    project = Project(os.path.abspath(args.root),
+                      domains_dir=getattr(args, "domains_dir", "") or "",
+                      audit_path=getattr(args, "audit", "") or "")
     {"measure": cmd_measure, "verify": cmd_verify, "record-gate": cmd_record_gate, "triggers": cmd_triggers,
      "lint-handoff": cmd_lint_handoff, "handoffs": cmd_handoffs,
      "lint-deferred": cmd_lint_deferred, "deferred": cmd_deferred,
@@ -1331,6 +1430,7 @@ def main() -> None:
      "set-utility-status": cmd_set_utility_status,
      "retro-done": cmd_retro_done, "sync-done": cmd_sync_done,
      "adopt": cmd_adopt,
+     "compose-spawn-prompt": cmd_compose_spawn_prompt,
      "screenshot-record": cmd_screenshot_record,
      "screenshot-mark-stale": cmd_screenshot_mark_stale,
      "screenshot-status": cmd_screenshot_status,

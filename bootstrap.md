@@ -56,7 +56,8 @@ itself is part of the scope being weighed.
   combining both needs — e.g. *"Bootstrap this project's design system (has-ui: yes) and
   implement: \<operator's request, verbatim\>."* This is passed as direct input, not sourced from a
   `ROADMAP.md` (none exists yet for a fresh project). The planner treats it like any other
-  capability: no changes to `planner.md` or `domains/planning.md` are needed — it orients (finds
+  capability: no changes to its `domains/role-aliases.md` entry or `domains/planning.md` are
+  needed — it orients (finds
   `corpora/config.md` but no `ui-library.md`, `ux-library.md`, or existing code), decomposes into
   tasks (`bootstrap-ui-library`, `bootstrap-ux-library` when `has-ui: yes`, plus the feature's own
   task(s)), and sequences by real output dependency (the feature task is blocked-by the design
@@ -68,9 +69,10 @@ itself is part of the scope being weighed.
   **One boundary to hold:** the planner's dialogue step must not ask the audience/aesthetic-direction
   questions that open Phase 2 below — those are the `ui-design`-composed spawn's own divergent
   judgment call, asked when its task actually runs, not decomposition-shaping ambiguity the
-  planner should resolve upfront. The planner lens already states this general rule ("do not try
-  to anticipate the direction questions downstream roles will face mid-work"); this is that rule's
-  bootstrap instance, named here because it's easy to blur in practice.
+  planner should resolve upfront. The `planner` alias's own notes (`domains/role-aliases.md`)
+  already state this general rule ("do not try to anticipate the direction questions downstream
+  spawns will face mid-work"); this is that rule's bootstrap instance, named here because it's easy
+  to blur in practice.
 
   Once the queue is written, the orchestrator executes it per its normal routing judgment —
   spawning each task's composition in sequence (or asking the operator when a task's `judgment:

@@ -12,12 +12,14 @@ fixed roles. `kernel.md` is the canonical reference: schema, stance+composition 
 stance, ratify gate, write-back, handoff artifact, retrospective. `domains/role-aliases.md` names
 the recurring compositions (`coder`, `ux-design`, `ui-design`) as routing shorthand.
 
-**Layer 1 — kernel (stack-agnostic, always available):** the **orchestrator** (this file; declares
-`orchestrator-routing` and `ratify-gate`) and the **planner** (`planner.md`) are the two fixed,
-named entities — excluded from the stance-composition model because they are the thing doing the
-composing. Every other working spawn composes from `coding-general` (and, for web-frontend
-projects, the domains named below) — there is no fixed "base coder" file. Kernel-seed domains live
-in `domains/` with one `domains/audit.md` for the layer.
+**Layer 1 — kernel (stack-agnostic, always available):** the **orchestrator** (this file, declaring
+`orchestrator-routing` and `ratify-gate`) is a pure process layer that composes and routes spawns
+but never takes on a spawn's stance itself — the one thing that has to occupy that position before
+any composition can happen. The **planner** is not a fixed entity like the orchestrator: it is a
+seeded alias (`domains/role-aliases.md`, domains `planning` + `interviewing`) that composes like
+`coder`, `ux-design`, and `ui-design` do. Every working spawn composes from `coding-general` at
+minimum (and, for web-frontend projects, the domains named below) — there is no fixed "base coder"
+file. Kernel-seed domains live in `domains/` with one `domains/audit.md` for the layer.
 
 **Layer 2 — role packs (stack-specific):** a pack lives under `packs/<name>/domains/` (with its
 own `audit.md`) — domain files only, no lens files. It loads when the project's
@@ -175,13 +177,19 @@ unverifiable; the spawn brief is the check.
    surface that the project needs `corpora:bootstrap` rather than starting into a vacuum.
 2. Prompt structure: [`kernel.md`'s "Generative stance" section for the composed stance] +
    `## Domains` + [each composed domain's seed + project working content] + [kernel.md's "The
-   handoff artifact" section, inlined] + `## Task` + task description + relevant context. The
-   handoff section is inlined, not pointed at, for the same reason domains are: a spawn told to
-   read a file it thinks it knows may shortcut the read and pattern-match a near-miss envelope.
-   Include prior spawn output as its structured artifact, not raw transcript. Never include the
-   other stance's frame or an undeclared domain — the seam is enforced here. Full injection is a
-   load-completeness guarantee. Its duplicate token cost is tolerated, not desired, and must not be
-   treated as corpus-size control; govern corpus growth separately.
+   handoff artifact" section, inlined] + `## Task` + task description + relevant context. Build
+   this with `scripts/corpus.py compose-spawn-prompt --stance <s> --domains <d1,d2,...>
+   --task-file <path> [--composition <alias>]` rather than hand-assembling it: the command
+   concatenates each piece byte-for-byte with no generative or summarization step, so there is no
+   place for compression to sneak in as a session's context accumulates. It writes one file that
+   serves as both the dispatched prompt and the saved-for-review copy — read that file yourself and
+   paste its content into the spawn; do not point the spawn at the file, for the same reason domains
+   are inlined rather than referenced: a spawn told to read a file it thinks it knows may shortcut
+   the read and pattern-match a near-miss envelope. Include prior spawn output as its structured
+   artifact, not raw transcript, appended after the task. Never include the other stance's frame or
+   an undeclared domain — the seam is enforced here. Full injection is a load-completeness
+   guarantee. Its duplicate token cost is tolerated, not desired, and must not be treated as
+   corpus-size control; govern corpus growth separately.
 3. Append the token usage summary request to every new isolated role agent (`spawn-token-summary` in
    `ratify-gate`).
 4. Relay the handoff artifact — the `Artifact` section for approval before passing to the next

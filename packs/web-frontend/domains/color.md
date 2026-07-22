@@ -1,6 +1,6 @@
 # Domain: color (web-frontend pack)
 
-Palette and hue judgment. Declared by the **ui-designer** lens. Audit metadata lives in
+Palette and hue judgment. Declared by the **ui-design** lens. Audit metadata lives in
 `packs/web-frontend/domains/audit.md`, loaded only at ratify/retrospective time.
 
 ```yaml

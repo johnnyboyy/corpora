@@ -1,7 +1,7 @@
 # Domain: forms-inputs (web-frontend pack)
 
 Input fields and their default/empty/derived states. Cross-role — declared by both the
-**ux-designer** and **ui-designer** lenses. Audit metadata lives in
+**ux-design** and **ui-design** lenses. Audit metadata lives in
 `packs/web-frontend/domains/audit.md`, loaded only at ratify/retrospective time.
 
 ```yaml

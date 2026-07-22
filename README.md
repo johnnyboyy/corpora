@@ -8,12 +8,12 @@ Domains, not roles, own corpora — so shared judgment lives once and is availab
 
 ## Architecture
 
-**Two layers of domains, two fixed roles:**
+**Two layers of domains, one fixed process layer:**
 
-- **Kernel** — stack-agnostic, always loaded. Two fixed, named entities: the **orchestrator** (`SKILL.md`, declares `orchestrator-routing` and `ratify-gate`) and the **planner** (`planner.md`, declares `planning`) — excluded from the stance-composition model because they're the thing doing the composing. Every other working spawn composes from `coding-general` at minimum; there is no fixed "base coder" file. Every project starts here, even with no role pack.
+- **Kernel** — stack-agnostic, always loaded. The **orchestrator** (`SKILL.md`, declares `orchestrator-routing` and `ratify-gate`) is the one fixed thing: a process layer that composes and routes spawns but never takes on a spawn's stance itself, so something occupies that position before any composition can happen. The **planner** is not fixed the same way — it's a seeded alias (`domains/role-aliases.md`, domains `planning` + `interviewing`) that composes like any other spawn. Every working spawn composes from `coding-general` at minimum; there is no fixed "base coder" file. Every project starts here, even with no role pack.
 - **Role pack** — stack-specific domains under `packs/<name>/domains/`, loaded only when a project's `corpora/config.md` declares `role-pack: <name>`. The only pack here is `web-frontend` (coding + design domains for the `coder`, `ux-design`, and `ui-design` compositions).
 
-A pack adds **domains a spawn can compose from** — not new fixed roles. `domains/role-aliases.md` names the recurring compositions (`coder`, `ux-design`, `ui-design`) as routing shorthand, not a schema entity. One composed spawn per named alias runs at a time per project; a domain splits into scoped instances only when the retrospective surfaces a fork signal (conditions that partition the space and give opposing advice), never from an org chart.
+A pack adds **domains a spawn can compose from** — not new fixed roles. `domains/role-aliases.md` names the recurring compositions (`coder`, `ux-design`, `ui-design`, `planner`) as routing shorthand, not a schema entity. One composed spawn per named alias runs at a time per project; a domain splits into scoped instances only when the retrospective surfaces a fork signal (conditions that partition the space and give opposing advice), never from an org chart.
 
 **Domains (where judgment lives):**
 
@@ -32,9 +32,8 @@ For each domain a spawn's composition includes, both apply when it runs — seed
 ## Files
 
 - `SKILL.md` — the shared orchestrator entrypoint for Claude Code (`/corpora`) and Codex (`$corpora`): routes workstreams, assembles complete spawn loads, relays handoffs, and drives the ratify gate.
-- `planner.md` — the fixed planner lens. Declares `planning`. Loaded for task decomposition, independent of role pack.
 - `kernel.md` — the schema, stance+composition model, ratify gate, write-back format, two load modes, retrospective signals, and domain lifecycle. Reference document.
-- `domains/` — kernel-seed domains: `coding-general.md`, `orchestrator-routing.md`, `ratify-gate.md`, `planning.md`, `role-aliases.md` (routing shorthand, not a domain), plus `audit.md` (provenance/kill detail for the layer, loaded only at ratify/retrospective time).
+- `domains/` — kernel-seed domains: `coding-general.md`, `orchestrator-routing.md`, `ratify-gate.md`, `planning.md`, `interviewing.md`, `role-aliases.md` (routing shorthand, not a domain, seeds `coder`/`ux-design`/`ui-design`/`planner`), plus `audit.md` (provenance/kill detail for the layer, loaded only at ratify/retrospective time).
 - `packs/web-frontend/` — the web-frontend pack: `domains/` only (stack-specific coding + design domains, plus the layer `audit.md`). Loaded only when `role-pack: web-frontend`.
 - `bootstrap.md` — one-time project setup. Phase 1 detects project shape and writes `corpora/config.md`. Phases 2 and 3 (UI projects only) generate `corpora/ui-library.md` (`ui-design`-composed, divergent) then `corpora/ux-library.md` (`ux-design`-composed, convergent) and propose seed design principles.
 - `LINEAGE.md` — intellectual history: why conventions became law, key kills, design decisions.

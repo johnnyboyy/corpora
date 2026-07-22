@@ -85,6 +85,16 @@ principles:
   condition: "When writing or reviewing any task description in the queue."
   reason: "Naming implementation details couples the plan to a specific approach before the coder has seen the code. It narrows the solution space unnecessarily and makes the queue wrong the moment the code diverges from the assumption — without any signal that it has. The coder's job is to decide how; the planner's job is to decide what."
 
+- id: concern-names-work-not-role
+  rule: "When setting a task's `concern` field, name the character of the work (e.g. visual, interaction, implementation) as orientation revealed it — never a role or lens that should perform it."
+  condition: "When decomposing a capability into tasks and populating each task's `concern` field."
+  reason: "Naming a role there pre-empts a routing decision the planner doesn't own, and removes the orchestrator's flexibility — e.g. it blocks the lighter surface-to-operator path for settled work, which routes off `concern`/`judgment` signals rather than a role assignment."
+
+- id: self-check-against-domain-before-finalizing
+  rule: "Before writing the queue, re-read every task description against the `planning` domain's own ratified principles and revise any violation found."
+  condition: "Before the planner's terminal write of `corpora/queue.md`."
+  reason: "Catches a violation before the external ratify gate does, cheaper than a round-trip. A domain's principles only earn their keep if actually checked against the specific output before it ships — treating them as read-once context risks a deliverable that quietly violates something already ratified."
+
 killed:
 
 - id: surface-shared-concept-before-implementation

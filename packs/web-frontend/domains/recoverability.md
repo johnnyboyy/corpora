@@ -1,7 +1,7 @@
 # Domain: recoverability (web-frontend pack)
 
 Destructive actions, confirmation, undo, and recovery. The canonical cross-role domain — declared by
-both the **ux-designer** and **ui-designer** lenses (the UX flow and the visible recovery affordance
+both the **ux-design** and **ui-design** lenses (the UX flow and the visible recovery affordance
 are one concern). Audit metadata lives in `packs/web-frontend/domains/audit.md`, loaded only at
 ratify/retrospective time.
 

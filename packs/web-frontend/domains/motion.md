@@ -1,6 +1,6 @@
 # Domain: motion (web-frontend pack)
 
-Animation and motion as signal. Declared by the **ui-designer** and **ux-designer** lenses. Audit
+Animation and motion as signal. Declared by the **ui-design** and **ux-design** lenses. Audit
 metadata lives in `packs/web-frontend/domains/audit.md`, loaded only at ratify/retrospective time.
 
 ```yaml

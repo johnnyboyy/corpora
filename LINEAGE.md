@@ -1217,8 +1217,10 @@ speculative one regardless of path.
 
 ## 2026-07-21 — v3: stance-composed lenses replace lens + declaration
 
-Full reasoning in `v3-redesign-proposal.md` (kept in-repo as the working proposal this entry
-implements and now supersedes as the historical record). Phases 0–3 only — this repo (kernel,
+Full reasoning previously lived in `v3-redesign-proposal.md`, the working proposal this entry
+implemented; removed once phase 5 (old-framing cleanup) was carried out (see the 2026-07-22 entry
+below). Phase 4 (the downstream-project upgrade path) remains open, tracked only in memory now that
+the proposal doc is gone. Phases 0–3 only, this session — this repo (kernel,
 `corpus.py`, `SKILL.md`, `bootstrap.md`, `README.md`, the web-frontend pack). Phase 4 (the
 downstream-project upgrade path) and phase 5 (old-framing cleanup pass) were explicitly not
 started this session.
@@ -1294,14 +1296,100 @@ never a ratify-gate target.
 the lens collapse) both tagged; diff against either to see exactly what changed at each era
 boundary.
 
-**Left for a later session (see `v3-redesign-proposal.md` phase 1's task list and the "Threads
-this does NOT make moot" section):** the per-principle `applies-to:` tagging idea for
-stance-mixed domains has not been implemented — only its dependency (the retrospective signal
-reword, above) was cleared. The downstream-project upgrade path (phase 4) has not started.
-The old-framing comparative narration that leaked into this session's rewritten files (expected,
-per the phase-5 plan) has not yet been swept to clean present-tense description outside this
-entry. The "Bootstrap hands off to the planner" entry immediately above this one predates the v3
-terminology — its prose still says "UI designer"/"lens"; `bootstrap.md` and `SKILL.md`'s actual
-routing text for that feature was updated to composition terminology as part of this merge, but
-the LINEAGE entry describing it is left in its original words since LINEAGE is historical record,
-not living spec.
+**Left for a later session** (originally tracked in `v3-redesign-proposal.md` phase 1's task list
+and its "Threads this does NOT make moot" section, since removed — this entry is now the record):
+the per-principle `applies-to:` tagging idea for stance-mixed domains has not been implemented —
+only its dependency (the retrospective signal reword, above) was cleared. The downstream-project
+upgrade path (phase 4) has not started; still open as of the 2026-07-22 entry below. The
+old-framing comparative narration that leaked into this session's rewritten files (expected, per
+the phase-5 plan) was swept in the 2026-07-22 entry below. The "Bootstrap hands off to the
+planner" entry immediately above this one predates the v3 terminology — its prose still says "UI
+designer"/"lens"; `bootstrap.md` and `SKILL.md`'s actual routing text for that feature was updated
+to composition terminology as part of this merge, but the LINEAGE entry describing it is left in
+its original words since LINEAGE is historical record, not living spec.
+
+---
+
+## 2026-07-22 — v3 phases 4/5 close out; planner collapses into the alias model
+
+A full end-to-end dry run of the pipeline (bootstrap → planner → parallel ux-design/coder →
+ui-design → coder) on a throwaway project surfaced a punch list, worked through in order:
+mechanical fixes, then tooling, then the architecture question the exercise's own reasoning
+raised, then prompt-content polish. The working punch list (`docs/known-issues-from-pokemon-
+exercise.md`) and `v3-redesign-proposal.md` are both removed now that every item is done; this
+entry is the retained record.
+
+**Mechanical (v3 phase 5's cleanup, finished):** `lint-handoff` validated a retired `role:`
+frontmatter field years after the schema moved to `stance:`/`composition:` — every handoff this
+exercise produced failed the check. Fixed to validate `stance` against the enum and `composition`
+(non-empty if present); found and fixed a latent bug in the same frontmatter-field regex along the
+way (`\s*` after a field's colon was consuming the field's own newline and swallowing the next
+line's value when the field was empty). All ten web-frontend pack design-domain files still named
+the retired `ux-designer`/`ui-designer` lens files in their preambles — confirmed live, not just
+historical, since two real spawn prompts this exercise produced had copied the stale header
+verbatim. Find-and-replaced to `ux-design`/`ui-design`.
+
+**Tooling — `corpus.py compose-spawn-prompt`:** the exercise checked what was actually inlined into
+five real spawn prompts against the source domain files on disk. Two were fully compliant with
+`full-corpus-on-spawn`; two coder spawns weren't — one summarized three domains' kill logs instead
+of reproducing them, a later one in the same session silently dropped kill logs entirely and
+stripped a domain down to `id`/`rule` only. The violation got worse as the session accumulated
+context — hand-discipline alone wasn't holding the guarantee. New subcommand mechanically
+concatenates each composed domain's full working file byte-for-byte (through the existing
+seed→pack→project layering, respecting `fork-status: forked`), plus the stance frame and handoff
+schema read verbatim from `kernel.md`, plus the task — no generative or summarization step in the
+assembly, so there is nowhere for compression to enter. One output file serves as both the
+dispatched prompt and the saved-for-review copy, which also closed a separate finding: the
+"inline, not point-at" rule for spawn prompts had no answer for wanting a record copy, and pointing
+the spawn at that record file (rather than pasting it) was exactly the shortcut-read failure mode
+the rule exists to prevent. Wired into `SKILL.md`'s own spawn-assembly instructions so it's the
+actual mechanism used, not a tool that exists unreferenced. Separately, `record-gate`/`measure`/
+`verify` gained the same `--domains-dir`/`--audit` override `kill-report`/`graduate-kill`/`adopt`
+already had — discovered directly, when there was no way to gate-record this exercise's own edits
+to the kernel-seed layer's domains against `domains/audit.md`.
+
+**Architecture — the planner collapses into the alias model.** The exercise's own reasoning led
+here: kernel.md excluded "the orchestrator and the planner" from the stance-composition model as
+"the fixed, named entities doing the composing." Decomposing the planner's dialogue step (below)
+showed the planner doesn't actually need that exclusion — it composes `planning` + `interviewing`
+like any other spawn. Once it moved, the orchestrator was the only thing left in that excluded
+category, which exposed that *fixedness* was never the real criterion — it invited exactly the
+question of whether the orchestrator could collapse too. It can't, but not because it's "still
+fixed": a lens (any composed stance + domain subset, planner included now) produces a generative
+artifact about a subject; the orchestrator produces routing and gating decisions *about other
+lenses*, one level up, and something has to occupy that position before any composition can
+happen — the regress has no floor otherwise. `SKILL.md` already had the right words for this
+("a pure process layer that composes and routes spawns but never takes on a spawn's stance
+itself"); `kernel.md`'s framing was rewritten around process-layer-vs-lens instead of
+fixed-vs-composed, with `SKILL.md`'s phrasing made canonical. `planner` became a fourth seeded
+entry in `domains/role-aliases.md` (stance: convergent, domains: `planning` + `interviewing`);
+`planner.md` was deleted, its genuinely planner-specific procedure (orient, decompose, sequence,
+self-check, write-queue, plus the dialogue-scoping rule that downstream direction questions belong
+to the executing spawn, not the planner) folded into the alias's `notes:` field — longer than the
+other three aliases' notes, accepted as this alias's shape rather than forced to condense further.
+
+**New domain — `interviewing`.** Decomposing the planner's "Dialogue" step through a genuine-fork
+test with the operator cut 3 of 8 candidate proposals as "an agent would reasonably do this
+anyway," not earned corrections. Survivors seeded a new kernel-level `domains/interviewing.md`
+(`ask-one-question-at-a-time`, `name-clear-direction-dont-manufacture-choice`,
+`frame-questions-for-cheap-answers`) — stance-agnostic, consumed by any convergent lens that hits a
+genuine clarifying moment, not owned by a single role — plus two new `domains/planning.md`
+principles (`concern-names-work-not-role`, `self-check-against-domain-before-finalizing`).
+`orchestrator-routing`'s `surface-design-questions-neutrally` was retired via `history: type:
+moved` (not silently duplicated) once `frame-questions-for-cheap-answers` generalized past its
+original UX/UI-specific condition.
+
+**Prompt-content polish.** The handoff-artifact schema's inlined illustrative example
+(`composition: ux-design`, `workstream: checkout-redesign`, `domains-loaded: [ux-design,
+recoverability]`) read as plausible real values, not obviously placeholders — the one planner
+prompt in the exercise left them unchanged where they didn't belong. Genericized to
+`<convergent|divergent>`, `<alias-name-or-omit>`, `<stable-workstream-id>` (with a note not to
+leave the placeholder in place), `[<domain-a>, <domain-b>, ...]`. The ux-design/ui-design alias
+notes gained an explicit warning against conflating a project's UX/UI library (`bootstrap.md`'s
+narrative, prose-section format) with the domain-corpus `principles:` YAML shape, after a bootstrap
+run produced a `ux-library.md` draft in the wrong shape. A separate idea — reordering the handoff
+schema ahead of composition-varying domain content for prefix-based prompt-cache reuse across
+spawns — was investigated and not applied: Anthropic's cache keys off explicit `cache_control`
+breakpoints placed by whatever turns assembled prompt text into an API call, and nothing on the
+Agent-tool surface used here exposes control over where that breakpoint lands, so reordering prose
+alone has no confirmed mechanism to produce a win.

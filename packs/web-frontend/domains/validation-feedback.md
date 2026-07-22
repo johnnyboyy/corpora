@@ -1,7 +1,7 @@
 # Domain: validation-feedback (web-frontend pack)
 
-Warnings, validation, and surfacing side effects. Cross-role — declared by both the **ux-designer**
-and **ui-designer** lenses (the UX locates the fix; the UI co-locates it visually). Audit metadata
+Warnings, validation, and surfacing side effects. Cross-role — declared by both the **ux-design**
+and **ui-design** lenses (the UX locates the fix; the UI co-locates it visually). Audit metadata
 lives in `packs/web-frontend/domains/audit.md`, loaded only at ratify/retrospective time.
 
 ```yaml

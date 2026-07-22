@@ -1,6 +1,6 @@
 # Domain: ranking-evaluation (web-frontend pack)
 
-Ranking, scoring, triage, and reference-building tools. Declared by the **ux-designer** lens. Several
+Ranking, scoring, triage, and reference-building tools. Declared by the **ux-design** lens. Several
 principles here are flagged provisional in the audit (earned in a single tool) — weigh that before
 promoting. Audit metadata lives in `packs/web-frontend/domains/audit.md`, loaded only at
 ratify/retrospective time.

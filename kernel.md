@@ -142,16 +142,26 @@ inspectable after the fact via the handoff's `domains-loaded:` field (see "The h
 The orchestrator's composition choice is visible before the spawn runs the same way any other
 orchestrator action is; see the spawn brief, below.
 
-**Recurring domain-subsets get an informal alias.** `coder`, `ux-design`, and `ui-design` are the
-first three seeded entries in `domains/role-aliases.md` — a label for a domain-subset +
+**Recurring domain-subsets get an informal alias.** `coder`, `ux-design`, `ui-design`, and
+`planner` are the four seeded entries in `domains/role-aliases.md` — a label for a domain-subset +
 stance combination the orchestrator reuses often enough to be worth naming as routing shorthand.
 An alias is not a schema entity and not a file with its own prompt — it carries no persona text.
 New aliases accumulate the same way domains do — from repeated, observed composition, never
 declared up front.
 
-**The orchestrator and the planner do not compose domains.** They are the fixed, named entities
-doing the composing, not domain-consuming working roles — `SKILL.md`'s routing logic and
-`planner.md` keep their own prompts.
+**The orchestrator does not compose domains — every other spawn does, planner included.** The
+distinction is not fixedness (a planner-shaped alias could in principle be renamed or split like
+any other); it is what kind of thing produces what. A lens — any composed stance + domain subset —
+produces a generative artifact *about a subject*: a spec, a plan, code. The orchestrator produces
+routing and gating *decisions about other lenses*, one level up: which stance and domains a task
+needs, whether a proposal ratifies, when a retrospective fires. Something has to occupy that
+position before any composition can happen — otherwise nothing decides what to compose for the
+orchestrator itself, and the regress has no floor. `SKILL.md` states this precisely: the
+orchestrator is "a pure process layer that composes and routes spawns but never takes on a spawn's
+stance itself." `orchestrator-routing` and `ratify-gate` are its own domains, loaded into
+`SKILL.md`'s own prompt rather than composed fresh per task — not because the orchestrator is
+"fixed" in some special sense, but because a process layer has no subject to compose *for*; it has
+only the process itself.
 
 Multiple domain-subsets can compose into one spawn when a task's coupling warrants it (a
 gesture-transition task might load `motion` + `wizards-flows` + `ranking-evaluation` together in
@@ -389,13 +399,15 @@ form.
 
 ```yaml
 ---
-stance: convergent           # convergent | divergent — which stance this spawn ran under
-composition: ux-design       # OPTIONAL — the alias name, if the spawn used one, for fast
+stance: <convergent|divergent>  # which stance this spawn ran under
+composition: <alias-name-or-omit> # OPTIONAL — the alias name, if the spawn used one, for fast
                               #   scanning only; never authoritative. Omit for ad hoc composition.
-workstream: checkout-redesign # stable across checkpoints and revisions
+workstream: <stable-workstream-id> # stable across checkpoints and revisions — not this spawn's
+                              #   composition or task name; substitute a real identifier, never
+                              #   leave this example value in place
 agent-continuity: new        # new | continued | replacement
 status: complete             # complete | tradeoffs-pending | questions-pending | blocked
-domains-loaded: [ux-design, recoverability]
+domains-loaded: [<domain-a>, <domain-b>, ...] # every domain this spawn's composition actually loaded
 proposals:                   # principle proposals, provenance attached at proposal time
   - id: proposed-slug
     rule: "..."

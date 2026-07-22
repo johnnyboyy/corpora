@@ -113,6 +113,10 @@ provenance:
 - id: surface-design-questions-neutrally
   domain: orchestrator-routing
   provenance: "2026-06-12, operator clarified: orchestrator should not drift into design thinking even when capable."
+  history:
+    - date: 2026-07-22
+      type: moved
+      reason: "pokemon-game dry-run exercise, planner-decomposition session. Generalized beyond its UX/UI-specific condition and relocated to the new interviewing domain as frame-questions-for-cheap-answers — the same test (frame for a cheap answer, omit a baked-in opinion) applies to any question-framing moment (planner dialogue, any lens's questions-pending pause), not only the orchestrator routing a design question. Removed from orchestrator-routing's principles: the orchestrator now draws this judgment by composing interviewing (directly, or via the planner alias) rather than carrying a duplicate, narrower copy of its own."
 
 - id: spawn-threshold-is-spec-scope
   domain: orchestrator-routing
@@ -179,7 +183,33 @@ provenance:
   domain: ratify-gate
   provenance: "Meridian project, 2026-07-17, retrospective conversation. Operator flagged that UI-library sync handoffs reproduced the whole ui-library.md document in the Artifact section despite the role having written directly to the file — real token cost paid once and then discarded when the handoff is deleted post-ratify. The schema's 'freeform' Artifact field never mandated full reproduction; this names the actual dividing line (does the content already have a persisted home the orchestrator can read) that the freeform language left implicit."
 
+# domain: interviewing (new domain, seeded 2026-07-22)
+- id: ask-one-question-at-a-time
+  domain: interviewing
+  kind: judgment
+  provenance: "2026-07-22, pokemon-game dry-run exercise. Decomposed from planner.md's 'Dialogue' step. Genuine-fork-tested against the operator's own observed default: batching multiple clarifying questions into one turn is a concrete, recurring model behavior, not a strawman."
+
+- id: name-clear-direction-dont-manufacture-choice
+  domain: interviewing
+  kind: judgment
+  provenance: "2026-07-22, pokemon-game dry-run exercise. Decomposed from planner.md's 'Dialogue' step. Directly evidenced within the same session: the orchestrator manufactured multi-option choices until the operator asked it to stop and proceed on recommendation instead."
+
+- id: frame-questions-for-cheap-answers
+  domain: interviewing
+  kind: judgment
+  provenance: "2026-07-22, pokemon-game dry-run exercise. Absorbs and generalizes orchestrator-routing's surface-design-questions-neutrally (see that principle's history entry, dated the same day) — widened from 'a UX or UI question routed to the operator' to any question-framing moment, since the condition named no genuinely UX/UI-specific mechanism."
+
 # domain: planning
+- id: concern-names-work-not-role
+  domain: planning
+  kind: judgment
+  provenance: "2026-07-22, pokemon-game dry-run exercise. Decomposed from planner.md's step 4 ('set concern... do not name roles'), which stated the constraint in lens prose without a corresponding ratified domain principle."
+
+- id: self-check-against-domain-before-finalizing
+  domain: planning
+  kind: judgment
+  provenance: "2026-07-22, pokemon-game dry-run exercise. Decomposed from planner.md's step 6 ('self-check against planning principles' before writing the queue). Genuine-fork-tested against the same session's own evidence: the orchestrator did not catch its own full-corpus-on-spawn violations until asked to review — explicit self-checking does not happen for free under accumulated context, which is also why coding-general's structural-examination-at-working-checkpoint exists as a ratified principle rather than assumed behavior."
+
 - id: open-questions-are-explicit
   domain: planning
   provenance: "No provenance was ever recorded for this principle — a pre-existing gap found while executing the 2026-07-18 structural-kinship merge, backfilled here rather than left orphaned."

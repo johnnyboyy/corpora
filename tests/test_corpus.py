@@ -53,7 +53,8 @@ class CorpusCommandTestCase(unittest.TestCase):
     def write_handoff(self, ui_drift="ui-drift:\n  screens: []\n  components: []", status="complete"):
         path = self.root / "handoff.md"
         path.write_text(f"""---
-role: coder
+stance: convergent
+composition: coder
 status: {status}
 domains-loaded: [coding-general]
 proposals: []
@@ -404,6 +405,41 @@ class LintHandoffUiDriftTest(CorpusCommandTestCase):
         self.assertIn("ui-drift.components missing or not a list", result.stdout)
         self.assertNotIn("ui-drift.screens missing", result.stdout)
 
+    def test_missing_stance_fails(self):
+        path = self.write_handoff()
+        path.write_text(path.read_text().replace("stance: convergent\n", ""))
+
+        result = self.run_command(["lint-handoff", str(path)])
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("stance", result.stdout)
+
+    def test_invalid_stance_fails(self):
+        path = self.write_handoff()
+        path.write_text(path.read_text().replace("stance: convergent", "stance: neutral"))
+
+        result = self.run_command(["lint-handoff", str(path)])
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("stance 'neutral' not in", result.stdout)
+
+    def test_empty_composition_fails(self):
+        path = self.write_handoff()
+        path.write_text(path.read_text().replace("composition: coder", "composition:"))
+
+        result = self.run_command(["lint-handoff", str(path)])
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("composition present but empty", result.stdout)
+
+    def test_old_role_field_no_longer_required(self):
+        path = self.write_handoff()
+        path.write_text(path.read_text().replace("composition: coder\n", ""))
+
+        result = self.run_command(["lint-handoff", str(path)])
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+
 
 class ScreenshotCommandsTest(CorpusCommandTestCase):
     @staticmethod
@@ -699,6 +735,71 @@ class RecordGateCoOccurrenceAndOriginTest(CorpusCommandTestCase):
         self.assertIn("origin: pack", audit_text)
 
 
+class ArbitraryLayerOverrideTest(unittest.TestCase):
+    """measure/verify/record-gate must work on any domains-dir + audit.md pair — the kernel-seed
+    layer or a pack layer, not only a project's own corpora/domains — the same treatment
+    kill-report/graduate-kill/adopt already have."""
+
+    def setUp(self):
+        self.tempdir = tempfile.TemporaryDirectory()
+        self.root = Path(self.tempdir.name)
+        self.domains_dir = self.root / "seed-domains"
+        self.domains_dir.mkdir()
+        self.audit_path = self.domains_dir / "audit.md"
+        (self.domains_dir / "widgets.md").write_text(
+            '# Domain: widgets\n\n```yaml\nprinciples:\n\n- id: p1\n  rule: "R"\n  condition: "C"\n  reason: "Why."\n```\n'
+        )
+        self.audit_path.write_text("# Audit\n\n```yaml\nprovenance:\n```\n")
+
+    def tearDown(self):
+        self.tempdir.cleanup()
+
+    def run_command(self, command):
+        return subprocess.run(
+            [sys.executable, str(SCRIPT), *command],
+            text=True, capture_output=True, check=False,
+        )
+
+    def layer_args(self):
+        return ["--domains-dir", str(self.domains_dir), "--audit", str(self.audit_path)]
+
+    def test_measure_registers_a_non_project_layer(self):
+        result = self.run_command(["measure", *self.layer_args()])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("widgets:", result.stdout)
+        self.assertIn("counters:", self.audit_path.read_text())
+
+    def test_verify_reconciles_a_non_project_layer(self):
+        self.run_command(["measure", *self.layer_args()])
+
+        result = self.run_command(["verify", *self.layer_args()])
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        self.assertIn("ledger reconciled", result.stdout)
+
+    def test_record_gate_writes_to_the_given_audit_file(self):
+        self.run_command(["measure", *self.layer_args()])
+
+        result = self.run_command([
+            "record-gate", *self.layer_args(), "--domain", "widgets", "--ratified", "1",
+        ])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("ratified: 1", self.audit_path.read_text())
+
+    def test_measure_without_domains_dir_falls_back_to_root_corpora_domains(self):
+        (self.root / "corpora" / "domains").mkdir(parents=True)
+        (self.root / "corpora" / "domains" / "color.md").write_text(
+            "# Domain: color\n\n```yaml\nprinciples:\n```\n"
+        )
+
+        result = self.run_command(["--root", str(self.root), "measure"])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("color:", result.stdout)
+
+
 class AdoptCommandTest(CorpusCommandTestCase):
     def test_adopt_finds_kernel_seed_domain(self):
         result = self.run_command(["adopt", "--domain", "coding-general"])
@@ -749,6 +850,103 @@ class AdoptCommandTest(CorpusCommandTestCase):
 
         self.assertEqual(result.returncode, 2)
         self.assertIn("already forked", result.stderr)
+
+
+class ComposeSpawnPromptTest(CorpusCommandTestCase):
+    def write_task(self, content="Implement the thing."):
+        path = self.root / "task.md"
+        path.write_text(content)
+        return path
+
+    def test_rejects_invalid_stance(self):
+        task = self.write_task()
+
+        result = self.run_command([
+            "compose-spawn-prompt", "--stance", "neutral", "--domains", "coding-general",
+            "--task-file", str(task),
+        ])
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("invalid choice: 'neutral'", result.stderr)
+
+    def test_assembles_seed_domain_stance_frame_and_handoff_schema(self):
+        task = self.write_task("Fix the flaky test.")
+        out = self.root / "out.md"
+
+        result = self.run_command([
+            "compose-spawn-prompt", "--stance", "convergent", "--domains", "coding-general",
+            "--task-file", str(task), "--output", str(out),
+        ])
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        text = out.read_text()
+        self.assertIn("### Generative stance", text)
+        self.assertIn("### Domain: coding-general", text)
+        self.assertIn("## The handoff artifact", text)
+        self.assertIn("Fix the flaky test.", text)
+        # byte-for-byte, not summarized: a real principle id from the seed file must survive whole
+        seed_text = (Path(__file__).parents[1] / "domains" / "coding-general.md").read_text()
+        first_id_line = next(line for line in seed_text.splitlines() if line.strip().startswith("- id:"))
+        self.assertIn(first_id_line.strip(), text)
+
+    def test_forked_project_domain_skips_the_seed(self):
+        task = self.write_task()
+        out = self.root / "out.md"
+        (self.root / "corpora" / "domains" / "coding-general.md").write_text(
+            "# Domain: coding-general (forked)\n\n```yaml\n"
+            "fork-status: forked\nforked-from: domains/coding-general.md\nforked-date: 2026-07-01\n\n"
+            "principles:\n\nkilled:\n```\n"
+        )
+
+        result = self.run_command([
+            "compose-spawn-prompt", "--stance", "convergent", "--domains", "coding-general",
+            "--task-file", str(task), "--output", str(out),
+        ])
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        text = out.read_text()
+        self.assertIn("forked", text)
+        self.assertNotIn("<!-- seed:", text)
+
+    def test_project_only_domain_with_no_seed_counterpart(self):
+        task = self.write_task()
+        out = self.root / "out.md"
+        (self.root / "corpora" / "domains" / "spatial-metaphor.md").write_text(
+            "# Domain: spatial-metaphor\n\n```yaml\nprinciples:\n\nkilled:\n```\n"
+        )
+
+        result = self.run_command([
+            "compose-spawn-prompt", "--stance", "convergent", "--domains", "spatial-metaphor",
+            "--task-file", str(task), "--output", str(out),
+        ])
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        self.assertIn("### Domain: spatial-metaphor", out.read_text())
+
+    def test_unknown_domain_fails(self):
+        task = self.write_task()
+
+        result = self.run_command([
+            "compose-spawn-prompt", "--stance", "convergent", "--domains", "not-a-real-domain",
+            "--task-file", str(task),
+        ])
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("nothing to compose", result.stderr)
+
+    def test_defaults_output_path_under_session_prompts(self):
+        task = self.write_task()
+
+        result = self.run_command([
+            "compose-spawn-prompt", "--stance", "convergent", "--domains", "coding-general",
+            "--task-file", str(task), "--composition", "coder",
+        ])
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        expected_dir = self.root / "corpora" / "session-prompts"
+        self.assertTrue(expected_dir.is_dir())
+        written = list(expected_dir.glob("*-coder.md"))
+        self.assertEqual(len(written), 1)
 
 
 class KillGraduationTest(unittest.TestCase):
