@@ -6,25 +6,26 @@ description: Bootstrap a project's config, UI library, and UX library. Run once,
 # Project Bootstrap
 
 Reference for the orchestrator's bootstrap flow, run when `corpora/config.md` is absent — Phase 1
-inline, Phase 2 by routing the UI designer with the Phase 2 section as the task, Phase 3 by routing
-the UX designer with the Phase 3 section. Not a standalone skill.
+inline, Phase 2 by routing a `ui-design`-composed spawn with the Phase 2 section as the task,
+Phase 3 by routing a `ux-design`-composed spawn with the Phase 3 section (see
+`domains/role-aliases.md` for what each composition loads). Not a standalone skill.
 
 - **Phase 1 — always, run inline.** Detect the project's shape, commands, and existing utilities; write
   **`corpora/config.md`** (schema below: shape — language, framework, package manager, `has-ui`,
   styling, `role-pack`; project resources — registered utilities, UI library location, verification
   commands). This flips the project to "bootstrapped" and runs for
   every project type.
-- **Phase 2 — only when `has-ui: yes`, UI designer workstream.** Bootstrap the design system:
-  **`corpora/ui-library.md`** (or the project's chosen path — the living design system reference)
-  plus **proposed design principles** distilled from the foundational decisions and surfaced in
-  the standard proposed-principles block; the orchestrator ratifies them into the project's design
-  domains (`corpora/domains/<domain>.md`), assigning each a domain at the gate. This is the UI
-  designer's foundational work — get it right and every subsequent designer session starts with
+- **Phase 2 — only when `has-ui: yes`, `ui-design`-composed workstream.** Bootstrap the design
+  system: **`corpora/ui-library.md`** (or the project's chosen path — the living design system
+  reference) plus **proposed design principles** distilled from the foundational decisions and
+  surfaced in the standard proposed-principles block; the orchestrator ratifies them into the
+  project's design domains (`corpora/domains/<domain>.md`), assigning each a domain at the gate.
+  This is the foundational work — get it right and every subsequent design session starts with
   real constraints; get it wrong and every session invents in a vacuum.
-- **Phase 3 — only when `has-ui: yes`, UX designer workstream, after Phase 2.** Bootstrap the
-  experience reference: **`corpora/ux-library.md`** plus proposed principles/directions, same
-  gate. UI runs first deliberately — the divergent lens sets identity before the convergent lens
-  documents constraints (see LINEAGE.md, "UI/UX seam settled").
+- **Phase 3 — only when `has-ui: yes`, `ux-design`-composed workstream, after Phase 2.** Bootstrap
+  the experience reference: **`corpora/ux-library.md`** plus proposed principles/directions, same
+  gate. UI runs first deliberately — the divergent stance sets identity before the convergent
+  stance documents constraints (see LINEAGE.md, "UI/UX seam settled").
 
 The library and corpus are text-only. See LINEAGE.md for why text outperforms design artifacts
 for this purpose.
@@ -62,8 +63,9 @@ runtime already exposes browser automation, image generation, delegation, and si
 worse than `none` because a role will try to use something that is not there.
 
 **If `has-ui: no`, Phase 1 is the whole job.** Write `corpora/config.md` and stop — no UI library,
-no design principles, no designer roles for this project. Note to the operator that design-phase
-roles are inactive and the project runs on the kernel (orchestrator + base coder).
+no design principles, no design spawns for this project. Note to the operator that
+divergent/visual-identity domains are inactive and the project runs on the kernel layer (the
+orchestrator, the planner, and coder-composed spawns only).
 
 **If `has-ui: yes`, continue to Phases 2 and 3.**
 
@@ -76,8 +78,8 @@ with an empty `candidates: []` list.
 
 ## Phase 2 — UI library (only when `has-ui: yes`)
 
-You are now the UI designer bootstrapping a design system for a project that has none yet. The
-orchestrator should pass any of the following that exist; work with what's provided and ask for
+You are now a `ui-design`-composed spawn (divergent stance) bootstrapping a design system for a
+project that has none yet. The orchestrator should pass any of the following that exist; work with what's provided and ask for
 what's missing only if it blocks a foundational decision:
 
 - Existing design documentation (brand guidelines, style guides, Figma exports as text)
@@ -347,9 +349,10 @@ transcribe the relevant values and add the sections the source document missed
 
 ## Phase 3 — UX library (only when `has-ui: yes`, after Phase 2)
 
-You are now the UX designer bootstrapping the project's experience reference. The UI designer has
-already run — identity is set; your job is convergent documentation of how the product *works* as
-an experience, so future UX sessions weigh established patterns instead of re-deriving them.
+You are now a `ux-design`-composed spawn (convergent stance) bootstrapping the project's
+experience reference. The `ui-design`-composed Phase 2 spawn has already run — identity is set;
+your job is convergent documentation of how the product *works* as an experience, so future UX
+sessions weigh established patterns instead of re-deriving them.
 
 Write `corpora/ux-library.md` (or the path config names under `ux-library`) covering, as they
 exist in the project:
