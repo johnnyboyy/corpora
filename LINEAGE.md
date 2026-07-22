@@ -1220,7 +1220,7 @@ speculative one regardless of path.
 Full reasoning in `v3-redesign-proposal.md` (kept in-repo as the working proposal this entry
 implements and now supersedes as the historical record). Phases 0–3 only — this repo (kernel,
 `corpus.py`, `SKILL.md`, `bootstrap.md`, `README.md`, the web-frontend pack). Phase 4 (the
-FAMOUS/Blog/Meridian upgrade path) and phase 5 (old-framing cleanup pass) were explicitly not
+downstream-project upgrade path) and phase 5 (old-framing cleanup pass) were explicitly not
 started this session.
 
 **What changed.** A role stopped being a persistent named file (`coder.md`, `ux-designer.md`,
@@ -1276,7 +1276,7 @@ than merging into `coder`.
   (seed/pack/project, default `project`, stronger than directory-inference alone since
   `record-gate` only ever sees a project's own `corpora/domains/`).
 - **`cmd_adopt` kept as-is**, decision reversed from an earlier same-session read: unused-so-far
-  (`fork-status: forked` has never fired in FAMOUS, Blog, or Meridian, surveyed 2026-07-21) isn't
+  (`fork-status: forked` has never fired in any downstream project, surveyed 2026-07-21) isn't
   evidence it's unneeded. It answers a distinct question finer-grained domains reduce but don't
   eliminate — keeping a project-local principle without forcing premature seed promotion.
 
@@ -1297,8 +1297,7 @@ boundary.
 **Left for a later session (see `v3-redesign-proposal.md` phase 1's task list and the "Threads
 this does NOT make moot" section):** the per-principle `applies-to:` tagging idea for
 stance-mixed domains has not been implemented — only its dependency (the retrospective signal
-reword, above) was cleared. The FAMOUS/Blog/Meridian upgrade path (phase 4) has not started; all
-three still run the pre-v3 model with their own `ux-library.md`/`ui-library.md` split unchanged.
+reword, above) was cleared. The downstream-project upgrade path (phase 4) has not started.
 The old-framing comparative narration that leaked into this session's rewritten files (expected,
 per the phase-5 plan) has not yet been swept to clean present-tense description outside this
 entry. The "Bootstrap hands off to the planner" entry immediately above this one predates the v3
