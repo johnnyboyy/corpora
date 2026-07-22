@@ -4,9 +4,9 @@ Stack-agnostic coding judgment — applies in any language or framework, loaded 
 convergent coding spawn (always). Audit metadata lives in `domains/audit.md`, loaded only at
 ratify/retrospective time.
 
-Foundational, stable across every project shape this domain serves — folded here from the
-audit layer's retired `promoted:` section (v3-redesign-proposal.md, 2026-07-21) rather than kept
-as a separate authority tier:
+Foundational, stable across every project shape this domain serves — held here in the preamble
+rather than in `principles:`, since checking a `condition` and `reason` against these before every
+task would be friction without benefit (provenance: `domains/audit.md`):
 
 - **Explicit by Default** and **prefer the error-exposing form** are peer meta-conventions, both
   extending Crockford's heuristic ("if a feature is sometimes useful and sometimes dangerous and

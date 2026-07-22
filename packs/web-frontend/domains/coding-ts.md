@@ -6,10 +6,9 @@ pack's default language, even where a given principle's underlying fact would al
 JS. Loaded by any convergent coding spawn when `role-pack: web-frontend`. Audit metadata lives in
 `packs/web-frontend/domains/audit.md`, loaded only at ratify/retrospective time.
 
-Settled JS/TS style, folded here from the audit layer's retired `promoted:` section
-(v3-redesign-proposal.md, 2026-07-21) rather than kept as a separate authority tier — both are JS
+Settled JS/TS style, held here in the preamble rather than in `principles:` — both are JS
 instances of the base `coding-general` meta-rules, near-unconditional enough that per-case
-condition-weighing is friction without benefit:
+condition-weighing is friction without benefit (provenance: `packs/web-frontend/domains/audit.md`):
 
 - **Block arrow bodies always** (`() => { return value; }`) — `{}` after an arrow is a function
   body, not a value; the concise form has a silent failure mode and forces a per-function judgment

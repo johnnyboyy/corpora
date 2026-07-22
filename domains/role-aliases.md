@@ -8,9 +8,7 @@ up front. Adding, renaming, or retiring an alias is an ordinary operator/orchest
 call, not a ratify-gate action (nothing here is a corpus proposal, and the `notes:` field below is
 explicitly non-normative — task-mechanics reference, not weighable guidance).
 
-Seeded 2026-07-21 (v3 lens-collapse migration, retiring `coder.md`, `packs/web-frontend/coder.md`,
-`packs/web-frontend/ux-designer.md`, and `packs/web-frontend/ui-designer.md` as persistent lens
-files):
+Current seeded aliases:
 
 ```yaml
 aliases:
