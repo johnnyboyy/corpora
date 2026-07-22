@@ -3,9 +3,11 @@
 The kernel is the shared mechanism every role inherits. It is not code — it is a discipline made
 of files plus a loop.
 
-A **role** is a *lens* plus a *declaration*: a domain prompt (the mode of reasoning the agent
-applies) and a static list of the **domain corpora** it loads. Roles do not own corpora. Judgment
-lives in domains; a role is the lens through which one or more domains are applied to a task.
+A **spawn** is a *stance* plus a *composed domain subset*: a generative posture (the mode of
+reasoning the agent applies) and the **domain corpora** the orchestrator assembles fresh for the
+task at hand. Spawns do not own corpora. Judgment lives in domains; a spawn is the momentary lens
+through which one or more domains are applied to a task. See "Spawns: stance + composed domain
+subset," below.
 
 A **domain corpus** is a list of principles about one subject matter, context type, or decision
 class — not a job title. Multiple roles may declare the same domain, so shared judgment lives
@@ -44,17 +46,17 @@ Notes on fields:
 
 ### Storage: working vs audit
 
-Working and audit metadata are split so a role's working context carries only the fields it weighs
+Working and audit metadata are split so a spawn's working context carries only the fields it weighs
 during a task. **File granularity matches load granularity:** working files are per-domain because
-the working load is *selective* (only declared domains); audit metadata is one file per layer
+the working load is *selective* (only composed domains); audit metadata is one file per layer
 because the audit load is *broad* (the orchestrator pulls the whole layer at once).
 
 - **Working file** (`domains/<domain>.md`) — one per domain. The active `principles:` with their
   `id / rule / condition / reason / see-also`, plus the `killed:` log. This is the only
   part loaded when a role works, inline or spawned.
 - **Audit file** (`domains/audit.md`, one per layer — kernel-seed, each pack, and each project) —
-  per-principle `provenance` keyed by `id` (each entry noting its `domain`), the `promoted:` block,
-  and per-kill audit metadata. Loaded only at ratify and retrospective time, by the orchestrator —
+  per-principle `provenance` keyed by `id` (each entry noting its `domain`) and per-kill audit
+  metadata. Loaded only at ratify and retrospective time, by the orchestrator —
   never in a role's working context. The audit file also carries the layer's **counters** — the
   mechanical signals that replace operator feel. **Never write or edit these by hand, including
   when creating a fresh audit file**: `scripts/corpus.py` alone creates them (`measure`) and
@@ -64,6 +66,8 @@ because the audit load is *broad* (the orchestrator pulls the whole layer at onc
   ```yaml
   counters:
     - domain: coding-general
+      origin: seed                 # seed | pack | project — stronger than directory-inference
+                                    #   alone; defaults from --domains-dir shape, overridable
       since: 2026-06-20            # last retrospective
       ratified: 3                  # new principles since
       killed: 1
@@ -78,6 +82,11 @@ because the audit load is *broad* (the orchestrator pulls the whole layer at onc
       fired: 4                     # was relevant and the output followed it
       violated: 1                  # was relevant and the output contradicted it
       idle: 9                      # domain was loaded, principle never relevant
+
+  co-occurrence:                   # per unordered domain pair, incremented at each gate that
+                                    #   loaded both — mechanical byproduct of record-gate's inputs
+    - domains: [color, motion]
+      count: 3
 
   library-drift:                   # project layer only, when has-ui: yes
     since-last-sync: 2             # gates where a handoff carried ui-drift: yes
@@ -114,59 +123,73 @@ every active `id` in a working file has a `provenance` entry in its layer's audi
 
 ---
 
-## Roles: lens + declaration
+## Spawns: stance + composed domain subset
 
-A role file is a **lens** — a prompt establishing the mode of reasoning — followed by a static
-declaration of the domains it loads:
+A **spawn** is a stance (see "Generative stance," below) plus a domain subset the orchestrator
+composes fresh for the task at hand — never a persistent named file carrying its own persona
+prompt and a fixed domain list. Two fixed, universal frames exist: convergent and divergent
+(below). Everything else about "what this spawn is" is assembled per task.
 
-```markdown
-## domains
-stance: convergent        # convergent | divergent — the lens's generative stance (see below)
-- coding-general          # always
-- coding-ts               # when role-pack: web-frontend
-- coding-react            # when role-pack: web-frontend
-- css                     # when role-pack: web-frontend
-```
+The orchestrator decides which domains a task needs and unions them into one working
+declaration, same-stance domains only — the hard line below (no stance-mixing inside one spawn)
+is the one invariant carried over unchanged from the earlier lens-file model. A domain is
+available to any spawn whose stance and subject match; domains are not "declared by" a role.
 
-The declaration is checked into the role file, not computed at runtime. Assembly is therefore a
-deterministic, inspectable fact — read the lens, know exactly what loads. An agent never selects
-its own constraints; there is no runtime relevance call on a working role's corpus. A domain may
-be conditional on the project's `role-pack` (a pack adds domains to a role's declaration; it never
-adds a new role).
+**The declaration is still deterministic, not a self-selected runtime relevance call by the
+working agent** — that invariant survives in spirit — but it changes shape: no longer inspectable
+in advance by reading a fixed lens file, it is inspectable *after* spawn via the handoff's
+`domains-loaded:` field (see "The handoff artifact"). The orchestrator's composition choice is
+visible before the spawn runs the same way any other orchestrator action is; see the spawn brief,
+below.
+
+**Recurring domain-subsets get an informal alias.** `coder`, `ux-design`, and `ui-design` are the
+first three seeded entries in `domains/role-aliases.md` — a label for a domain-subset +
+stance combination the orchestrator reuses often enough to be worth naming as routing shorthand.
+An alias is not a schema entity and not a file with its own prompt — it carries no persona text.
+New aliases accumulate the same way domains do — from repeated, observed composition, never
+declared up front.
+
+**The orchestrator and the planner are excluded from this collapse.** They are the fixed,
+named entities doing the composing, not domain-consuming working roles — `SKILL.md`'s routing
+logic and `planner.md` keep their own prompts and stay as they are.
+
+Multiple domain-subsets can compose into one spawn when a task's coupling warrants it (a
+gesture-transition task might load `motion` + `wizards-flows` + `ranking-evaluation` together in
+one divergent spawn, rather than being forced across two separately-named roles).
 
 ### Two load modes
 
-- **Working load** (generation): a role's declared domains, *working files only*. Lean and
-  inspectable. This is every new isolated role agent and every inline role segment.
+- **Working load** (generation): a spawn's composed domains, *working files only*. Lean and
+  inspectable. This is every new isolated spawn and every inline role segment.
 - **Audit load** (synthesis, human-gated): the orchestrator loads relevant domains *broadly,
   including audit and kill metadata*, at ratify and retrospective time. Breadth is safe here
   because it is not constrained generation and it is gated by the operator.
 
-Declarations enforce load boundaries: the coder declares coding domains and never design domains.
-Whether two role segments may share a context is routing judgment, informed by stance, prior
-exploration, evaluator independence, context length, and cost. A handoff captures proposals and
-violations at a transition, but is a checkpoint rather than automatic agent termination. See
+Composition enforces load boundaries: a coding-stance spawn loads coding domains and never design
+domains. Whether two spawn segments may share a context is routing judgment, informed by stance,
+prior exploration, evaluator independence, context length, and cost. A handoff captures proposals
+and violations at a transition, but is a checkpoint rather than automatic agent termination. See
 `SKILL.md`, "Inline, resume, or isolate," and LINEAGE.md, "Role isolation."
 
 ### Generative stance
 
-Each lens declares a `stance:` — how it generates. There are two, and they are opposite:
+Every spawn has a `stance:` — how it generates. There are two, and they are opposite:
 
 - **convergent** — the value of the output comes from *matching a standard*: correctness, idiom,
-  fit. The coder, the UX designer, the planner, and the orchestrator are convergent. For a
-  convergent lens, regression toward the training mean is frequently the *right* answer; there is
-  no anti-mean anchor.
+  fit. Coding, UX-flow, planning, and orchestration work are convergent. For a convergent spawn,
+  regression toward the training mean is frequently the *right* answer; there is no anti-mean anchor.
 - **divergent** — the value comes from *differentiating from the standard*: a distinctive identity.
-  The UI designer is divergent. A divergent lens carries an **anti-mean anchor**: before committing
-  to a direction it must name at least one safe/expected default that should *not* apply, because a
-  generative model otherwise drifts to the average of its training data — the forgettable answer.
-  (History: LINEAGE.md.)
+  Visual/UI-identity work is divergent. A divergent spawn carries an **anti-mean anchor**: before
+  committing to a direction it must name at least one safe/expected default that should *not*
+  apply, because a generative model otherwise drifts to the average of its training data — the
+  forgettable answer. (History: LINEAGE.md.)
 
-Stance is a property of the **lens** (the generating agent), not of a domain. Principles, by their
-nature — a weighable rule with a condition and a reason — overwhelmingly encode *convergent*
-correctness; that is what crystallizes into a rule. The divergent element is a generative *stance*,
-not a body of principles. So domains are mostly convergent guardrails, consumed by lenses of either
-stance, and the anti-mean anchor lives on the divergent lens and fires at the generative moment.
+Stance is a property of the **spawn** (the generating agent, for this task), not of a domain.
+Principles, by their nature — a weighable rule with a condition and a reason — overwhelmingly
+encode *convergent* correctness; that is what crystallizes into a rule. The divergent element is a
+generative *stance*, not a body of principles. So domains are mostly convergent guardrails,
+consumed by spawns of either stance, and the anti-mean anchor lives on the divergent stance and
+fires at the generative moment.
 
 **The hard line:** a single domain must not bundle principles that demand *opposite* generative
 stances to apply — a "resist the standard" instruction sitting beside "match the standard" rules is
@@ -174,6 +197,29 @@ incoherent, since the agent cannot hold both stances at once. The sharpest case 
 judgment and visual-aesthetic judgment never share a domain. At the ratify gate, a proposal that
 wants a home in a domain whose principles pull the opposite way is a signal the domain or the
 proposal is wrong — surface it (a fork candidate), do not force the fit.
+
+---
+
+## The spawn brief
+
+Before spawning, the orchestrator states its composition choice in a short, fixed-field brief —
+the schema structures the envelope, not the thinking. No decision-procedure is baked into the
+schema for *how* the orchestrator picks these values; that judgment stays as flexible as ever and
+accumulates the normal way, through `domains/orchestrator-routing.md`'s own principles.
+
+```yaml
+stance: divergent
+domains: [color, visual-hierarchy, motion]
+expected-output: "Design spec for the settings-panel color treatment."
+```
+
+This is visibility, not a pre-spawn approval gate — the orchestrator's routing choice (which
+domains, why) is already visible before a spawn runs, the same way any other orchestrator action
+is. The real gate stays exactly where it already is: the ratify gate, for anything proposing new
+corpus content, never for the working composition itself. A genuinely novel subject with no
+existing domain simply runs guardrail-light; the new-domain need surfaces through the spawn's own
+proposal at the ratify gate as already designed, with no separate ephemeral-domain
+pre-declaration step required.
 
 ---
 
@@ -206,14 +252,33 @@ kill (which fires because the answer is derivable from training/docs regardless 
 exists) — the fork test asks whether a fork exists at all, prior to asking where the answer came
 from.
 
+The same test extends to domain **creation**, not only principle ratification: before a new
+domain is born at the gate (see "Domain assignment," below), ask whether the proposal is actually
+a different subject from every existing domain, not merely a proposal that would read a little
+cleaner with its own file. Freer domain creation under the composed-subset model cuts both ways —
+it removes the old incentive to force-fit content into an ill-fitting existing container, but
+without this check it trades that failure for the opposite one: fragmentation into too many
+narrow, single-principle domains. A new domain clears the bar only when an existing domain's
+principles would have to bundle opposing generative stances, or a genuinely separate decision
+class, to hold it — the same structural-kinship/fork evidence used for domain splits, applied at
+creation time instead of split time.
+
 ### Domain assignment at the gate
 
 A proposal arrives without a home. At the gate the orchestrator decides which domain it belongs to
 and writes it there. If no existing domain fits, a **new domain is born here** — the orchestrator
-creates `domains/<new-domain>.md` (+ audit) and adds it to the declarations of the roles that
-should load it. This is the one point where domain assignment involves judgment, and it is
-human-gated. A proposal that spans two domains is a signal the domain boundaries may be wrong —
-surface it rather than fragmenting the principle across both.
+creates `domains/<new-domain>.md` (+ audit); the domain becomes available to any spawn whose
+stance and subject match — there is no role declaration to add it to. This is the one point where
+domain assignment involves judgment, and it is human-gated. A proposal that spans two domains is a
+signal the domain boundaries may be wrong — surface it rather than fragmenting the principle
+across both.
+
+A proposal must cite specifically how it matches an existing domain's stated subject — not just
+"plausibly fits." This is a cheap, one-line justification the proposer states at write-back time,
+not a new tier or gate: it exists to stop content being filed into a domain because the container
+looked plausible and was already open, rather than because it is actually the right home — the
+exact failure mode a persistent named lens file used to invite (see LINEAGE.md, the v3 transition
+entry).
 
 ### Write-back format
 
@@ -243,27 +308,30 @@ carries `date`, `type` (generalized / consolidated / split / moved), and `reason
       reason: "Re-homed from ui-designer corpus to the recoverability domain — it is shared with UX."
 ```
 
-Promoted principle — when a corpus entry graduates to a lens prompt itself (becomes a baked-in
-default rather than a weighable principle), move it from `principles:` to `promoted:` in the audit
-file. Keep the entry so the audit trail is legible — a promoted principle that reappears as a
-corpus proposal is a signal of regression, not new insight.
+Retired principle — folded into scene-setting: when a principle has been ratified long enough that
+checking its `condition` and `reason` before every task is friction without benefit, it does not
+graduate to a separate authority tier. Move its substance into the domain's own **preamble** — the
+scene-setting prose read before the working file's `principles:` list — and remove the entry from
+`principles:`. A preamble doesn't read as more authoritative than a principle; it's just the frame
+read first. Add a `history:` entry (`type: folded-to-preamble`) to the principle's audit-layer
+`provenance` record so the trail stays legible — a principle that reappears as a corpus proposal
+after being folded is a signal of regression, not new insight, exactly as the old `promoted:` log
+was for.
 
-```yaml
-- id: principle-id
-  promoted_to: "<lens> prompt — <section name>"
-  provenance: "Date, task, context. Note if it was subsumed by a meta-rule."
-```
+The other job `promoted:` used to do — "this principle has outgrown its narrow domain, belongs
+somewhere more general or deserves a new domain" — is not a distinct mechanism either: it is
+exactly what the structural-kinship/condensation signal (see "The retrospective," below) and the
+gate's ordinary domain-reassignment judgment already catch. No parallel "laws vs. rules" split is
+introduced — an entry exempt from condition-checking is *more* dangerous, not more trustworthy,
+and a separate authority tier would reintroduce the same ossification risk a persistent lens
+file's baked prompt text had.
 
-The trigger for promotion: a principle has been ratified long enough that checking its `condition`
-and `reason` before every task is friction without benefit. Or: several principles share a common
-root justification; the meta-rule that unifies them gets promoted, and the individual entries
-become examples of it.
-
-**Promotion restraint.** Before promoting, ask: would the role still need to reconsider this when
-the project context changes? Promote only if the judgment is stable *across the kinds of projects
-the role serves* — or is so foundational that contestability has genuinely become noise — not
-merely because it has repeated inside one project family. When in doubt, leave it in `principles:`
-where its `condition` and `reason` can still be checked against an unfamiliar case.
+**Promotion restraint** still applies to the fold-to-preamble case: before folding, ask whether the
+role would still need to reconsider this when the project context changes. Fold only if the
+judgment is stable *across the kinds of projects the domain serves* — or is so foundational that
+contestability has genuinely become noise — not merely because it has repeated inside one project
+family. When in doubt, leave it in `principles:` where its `condition` and `reason` can still be
+checked against an unfamiliar case.
 
 ### Killed entries
 
@@ -315,15 +383,18 @@ pack corpora too, not only in downstream projects.
 
 ## The handoff artifact
 
-A role's terminal output is a **handoff artifact**: one file per role session, written by the role
-as its final act, at `corpora/handoffs/<date>-<role>-<slug>.md`. The orchestrator relays this file
-— never raw transcript — and the ratify gate reads proposals from its fields instead of parsing
-prose. The schema structures the *envelope* (what the gate and relay mechanically consume), not the
-*thinking*: the artifact body stays freeform in the lens's own form.
+A spawn's terminal output is a **handoff artifact**: one file per spawn session, written by the
+spawn as its final act, at `corpora/handoffs/<date>-<composition>-<slug>.md`. The orchestrator
+relays this file — never raw transcript — and the ratify gate reads proposals from its fields
+instead of parsing prose. The schema structures the *envelope* (what the gate and relay
+mechanically consume), not the *thinking*: the artifact body stays freeform in the spawn's own
+form.
 
 ```yaml
 ---
-role: ux-designer            # which lens produced this
+stance: convergent           # convergent | divergent — which stance this spawn ran under
+composition: ux-design       # OPTIONAL — the alias name, if the spawn used one, for fast
+                              #   scanning only; never authoritative. Omit for ad hoc composition.
 workstream: checkout-redesign # stable across checkpoints and revisions
 agent-continuity: new        # new | continued | replacement
 status: complete             # complete | tradeoffs-pending | questions-pending | blocked
@@ -345,7 +416,7 @@ delegated-workers: []        # worker scopes, if this role delegated execution
 
 ## Artifact
 
-[The spec / audit / tradeoff block — freeform, in the lens's own form.]
+[The spec / audit / tradeoff block — freeform, in the spawn's own form.]
 
 ## Surfaced
 
@@ -357,16 +428,21 @@ always present; an empty section is a statement, a missing one is a schema viola
 
 Field notes:
 
+- **`stance`** reports what actually ran, not a claim about what a role generally does — immune to
+  declaration drift by construction. **`composition`** is a fast-scan label only; the gate never
+  treats it as authoritative, and a spawn with no matching alias simply omits it. Together they
+  replace the old `role:` field: `domains-loaded:` (already on this schema) plus `stance:` report
+  exactly what was applied for *this* spawn, more precisely than a role name did.
 - **`workstream`** stays stable across implementation, operator testing, and revisions. A new plan
   or unrelated intended outcome receives a new identifier. **`agent-continuity`** makes a context
   discontinuity visible: `new` starts the workstream, `continued` resumes its owning agent, and
   `replacement` reconstructs from the complete role load and structured artifacts because the
   prior agent could not continue.
-- **`kind`** is captured when the role knows it from the inside, not reconstructed at the gate.
+- **`kind`** is captured when the spawn knows it from the inside, not reconstructed at the gate.
   `judgment` = a decision made under uncertainty where context and tradeoffs shaped the outcome;
   `knowledge` = derivable from documentation or training; `direction` = a project design-direction
   choice — an identity decision, not a weighable rule. The stance model predicts `direction`: a
-  divergent lens's output is a choice, so most UI-designer proposals are direction, not principle.
+  divergent spawn's output is a choice, so most UI-identity proposals are direction, not principle.
 - **`utility-candidates`** is deliberately liberal. Each entry names an observed inference burden
   and concrete deterministic operation shape; it need not prove recurrence or specify a finished
   CLI. The orchestrator transfers it to the persistent project ledger before deleting the handoff.
@@ -413,7 +489,7 @@ Only non-blocking UI/UX questions belong here. Blocking questions are surfaced i
 ```yaml
 decisions:
   - id: results-empty-state
-    role: ux-designer
+    stance: convergent
     domain: validation-feedback
     question: "Should an empty filtered result preserve filters or offer a reset action?"
     context: "Results panel introduced by the search workstream."
@@ -427,11 +503,11 @@ decisions:
 ````
 
 The schema is deliberately flat so `scripts/corpus.py lint-deferred` can validate it without a YAML
-dependency. `role` is `ui-designer` or `ux-designer`; `status` is `queued` or `resolved`; `blocking`
-must always be `no`. Group items by owning role and related surface, not count alone. Route a role
+dependency. `stance` is `convergent` or `divergent`; `status` is `queued` or `resolved`; `blocking`
+must always be `no`. Group items by stance and related surface, not count alone. Route a spawn
 workstream when several items need coherent judgment, an item becomes blocking, provisional work
-would create material rework, or the operator requests it. Pass the relevant entries to the role.
-Mark them `resolved` only after the operator ratifies the role's handoff, then remove them; durable
+would create material rework, or the operator requests it. Pass the relevant entries to the spawn.
+Mark them `resolved` only after the operator ratifies the spawn's handoff, then remove them; durable
 direction and judgment live in the UI/UX libraries and corpora, not this queue.
 
 ---
@@ -484,8 +560,8 @@ lifecycle) and is indifferent to how many domains exist.
 Seed domain = general judgment that travels across projects (lives in the skill: kernel-level
 `domains/` and pack-level `packs/<pack>/domains/`).
 Project domain = judgment earned in this specific project.
-Both apply when a role runs: for each domain the role declares, load the seed domain (if any) then
-the project domain (if any) of the same name — unless the project domain file's preamble declares
+Both apply when a spawn runs: for each domain the spawn's composition includes, load the seed
+domain (if any) then the project domain (if any) of the same name — unless the project domain file's preamble declares
 `fork-status: forked`, in which case load only the project file; the seed is no longer consulted
 for that domain. A project may also have domains with no seed counterpart (project-specific
 subjects, e.g. `spatial-metaphor`).
@@ -502,11 +578,12 @@ merged by `id` with any principles already there — with `fork-status: forked`,
 path>`, and `forked-date: <date>` in its preamble. Forking is one-way: it stops the live merge for
 that domain going forward. Re-syncing a fork against later seed changes is not yet supported.
 
-Two layers supply the seed: a stack-agnostic kernel layer (orchestrator + base coder + their
-domains) always present, and an optional role pack selected by `corpora/config.md` (`role-pack:`)
-that overlays stack-specific lenses and domains. A pack adds depth — more domains on existing
-roles — never new roles. A project with no UI runs on the kernel layer alone, designer lenses
-inactive.
+Two layers supply the seed: a stack-agnostic kernel layer (orchestrator + planner + their domains,
+plus the domains any convergent coding spawn composes from) always present, and an optional role
+pack selected by `corpora/config.md` (`role-pack:`) that overlays stack-specific domains. A pack
+adds depth — more domains available to compose — never new fixed roles. A project with no UI runs
+on the kernel layer alone; divergent, visual-identity domains are simply never composed into a
+spawn.
 
 ---
 
@@ -514,13 +591,13 @@ inactive.
 
 Run at two cadences. Same faculty, different direction.
 
-**Forward (per-task):** Route the task to the right lens(es) and assemble the right domains. Guard
+**Forward (per-task):** Route the task to the right stance and compose the right domains. Guard
 against contamination — is the working context holding domains from another mode?
 
 **Backward (periodic):** Surface signals as proposals for the operator:
 
 1. **Contamination detected** — attention was spent on a domain outside the task's mode. Fix the
-   routing or the declaration.
+   routing or the composition.
 2. **Domain tension → split / fork** — two ratified principles in one domain have conditions that
    partition the same space and give *opposing* advice. Proposal: split the domain (and, if the
    split tracks a role seam, fork the role). Advisory only — the operator judges whether the
@@ -530,8 +607,11 @@ against contamination — is the working context holding domains from another mo
    a partition. The seam is discovered here, from tension — never assumed up front.
 3. **Convergence → explorer** — a domain has stopped changing, corrections rare. Proposal: pair the
    roles that use it with an explorer to prevent calcification.
-4. **Declaration drift** — a role declares a domain it never draws from, or repeatedly reaches for a
-   domain it doesn't declare. Proposal: fix the declaration.
+4. **Composition drift** — a spawn's composed domain-subset consistently excludes a domain the work
+   actually needed, or includes one it never draws from. Proposal: fix the composition (or, if this
+   recurs on the same task shape, propose the pattern as a new or revised alias). Maps directly onto
+   the co-occurrence tally `corpus.py record-gate` maintains (see "Storage: working vs audit") and
+   the handoff's `Surfaced` field.
 5. **Seed promotion candidate** — a project domain principle whose condition makes no reference to
    this project's stack, domain, or specifics, and has held across enough tasks to read as general.
    Surface it as a candidate for promotion to the seed domain of the same name in the skill repo.
@@ -576,12 +656,13 @@ Each domain working file carries `last-retrospective: <date>` at the top to make
 
 ---
 
-## Role lifecycle
+## Domain lifecycle
 
 ```
-spawn (lens + declared seed domains)
+spawn (stance + composed domain subset)
   → accumulate (work + retrospective surface principles; operator ratifies into domains)
-  → [retrospective may propose SPLIT if a domain develops tension, FORK if the split tracks a role seam]
+  → [retrospective may propose SPLIT if a domain develops tension, FORK if the split tracks a
+     project-local seam]
   → converge / lock (domains stabilize, corrections rare)
   → [retrospective proposes pairing with an EXPLORER]
 ```
