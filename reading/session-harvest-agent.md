@@ -22,11 +22,11 @@ harvester finding little is the system working.
 
 ## For each unharvested session (one at a time, fresh context per session)
 
-### 1. Load the lens
+### 1. Compose the stance and domains
 
-Determine the session's apparent subject (coding, UX, visual) and load the matching lens plus its
-declared domains — same routing table as the reading agent (`reading-agent.md`, step 1). Reading
-a transcript through a lens is what turns "the operator said no" into a candidate with a
+Determine the session's apparent subject (coding, UX, visual) and compose the matching stance plus
+domains — same routing table as the reading agent (`reading-agent.md`, step 1). Reading a
+transcript under a stance is what turns "the operator said no" into a candidate with a
 `condition`. Load the domains' working files *including their kill logs* — the dedupe check below
 depends on them.
 

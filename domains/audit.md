@@ -116,6 +116,9 @@ provenance:
     - date: 2026-06-22
       type: generalized
       reason: "Reworded from 'load coder.md' to 'load the coder lens and its declared domains' to match the lens+declaration model introduced in the corpus redesign. No change to the judgment."
+    - date: 2026-07-21
+      type: generalized
+      reason: "Reworded from 'load the coder lens and its declared domains' to 'compose the coder alias' to match v3-redesign-proposal.md's stance+composition model — coder.md no longer exists as a file. No change to the judgment."
 
 - id: design-question-during-coder-session
   domain: orchestrator-routing
@@ -125,6 +128,10 @@ provenance:
 - id: audit-request-means-spawn-designer
   domain: orchestrator-routing
   provenance: "2026-06-13, load calculator audit session — orchestrator implemented operator-listed concerns as code and skipped the designer spawn."
+  history:
+    - date: 2026-07-21
+      type: generalized
+      reason: "Reworded from 'spawn the UI Designer' to 'spawn a ui-design-composed spawn' — ui-designer.md no longer exists as a file. No change to the judgment."
 
 # domain: ratify-gate (split from orchestrator-routing 2026-07-18; see LINEAGE.md, "The ratify-gate split")
 - id: pre-scan-before-spawning
