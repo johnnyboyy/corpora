@@ -322,6 +322,59 @@ class DeferredAndUtilityCommandsTest(CorpusCommandTestCase):
         self.assertEqual(linted.returncode, 0, linted.stderr + linted.stdout)
 
 
+class RecordGateCoOccurrenceAndOriginTest(CorpusCommandTestCase):
+    def write_domain(self, name):
+        (self.root / "corpora" / "domains" / f"{name}.md").write_text(
+            f'# Domain: {name}\n\n```yaml\nprinciples:\n\n- id: p1\n  rule: "R"\n  condition: "C"\n  reason: "Why."\n```\n'
+        )
+
+    def record_gate(self, extra=()):
+        return self.run_command([
+            "record-gate", "--domain", "color", "--ratified", "0", "--killed", "0",
+            "--violations", "0", *extra,
+        ])
+
+    def test_record_gate_tallies_domain_co_occurrence(self):
+        self.write_domain("color")
+        self.write_domain("motion")
+
+        result = self.record_gate(["--co-occurs-with", "motion"])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        audit_text = (self.root / "corpora" / "domains" / "audit.md").read_text()
+        self.assertIn("domains: [color, motion]", audit_text)
+        self.assertIn("count: 1", audit_text)
+
+    def test_record_gate_co_occurrence_accumulates_across_gates(self):
+        self.write_domain("color")
+        self.write_domain("motion")
+
+        for _ in range(2):
+            result = self.record_gate(["--co-occurs-with", "motion"])
+            self.assertEqual(result.returncode, 0, result.stderr)
+
+        audit_text = (self.root / "corpora" / "domains" / "audit.md").read_text()
+        self.assertIn("count: 2", audit_text)
+
+    def test_record_gate_defaults_origin_to_project(self):
+        self.write_domain("color")
+
+        result = self.record_gate()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        audit_text = (self.root / "corpora" / "domains" / "audit.md").read_text()
+        self.assertIn("origin: project", audit_text)
+
+    def test_record_gate_stamps_explicit_origin(self):
+        self.write_domain("color")
+
+        result = self.record_gate(["--origin", "pack"])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        audit_text = (self.root / "corpora" / "domains" / "audit.md").read_text()
+        self.assertIn("origin: pack", audit_text)
+
+
 class AdoptCommandTest(CorpusCommandTestCase):
     def test_adopt_finds_kernel_seed_domain(self):
         result = self.run_command(["adopt", "--domain", "coding-general"])

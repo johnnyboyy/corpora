@@ -97,8 +97,11 @@ class Project:
 #   efficacy:      list of per-principle dicts
 #   library-drift: one dict
 
+ORIGIN_ENUM = {"seed", "pack", "project"}
+
+
 def empty_state() -> dict:
-    return {"counters": [], "efficacy": [], "library-drift": {"since-last-sync": 0}}
+    return {"counters": [], "efficacy": [], "co-occurrence": [], "library-drift": {"since-last-sync": 0}}
 
 
 def parse_state(text: str) -> dict:
@@ -111,7 +114,7 @@ def parse_state(text: str) -> dict:
             continue
         if not line.startswith(" "):
             key = line.rstrip(":")
-            section = key if key in ("counters", "efficacy", "library-drift") else None
+            section = key if key in ("counters", "efficacy", "co-occurrence", "library-drift") else None
             item = None
             continue
         if section is None:
@@ -123,18 +126,23 @@ def parse_state(text: str) -> dict:
             stripped = stripped[2:]
         if ":" in stripped:
             k, _, v = stripped.partition(":")
+            k = k.strip()
             v = v.strip()
-            val = int(v) if re.fullmatch(r"-?\d+", v) else v
+            if k == "domains" and v.startswith("[") and v.endswith("]"):
+                val = [d.strip() for d in v[1:-1].split(",") if d.strip()]
+            else:
+                val = int(v) if re.fullmatch(r"-?\d+", v) else v
             if section == "library-drift":
-                state[section][k.strip()] = val
+                state[section][k] = val
             elif item is not None:
-                item[k.strip()] = val
+                item[k] = val
     return state
 
 
-COUNTER_FIELDS = ["domain", "since", "ratified", "killed", "gate-violations",
+COUNTER_FIELDS = ["domain", "origin", "since", "ratified", "killed", "gate-violations",
                   "working-file-tokens", "baseline-tokens",
                   "principles-at-baseline", "kills-at-baseline"]
+COOCCURRENCE_FIELDS = ["domains", "count"]
 
 
 def count_entries(path: str) -> tuple:
@@ -168,13 +176,23 @@ def render_state(state: dict) -> str:
     for c in state["counters"]:
         prefix = "  - "
         for f in COUNTER_FIELDS:
-            lines.append(f"{prefix}{f}: {c.get(f, 0)}")
+            default = "project" if f == "origin" else 0
+            lines.append(f"{prefix}{f}: {c.get(f, default)}")
             prefix = "    "
     lines.append("efficacy:")
     for e in state["efficacy"]:
         prefix = "  - "
         for f in EFFICACY_FIELDS:
             lines.append(f"{prefix}{f}: {e.get(f, 0)}")
+            prefix = "    "
+    lines.append("co-occurrence:")
+    for pair in state["co-occurrence"]:
+        prefix = "  - "
+        for f in COOCCURRENCE_FIELDS:
+            if f == "domains":
+                lines.append(f"{prefix}domains: [{', '.join(pair.get('domains', []))}]")
+            else:
+                lines.append(f"{prefix}{f}: {pair.get(f, 0)}")
             prefix = "    "
     lines.append("library-drift:")
     lines.append(f"  since-last-sync: {state['library-drift'].get('since-last-sync', 0)}")
@@ -207,16 +225,26 @@ def save(project: Project, state: dict) -> None:
     open(project.audit_path, "w").write(text)
 
 
-def counter_for(state: dict, domain: str, tokens: int, path: str = "") -> dict:
+def counter_for(state: dict, domain: str, tokens: int, path: str = "", origin: str = "project") -> dict:
     for c in state["counters"]:
         if c.get("domain") == domain:
             return c
     p, k = count_entries(path) if path else (0, 0)
-    c = {"domain": domain, "since": today(), "ratified": 0, "killed": 0,
+    c = {"domain": domain, "origin": origin, "since": today(), "ratified": 0, "killed": 0,
          "gate-violations": 0, "working-file-tokens": tokens, "baseline-tokens": tokens,
          "principles-at-baseline": p, "kills-at-baseline": k}
     state["counters"].append(c)
     return c
+
+
+def co_occurrence_for(state: dict, domain_a: str, domain_b: str) -> dict:
+    pair = sorted([domain_a, domain_b])
+    for entry in state["co-occurrence"]:
+        if sorted(entry.get("domains", [])) == pair:
+            return entry
+    entry = {"domains": pair, "count": 0}
+    state["co-occurrence"].append(entry)
+    return entry
 
 
 def efficacy_for(state: dict, pid: str) -> dict:
@@ -287,7 +315,9 @@ def cmd_record_gate(project: Project, args) -> None:
         fail(f"unknown domain '{args.domain}' — have: {', '.join(files) or 'none'}")
     tokens = est_tokens(files[args.domain])
     existed = any(c.get("domain") == args.domain for c in state["counters"])
-    c = counter_for(state, args.domain, tokens, files[args.domain])
+    c = counter_for(state, args.domain, tokens, files[args.domain], origin=args.origin)
+    if args.origin != c.get("origin", "project"):
+        c["origin"] = args.origin
     if not existed:
         # First registration during a gate: the file already contains the entries
         # this gate ratified/killed (write-back precedes record-gate), so exclude
@@ -306,6 +336,8 @@ def cmd_record_gate(project: Project, args) -> None:
         efficacy_for(state, pid)["idle"] += 1
     if args.ui_drift:
         state["library-drift"]["since-last-sync"] = state["library-drift"].get("since-last-sync", 0) + 1
+    for other in _ids(args.co_occurs_with):
+        co_occurrence_for(state, args.domain, other)["count"] += 1
     save(project, state)
     print(f"recorded gate for {args.domain}: +{args.ratified} ratified, +{args.killed} killed, "
           f"+{args.violations} violations, drift={'+1' if args.ui_drift else 'no'}")
@@ -976,6 +1008,10 @@ def main() -> None:
     g.add_argument("--fired", default="", help="comma-separated principle ids")
     g.add_argument("--violated", default="", help="comma-separated principle ids")
     g.add_argument("--idle", default="", help="comma-separated principle ids")
+    g.add_argument("--origin", choices=sorted(ORIGIN_ENUM), default="project",
+                   help="seed | pack | project — stronger than directory-inference alone")
+    g.add_argument("--co-occurs-with", default="",
+                   help="comma-separated domain names loaded alongside --domain in the same spawn")
     sub.add_parser("triggers")
     lh = sub.add_parser("lint-handoff")
     lh.add_argument("file")
