@@ -1,6 +1,6 @@
 ---
 name: corpora:bootstrap
-description: Bootstrap a project's config, UI library, and UX library. Run once, before any feature design work. Works from existing design documentation, brand guidelines, aesthetic references, or from scratch with operator guidance. Outputs corpora/config.md (project shape, commands, and registered utilities), and — via a direct designer sequence or a planner-produced queue, depending on whether a concrete feature accompanied the bootstrap request — corpora/ui-library.md, corpora/ux-library.md, and proposed design principles ratified into the project's design domains. Text-only — no screenshots or image exports (see LINEAGE.md for why).
+description: Bootstrap a project's config, UI library, and UX library. Run once, before any feature design work. Works from existing design documentation, brand guidelines, aesthetic references, or from scratch with operator guidance. Outputs corpora/config.md (project shape, commands, and registered utilities), and — via a direct designer sequence or a planner-produced queue, depending on whether a concrete feature accompanied the bootstrap request — corpora/ui-library.md, corpora/ux-library.md, proposed design principles ratified into the project's design domains, and corpora/screenshots/manifest.md (one canonical screenshot per identified screen, seeding the visual reuse cache). The library documents themselves stay text-only — no screenshots or image exports embedded in ui-library.md or ux-library.md (see LINEAGE.md for why).
 ---
 
 # Project Bootstrap
@@ -265,6 +265,25 @@ an app dashboard, a documentation section vs. a tools section), document each as
 named sub-system with a one-paragraph boundary note describing what's different and
 where to find the canonical reference.
 
+### 9. Screenshot cache seeding
+
+Nothing seeds `corpora/screenshots/manifest.md` today — this is that seed, for newly-bootstrapped
+projects only (backfilling an already-bootstrapped project's cache is a separate follow-on, not
+part of bootstrap). For every screen identified while working through the sections above, use the
+project's browser automation tool to capture one canonical screenshot and register it directly:
+
+```
+corpus.py screenshot-record --screen <id> --variant default \
+  --path <id>/default.png --components <comma-list of components shown>
+```
+
+Save the image under `corpora/screenshots/<id>/default.png` before registering it — `record`
+stamps the manifest but does not itself invoke the browser tool. One canonical shot per screen is
+enough; do not proactively capture variant states (dark mode, error states) unless the bootstrap
+task already needs one. If no browser automation tool is available this session, skip seeding —
+the cache starts empty and grows the normal way, one `screenshot-record` at a time as later
+sessions touch each screen.
+
 ---
 
 ## The config file (`corpora/config.md`)
@@ -459,8 +478,10 @@ convention re-teaches it to every future session.
 ## Proposed principles output
 
 Applies to Phases 2 and 3. End by writing your **handoff artifact** per `kernel.md`, "The handoff
-artifact": the library goes in the `Artifact` section (Phase 2 sets `ui-drift: yes` — it defines
-the rendered visual system; Phase 3 documents experience and does not);
+artifact": the library goes in the `Artifact` section (Phase 2's own `screenshot-record` calls
+already registered every identified screen as current during the session, so its handoff leaves
+`ui-drift.screens`/`.components` empty — there is nothing left for the gate's invalidation step to
+do; Phase 3 documents experience and touches neither field either);
 foundational design decisions go in the envelope's `proposals` field with `kind` set from the
 inside. Expect a mix: seed *principles* (weighable rules — `kind: judgment`) and *directions*
 (identity choices the gate files into the library itself rather than a domain — `kind:
