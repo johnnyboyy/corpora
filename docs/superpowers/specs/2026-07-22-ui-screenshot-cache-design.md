@@ -17,7 +17,11 @@ is no current blanket-recapture behavior anywhere in the system to remove.
 ## Goals
 
 - Give any `ui-design`-composed spawn full-app visual awareness (every screen) without redundant
-  capture — read the cache, only recapture what's actually stale.
+  capture — read the cache, only recapture what's actually stale. "Awareness" means the manifest's
+  screen list + `components:` tags (cheap text), not viewing every cached image — an actual PNG
+  is only loaded into context for a specific reuse-lookup hit or the existing aesthetic-quality
+  exception. Otherwise this just moves the token cost `LINEAGE.md` already rejected from
+  capture-time to read-time.
 - Support reuse discovery: given a component name, find every screen that already shows it.
 - Keep the cache accurate under two kinds of change: a screen's own content changing, and a
   shared component changing in a way that ripples to every screen that uses it.
@@ -51,8 +55,9 @@ corpora/screenshots/
 
 One canonical screenshot per screen by default (comprehensive across *screens*, not proactively
 comprehensive across *variants*). `manifest.md` is the single source of truth for what's cached,
-its component tags, and its freshness — read once at the start of `ui-design` work for full-app
-awareness, instead of a blanket live-capture pass.
+its component tags, and its freshness — its text (screen ids + `components:` tags) is read once
+at the start of `ui-design` work for full-app awareness, instead of a blanket live-capture pass.
+Loading an actual image happens separately and only on demand (see Goals).
 
 ## Manifest schema
 
@@ -120,8 +125,11 @@ requires a spawn to know the full set of screens a component appears on.
 
 **Known limitation, accepted:** this only catches ripples for components already tagged on the
 screens that use them. A screen not recaptured since a component was added to it won't be in the
-tag index yet, so a ripple to it would be missed. Since recapture is immediate (not batched), this
-should stay accurate in practice, but it's not a hard guarantee.
+tag index yet, so a ripple to it would be missed. `ui-drift.components` is also, in practice,
+populated reliably only by `ui-design`-composed spawns — a coder-only session's `ui-drift.screens`
+still correctly flags the screen it directly touched, but has no equivalent duty to name a shared
+component. Accepted as-is, not solved further here; full reasoning belongs in a future consolidated
+LINEAGE.md entry, not this spec.
 
 ## Recapture: mechanism and cadence
 
@@ -132,31 +140,58 @@ spawn iterating on a screen across several rounds only reports its final touched
 once, at the end, exactly like every other handoff field.
 
 Recapture itself is a **mechanical step in the existing ratify-gate procedure**, run by the
-orchestrator directly via the project's registered browser automation tool — not a spawned role.
-It requires no design judgment (just "go look at the current rendered state and save it"), so it
-fits the same pattern as the orchestrator already running `corpus.py verify`/`lint-handoff`
-without spawning anything for those. This also sidesteps the concern that text-library sync has
-(needing a fresh session because re-deriving *why* something changed takes context) — a
-screenshot capture needs no reasoning carried over, so the orchestrator can do it inline right
-after processing the handoff.
+orchestrator directly via the project's browser automation tool (discovered from the current
+runtime, same as other environment-owned capabilities — never a `corpora/config.md` field) — not a
+spawned role. It requires no design judgment (just "go look at the current rendered state and save
+it"), so it fits the same pattern as the orchestrator already running `corpus.py
+verify`/`lint-handoff` without spawning anything for those. This also sidesteps the concern that
+text-library sync has (needing a fresh session because re-deriving *why* something changed takes
+context) — a screenshot capture needs no reasoning carried over, so the orchestrator can do it
+inline right after processing the handoff.
+
+If no browser automation tool is available in the current runtime, the gate does not block:
+`screenshot-mark-stale` still records the screen as stale, and capture is simply deferred until a
+session with the tool processes it.
+
+**Domain grounding (new):** `orchestrator-routing.md` gains a principle stating explicitly that
+operating the project's browser automation tool for mechanical screenshot capture — recording
+current rendered state, no design judgment involved — is in-scope orchestrator work, distinct from
+the design/code judgment that triggers `stop-and-route`. Without this, "the orchestrator does
+recapture directly" was asserted by analogy to running `corpus.py`, which a fresh-context review
+found to be a weaker fit than presented (script invocation has zero interpretation; navigating to
+the correct rendered state involves some procedural judgment). Exact principle wording finalized
+at implementation time, written into `orchestrator-routing.md` through the same ratify path any
+other domain content goes through.
 
 ## `corpus.py` additions
 
-New subcommands, following the existing ledger pattern (`utility-candidates`/`deferred`):
+New subcommands, following the existing ledger pattern (`utility-candidates`/`deferred`). The
+manifest's `screens: [{..., variants: [{...}]}]` shape is two levels of nested lists — model its
+parser on `parse_utility_candidates` (which already hand-rolls this depth for
+`candidates: [{..., evidence: [{...}]}]`), **not** the flat, single-level `parse_state` used for
+the audit-file counters block; `parse_state` cannot represent this nesting.
 
 - `screenshot-record --screen <id> --variant <label> --path <file> --components <comma-list>` —
   registers/updates a captured variant, stamps `captured:` date, sets `status: current`, updates
   the screen's `components:` tags.
 - `screenshot-mark-stale --screens <comma-list> --components <comma-list>` — the invalidation step
   above; called at gate time from the handoff's `ui-drift` fields. Read-modify-write against
-  `manifest.md`'s script-owned block.
-- `screenshot-status` — lists current/stale/missing screens, for orchestrator visibility (mirrors
-  `utility-candidates`/`deferred`).
+  `manifest.md`'s script-owned block. Prints which screens it invalidated, matching `record-gate`'s
+  print-what-happened convention.
+- `screenshot-status` — lists current/stale screens, for orchestrator visibility (mirrors
+  `utility-candidates`/`deferred`). No "missing" category — a screen not yet in the manifest isn't
+  tracked at all; coverage grows organically as screens get captured, same as variants.
 - `screenshot-lookup --component <name>` — the reuse-discovery query: which screens already show
   this component, and where their images live.
 - `lint-screenshots` — validates `manifest.md` structurally (every variant has a `path` that
   exists on disk, every screen has a `captured` date, no orphaned image files absent from the
   manifest), mirroring `lint-deferred`/`lint-utility-candidates`.
+
+**Existing command that also needs updating:** `cmd_lint_handoff`'s current `ui-drift` check
+(`scripts/corpus.py`, ~line 395) validates against the literal set `{"yes", "no"}` via a
+single-line-field regex. Against the new nested `{screens:, components:}` shape that regex
+captures nothing, so the check silently no-ops instead of failing loudly — this must be rewritten
+to validate the new structure (both fields present, both lists), not left as dead validation code.
 
 All of these get unit tests in `tests/test_corpus.py`, same TDD pattern as the rest of the file —
 tests added alongside the mechanism, not after.
@@ -177,16 +212,19 @@ specification remains the default source of truth for exact values." Exact wordi
 implementation time; the substance is "reading cached images is normal now, live capture stays
 the exception."
 
-## Bootstrap and existing-project seeding
+## Bootstrap seeding (in scope) vs. existing-project backfill (out of scope)
 
-Nothing today seeds this cache — `bootstrap.md` has no existing blanket-screenshot step to repurpose.
+Nothing today seeds this cache — `bootstrap.md` has no existing blanket-screenshot step to
+repurpose. **In scope for this plan:** Phase 2 (`ui-design` bootstrap) gains an explicit step —
+while establishing `ui-library.md`, capture one canonical screenshot per identified screen and
+register each via `corpus.py screenshot-record`, seeding `manifest.md` alongside the library. This
+only benefits newly-bootstrapped projects going forward.
 
-- **New projects:** Phase 2 (`ui-design` bootstrap) gains an explicit step: while establishing
-  `ui-library.md`, capture one canonical screenshot per identified screen and register each via
-  `corpus.py screenshot-record`, seeding `manifest.md` alongside the library.
-- **Already-bootstrapped projects (FAMOUS today; Blog/Meridian once they're on v3):** a one-time
-  backfill pass — capture every screen currently documented in `ui-library.md`'s structure once,
-  register them, done outside the normal gate flow since there's no handoff driving it.
+**Explicitly out of scope, separate follow-on:** backfilling the cache for already-bootstrapped
+projects (FAMOUS today; Blog/Meridian once they're on v3) — a one-time pass capturing every screen
+`ui-library.md` currently documents, done outside the normal gate flow since no handoff drives it.
+Tracked separately, same as FAMOUS's own v3 upgrade was kept separate from the kernel-level v3
+work.
 
 ## Testing
 
@@ -200,6 +238,9 @@ Nothing today seeds this cache — `bootstrap.md` has no existing blanket-screen
 
 - Exact reworded text for `documentation-before-screenshots` (substance agreed above, wording not
   finalized).
-- Whether `screenshot-mark-stale` should also print which screens it invalidated (for gate
-  visibility) — likely yes, matching `record-gate`'s existing print-what-happened convention, but
-  not load-bearing to the design.
+- Exact wording of the new `orchestrator-routing.md` principle grounding browser-automation-driven
+  recapture (substance agreed above, wording not finalized).
+- Note for the eventual LINEAGE.md entry (bundled with the v3 entry, written after all review
+  findings across this and any other pending design are resolved, not per-finding): the
+  ui-drift.components ownership gap (coder-only sessions don't populate it) was found and accepted
+  as a bounded limitation, not solved.
