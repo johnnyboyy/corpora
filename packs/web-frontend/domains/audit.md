@@ -448,6 +448,9 @@ provenance:
     - date: 2026-06-22
       type: consolidated
       reason: "This principle existed byte-for-byte identical in BOTH the ui-designer and ux-designer seed corpora — the clearest instance of the container problem the redesign targets: shared judgment stored twice because the role was the container. Merged into a single entry in the design-method domain, which both designer lenses declare."
+    - date: 2026-07-22
+      type: reworded
+      reason: "UI screenshot cache design (docs/superpowers/specs/2026-07-22-ui-screenshot-cache-design.md) introduced a persistent visual cache read separately from live capture. The original wording only distinguished 'documentation' from 'screenshots' and could not express that reading the cache is now free while live capture stays the guarded exception — reworded to name the cache explicitly and split the two costs it previously conflated."
 
 - id: progressive-disclosure-for-primary-advanced-split
   domain: design-method

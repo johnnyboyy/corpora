@@ -27,9 +27,9 @@ principles:
   reason: "Undocumented sub-systems let future design work accidentally import the wrong conventions. But over-documenting self-contained surfaces creates a second source of truth that drifts from the code."
 
 - id: documentation-before-screenshots
-  rule: "Use the browser automation tool for screenshots only when the design system documentation does not answer the specific question. Documentation is the default; screenshots are the exception."
+  rule: "Consult the screenshot cache (`corpora/screenshots/manifest.md`) freely for orientation and reuse-discovery — reading it costs nothing new. Reach for the browser automation tool for a fresh capture only when the cache is missing or stale for a screen you need, or to verify aesthetic quality the text documentation can't fully characterize. Documented specification remains the default source of truth for exact values."
   condition: "Any time visual information about the current product is needed during a design task."
-  reason: "Screenshots are expensive and show a snapshot, not documented intent. The design system documentation is authoritative and answers most questions about what already exists."
+  reason: "Reading cached images is normal now — the cache already paid its capture cost at handoff time, so re-reading it is free. Live capture stays the exception: it still repeats the token cost the design system documentation exists to avoid, and shows a snapshot rather than documented intent."
 
 - id: progressive-disclosure-for-primary-advanced-split
   rule: "Use progressive disclosure — hiding secondary options behind a reveal mechanism — when there is a clear usage split between what most users need (primary tasks, essential fields) and what a smaller subset needs (advanced options, edge-case settings). Do not use it when all options are needed with similar frequency or when users cannot predict that hidden content exists."
