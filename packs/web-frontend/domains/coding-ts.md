@@ -3,8 +3,25 @@
 Framework-agnostic JS/TS code patterns — language and module-system judgment that holds regardless
 of which UI framework the project uses. Named for TypeScript rather than JS: TypeScript is this
 pack's default language, even where a given principle's underlying fact would also hold in plain
-JS. Declared by the coder lens when `role-pack: web-frontend`. Audit metadata lives in
+JS. Loaded by any convergent coding spawn when `role-pack: web-frontend`. Audit metadata lives in
 `packs/web-frontend/domains/audit.md`, loaded only at ratify/retrospective time.
+
+Settled JS/TS style, folded here from the audit layer's retired `promoted:` section
+(v3-redesign-proposal.md, 2026-07-21) rather than kept as a separate authority tier — both are JS
+instances of the base `coding-general` meta-rules, near-unconditional enough that per-case
+condition-weighing is friction without benefit:
+
+- **Block arrow bodies always** (`() => { return value; }`) — `{}` after an arrow is a function
+  body, not a value; the concise form has a silent failure mode and forces a per-function judgment
+  call.
+- **No early returns or guard clauses** — use if/else block bodies. Indentation should encode the
+  conditions under which each line runs: an early return lets a line that needs two conditions to
+  be true sit at the function's base indentation as if it needs nothing, while if/else puts it
+  where it belongs. A flat row of guards whose order doesn't matter is not a case for keeping
+  them; it is a signal to extract and name the combined condition
+  (`const error = validateRequest(req)`), after which if/else costs nothing. Scoped to this pack
+  because some ecosystems (e.g. Go) idiomatically prefer guard clauses — the reasoning itself is
+  general.
 
 ```yaml
 last-retrospective: 2026-07-18

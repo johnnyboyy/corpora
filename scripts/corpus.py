@@ -831,7 +831,10 @@ def parse_audit_entries(audit_path: str) -> dict:
 
     Extracts only top-level (2-space-indented) scalar fields per entry — id, domain, killed,
     graduated. Nested `history:` sub-blocks (4-space indented) are deliberately not parsed; this
-    reads just enough structure for kill-age accounting, not a general YAML parser.
+    reads just enough structure for kill-age accounting, not a general YAML parser. The
+    `provenance:` list runs to end of file — there is no `promoted:` section to bound it against
+    (retired per v3-redesign-proposal.md; formerly-promoted principles now live as preamble prose
+    in their domain's working file instead of a separate audit-file tier).
     """
     entries = {}
     current = None
@@ -841,10 +844,6 @@ def parse_audit_entries(audit_path: str) -> dict:
         stripped = line.strip()
         if re.fullmatch(r"provenance:", stripped):
             in_provenance = True
-            continue
-        if re.fullmatch(r"promoted:", stripped):
-            in_provenance = False
-            current = None
             continue
         if not in_provenance:
             continue
@@ -931,8 +930,6 @@ def annotate_graduated(audit_path: str, kill_id: str) -> bool:
         stripped = line.strip()
         if re.fullmatch(r"provenance:", stripped):
             in_provenance = True
-        if re.fullmatch(r"promoted:", stripped):
-            in_provenance = False
         if in_provenance:
             m = re.match(r"-\s*id:\s*(\S+)", stripped)
             if m:

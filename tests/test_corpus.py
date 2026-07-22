@@ -400,6 +400,7 @@ class KillGraduationTest(unittest.TestCase):
         )
 
     def write_audit(self, entries):
+        # No `promoted:` section — retired per v3-redesign-proposal.md. provenance: runs to EOF.
         lines = ["# Audit", "", "```yaml", "provenance:", ""]
         for kid, fields in entries.items():
             lines.append(f"- id: {kid}")
@@ -408,7 +409,7 @@ class KillGraduationTest(unittest.TestCase):
             for key, value in fields.items():
                 lines.append(f"  {key}: {value}")
             lines.append("")
-        lines += ["promoted:", "```", ""]
+        lines += ["```", ""]
         self.audit_path.write_text("\n".join(lines))
 
     def run_command(self, command):
@@ -499,6 +500,24 @@ class KillGraduationTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 2)
         self.assertIn("already graduated", result.stderr)
+
+    def test_parses_last_entry_with_no_promoted_marker(self):
+        # promoted: retired as a section boundary; provenance: now runs to EOF. An entry that
+        # would previously have sat right where a `promoted:` marker used to go must still parse.
+        self.write_domain(["first-kill", "last-kill"])
+        self.write_audit({
+            "first-kill": {"killed": self.old_date},
+            "last-kill": {"killed": self.old_date},
+        })
+
+        result = self.run_command([
+            "kill-report", "--domains-dir", str(self.domains_dir), "--audit", str(self.audit_path),
+            "--min-age-days", "90",
+        ])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("'first-kill' killed", result.stdout)
+        self.assertIn("'last-kill' killed", result.stdout)
 
 
 if __name__ == "__main__":

@@ -173,36 +173,51 @@ provenance:
   provenance: "No provenance was ever recorded for this principle — same pre-existing gap as open-questions-are-explicit, backfilled here rather than left orphaned."
   killed: 2026-07-18
 
-promoted:
-
-# domain: coding-general
 - id: no-re-export-from-peer-module
   domain: coding-general
-  promoted_to: coder lens — "General conventions" section (one-liner convention bullet)
   provenance: "Promoted 2026-07-06 from both Blog and FAMOUS project coding-general domains (Blog: 2026-06-28, hiragana quiz reviewer; FAMOUS: 2026-07-01, cross-project review). Two-project exposure via cross-project review. Promoted directly to lens convention — rule is near-unconditional (barrel exception is short enough to state inline) and needs no condition-weighing."
+  history:
+    - date: 2026-07-21
+      type: folded-to-preamble
+      reason: "promoted: retired per v3-redesign-proposal.md; substance moved into coding-general's own preamble."
 
 - id: explicit-by-default
   domain: coding-general
-  promoted_to: coder lens — "General conventions" section
   provenance: "Blog project, 'Explicit by Default' post (content/posts/coding/explicit-by-default.mdx). The umbrella the operator's individual coding rules turned out to be instances of — named by Claude Code while it was taught the rules alongside their whys. The realization that the whys mattered more than the rules is what seeded this corpora system. Held as a PEER of prefer-error-exposing-form, not its parent: whether one subsumes the other is a question for a future retrospective to surface from evidence, not a top-down call."
+  history:
+    - date: 2026-07-21
+      type: folded-to-preamble
+      reason: "promoted: retired per v3-redesign-proposal.md; substance moved into coding-general's own preamble."
 
 - id: prefer-error-exposing-form
   domain: coding-general
-  promoted_to: coder lens — "General conventions" section
   provenance: "2026-06-19, Blog project. JSLint/Crockford analysis. A peer of explicit-by-default; its concrete instances live in pack overlays."
+  history:
+    - date: 2026-07-21
+      type: folded-to-preamble
+      reason: "promoted: retired per v3-redesign-proposal.md; substance moved into coding-general's own preamble."
 
 - id: deletion-over-addition
   domain: coding-general
-  promoted_to: coder lens — "What you do" section (prefer smaller net addition)
   provenance: "2026-06-17, Blog project retrospective."
+  history:
+    - date: 2026-07-21
+      type: folded-to-preamble
+      reason: "promoted: retired per v3-redesign-proposal.md; substance moved into coding-general's own preamble."
 
 - id: yagni-gate-before-implementing
   domain: coding-general
-  promoted_to: coder lens — "What you do" section (ask whether it needs to exist, stdlib, installed dep)
   provenance: "2026-06-17, Blog project retrospective."
+  history:
+    - date: 2026-07-21
+      type: folded-to-preamble
+      reason: "promoted: retired per v3-redesign-proposal.md; substance moved into coding-general's own preamble."
 
 - id: verify-build-not-just-lint
   domain: coding-general
-  promoted_to: coder lens — "What you do" section (run the project's verification commands before finishing)
   provenance: "2026-06-17, Blog project retrospective."
+  history:
+    - date: 2026-07-21
+      type: folded-to-preamble
+      reason: "promoted: retired per v3-redesign-proposal.md; substance moved into coding-general's own preamble."
 ```

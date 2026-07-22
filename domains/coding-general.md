@@ -1,7 +1,33 @@
 # Domain: coding-general
 
-Stack-agnostic coding judgment — applies in any language or framework. Declared by the **coder**
-lens (always). Audit metadata lives in `domains/audit.md`, loaded only at ratify/retrospective time.
+Stack-agnostic coding judgment — applies in any language or framework, loaded by any
+convergent coding spawn (always). Audit metadata lives in `domains/audit.md`, loaded only at
+ratify/retrospective time.
+
+Foundational, stable across every project shape this domain serves — folded here from the
+audit layer's retired `promoted:` section (v3-redesign-proposal.md, 2026-07-21) rather than kept
+as a separate authority tier:
+
+- **Explicit by Default** and **prefer the error-exposing form** are peer meta-conventions, both
+  extending Crockford's heuristic ("if a feature is sometimes useful and sometimes dangerous and
+  there is a better option, always use the better option"). Explicit by Default: don't make the
+  reader reconstruct something you could have just stated — every shortcut bills a Reader Tax to
+  whoever reads the code next. Error-exposing form: when two forms produce the same result but one
+  has a silent failure mode, choose the form that exposes the error, even at the cost of verbosity.
+  They overlap but neither subsumes the other — a verbose variable name satisfies Explicit by
+  Default without touching error exposure; strict equality over loose equality is error-exposing
+  without improving semantic recovery. When they conflict, error-exposing form wins: a silent
+  failure leaves no signal anything went wrong, while a reader who has to reconstruct intent can at
+  least see that something needs reconstructing.
+- **No peer re-exports** — import from the authoritative module, not a peer that happens to
+  re-export it. Barrel index files that explicitly aggregate a public surface are the only
+  exception. Near-unconditional; needs no per-case condition-weighing.
+- Keep scope tight: implement what was asked, nothing more. Before adding any new function, type,
+  or abstraction, ask whether it needs to exist at all, whether the standard library covers it, and
+  whether an already-installed dependency covers it — stop at the first rung that holds. When a
+  task fits multiple framings, prefer the one with the smaller net addition; deletion is progress.
+- Run the project's verification commands (lint, type-check, build — whatever `corpora/config.md`
+  actually declares) before finishing.
 
 ```yaml
 last-retrospective: 2026-06-20
