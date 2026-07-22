@@ -259,6 +259,16 @@ suggestion: documentation work against the rendered state, run as a `ui-design`-
 stale library silently re-teaches retired decisions; discarded experimental work never reaches a
 gate, so exploration never triggers a sync.
 
+**Screenshot cache upkeep:** right after processing a handoff whose `ui-drift.screens` or
+`.components` is non-empty, run `corpus.py screenshot-mark-stale --screens <ids> --components
+<names>` — it expands `.components` into every screen the manifest's own tags already show it on,
+so a spawn never has to enumerate the ripple itself. For each screen the command reports as
+invalidated, recapture immediately using the project's browser automation tool and register the
+result with `corpus.py screenshot-record`, still inline in the same gate pass — this needs no
+design judgment (`screenshot-recapture-is-orchestrator-mechanical`), so it never spawns a role. If
+no browser automation tool is available this session, leave the invalidated screens marked stale;
+capture is deferred until a session with the tool processes them.
+
 ## What you don't do
 
 - Make visual, UX, or code-level decisions inline.

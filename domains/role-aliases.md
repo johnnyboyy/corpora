@@ -63,5 +63,6 @@ aliases:
       values, no CSS class names, no component names; implementation is not this composition's
       concern. Most proposals from this composition are `kind: direction` (the gate files these
       into the UI library, not a domain) — a divergent spawn's output is an identity choice, not a
-      weighable rule; set `ui-drift: yes` when the spec changes the rendered visual system.
+      weighable rule; name every screen this spec changes in `ui-drift.screens` and every shared
+      component it changes in `ui-drift.components`.
 ```
