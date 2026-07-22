@@ -46,11 +46,11 @@ class CorpusCommandTestCase(unittest.TestCase):
         )
 
     @staticmethod
-    def entry(identifier="empty-state", role="ux-designer", status="queued", blocking="no"):
+    def entry(identifier="empty-state", stance="convergent", status="queued", blocking="no"):
         return f"""
         decisions:
           - id: {identifier}
-            role: {role}
+            stance: {stance}
             domain: validation-feedback
             question: "Should empty results offer a reset action?"
             context: "Search results workstream."
@@ -114,12 +114,12 @@ class DeferredAndUtilityCommandsTest(CorpusCommandTestCase):
         result = self.run_command("lint-deferred")
 
         self.assertEqual(result.returncode, 1)
-        self.assertIn("missing role", result.stdout)
+        self.assertIn("missing stance", result.stdout)
         self.assertIn("missing provisional-treatment", result.stdout)
 
-    def test_invalid_role_status_and_date_fail(self):
+    def test_invalid_stance_status_and_date_fail(self):
         self.write_config()
-        entry = self.entry(role="coder", status="waiting").replace(
+        entry = self.entry(stance="sideways", status="waiting").replace(
             "created: 2026-07-14", "created: today"
         )
         self.write_queue(entry)
@@ -127,7 +127,7 @@ class DeferredAndUtilityCommandsTest(CorpusCommandTestCase):
         result = self.run_command("lint-deferred")
 
         self.assertEqual(result.returncode, 1)
-        self.assertIn("role must be", result.stdout)
+        self.assertIn("stance must be", result.stdout)
         self.assertIn("status must be", result.stdout)
         self.assertIn("created must be YYYY-MM-DD", result.stdout)
 
@@ -151,19 +151,19 @@ class DeferredAndUtilityCommandsTest(CorpusCommandTestCase):
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
         self.assertIn("resolved entries should be removed", result.stdout)
 
-    def test_deferred_groups_active_items_by_role(self):
+    def test_deferred_groups_active_items_by_stance(self):
         self.write_config()
         ux = textwrap.dedent(self.entry(identifier="ux-choice")).strip()
         ui_item = textwrap.dedent(
-            self.entry(identifier="ui-choice", role="ui-designer")
+            self.entry(identifier="ui-choice", stance="divergent")
         ).strip().removeprefix("decisions:\n")
         self.write_queue(ux + "\n" + ui_item)
 
         result = self.run_command("deferred")
 
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
-        self.assertIn("ui-designer (1)", result.stdout)
-        self.assertIn("ux-designer (1)", result.stdout)
+        self.assertIn("divergent (1)", result.stdout)
+        self.assertIn("convergent (1)", result.stdout)
         self.assertIn("ui-choice", result.stdout)
         self.assertIn("ux-choice", result.stdout)
 

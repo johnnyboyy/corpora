@@ -50,7 +50,7 @@ SYNC_DRIFT = 3
 
 STATUS_ENUM = {"complete", "tradeoffs-pending", "questions-pending", "blocked"}
 KIND_ENUM = {"judgment", "knowledge", "direction"}
-DEFERRED_ROLE_ENUM = {"ui-designer", "ux-designer"}
+DEFERRED_STANCE_ENUM = {"convergent", "divergent"}
 DEFERRED_STATUS_ENUM = {"queued", "resolved"}
 UTILITY_STATUS_ENUM = {"open", "deferred", "denied", "accepted", "implemented"}
 UTILITY_STATUS_REQUIRES_REASON = {"deferred", "denied"}
@@ -432,7 +432,7 @@ def parse_deferred(path: str) -> list:
 
 
 def deferred_problems(entries: list) -> list:
-    required = ("id", "role", "domain", "question", "context", "source-workstream",
+    required = ("id", "stance", "domain", "question", "context", "source-workstream",
                 "created", "blocking", "provisional-treatment", "status")
     problems = []
     seen = set()
@@ -444,8 +444,8 @@ def deferred_problems(entries: list) -> list:
         if entry.get("id") in seen:
             problems.append(f"{label}: duplicate id")
         seen.add(entry.get("id"))
-        if entry.get("role") not in DEFERRED_ROLE_ENUM:
-            problems.append(f"{label}: role must be one of {sorted(DEFERRED_ROLE_ENUM)}")
+        if entry.get("stance") not in DEFERRED_STANCE_ENUM:
+            problems.append(f"{label}: stance must be one of {sorted(DEFERRED_STANCE_ENUM)}")
         if entry.get("status") not in DEFERRED_STATUS_ENUM:
             problems.append(f"{label}: status must be one of {sorted(DEFERRED_STATUS_ENUM)}")
         if entry.get("blocking") != "no":
@@ -491,11 +491,11 @@ def cmd_deferred(project: Project, _args) -> None:
         print("deferred decision queue: empty")
         return
     print("deferred non-blocking decisions:")
-    for role in sorted(DEFERRED_ROLE_ENUM):
-        owned = [entry for entry in queued if entry["role"] == role]
+    for stance in sorted(DEFERRED_STANCE_ENUM):
+        owned = [entry for entry in queued if entry["stance"] == stance]
         if not owned:
             continue
-        print(f"  {role} ({len(owned)}):")
+        print(f"  {stance} ({len(owned)}):")
         for entry in owned:
             print(f"    - {entry['id']}  domain={entry['domain']}  workstream={entry['source-workstream']}")
             print(f"      {entry['question']}")
