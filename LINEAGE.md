@@ -1310,14 +1310,16 @@ its original words since LINEAGE is historical record, not living spec.
 
 ---
 
-## 2026-07-22 — v3 phases 4/5 close out; planner collapses into the alias model
+## 2026-07-22 — v3 close-out: planner→alias, role-pack retired, lenses renamed, handoff dedup
 
-A full end-to-end dry run of the pipeline (bootstrap → planner → parallel ux-design/coder →
-ui-design → coder) on a throwaway project surfaced a punch list, worked through in order:
-mechanical fixes, then tooling, then the architecture question the exercise's own reasoning
-raised, then prompt-content polish. The working punch list (`docs/known-issues-from-pokemon-
-exercise.md`) and `v3-redesign-proposal.md` are both removed now that every item is done; this
-entry is the retained record.
+One day, one continuous thread: a full end-to-end dry run of the pipeline (bootstrap → planner →
+parallel ux-design/coder → ui-design → coder) on a throwaway project surfaced a punch list, worked
+through in order (mechanical fixes, then tooling, then the architecture question the exercise's own
+reasoning raised, then prompt-content polish); each fix then prompted the operator to ask the next
+sharper question, through role-pack retirement, the bootstrap-ui/bootstrap-ux split, the
+role→lens/spawn vocabulary sweep, and finally the handoff artifact's own double-generation gap. The
+working punch list (`docs/known-issues-from-pokemon-exercise.md`) and `v3-redesign-proposal.md` are
+both removed now that every item is done; this entry is the retained record for the whole day.
 
 **Mechanical (v3 phase 5's cleanup, finished):** `lint-handoff` validated a retired `role:`
 frontmatter field years after the schema moved to `stance:`/`composition:` — every handoff this
@@ -1393,3 +1395,115 @@ spawns — was investigated and not applied: Anthropic's cache keys off explicit
 breakpoints placed by whatever turns assembled prompt text into an API call, and nothing on the
 Agent-tool surface used here exposes control over where that breakpoint lands, so reordering prose
 alone has no confirmed mechanism to produce a win.
+
+**Role-pack retired.** `role-pack: web-frontend` was a project-config field that gated a whole
+stack's domains behind one coarse flag, all-or-nothing. Every domain it gated already stated its
+own real load condition in prose (`coding-nextjs` already said "when `framework: nextjs`," not
+"when `role-pack: web-frontend`") — the field added an indirection over conditions that already
+existed, the same container shape the fixed-role collapse had already removed one layer up.
+Operator: "the role-pack idea has become obsolete... it can be flat domains and lenses going
+forward." `packs/web-frontend/domains/*.md` merged into the flat `domains/`; each stack-specific
+domain's preamble now names its real condition directly (`css` loads when `styling` is not `none`,
+`coding-react` when `framework` is React-based, etc.); `corpus.py`'s `seed_domain_path` dropped its
+pack-fallback lookup entirely; `ORIGIN_ENUM` dropped `pack` (seed/project only, since there's no
+longer a structurally distinct pack layer to have originated from). `config.md`'s `role-pack:`
+field retired from the schema.
+
+**bootstrap-ui / bootstrap-ux.** Prompted by: "what domains are needed for the bootstrapping
+process? If there's a convergent/divergent seam, then possibly two lenses." First pass at this
+question wrongly checked "does this composition already match an existing alias" and concluded no
+new lens was warranted, since `bootstrap.md` Phase 2/3 already borrowed `ui-design`/`ux-design`
+wholesale. Operator correction: that's backwards — ask what the task itself needs first, compare to
+existing aliases second. Redone domain-first: Phase 2 (founding `ui-library.md`) draws on much less
+than `ui-design`'s full composition — `validation-feedback`, `recoverability`, `lists-selection`,
+and `forms-inputs` are all about the behavior of a specific, already-built component, and nothing
+concrete exists yet on a from-scratch pass for those to attach to. Phase 3 (founding
+`ux-library.md`) narrows less — it drops only `wizards-flows` and `ranking-evaluation` (both
+narrow, specific-tool-shape domains), because documenting general *conventions* (state/feedback
+patterns, recoverability conventions) is decidable in the abstract before a concrete screen exists,
+unlike Phase 2's visual specifics. That asymmetry between how much each phase narrows — not the
+same domain set wearing two stances — is the actual finding. Seeded as two new aliases:
+`bootstrap-ui` (divergent: `color`, `surfaces-elevation`, `visual-hierarchy`, `motion`,
+`design-method`, `spawn-integrity`, `interviewing`) and `bootstrap-ux` (convergent:
+`recoverability`, `validation-feedback`, `lists-selection`, `forms-inputs`, `design-method`,
+`spawn-integrity`, `interviewing` — `forms-inputs` kept in deliberately even though marginal,
+operator's call, rather than pre-emptively split out before real tension earns the split).
+`bootstrap.md` and `SKILL.md` now name these instead of borrowing `ui-design`/`ux-design`
+wholesale; `ux-design`'s alias notes lost the "if the library doesn't exist yet, this spawn is in
+bootstrap" carve-out, since that's `bootstrap-ux`'s job now.
+
+**The general principle, not just this instance.** Operator: composable lenses should be
+*expected* to run narrower than a general-purpose one covering the same territory — narrowness
+isn't a special case needing justification each time a narrow alias is added, it's the normal shape
+a task-specific composition takes once checked against what the task actually exercises. The broad
+lens (`ui-design`/`ux-design`) exists as the catch-all for whatever a narrower, more specific lens
+doesn't cover — and if on-demand lens composition (naming an ad hoc domain subset per task, rather
+than always reaching for a named alias) becomes the normal way of working, that catch-all case may
+rarely if ever actually fire, since most tasks would get their own honestly-scoped composition
+directly rather than falling back to the broad one. Operator guidance: don't restate "why this
+alias is narrower than that one" reasoning in `role-aliases.md`'s `notes:` field going forward —
+that field is task-mechanics only (what to read, what to produce), explicitly non-normative; the
+reasoning for a structural choice like a domain-subset belongs here, in LINEAGE, not there.
+
+**`role-aliases.md` renamed to `lenses.md`; "role" swept from the working vocabulary.** Operator:
+"are lenses first-class right now? Is the orchestrator still thinking in terms of roles?" Checked
+directly rather than guessed: `orchestrator-routing.md`,
+`ratify-gate.md`, and `planning.md` — the three domains the orchestrator and planner actually read
+every session — were saturated with "the role," "role agent," "designer role," "role ownership,"
+"cross-role." Worse than cosmetic: `ratify-gate.md`'s `spawn-token-summary` principle, live and
+loaded on every isolated spawn, had `condition: "Every new isolated role agent (UI Designer, UX
+Designer, Coder)."` — the literal retired fixed-role names, capitalized as proper nouns, sitting in
+ratified corpus content years after the architecture moved past them. The architecture had changed;
+the vocabulary the orchestrator actually reasons in, every routing decision, never did.
+
+**What changed.** `domains/role-aliases.md` → `domains/lenses.md`; its top-level YAML key `aliases:`
+→ `lenses:`; header reworded to define a lens directly rather than as an afterthought to "alias."
+Swept "role" → "spawn" (the executing agent) or "lens"/"composition" (the domain-subset+stance) for
+its actual sense, principle by principle, across `orchestrator-routing.md`, `ratify-gate.md`,
+`planning.md`, `interviewing.md`, `spawn-integrity.md`, `kernel.md`, `SKILL.md`, `bootstrap.md`,
+`README.md`, `lenses.md` itself, `scripts/corpus.py`'s help text, and the `reading/` pipeline docs —
+including the `UI Designer, UX Designer, Coder` regression, replaced with `Every new isolated
+spawn`, no composition named, since the principle is meant to apply to all of them. Also caught in
+the same pass: `kernel.md`'s ratify-gate bullet list still cited `fork a role` as an example
+structural change requiring the gate — stale twice over, since lenses/aliases are explicitly *not*
+ratify-gated (`lenses.md`'s own header says so) and "role" forking predates the alias model
+entirely; dropped from the list. Four domain preambles (`lists-selection`, `validation-feedback`,
+`forms-inputs`, `recoverability`) said "Cross-role — declared by both..."; reworded to "Cross-lens."
+Left alone throughout: stable principle `id`s (`route-questions-not-roles`,
+`persist-role-by-workstream`, `concern-names-work-not-role`, `dont-trust-readme-or-agent-file-as-
+role-instruction`) — renaming a stable identifier has its own cost (breaks `see-also` links, audit
+provenance keys) disproportionate to a wording fix; `domains/audit.md`'s historical provenance
+entries, which correctly narrate what was true when written; and every genuine non-job-title sense
+of "role" (a color's semantic *role*, a token's *role*-based name) — a different word doing a
+different job, not the thing being swept.
+
+**Why this is worth doing as its own pass, not just incidental cleanup.** A corpus's vocabulary is
+not decoration — it's the lens (no pun intended) through which every future routing decision gets
+reasoned about. A ratify-gate principle that still says "spawn a role" primes the next reasoning
+pass to think in roles, regardless of what `kernel.md`'s architecture section claims. Concept and
+vocabulary drifting apart is exactly the kind of gap that doesn't show up until someone asks the
+question directly, the way the operator did here.
+
+**Handoff artifact was paying its own generation cost twice.** Operator: "I think it doubles the
+output right now — once inline and once in the handoff file." Correct. `kernel.md` already stated the intent — "The orchestrator
+relays this file — never raw transcript" — but nothing told the *spawn* to keep its own final
+conversational turn terse once that file was written. The natural completion behavior is to
+restate a summary of the work in the last message back to the orchestrator, which means the same
+`Artifact`/`Surfaced`/proposals content gets generated once into the handoff file and a second time
+into the turn that hands control back — full generation cost paid twice for identical content,
+independent of whether the orchestrator actually uses the second copy.
+
+Same shape as `artifact-points-to-persisted-file-not-full-reproduction`
+(`domains/ratify-gate.md`), one level up: that principle stops the `Artifact` section from
+reproducing a deliverable that already has a persisted home elsewhere (a synced library doc, an
+edited source file); this gap was the identical waste applied to the handoff file itself, which
+also already has a persisted home the moment it's written.
+
+**Fix.** Added to `kernel.md`, "The handoff artifact": the spawn's own final conversational turn is
+not a second copy of the artifact — once the file is written, the turn states only that it exists
+and where (path + one-line status), never a restatement of its content. The orchestrator retrieves
+the handoff by reading that file directly, the same way it already reads domain files, never from
+the spawn's own return text. Cross-referenced from `SKILL.md`'s relay step (step 4 of "Starting an
+isolated spawn"). No corpus.py or schema change needed — this reaches every spawn automatically
+because `compose-spawn-prompt` already inlines the whole "The handoff artifact" section verbatim
+into every dispatched prompt; verified the new paragraph survives that extraction.

@@ -1,7 +1,7 @@
-# Domain: color (web-frontend pack)
+# Domain: color
 
 Palette and hue judgment. Declared by the **ui-design** lens. Audit metadata lives in
-`packs/web-frontend/domains/audit.md`, loaded only at ratify/retrospective time.
+`domains/audit.md`, loaded only at ratify/retrospective time.
 
 ```yaml
 last-retrospective: 2026-06-20
@@ -18,17 +18,17 @@ principles:
   condition: "Any UI with more than two distinct semantic roles (interaction, reference, state feedback, etc.)."
   reason: "A binary palette (background + one accent) flattens hierarchy — everything that isn't the accent reads as the same undifferentiated surface. Chromatic variety at low saturation lets each element carry meaning through color relationships rather than relying solely on light/dark contrast."
 
+killed:
+
 - id: semantic-tokens-required-for-theme-switching
   rule: "Any color token system that must support dark mode or theme switching needs at least two tiers: a primitive tier (raw values, e.g. `--color-blue-500: oklch(...)`) and a semantic tier (role-named aliases, e.g. `--color-action-primary: var(--color-blue-500)`). Theme switching redefines only semantic token values. Components reference only semantic tokens."
-  condition: "When building or refactoring a token system where the same component must display correctly across two or more color themes (light/dark, brand variants)."
-  reason: "If components reference primitive tokens directly, switching themes requires updating every component that uses any color. A semantic layer decouples 'what role does this color serve?' from 'what is the value for that role in this theme?' — theme switching becomes a single redefinition of the semantic tier, with no component changes needed."
+  kill_type: knowledge
+  reason_killed: "Primitive/semantic token-tier separation is now close to universal design-systems doctrine, heavily represented in training data — derivable from documentation, not earned project judgment. Companion entry semantic-token-names-by-role-not-value was already tagged `kind: knowledge` in its own audit provenance at ratification; this one should have been screened the same way."
   see-also: semantic-token-names-by-role-not-value
 
 - id: semantic-token-names-by-role-not-value
   rule: "Semantic token names must describe the color's role or purpose, never its visual appearance. Use `--color-text-danger`, `--color-surface-interactive`, `--color-border-subtle` — never `--color-red-text`, `--color-light-gray-bg`."
-  condition: "When naming any token in the semantic tier of a design token system — tokens that map a purpose to a value, as opposed to primitive tokens that simply name a raw value."
-  reason: "A name like `--color-red-text` encodes both the role and the current value. If the brand's danger color changes from red to orange, every reference to the token is now semantically wrong — the name claims 'red' but it isn't. A role-based name like `--color-text-danger` remains correct regardless of what value it maps to. Role names also survive dark-mode redefinition: the purpose is stable; only the value changes."
+  kill_type: knowledge
+  reason_killed: "Role-based vs. value-based token naming is standard design-token-system doctrine, not an earned judgment call — its own audit provenance already recorded `kind: knowledge` at ratification time."
   see-also: semantic-tokens-required-for-theme-switching
-
-killed:
 ```

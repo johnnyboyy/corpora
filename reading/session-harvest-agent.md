@@ -18,7 +18,7 @@ harvester finding little is the system working.
 2. Claude Code transcripts live under `~/.claude/projects/<munged-project-path>/`, one JSONL
    file per session.
 3. Read `reading/harvested.md`. Skip any session already listed — sessions are never re-mined.
-4. Read the project's `corpora/config.md` for its shape and role-pack.
+4. Read the project's `corpora/config.md` for its shape (language, framework, styling, has-ui).
 
 ## For each unharvested session (one at a time, fresh context per session)
 
@@ -34,8 +34,8 @@ depends on them.
 
 Scan for four signals, in descending precision:
 
-1. **Operator corrections** — the operator overrides, redirects, or rewords after role output
-   ("no, actually…", an edit reversing the role's choice). The correction *is* the judgment; the
+1. **Operator corrections** — the operator overrides, redirects, or rewords after a spawn's output
+   ("no, actually…", an edit reversing the spawn's choice). The correction *is* the judgment; the
    candidate encodes what should have been weighed.
 2. **Retry chains** — the same intent re-asked after an unsatisfying first pass. The delta
    between the failed and accepted attempts is the condition under which the first approach

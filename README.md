@@ -8,16 +8,16 @@ Domains, not roles, own corpora — so shared judgment lives once and is availab
 
 ## Architecture
 
-**Two layers of domains, one fixed process layer:**
+**One flat domain pool, one fixed process layer:**
 
-- **Kernel** — stack-agnostic, always loaded. The **orchestrator** (`SKILL.md`, declares `orchestrator-routing` and `ratify-gate`) is the one fixed thing: a process layer that composes and routes spawns but never takes on a spawn's stance itself, so something occupies that position before any composition can happen. The **planner** is not fixed the same way — it's a seeded alias (`domains/role-aliases.md`, domains `planning` + `interviewing`) that composes like any other spawn. Every working spawn composes from `coding-general` at minimum; there is no fixed "base coder" file. Every project starts here, even with no role pack.
-- **Role pack** — stack-specific domains under `packs/<name>/domains/`, loaded only when a project's `corpora/config.md` declares `role-pack: <name>`. The only pack here is `web-frontend` (coding + design domains for the `coder`, `ux-design`, and `ui-design` compositions).
+- **The orchestrator** (`SKILL.md`, declares `orchestrator-routing` and `ratify-gate`) is the one fixed thing: a process layer that composes and routes spawns but never takes on a spawn's stance itself, so something occupies that position before any composition can happen. The **planner** is not fixed the same way — it's a seeded alias (`domains/lenses.md`, domains `planning` + `interviewing`) that composes like any other spawn. Every working spawn composes from `coding-general` at minimum; there is no fixed "base coder" file.
+- **Domains** — stack-agnostic (`coding-general`, `orchestrator-routing`, `spawn-integrity`, ...) and stack-specific (`coding-react`, `css`, `color`, ...) domains live together in one flat `domains/`, not two separate layers. There's no "role pack" selected by a project-config field: each stack-specific domain states its own load condition directly against `corpora/config.md`'s shape fields (`language`, `framework`, `styling`, `has-ui`) in its own preamble — retired 2026-07-22, since a `role-pack:` field only ever bundled conditions the domains already carried individually, all-or-nothing.
 
-A pack adds **domains a spawn can compose from** — not new fixed roles. `domains/role-aliases.md` names the recurring compositions (`coder`, `ux-design`, `ui-design`, `planner`) as routing shorthand, not a schema entity. One composed spawn per named alias runs at a time per project; a domain splits into scoped instances only when the retrospective surfaces a fork signal (conditions that partition the space and give opposing advice), never from an org chart.
+`domains/lenses.md` names the recurring compositions (`coder`, `ux-design`, `ui-design`, `planner`) as routing shorthand, not a schema entity — domains available to an alias are not new fixed roles. One composed spawn per named alias runs at a time per project; a domain splits into scoped instances only when the retrospective surfaces a fork signal (conditions that partition the space and give opposing advice), never from an org chart.
 
 **Domains (where judgment lives):**
 
-- **Seed domain** — general principles, in `domains/` (kernel) and `packs/<pack>/domains/` (pack).
+- **Seed domain** — general principles, in the skill's flat `domains/`.
 - **Project domain** — project-specific accumulated judgment at `corpora/domains/<domain>.md` in the target project. Never merged back here without abstraction.
 
 For each domain a spawn's composition includes, both apply when it runs — seed first, then the same-named project domain. A project may also have domains with no seed counterpart (project-specific subjects, e.g. `spatial-metaphor`).
@@ -33,8 +33,7 @@ For each domain a spawn's composition includes, both apply when it runs — seed
 
 - `SKILL.md` — the shared orchestrator entrypoint for Claude Code (`/corpora`) and Codex (`$corpora`): routes workstreams, assembles complete spawn loads, relays handoffs, and drives the ratify gate.
 - `kernel.md` — the schema, stance+composition model, ratify gate, write-back format, two load modes, retrospective signals, and domain lifecycle. Reference document.
-- `domains/` — kernel-seed domains: `coding-general.md`, `orchestrator-routing.md`, `ratify-gate.md`, `planning.md`, `interviewing.md`, `role-aliases.md` (routing shorthand, not a domain, seeds `coder`/`ux-design`/`ui-design`/`planner`), plus `audit.md` (provenance/kill detail for the layer, loaded only at ratify/retrospective time).
-- `packs/web-frontend/` — the web-frontend pack: `domains/` only (stack-specific coding + design domains, plus the layer `audit.md`). Loaded only when `role-pack: web-frontend`.
+- `domains/` — every seed domain, flat: stack-agnostic (`coding-general.md`, `orchestrator-routing.md`, `ratify-gate.md`, `planning.md`, `interviewing.md`, `spawn-integrity.md`) and stack-specific (`coding-ts.md`, `coding-react.md`, `coding-nextjs.md`, `css.md`, and the design domains `color.md`/`motion.md`/`recoverability.md`/etc.) alike, each stating its own load condition in its own preamble. Plus `lenses.md` (routing shorthand, not a domain, seeds `coder`/`ux-design`/`ui-design`/`planner`) and `audit.md` (provenance/kill detail for the layer, loaded only at ratify/retrospective time).
 - `bootstrap.md` — one-time project setup. Phase 1 detects project shape and writes `corpora/config.md`. Phases 2 and 3 (UI projects only) generate `corpora/ui-library.md` (`ui-design`-composed, divergent) then `corpora/ux-library.md` (`ux-design`-composed, convergent) and propose seed design principles.
 - `LINEAGE.md` — intellectual history: why conventions became law, key kills, design decisions.
 - `reader-tax-and-the-model.md` — a living, multi-model assessment of whether Explicit by Default helps the model itself, not only the human reviewer.
@@ -88,6 +87,6 @@ The seed domains here have been through a retrospective pass (2026-06-20): scopi
 
 ## New stacks and domain splitting
 
-**New stack:** the kernel applies unchanged — every new project inherits the orchestrator, the planner, and `coding-general` for free. Add a role pack only when a body of stack-specific conventions has accumulated and is worth shipping across projects of that stack. Until then, project-earned specifics live in `corpora/domains/coding-general.md` (and project-specific domains). Do not pre-build packs speculatively.
+**New stack:** the kernel applies unchanged — every new project inherits the orchestrator, the planner, and `coding-general` for free. Add stack-specific seed domains (with their own load conditions against `language`/`framework`/`styling`) only once a body of stack-specific conventions has accumulated and is worth shipping across projects of that stack. Until then, project-earned specifics live in `corpora/domains/coding-general.md` (and project-specific domains). Do not pre-build stack-specific domains speculatively.
 
 **Domain splitting:** new judgment lands in the domain it's about (a new domain is born at the ratify gate when nothing fits, after clearing the genuine-fork test — see `kernel.md`, "The genuine-fork test"). A domain splits into scoped instances only when it develops a genuine fork signal — conditions that partition the space and give opposing advice. Reach for this only when accumulated tension reveals the seam, not from an org chart.

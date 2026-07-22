@@ -1,7 +1,7 @@
-# Domain: lists-selection (web-frontend pack)
+# Domain: lists-selection
 
-Lists, rows, and active/selected item treatment. Cross-role — declared by both the **ux-design**
-and **ui-design** lenses. Audit metadata lives in `packs/web-frontend/domains/audit.md`, loaded
+Lists, rows, and active/selected item treatment. Cross-lens — declared by both the **ux-design**
+and **ui-design** lenses. Audit metadata lives in `domains/audit.md`, loaded
 only at ratify/retrospective time.
 
 ```yaml

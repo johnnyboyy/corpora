@@ -1,10 +1,11 @@
-# Domain: coding-react (web-frontend pack)
+# Domain: coding-react
 
 React-specific code patterns — JSX, hooks, refs, and component prop-typing. Declared by the coder
-lens when `role-pack: web-frontend`. Split from `coding-js-react` 2026-07-18 once the domain's
+lens when `framework` is React-based (react, next.js, react native, expo, etc.). Split from
+`coding-js-react` 2026-07-18 once the domain's
 framework-agnostic JS/TS principles were carved into their own `coding-ts` domain — see
-`packs/web-frontend/domains/audit.md` for the migration note. Audit metadata lives in
-`packs/web-frontend/domains/audit.md`, loaded only at ratify/retrospective time.
+`domains/audit.md` for the migration note. Audit metadata lives in
+`domains/audit.md`, loaded only at ratify/retrospective time.
 
 ```yaml
 last-retrospective: 2026-07-18
@@ -71,6 +72,18 @@ principles:
   rule: "When a useEffect's entire body only computes or adjusts local state from a prop or another piece of state's current value — no subscription, timer, listener, fetch, or other external interaction — do the comparison and setState call directly in the render body (a ref holding the 'previous value' is fine to mutate there), not inside useEffect."
   condition: "When reviewing a useEffect whose body contains zero external interaction and whose only effect is one or more setState calls gated by a dependency-array change."
   reason: "The effect only defers a derivable computation to a second render pass for no benefit — an extra render plus an unneeded node in the effect dependency graph. Confirmed as a recurring miss, not a one-off: found independently in FAMOUS (PlayerBarContent's track-change scrubber reset) and Blog (ResultBar's useResultFlash throttled counter), both effects existing purely to adjust local state with no external interaction."
+
+- id: optimistic-ui-for-high-confidence-mutations
+  rule: "Apply optimistic UI (show assumed-success state immediately) only for mutations where server failure is rare and a visible rollback carries low cost — toggles, likes, reorders, non-destructive inline updates. Do not use optimistic UI for destructive actions, payment flows, or any mutation whose failure would require significant user re-entry."
+  condition: "When deciding whether to apply optimistic state patterns (React 19 `useOptimistic`, or manual optimistic state) to a user-triggered server mutation."
+  reason: "Optimistic UI trades accuracy for perceived speed. The pattern earns its keep when the assumed-success is almost always correct — the rare rollback is a minor correction. When failure is plausible (a payment that might decline, a delete that might conflict), a visible rollback is disorienting: the user briefly sees success, then it reverses. Worse, a user who misreads the rollback as success stops retrying. The optimistic assumption must be safe to make."
+  see-also: optimistic-rollback-requires-explicit-error, recovery-path-replaces-confirmation
+
+- id: optimistic-rollback-requires-explicit-error
+  rule: "When an optimistic UI mutation fails and state rolls back to its pre-action value, always surface an explicit error message. Never let the visual rollback be the sole signal of failure."
+  condition: "When implementing any optimistic state pattern — including React 19 `useOptimistic` — where the state reverts on a failed async action."
+  reason: "A state rollback with no error message is experienced as a mysterious 'snap-back': the UI briefly showed the new state, then silently returned to the old one. The user doesn't know if the action failed, is still pending, or partially succeeded — and whether they should retry. An explicit error closes the gap between what happened internally and what the user knows happened, and makes retry decisions possible."
+  see-also: optimistic-ui-for-high-confidence-mutations, recovery-path-replaces-confirmation
 
 killed:
 

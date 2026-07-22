@@ -9,7 +9,7 @@ Runs Fridays at 8 AM PST. Self-contained — no prior session context needed.
 
 1. Add and clone the corpora repo: `johnnyboyy/corpora`
 2. Read `reading/config.md` for feeds and author list
-3. Read all domain working files: `domains/*.md` and `packs/web-frontend/domains/*.md`
+3. Read all domain working files: `domains/*.md`
 
 ## Gap identification
 

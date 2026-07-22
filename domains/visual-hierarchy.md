@@ -1,7 +1,7 @@
-# Domain: visual-hierarchy (web-frontend pack)
+# Domain: visual-hierarchy
 
 Emphasis, grouping, and legibility weight. Declared by the **ui-design** lens. Audit metadata
-lives in `packs/web-frontend/domains/audit.md`, loaded only at ratify/retrospective time.
+lives in `domains/audit.md`, loaded only at ratify/retrospective time.
 
 ```yaml
 last-retrospective: 2026-06-20
@@ -9,9 +9,9 @@ last-retrospective: 2026-06-20
 principles:
 
 - id: hierarchy-through-scarcity
-  rule: "Emphasis signals — differentiation, color, elevation — apply to one dominant element per section; using them on more than one or two cancels the effect. Subordinating non-dominant elements means withholding emphasis, not reducing legibility — informational elements remain fully readable."
+  rule: "Subordinating a non-dominant element means withholding extra emphasis from it, never degrading its legibility (dimming, low-contrast text, shrinking below reading size) to make the dominant element stand out more. Every element stays fully readable; only one element per section carries the emphasis signals (differentiation, color, elevation) that mark it as dominant."
   condition: "When composing any screen or section layout and deciding which elements receive visual weight through color, size, differentiation, or elevation."
-  reason: "Hierarchy comes from elevating one element, not degrading the others. Dimming non-dominant elements destroys their communicative function without improving the dominant signal."
+  reason: "Degrading non-dominant elements is a plausible, common shortcut for creating contrast — it reads as hierarchy-by-subtraction and is easy to reach for. But it destroys those elements' communicative function without actually improving the dominant signal, which comes from elevating one element, not diminishing the rest. The corollary that only one element gets the emphasis signals is the more familiar half of this — worth keeping so it isn't restated as its own principle."
 
 - id: control-grouping-encodes-unity
   rule: "Visual grouping of controls — capsule, joined buttons, bordered cluster — signals that all segments operate on the same value or target (e.g. −/0/+ on a count, or 1/2/3 as states of a single selection). Apply a grouped form only when that relationship holds; keep controls visually separate when they are distinct actions, even if related or adjacent."

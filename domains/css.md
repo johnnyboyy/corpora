@@ -1,18 +1,13 @@
-# Domain: css (web-frontend pack)
+# Domain: css
 
-CSS / Tailwind authoring and specificity. Declared by the coder lens when `role-pack: web-frontend`.
-Audit metadata lives in `packs/web-frontend/domains/audit.md`, loaded only at ratify/retrospective
-time.
+CSS / Tailwind authoring and specificity. Declared by the coder lens when `styling` is not `none`
+(tailwind, css-modules, vanilla-css, etc.). Audit metadata lives in `domains/audit.md`, loaded only
+at ratify/retrospective time.
 
 ```yaml
 last-retrospective: 2026-06-18
 
 principles:
-
-- id: imports-before-tailwind-directives
-  rule: "When splitting a Tailwind CSS entry file into multiple files imported via @import, put the @import statements before the @tailwind directives."
-  condition: "When restructuring Tailwind CSS into multiple files via @import."
-  reason: "postcss-import emits one warning per import line per build if @import follows @tailwind. Cascade-order change is inert when no named component class collides on equal specificity with a Tailwind utility — verify this holds before assuming safety."
 
 - id: tokenize-only-recurring-magic-values
   rule: "When introducing CSS custom properties during a refactor, tokenize only values that recur with the same conceptual meaning. Single-use literals stay inline with a documentary comment citing the spec range if one is defined."
@@ -31,17 +26,22 @@ principles:
   reason: "Extracting a component from a loop to 'remove duplication' creates a component with exactly one callsite — the loop body — adding indirection with no reuse benefit. The authoring-level source of truth is already unique; only the rendered output repeats. The duplication concern that motivates component extraction is when independent elements in different templates share a style — not when one template loop generates identical markup."
   see-also: tailwind-extract-component-before-apply
 
-- id: grid-for-layout-flexbox-for-flow
-  rule: "Use CSS Grid when elements must align on two axes simultaneously or when their visual order must differ from source order. Use Flexbox when item count is dynamic or when items should size from their own content with the container distributing remaining space."
-  condition: "When choosing between `display: grid` and `display: flex` for a new layout container, in a CSS/DOM rendering context. Does not apply to React Native's native renderer, which has no CSS Grid support — flexbox-only there."
-  reason: "The two models have opposite starting points: Flexbox is content-outward (the container adapts to its items' content; remaining space is then distributed) and Grid is layout-inward (tracks are declared first; items are placed into them, independently of source order). Using Grid where content-first sizing is needed forces explicit track definitions for what could be automatic; using Flexbox where two-axis alignment is needed requires nested containers or duplicate sizing rules. Match the model to what the layout actually requires."
-
 killed:
 
 - id: mobile-fixed-bar-bottom-gap
   rule: "Set `bottom: -1px` on a mobile fixed bottom bar to prevent a subpixel gap at the bottom of the viewport on some devices."
   kill_type: knowledge
   reason_killed: "CSS browser rendering behavior — a lookup fact, not a judgment call. A coder hits this once via testing, searches it, finds the fix. No project-specific context encoded."
+
+- id: imports-before-tailwind-directives
+  rule: "When splitting a Tailwind CSS entry file into multiple files imported via @import, put the @import statements before the @tailwind directives."
+  kill_type: knowledge
+  reason_killed: "A postcss-import build-warning fact (import-before-directive ordering), not a judgment call — same class as mobile-fixed-bar-bottom-gap and table-row-color-override below. A coder hits the warning once, fixes the ordering, done."
+
+- id: grid-for-layout-flexbox-for-flow
+  rule: "Use CSS Grid when elements must align on two axes simultaneously or when their visual order must differ from source order. Use Flexbox when item count is dynamic or when items should size from their own content with the container distributing remaining space."
+  kill_type: knowledge
+  reason_killed: "Grid-vs-Flexbox use-case selection is close to textbook CSS knowledge, heavily represented in training data — its own audit provenance already recorded `kind: knowledge` at ratification time, which should have screened it out then. Derivable from documentation, not earned project judgment."
 
 - id: table-row-color-override
   rule: "To allow row-level text color overrides inside a scoped table, set the base color on the scope's thead (via inheritance) rather than directly on th."

@@ -1,10 +1,9 @@
-# Domain: coding-nextjs (web-frontend pack)
+# Domain: coding-nextjs
 
 Next.js-specific code patterns — App Router behavior, server/client component boundaries,
-routing conventions. Declared by the coder lens when `role-pack: web-frontend` AND
-`framework: nextjs`. Projects on other frameworks (Expo Router, Vite, etc.) do not load this
-domain. Audit metadata lives in `packs/web-frontend/domains/audit.md`, loaded only at
-ratify/retrospective time.
+routing conventions. Declared by the coder lens when `framework: nextjs`. Projects on other
+frameworks (Expo Router, Vite, etc.) do not load this domain. Audit metadata lives in
+`domains/audit.md`, loaded only at ratify/retrospective time.
 
 ```yaml
 last-retrospective: none

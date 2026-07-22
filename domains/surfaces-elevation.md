@@ -1,7 +1,7 @@
-# Domain: surfaces-elevation (web-frontend pack)
+# Domain: surfaces-elevation
 
 Surfaces, floating elements, and how depth is signaled. Declared by the **ui-design** lens. Audit
-metadata lives in `packs/web-frontend/domains/audit.md`, loaded only at ratify/retrospective time.
+metadata lives in `domains/audit.md`, loaded only at ratify/retrospective time.
 
 ```yaml
 last-retrospective: 2026-06-20

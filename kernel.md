@@ -1,6 +1,6 @@
 # The Role Kernel
 
-The kernel is the shared mechanism every role inherits. It is not code — it is a discipline made
+The kernel is the shared mechanism every spawn inherits. It is not code — it is a discipline made
 of files plus a loop.
 
 A **spawn** is a *stance* plus a *composed domain subset*: a generative posture (the mode of
@@ -10,7 +10,7 @@ through which one or more domains are applied to a task. See "Spawns: stance + c
 subset," below.
 
 A **domain corpus** is a list of principles about one subject matter, context type, or decision
-class — not a job title. Multiple roles may declare the same domain, so shared judgment lives
+class — not a job title. Multiple lenses may declare the same domain, so shared judgment lives
 once. Domain boundaries are *discovered from accumulated tension* (the fork signal in the
 retrospective), never declared up front from how a team would be organized.
 
@@ -38,7 +38,7 @@ Notes on fields:
 - **condition** is structurally the most important. When two ratified principles in a domain have
   conditions that partition the same space and give opposing advice, the corpus is telling you the
   domain has become two — a fork candidate.
-- **reason** travels with the rule always. This is what lets the role think rather than pattern-match:
+- **reason** travels with the rule always. This is what lets the spawn think rather than pattern-match:
   "the reason was X; this task is Y, so the rule doesn't bind here."
 - **provenance** is cheap to record and invaluable for trusting or retiring a principle later.
 - A principle does not name its domain in a field — the domain is the *file* it lives in. Moving a
@@ -53,11 +53,11 @@ because the audit load is *broad* (the orchestrator pulls the whole layer at onc
 
 - **Working file** (`domains/<domain>.md`) — one per domain. The active `principles:` with their
   `id / rule / condition / reason / see-also`, plus the `killed:` log. This is the only
-  part loaded when a role works, inline or spawned.
-- **Audit file** (`domains/audit.md`, one per layer — kernel-seed, each pack, and each project) —
+  part loaded when a spawn works, inline or spawned.
+- **Audit file** (`domains/audit.md`, one per layer — kernel-seed and each project) —
   per-principle `provenance` keyed by `id` (each entry noting its `domain`) and per-kill audit
   metadata. Loaded only at ratify and retrospective time, by the orchestrator —
-  never in a role's working context. The audit file also carries the layer's **counters** — the
+  never in a spawn's working context. The audit file also carries the layer's **counters** — the
   mechanical signals that replace operator feel. **Never write or edit these by hand, including
   when creating a fresh audit file**: `scripts/corpus.py` alone creates them (`measure`) and
   updates them (`record-gate`), inside a marker-delimited block it owns. Shown here for
@@ -66,7 +66,7 @@ because the audit load is *broad* (the orchestrator pulls the whole layer at onc
   ```yaml
   counters:
     - domain: coding-general
-      origin: seed                 # seed | pack | project — stronger than directory-inference
+      origin: seed                 # seed | project — stronger than directory-inference
                                     #   alone; defaults from --domains-dir shape, overridable
       since: 2026-06-20            # last retrospective
       ratified: 3                  # new principles since
@@ -93,7 +93,7 @@ because the audit load is *broad* (the orchestrator pulls the whole layer at onc
                                     #   was non-empty
   ```
 
-  Efficacy counts must never enter a working file — a role that sees them will start writing
+  Efficacy counts must never enter a working file — a spawn that sees them will start writing
   principles that fire often instead of principles that are right. They are audit-layer signals,
   consumed only by the retrospective.
 
@@ -113,13 +113,13 @@ because the audit load is *broad* (the orchestrator pulls the whole layer at onc
   start and announces the project as corpora-managed, so an omission at session end — where
   attention is weakest — is caught at the next session start, where it is strongest.
 
-The `killed:` log lives in the working file because it is active guidance — it tells the role what
+The `killed:` log lives in the working file because it is active guidance — it tells the spawn what
 has already been tried and rejected, prevents the same pattern from re-emerging, and opens new
 directions by making the rejection reason visible. Provenance and promotions are audit metadata a
-role does not weigh mid-task, so they stay in the audit file.
+spawn does not weigh mid-task, so they stay in the audit file.
 
 This is a *storage* split, not a *corpus* excerpt: every active principle and kill entry is still
-passed in full with the fields a role reasons over. Working and audit are kept consistent by `id`:
+passed in full with the fields a spawn reasons over. Working and audit are kept consistent by `id`:
 every active `id` in a working file has a `provenance` entry in its layer's audit file, and vice versa.
 
 ---
@@ -134,7 +134,7 @@ prompt and a fixed domain list. Two fixed, universal frames exist: convergent an
 The orchestrator decides which domains a task needs and unions them into one working
 declaration, same-stance domains only — a spawn never mixes domains whose principles demand
 opposite generative stances (see "The hard line," below). A domain is available to any spawn
-whose stance and subject match; domains are not "declared by" a role.
+whose stance and subject match; domains are not "declared by" a lens.
 
 **The declaration is deterministic, not a self-selected runtime relevance call by the working
 agent.** The orchestrator fixes which domains apply before the spawn runs; the choice is
@@ -142,9 +142,10 @@ inspectable after the fact via the handoff's `domains-loaded:` field (see "The h
 The orchestrator's composition choice is visible before the spawn runs the same way any other
 orchestrator action is; see the spawn brief, below.
 
-**Recurring domain-subsets get an informal alias.** `coder`, `ux-design`, `ui-design`, and
-`planner` are the four seeded entries in `domains/role-aliases.md` — a label for a domain-subset +
-stance combination the orchestrator reuses often enough to be worth naming as routing shorthand.
+**Recurring domain-subsets get an informal alias.** `coder`, `ux-design`, `ui-design`, `planner`,
+and the narrower bootstrap-only `bootstrap-ui`/`bootstrap-ux` are the seeded entries in
+`domains/lenses.md` — a label for a domain-subset + stance combination the orchestrator reuses
+often enough to be worth naming as routing shorthand.
 An alias is not a schema entity and not a file with its own prompt — it carries no persona text.
 New aliases accumulate the same way domains do — from repeated, observed composition, never
 declared up front.
@@ -165,12 +166,12 @@ only the process itself.
 
 Multiple domain-subsets can compose into one spawn when a task's coupling warrants it (a
 gesture-transition task might load `motion` + `wizards-flows` + `ranking-evaluation` together in
-one divergent spawn, rather than being forced across two separately-named roles).
+one divergent spawn, rather than being forced across two separately-named lenses).
 
 ### Two load modes
 
 - **Working load** (generation): a spawn's composed domains, *working files only*. Lean and
-  inspectable. This is every new isolated spawn and every inline role segment.
+  inspectable. This is every new isolated spawn and every inline spawn segment.
 - **Audit load** (synthesis, human-gated): the orchestrator loads relevant domains *broadly,
   including audit and kill metadata*, at ratify and retrospective time. Breadth is safe here
   because it is not constrained generation and it is gated by the operator.
@@ -237,10 +238,10 @@ pre-declaration step required.
 
 Every cross-boundary change is **propose → ratify → promote**, never write-directly.
 
-- A role proposes a principle as part of its output. It cannot write a corpus.
-- The operator (or a ratifying role acting under standing rules) reviews and ratifies or rejects.
+- A spawn proposes a principle as part of its output. It cannot write a corpus.
+- The operator (or a ratifying lens acting under standing rules) reviews and ratifies or rejects.
 - **Rejections are kept** with their reason. The kill log is the highest-signal training data.
-- Structural changes (split a domain, fork a role, add an explorer, change a route) go through the
+- Structural changes (split a domain, add an explorer, change a route) go through the
   same gate.
 - A proposal of `kind: direction` takes a **third route**: filed into the project's
   `ui-library.md` (provenance to the audit layer as usual) — never ratified into a domain, never
@@ -251,7 +252,7 @@ Every cross-boundary change is **propose → ratify → promote**, never write-d
 ### The genuine-fork test
 
 Before ratifying a `judgment` proposal, ask: is there a plausible alternative choice — one a
-competent role would actually reach for in the moment — that this principle rules out? If no
+competent spawn would actually reach for in the moment — that this principle rules out? If no
 realistic version of "the wrong way" exists, the proposal isn't recording judgment; it's
 decorating an outcome that was never at risk. Reject these by default, even when the rule is true
 and harmless — a principle earns its permanent slot by guarding against a real wrong turn, not by
@@ -278,7 +279,7 @@ creation time instead of split time.
 A proposal arrives without a home. At the gate the orchestrator decides which domain it belongs to
 and writes it there. If no existing domain fits, a **new domain is born here** — the orchestrator
 creates `domains/<new-domain>.md` (+ audit); the domain becomes available to any spawn whose
-stance and subject match — there is no role declaration to add it to. This is the one point where
+stance and subject match — there is no lens declaration to add it to. This is the one point where
 domain assignment involves judgment, and it is human-gated. A proposal that spans two domains is a
 signal the domain boundaries may be wrong — surface it rather than fragmenting the principle
 across both.
@@ -334,7 +335,7 @@ from condition-checking is *more* dangerous, not more trustworthy, and a separat
 would carry an ossification risk not worth taking on.
 
 **Promotion restraint** applies to the fold-to-preamble case: before folding, ask whether the
-role would still need to reconsider this when the project context changes. Fold only if the
+spawn would still need to reconsider this when the project context changes. Fold only if the
 judgment is stable *across the kinds of projects the domain serves* — or is so foundational that
 contestability has genuinely become noise — not merely because it has repeated inside one project
 family. When in doubt, leave it in `principles:` where its `condition` and `reason` can still be
@@ -375,16 +376,16 @@ Per-kill audit detail goes in the layer's audit file, keyed by `id`, alongside i
 **Graduation.** A kill's job is to stop the same rejected idea from being re-proposed. That value
 decays: a kill nobody has come near re-proposing across several retrospectives is no longer live
 guidance, and its continued presence in the working file is a small, permanent reader-tax paid by
-every future role session for a risk that has stopped materializing. `scripts/corpus.py kill-report
+every future spawn session for a risk that has stopped materializing. `scripts/corpus.py kill-report
 --domains-dir <dir> --audit <audit-file>` lists, per domain, every killed entry with no recorded
 `killed:` date (a bookkeeping gap to fix) and every one old enough (default 90 days, `--min-age-days`
 to override) to be a graduation candidate. The operator/retrospective judges whether it is actually
 safe — has anything resembling it resurfaced — then `corpus.py graduate-kill --domains-dir <dir>
 --audit <audit-file> --domain <domain> --id <id>` does the mechanical part: removes the entry from
 the working file's `killed:` log and stamps `graduated:` on its audit-file record. Works on any
-domains-dir + audit.md pair — a project's `corpora/domains/`, the kernel-seed `domains/`, or a pack's
-`packs/<pack>/domains/` — since retrospective consolidation happens in the skill repo's own seed and
-pack corpora too, not only in downstream projects.
+domains-dir + audit.md pair — a project's `corpora/domains/` or the kernel-seed `domains/` — since
+retrospective consolidation happens in the skill repo's own seed corpus too, not only in downstream
+projects.
 
 ---
 
@@ -396,6 +397,17 @@ relays this file — never raw transcript — and the ratify gate reads proposal
 instead of parsing prose. The schema structures the *envelope* (what the gate and relay
 mechanically consume), not the *thinking*: the artifact body stays freeform in the spawn's own
 form.
+
+**The spawn's own final conversational turn is not a second copy of the artifact.** Once the
+handoff file is written, the spawn's actual return to the orchestrator (its last message) states
+only that the file exists and where — a path and a one-line status, never a restatement of the
+`Artifact`/`Surfaced` content or the proposals. The orchestrator retrieves the handoff by reading
+the file directly, the same way it already reads domain files, never from the spawn's own return
+text. Paying full generation cost for the same content twice — once into the file, once again into
+the conversational turn that hands control back — is the same waste
+`artifact-points-to-persisted-file-not-full-reproduction` already rules out one level up (a
+deliverable that already has a persisted home does not get reproduced in full); this is that same
+principle applied to the handoff file itself, not only to what the handoff points at.
 
 ```yaml
 ---
@@ -422,7 +434,7 @@ ui-drift:                    # both invalidation signals — a spawn names only 
   components: []               #   shared component names changed, if any (matches
                                 #   ui-library.md's own component vocabulary headings)
 token-usage: "..."           # per spawn-token-summary
-delegated-workers: []        # worker scopes, if this role delegated execution
+delegated-workers: []        # worker scopes, if this spawn delegated execution
 ---
 
 ## Artifact
@@ -439,7 +451,7 @@ always present; an empty section is a statement, a missing one is a schema viola
 
 Field notes:
 
-- **`stance`** reports what actually ran, not a claim about what a role generally does — immune to
+- **`stance`** reports what actually ran, not a claim about what a lens generally does — immune to
   declaration drift by construction. **`composition`** is a fast-scan label only; the gate never
   treats it as authoritative, and a spawn with no matching alias simply omits it. Together they
   replace the old `role:` field: `domains-loaded:` (already on this schema) plus `stance:` report
@@ -447,7 +459,7 @@ Field notes:
 - **`workstream`** stays stable across implementation, operator testing, and revisions. A new plan
   or unrelated intended outcome receives a new identifier. **`agent-continuity`** makes a context
   discontinuity visible: `new` starts the workstream, `continued` resumes its owning agent, and
-  `replacement` reconstructs from the complete role load and structured artifacts because the
+  `replacement` reconstructs from the complete composition load and structured artifacts because the
   prior agent could not continue.
 - **`kind`** is captured when the spawn knows it from the inside, not reconstructed at the gate.
   `judgment` = a decision made under uncertainty where context and tradeoffs shaped the outcome;
@@ -457,7 +469,7 @@ Field notes:
 - **`utility-candidates`** is deliberately liberal. Each entry names an observed inference burden
   and concrete deterministic operation shape; it need not prove recurrence or specify a finished
   CLI. The orchestrator transfers it to the persistent project ledger before deleting the handoff.
-- **`status: questions-pending`** — the role hit a genuine direction question mid-work: it stops,
+- **`status: questions-pending`** — the spawn hit a genuine direction question mid-work: it stops,
   puts the questions in `Surfaced` (each with what has been established so far and what turns on
   the answer), and the orchestrator relays them and resumes the same workstream agent with the
   operator's answers when available, so working context survives the exchange. If continuation is
@@ -465,7 +477,7 @@ Field notes:
   `SKILL.md`; never rebuild from raw transcript. Same bar as
   gap-closing dialogue: only questions whose answers would produce materially different outputs.
 - **`ui-drift`** is the mechanical staleness signal for the project's UI library and its
-  screenshot cache (`corpora/screenshots/manifest.md`), self-reported while the role's context is
+  screenshot cache (`corpora/screenshots/manifest.md`), self-reported while the spawn's context is
   fresh. `screens:` names what was worked on directly; `components:` names shared components that
   changed. Empty on both means no drift. A spawn never has to enumerate which *other* screens a
   changed shared component appears on — at the ratify gate, `screenshot-mark-stale` expands
@@ -529,13 +541,13 @@ direction and judgment live in the UI/UX libraries and corpora, not this queue.
 
 ## Project utilities
 
-Active utilities live tersely in the `utilities` section of `corpora/config.md` because every role
+Active utilities live tersely in the `utilities` section of `corpora/config.md` because every spawn
 may need them. They are project-owned deterministic tools that replace recurring, precision-sensitive,
 or disproportionately token-expensive inference. Environment-owned tools are discovered from the
 current runtime instead.
 
 Candidates live separately in `corpora/utility-candidates.md` so cheap denials and recurrence
-evidence survive handoff deletion without taxing every role load:
+evidence survive handoff deletion without taxing every spawn's load:
 
 ````markdown
 # Utility candidates
@@ -572,8 +584,8 @@ In any project using this system, project-specific accumulated judgment lives un
 `corpora/domains/audit.md` for the project layer, same schema as the seed domains. The kernel is the mechanism (schema, ratify gate, retrospective,
 lifecycle) and is indifferent to how many domains exist.
 
-Seed domain = general judgment that travels across projects (lives in the skill: kernel-level
-`domains/` and pack-level `packs/<pack>/domains/`).
+Seed domain = general judgment that travels across projects (lives in the skill's `domains/`, one
+flat pool — stack-agnostic and stack-specific domains alike; see "One flat seed layer," below).
 Project domain = judgment earned in this specific project.
 Both apply when a spawn runs: for each domain the spawn's composition includes, load the seed
 domain (if any) then the project domain (if any) of the same name — unless the project domain file's preamble declares
@@ -583,22 +595,29 @@ subjects, e.g. `spatial-metaphor`).
 
 ### Forking a domain
 
-A project can adopt a seed or pack domain instead of always merging live with it — useful once a
-domain has diverged enough, or has principles that don't fit the project, that the live merge is
-more noise than signal. Run `corpus.py adopt --domain <domain>` (skill-repo script, project root as
-`--root`): it locates the domain's seed or pack file and prints its principles — mechanics only, no
+A project can adopt a seed domain instead of always merging live with it — useful once a domain
+has diverged enough, or has principles that don't fit the project, that the live merge is more
+noise than signal. Run `corpus.py adopt --domain <domain>` (skill-repo script, project root as
+`--root`): it locates the domain's seed file and prints its principles — mechanics only, no
 judgment. From there: propose which principles are project-relevant vs. droppable with a reason
 each, get operator approval, then write the curated result to `corpora/domains/<domain>.md` —
 merged by `id` with any principles already there — with `fork-status: forked`, `forked-from: <seed
 path>`, and `forked-date: <date>` in its preamble. Forking is one-way: it stops the live merge for
 that domain going forward. Re-syncing a fork against later seed changes is not yet supported.
 
-Two layers supply the seed: a stack-agnostic kernel layer (orchestrator + planner + their domains,
-plus the domains any convergent coding spawn composes from) always present, and an optional role
-pack selected by `corpora/config.md` (`role-pack:`) that overlays stack-specific domains. A pack
-adds depth — more domains available to compose — never new fixed roles. A project with no UI runs
-on the kernel layer alone; divergent, visual-identity domains are simply never composed into a
-spawn.
+### One flat seed layer
+
+The skill's `domains/` is one flat pool — no separate "role pack" layer selected by a project-config
+field. A stack-agnostic domain (`coding-general`, `orchestrator-routing`, `spawn-integrity`, ...)
+and a stack-specific one (`coding-react`, `css`, `color`, ...) live side by side; each states its own
+load condition directly against `corpora/config.md`'s existing project-shape fields (`language`,
+`framework`, `styling`, `has-ui`) in its own preamble — `coding-nextjs` loads when `framework:
+nextjs`, `css` loads when `styling` is not `none`, and so on. Retired 2026-07-22: an earlier
+`role-pack:` field bundled a stack's domains behind one coarse flag, gating them all-or-nothing;
+since every domain already carried its own precise condition in prose, the field added an
+indirection without adding information, and it couldn't express a project needing some but not all
+of a stack's domains. A project with no UI simply never composes divergent visual-identity domains
+into a spawn — nothing gates that on a config field at all, since nothing routes work into them.
 
 ---
 
@@ -613,15 +632,16 @@ against contamination — is the working context holding domains from another mo
 
 1. **Contamination detected** — attention was spent on a domain outside the task's mode. Fix the
    routing or the composition.
-2. **Domain tension → split / fork** — two ratified principles in one domain have conditions that
-   partition the same space and give *opposing* advice. Proposal: split the domain (and, if the
-   split tracks a role seam, fork the role). Advisory only — the operator judges whether the
-   partition is real. *What counts:* one cluster of principles clearly governs one decision class
-   and another governs a different one, and they repeatedly give opposing advice under their
-   conditions. *What doesn't:* two principles on different topics are simply different subjects, not
-   a partition. The seam is discovered here, from tension — never assumed up front.
+2. **Domain tension → split** — two ratified principles in one domain have conditions that
+   partition the same space and give *opposing* advice. Proposal: split the domain (if the split
+   tracks a lens seam, update the affected lenses' domain lists to match). Advisory only — the
+   operator judges whether the partition is real. *What counts:* one cluster of principles clearly
+   governs one decision class and another governs a different one, and they repeatedly give
+   opposing advice under their conditions. *What doesn't:* two principles on different topics are
+   simply different subjects, not a partition. The seam is discovered here, from tension — never
+   assumed up front.
 3. **Convergence → explorer** — a domain has stopped changing, corrections rare. Proposal: pair the
-   roles that use it with an explorer to prevent calcification.
+   lenses that use it with an explorer to prevent calcification.
 4. **Composition drift** — a spawn's composed domain-subset consistently excludes a domain the work
    actually needed, or includes one it never draws from. Proposal: fix the composition (or, if this
    recurs on the same task shape, propose the pattern as a new or revised alias). Maps directly onto

@@ -728,16 +728,16 @@ class RecordGateCoOccurrenceAndOriginTest(CorpusCommandTestCase):
     def test_record_gate_stamps_explicit_origin(self):
         self.write_domain("color")
 
-        result = self.record_gate(["--origin", "pack"])
+        result = self.record_gate(["--origin", "seed"])
 
         self.assertEqual(result.returncode, 0, result.stderr)
         audit_text = (self.root / "corpora" / "domains" / "audit.md").read_text()
-        self.assertIn("origin: pack", audit_text)
+        self.assertIn("origin: seed", audit_text)
 
 
 class ArbitraryLayerOverrideTest(unittest.TestCase):
-    """measure/verify/record-gate must work on any domains-dir + audit.md pair — the kernel-seed
-    layer or a pack layer, not only a project's own corpora/domains — the same treatment
+    """measure/verify/record-gate must work on any domains-dir + audit.md pair — e.g. the
+    kernel-seed layer, not only a project's own corpora/domains — the same treatment
     kill-report/graduate-kill/adopt already have."""
 
     def setUp(self):
@@ -809,21 +809,13 @@ class AdoptCommandTest(CorpusCommandTestCase):
         self.assertIn("ask-before-architecture", result.stdout)
         self.assertIn("fork-status: forked", result.stdout)
 
-    def test_adopt_finds_pack_domain_when_role_pack_declared(self):
-        (self.root / "corpora" / "config.md").write_text(
-            "# Config\n\nhas-ui: yes\nrole-pack: web-frontend\n"
-        )
-
+    def test_adopt_finds_stack_specific_domain_regardless_of_config(self):
+        # No role-pack concept anymore — domains/ is flat, so a stack-specific domain like
+        # css resolves the same way coding-general does, with no config.md needed at all.
         result = self.run_command(["adopt", "--domain", "css"])
 
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
-        self.assertIn("packs/web-frontend/domains/css.md", result.stdout)
-
-    def test_adopt_fails_without_role_pack_for_pack_only_domain(self):
-        result = self.run_command(["adopt", "--domain", "css"])
-
-        self.assertEqual(result.returncode, 2)
-        self.assertIn("nothing to fork from", result.stderr)
+        self.assertIn("domains/css.md", result.stdout)
 
     def test_adopt_fails_for_domain_with_no_seed_counterpart(self):
         result = self.run_command(["adopt", "--domain", "not-a-real-domain"])

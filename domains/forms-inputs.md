@@ -1,8 +1,8 @@
-# Domain: forms-inputs (web-frontend pack)
+# Domain: forms-inputs
 
-Input fields and their default/empty/derived states. Cross-role — declared by both the
+Input fields and their default/empty/derived states. Cross-lens — declared by both the
 **ux-design** and **ui-design** lenses. Audit metadata lives in
-`packs/web-frontend/domains/audit.md`, loaded only at ratify/retrospective time.
+`domains/audit.md`, loaded only at ratify/retrospective time.
 
 ```yaml
 last-retrospective: 2026-06-20
@@ -34,6 +34,12 @@ principles:
   condition: "When a form has fields whose relevance depends on the value of a sibling field — for example, a billing-address section that only applies when 'different from shipping address' is selected, or a 'specify other' field that appears only when 'Other' is chosen."
   reason: "A form that shows all conditional fields — even disabled — forces every user to parse and consciously skip irrelevant content. This creates confusion (why is this grayed out?), implies the field may later matter, and makes the form appear longer and more complex than the user's actual task requires. Revealing fields on demand minimizes apparent complexity and matches form length to the user's actual data-entry needs. Contrast with `persistent-controls-not-conditional`: that principle covers fields that are always conceptually relevant but vary in effect — this covers fields that are genuinely inapplicable until a prior condition is met."
   see-also: progressive-disclosure-for-primary-advanced-split, persistent-controls-not-conditional
+
+- id: progressive-disclosure-for-primary-advanced-split
+  rule: "Use progressive disclosure — hiding secondary options behind a reveal mechanism — when there is a clear usage split between what most users need (primary tasks, essential fields) and what a smaller subset needs (advanced options, edge-case settings). Do not use it when all options are needed with similar frequency or when users cannot predict that hidden content exists."
+  condition: "When designing an interface — form, settings panel, feature area, or navigation — where controls have noticeably unequal usage frequency and the low-frequency set is large enough to create cognitive overhead."
+  reason: "Showing all options at once imposes equal cognitive cost on all users, including the majority who only ever need a subset. Progressive disclosure reduces visual complexity for the common case. The cost is discoverability: users who need the hidden options must be able to predict they exist and find the trigger. When that predictability cannot be ensured — because the label is ambiguous or the option is needed by most users — the disclosure mechanism becomes an obstacle."
+  see-also: forms-reveal-conditional-fields
 
 - id: validate-on-blur-then-on-change
   rule: "Validate a field on `blur` the first time the user leaves it. Once the field is in an error state, switch to `change` events so corrections are acknowledged immediately. Never show validation errors while the user is still typing in a field that has not yet been in error."

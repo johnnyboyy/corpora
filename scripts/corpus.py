@@ -12,7 +12,7 @@ by markers — the script never touches anything outside its markers.
 Commands:
   measure [--domains-dir --audit]  update working-file-tokens for every domain (defaults to the
                                    project layer; override to measure any domains-dir + audit.md
-                                   pair — kernel-seed or a pack layer, same as kill-report/adopt)
+                                   pair — e.g. the kernel-seed layer, same as kill-report/adopt)
   verify [--domains-dir --audit]   reconcile ledger against working files (detects
                                    unrecorded gates and gate-bypassing writes)
   record-gate --domain D [...]     record a ratify gate's outcomes (same --domains-dir/--audit
@@ -21,14 +21,14 @@ Commands:
   lint-handoff FILE                validate a handoff artifact's envelope
   handoffs                         list lingering handoff files with age
   lint-deferred                    validate the non-blocking UI/UX decision queue
-  deferred                         list queued decisions grouped by owning role
+  deferred                         list queued decisions grouped by owning lens
   lint-utility-candidates          validate the persistent utility-candidate ledger
   utility-candidates               list candidates with status and sighting count
   record-utility-candidate [...]   append dated evidence to a candidate
   set-utility-status [...]         record the operator's candidate disposition
   retro-done --domain D            reset counters after a retrospective
   sync-done                        reset library-drift after a UI-library sync
-  adopt --domain D                 locate D's seed/pack file and print it for curation into a
+  adopt --domain D                 locate D's seed file and print it for curation into a
                                    project-local fork (fork-status: forked)
   compose-spawn-prompt [...]       mechanically assemble a spawn-ready prompt: stance frame +
                                    full seed/project domain files + handoff schema + task, no
@@ -112,7 +112,7 @@ class Project:
 #   efficacy:      list of per-principle dicts
 #   library-drift: one dict
 
-ORIGIN_ENUM = {"seed", "pack", "project"}
+ORIGIN_ENUM = {"seed", "project"}
 
 
 def empty_state() -> dict:
@@ -1039,36 +1039,17 @@ def cmd_sync_done(project: Project, _args) -> None:
     print("library-drift reset to 0")
 
 
-# ── adopt: fork a seed/pack domain into the project layer ──────────────────
+# ── adopt: fork a seed domain into the project layer ──────────────────
 
 def skill_root() -> str:
     return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-def read_role_pack(project: Project) -> str:
-    config_path = os.path.join(project.root, "corpora", "config.md")
-    if not os.path.exists(config_path):
-        return "none"
-    for raw in open(config_path):
-        m = re.match(r"role-pack:\s*(\S+)", raw.strip())
-        if m:
-            return m.group(1)
-    return "none"
-
-
-def seed_domain_path(project: Project, domain: str) -> str:
+def seed_domain_path(domain: str) -> str:
     if domain == "audit":
         return ""
-    root = skill_root()
-    kernel_path = os.path.join(root, "domains", f"{domain}.md")
-    if os.path.exists(kernel_path):
-        return kernel_path
-    pack = read_role_pack(project)
-    if pack != "none":
-        pack_path = os.path.join(root, "packs", pack, "domains", f"{domain}.md")
-        if os.path.exists(pack_path):
-            return pack_path
-    return ""
+    kernel_path = os.path.join(skill_root(), "domains", f"{domain}.md")
+    return kernel_path if os.path.exists(kernel_path) else ""
 
 
 def fork_info(path: str) -> dict:
@@ -1085,9 +1066,9 @@ def fork_info(path: str) -> dict:
 
 def cmd_adopt(project: Project, args) -> None:
     domain = args.domain
-    seed_path = seed_domain_path(project, domain)
+    seed_path = seed_domain_path(domain)
     if not seed_path:
-        fail(f"no seed or pack file for domain '{domain}' — nothing to fork from")
+        fail(f"no seed file for domain '{domain}' — nothing to fork from")
     project_path = os.path.join(project.domains_dir, f"{domain}.md")
     if os.path.exists(project_path):
         info = fork_info(project_path)
@@ -1142,12 +1123,12 @@ def cmd_compose_spawn_prompt(project: Project, args) -> None:
 
     parts = [f"stance: {args.stance}", "", stance_frame, "", "## Domains"]
     for domain in domains:
-        seed_path = seed_domain_path(project, domain)
+        seed_path = seed_domain_path(domain)
         project_path = os.path.join(project.domains_dir, f"{domain}.md")
         project_exists = os.path.exists(project_path)
         forked = project_exists and fork_info(project_path).get("fork-status") == "forked"
         if not seed_path and not project_exists:
-            fail(f"domain '{domain}' has no seed, pack, or project file — nothing to compose")
+            fail(f"domain '{domain}' has no seed or project file — nothing to compose")
         parts.append(f"\n### Domain: {domain}\n")
         if seed_path and not forked:
             parts.append(f"<!-- seed: {os.path.relpath(seed_path, skill_root())} -->\n")
@@ -1173,9 +1154,9 @@ def cmd_compose_spawn_prompt(project: Project, args) -> None:
 
 # ── kill-log graduation: age out killed entries with a recorded, stale kill date ─────────────
 #
-# Works on any domains-dir + its audit.md pair — project layer (<root>/corpora/domains), the
-# kernel-seed layer (domains/), or a pack layer (packs/<pack>/domains/) — not only project layers,
-# since retrospective consolidation happens in the skill repo's own seed/pack corpora too.
+# Works on any domains-dir + its audit.md pair — project layer (<root>/corpora/domains) or the
+# kernel-seed layer (domains/) — not only project layers, since retrospective consolidation
+# happens in the skill repo's own seed corpus too.
 
 KILL_GRADUATION_DAYS = 90
 
@@ -1336,8 +1317,7 @@ def main() -> None:
     ap.add_argument("--root", default=".", help="project root (contains corpora/)")
     sub = ap.add_subparsers(dest="cmd", required=True)
     layer_help = "override to work on any domains-dir + audit.md pair — a project's own " \
-                 "corpora/domains, the kernel-seed domains/, or a pack's packs/<pack>/domains/ " \
-                 "— not only a project's own corpora"
+                 "corpora/domains or the kernel-seed domains/ — not only a project's own corpora"
     m = sub.add_parser("measure")
     m.add_argument("--domains-dir", default="", help=layer_help)
     m.add_argument("--audit", default="", help=layer_help)
@@ -1356,7 +1336,7 @@ def main() -> None:
     g.add_argument("--violated", default="", help="comma-separated principle ids")
     g.add_argument("--idle", default="", help="comma-separated principle ids")
     g.add_argument("--origin", choices=sorted(ORIGIN_ENUM), default="project",
-                   help="seed | pack | project — stronger than directory-inference alone")
+                   help="seed | project — stronger than directory-inference alone")
     g.add_argument("--co-occurs-with", default="",
                    help="comma-separated domain names loaded alongside --domain in the same spawn")
     sub.add_parser("triggers")

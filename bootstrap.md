@@ -8,31 +8,32 @@ description: Bootstrap a project's config, UI library, and UX library. Run once,
 Reference for the orchestrator's bootstrap flow, run when `corpora/config.md` is absent — Phase 1
 always runs inline. What happens after Phase 1 branches on whether a concrete operator feature
 request accompanied the bootstrap (see "Routing after Phase 1" below): with no feature request,
-Phase 2 (`ui-design`-composed, divergent stance) then Phase 3 (`ux-design`-composed, convergent
-stance) run directly, the original fixed sequence (see `domains/role-aliases.md` for what each
-composition loads); with a feature request, the orchestrator hands off to the planner instead,
-which decomposes the bootstrap need and the feature into one sequenced queue. Not a standalone
-skill.
+Phase 2 (`bootstrap-ui`-composed, divergent stance) then Phase 3 (`bootstrap-ux`-composed,
+convergent stance) run directly, the original fixed sequence (see `domains/lenses.md` for
+what each composition loads — narrower than `ui-design`/`ux-design`'s ongoing-work compositions,
+since founding a library from nothing doesn't have concrete components/screens for every domain to
+attach to yet); with a feature request, the orchestrator hands off to the planner instead, which
+decomposes the bootstrap need and the feature into one sequenced queue. Not a standalone skill.
 
 - **Phase 1 — always, run inline.** Detect the project's shape, commands, and existing utilities; write
   **`corpora/config.md`** (schema below: shape — language, framework, package manager, `has-ui`,
-  styling, `role-pack`; project resources — registered utilities, UI library location, verification
+  styling; project resources — registered utilities, UI library location, verification
   commands). This flips the project to "bootstrapped" and runs for
   every project type.
-- **Phase 2 — only when `has-ui: yes`, `ui-design`-composed workstream.** Bootstrap the design
+- **Phase 2 — only when `has-ui: yes`, `bootstrap-ui`-composed workstream.** Bootstrap the design
   system: **`corpora/ui-library.md`** (or the project's chosen path — the living design system
   reference) plus **proposed design principles** distilled from the foundational decisions and
   surfaced in the standard proposed-principles block; the orchestrator ratifies them into the
   project's design domains (`corpora/domains/<domain>.md`), assigning each a domain at the gate.
   This is the foundational work — get it right and every subsequent design session starts with
   real constraints; get it wrong and every session invents in a vacuum.
-- **Phase 3 — only when `has-ui: yes`, `ux-design`-composed workstream, after Phase 2.** Bootstrap
-  the experience reference: **`corpora/ux-library.md`** plus proposed principles/directions, same
-  gate. UI runs first deliberately — the divergent stance sets identity before the convergent
-  stance documents constraints (see LINEAGE.md, "UI/UX seam settled"). When a planner queue is
-  driving the sequence instead (see below), this ordering falls out on its own: the UX library
-  cites the UI library's tokens and components, so the UX bootstrap task is genuinely blocked-by
-  the UI bootstrap task, not just stylistically sequenced after it.
+- **Phase 3 — only when `has-ui: yes`, `bootstrap-ux`-composed workstream, after Phase 2.**
+  Bootstrap the experience reference: **`corpora/ux-library.md`** plus proposed
+  principles/directions, same gate. UI runs first deliberately — the divergent stance sets
+  identity before the convergent stance documents constraints (see LINEAGE.md, "UI/UX seam
+  settled"). When a planner queue is driving the sequence instead (see below), this ordering falls
+  out on its own: the UX library cites the UI library's tokens and components, so the UX bootstrap
+  task is genuinely blocked-by the UI bootstrap task, not just stylistically sequenced after it.
 
 The library and corpus are text-only. See LINEAGE.md for why text outperforms design artifacts
 for this purpose.
@@ -56,7 +57,7 @@ itself is part of the scope being weighed.
   combining both needs — e.g. *"Bootstrap this project's design system (has-ui: yes) and
   implement: \<operator's request, verbatim\>."* This is passed as direct input, not sourced from a
   `ROADMAP.md` (none exists yet for a fresh project). The planner treats it like any other
-  capability: no changes to its `domains/role-aliases.md` entry or `domains/planning.md` are
+  capability: no changes to its `domains/lenses.md` entry or `domains/planning.md` are
   needed — it orients (finds
   `corpora/config.md` but no `ui-library.md`, `ux-library.md`, or existing code), decomposes into
   tasks (`bootstrap-ui-library`, `bootstrap-ux-library` when `has-ui: yes`, plus the feature's own
@@ -67,9 +68,9 @@ itself is part of the scope being weighed.
   3 already states below to Phase 2 as well when a planner-produced task frames the ask.
 
   **One boundary to hold:** the planner's dialogue step must not ask the audience/aesthetic-direction
-  questions that open Phase 2 below — those are the `ui-design`-composed spawn's own divergent
+  questions that open Phase 2 below — those are the `bootstrap-ui`-composed spawn's own divergent
   judgment call, asked when its task actually runs, not decomposition-shaping ambiguity the
-  planner should resolve upfront. The `planner` alias's own notes (`domains/role-aliases.md`)
+  planner should resolve upfront. The `planner` alias's own notes (`domains/lenses.md`)
   already state this general rule ("do not try to anticipate the direction questions downstream
   spawns will face mid-work"); this is that rule's bootstrap instance, named here because it's easy
   to blur in practice.
@@ -97,18 +98,18 @@ authoritative instruction source. Determine, and ask the operator only for what 
   Electron app, a TUI → yes. A CLI that prints text, a library, a backend service → no. This
   single field decides whether Phases 2 and 3 run.
 - **Styling approach** — tailwind, css-modules, vanilla-css, none, etc. (`none` is correct for
-  non-UI projects.)
-- **`role-pack`** — which role pack the project's roles should overlay. A web/Electron UI on a
-  JS/TS stack → `web-frontend`. Anything this repo has no pack for → `none` (the project runs on
-  the kernel alone; that is a valid, complete configuration).
+  non-UI projects.) Together with `language` and `framework`, this is what each stack-specific
+  domain checks in its own preamble to decide whether it loads for this project — there is no
+  separate role-pack field to set; a project stack simply is or isn't what a given domain's
+  condition names.
 - **Verification commands** — the project's lint, type-check, build, and/or test commands. Run
   what the project actually has; not every ecosystem separates these, and some have none.
 
 Record existing project-owned utilities and exact verification commands using the schema below.
 Do not search for predetermined utility categories or persist environment-owned capabilities; the
 runtime already exposes browser automation, image generation, delegation, and similar tools. Then
-**write `corpora/config.md`**. Detect, don't assume: an incorrect role pack, command, or utility is
-worse than `none` because a role will try to use something that is not there.
+**write `corpora/config.md`**. Detect, don't assume: an incorrect command or utility is worse than
+`none` because a spawn will try to use something that is not there.
 
 **If `has-ui: no` and no concrete feature request accompanied this bootstrap, Phase 1 is the whole
 job.** Write `corpora/config.md` and stop — no UI library, no design principles, no design spawns
@@ -129,7 +130,7 @@ with an empty `candidates: []` list.
 
 ## Phase 2 — UI library (only when `has-ui: yes`)
 
-You are now a `ui-design`-composed spawn (divergent stance) bootstrapping a design system for a
+You are now a `bootstrap-ui`-composed spawn (divergent stance) bootstrapping a design system for a
 project that has none yet. When this task arrived via a planner-produced queue (see "Routing
 after Phase 1"), it names a concrete feature to scope against — cover the sections below only to
 the depth that feature actually needs, same restraint Phase 3 applies: do not invent aspirational
@@ -290,11 +291,13 @@ sessions touch each screen.
 
 ## The config file (`corpora/config.md`)
 
-The file every role reads to learn stable project facts — without it the project is "not
+The file every spawn reads to learn stable project facts — without it the project is "not
 bootstrapped." It records **project shape**, **project-owned utilities**, library locations, and
 verification commands. Runtime-owned capabilities are discovered each session and never persisted.
 When updating a legacy config, remove browser/image runtime entries and migrate any project-owned
-color or other deterministic script into the general utility registry.
+color or other deterministic script into the general utility registry. Also drop a legacy
+`role-pack:` line if present — retired 2026-07-22; the fields already here (`language`, `framework`,
+`styling`) are what each stack-specific domain now checks directly.
 
 - **Utilities** — deterministic project-owned tools that replace recurring inference. Record their
   purpose, triggering condition, exact invocation, operations, and output shape. An empty registry
@@ -306,14 +309,14 @@ color or other deterministic script into the general utility registry.
 
 ### Schema
 
-Human-readable and edited by hand as the project changes; machine-read by every role at session
-start. Keep it terse because it loads on every role invocation. Project-shape and command values
+Human-readable and edited by hand as the project changes; machine-read by every spawn at session
+start. Keep it terse because it loads on every spawn invocation. Project-shape and command values
 are concrete or `none`; utilities are an explicit list or `utilities: []`.
 
 ```markdown
 # Config
 
-Read this file at the start of any role session. It declares the project's shape, registered
+Read this file at the start of any spawn's session. It declares the project's shape, registered
 project utilities, libraries, and verification commands. Generated by `corpora:bootstrap`; edit by
 hand as the project changes. Discover environment-owned capabilities from the current runtime.
 
@@ -323,13 +326,12 @@ framework: <e.g. next.js, astro, electron, fastapi, none>
 package-manager: <e.g. pnpm, npm, bun, uv, cargo, go>
 has-ui: <yes | no>
 styling: <e.g. tailwind, css-modules, vanilla-css, none>
-role-pack: <e.g. web-frontend, or none>
 
 ## utilities
 utilities:
   - id: <e.g. color-math>
     purpose: <the deterministic inference burden it replaces>
-    use-when: <condition under which a role should invoke it>
+    use-when: <condition under which a spawn should invoke it>
     invoke: <exact command form>
     operations: [<supported operations>]
     output: <paste-ready or machine-readable output shape>
@@ -434,8 +436,8 @@ this handoff, then route into Phase 3.
 
 ## Phase 3 — UX library (only when `has-ui: yes`, after Phase 2)
 
-You are now a `ux-design`-composed spawn (convergent stance) bootstrapping the project's
-experience reference. The `ui-design`-composed Phase 2 spawn has already run — identity is set;
+You are now a `bootstrap-ux`-composed spawn (convergent stance) bootstrapping the project's
+experience reference. The `bootstrap-ui`-composed Phase 2 spawn has already run — identity is set;
 your job is convergent documentation of how the product *works* as an experience, so future UX
 sessions weigh established patterns instead of re-deriving them.
 

@@ -15,16 +15,14 @@ Runs weeknights at 2 AM PST. Self-contained — no prior session context needed.
 ### 1. Compose the stance and domains
 
 From the entry's `domains` field, compose the spawn (see `kernel.md`, "Spawns: stance + composed
-domain subset", and `domains/role-aliases.md` for the named shorthand):
+domain subset", and `domains/lenses.md` for the named shorthand):
 - `coding-general` → convergent, load `domains/coding-general.md`
-- `coding-ts` → convergent, load `domains/coding-general.md` +
-  `packs/web-frontend/domains/coding-ts.md`
-- `coding-react` → convergent, load `domains/coding-general.md` +
-  `packs/web-frontend/domains/coding-react.md`
+- `coding-ts` → convergent, load `domains/coding-general.md` + `domains/coding-ts.md`
+- `coding-react` → convergent, load `domains/coding-general.md` + `domains/coding-react.md`
 - `ux-design`, `interaction`, or similar → convergent, load the `ux-design` alias's domains
-  (`domains/role-aliases.md`)
+  (`domains/lenses.md`)
 - `ui-design` or similar → divergent, load the `ui-design` alias's domains
-  (`domains/role-aliases.md`)
+  (`domains/lenses.md`)
 
 You are now reasoning under that stance, with those domains, for this entry.
 

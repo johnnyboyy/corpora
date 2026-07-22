@@ -1,7 +1,7 @@
-# Domain: motion (web-frontend pack)
+# Domain: motion
 
 Animation and motion as signal. Declared by the **ui-design** and **ux-design** lenses. Audit
-metadata lives in `packs/web-frontend/domains/audit.md`, loaded only at ratify/retrospective time.
+metadata lives in `domains/audit.md`, loaded only at ratify/retrospective time.
 
 ```yaml
 last-retrospective: 2026-06-20

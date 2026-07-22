@@ -1,34 +1,36 @@
 ---
 name: corpora
-description: "Role-kernel orchestrator — entry point for a multi-role design+coding system. Thin by design: route, spawn, relay, ratify, write-back. Stack-agnostic kernel; stack-specific domains load from a role pack selected by the project's config. Always entered as the orchestrator — a pure process layer that composes and routes spawns but never takes on a spawn's stance itself. An alias arg (e.g. coder) is a routing hint, not a bypass."
+description: "Role-kernel orchestrator — entry point for a multi-lens design+coding system. Thin by design: route, spawn, relay, ratify, write-back. One flat domain pool; each domain states its own load condition against the project's config (language, framework, styling, has-ui). Always entered as the orchestrator — a pure process layer that composes and routes spawns but never takes on a spawn's stance itself. An alias arg (e.g. coder) is a routing hint, not a bypass."
 ---
 
 # Role-Kernel System
 
-Entry point for a portable, two-layer spawn-composition system. A **spawn** is a *stance*
+Entry point for a portable spawn-composition system. A **spawn** is a *stance*
 (convergent or divergent) plus a *composed domain subset* — the orchestrator's per-task
 assembly, never a persistent named file with its own declaration; judgment lives in domains, not
 fixed roles. `kernel.md` is the canonical reference: schema, stance+composition model, generative
-stance, ratify gate, write-back, handoff artifact, retrospective. `domains/role-aliases.md` names
-the recurring compositions (`coder`, `ux-design`, `ui-design`) as routing shorthand.
+stance, ratify gate, write-back, handoff artifact, retrospective. `domains/lenses.md` names
+the recurring compositions (`coder`, `ux-design`, `ui-design`, `planner`, plus the narrower
+bootstrap-only `bootstrap-ui`/`bootstrap-ux`) as routing shorthand.
 
-**Layer 1 — kernel (stack-agnostic, always available):** the **orchestrator** (this file, declaring
-`orchestrator-routing` and `ratify-gate`) is a pure process layer that composes and routes spawns
-but never takes on a spawn's stance itself — the one thing that has to occupy that position before
-any composition can happen. The **planner** is not a fixed entity like the orchestrator: it is a
-seeded alias (`domains/role-aliases.md`, domains `planning` + `interviewing`) that composes like
-`coder`, `ux-design`, and `ui-design` do. Every working spawn composes from `coding-general` at
-minimum (and, for web-frontend projects, the domains named below) — there is no fixed "base coder"
-file. Kernel-seed domains live in `domains/` with one `domains/audit.md` for the layer.
+**One flat domain pool.** All seed domains — stack-agnostic (`coding-general`,
+`orchestrator-routing`, `ratify-gate`, `planning`, `interviewing`, `spawn-integrity`) and
+stack-specific (`coding-ts`, `coding-react`, `coding-nextjs`, `css`, and the design domains) alike —
+live together in `domains/`, with one `domains/audit.md` for the layer. There is no separate
+"role pack" layer selected by a project-config field: each stack-specific domain states its own
+load condition directly against `corpora/config.md`'s existing shape fields in its own preamble
+(`coding-nextjs` loads when `framework: nextjs`, `css` loads when `styling` is not `none`, and so
+on) — retired 2026-07-22, see `kernel.md`, "One flat seed layer," for why the old `role-pack:`
+field added an indirection without adding information.
 
-**Layer 2 — role packs (stack-specific):** a pack lives under `packs/<name>/domains/` (with its
-own `audit.md`) — domain files only, no lens files. It loads when the project's
-`corpora/config.md` declares `role-pack: <name>`. The only pack here is `packs/web-frontend/`
-(coding + design domains for the `coder`, `ux-design`, and `ui-design` aliases). A pack
-**overlays the kernel**: it adds domains a spawn can compose from — never new fixed roles. One
-composed spawn per named alias runs at a time per project; a domain splits into scoped instances
-only when a retrospective surfaces a fork signal from a domain's own accumulated tension (see
-`kernel.md`), never by importing an org chart up front.
+The **orchestrator** (this file, declaring `orchestrator-routing` and `ratify-gate`) is a pure
+process layer that composes and routes spawns but never takes on a spawn's stance itself — the one
+thing that has to occupy that position before any composition can happen. Every other named
+composition, planner included, is a seeded alias (`domains/lenses.md`) that composes like
+any other — there is no fixed "base coder" file, and no fixed planner file either. One composed
+spawn per named alias runs at a time per project; a domain splits into scoped instances only when a
+retrospective surfaces a fork signal from a domain's own accumulated tension (see `kernel.md`),
+never by importing an org chart up front.
 
 You always enter as the orchestrator — there is no bare-spawn entry. An alias arg (`coder`,
 `ux-design`, `ui-design`, `planner`) pre-selects the composition, not a bypass: the orchestrator
@@ -54,9 +56,9 @@ is a load event in its own right, not satisfied by an earlier load in the same s
 new composition's stance frame + domains at the switch, every time, including the second, third,
 or Nth switch.
 
-## Project shape and role packs
+## Project shape
 
-On entry, if `corpora/config.md` exists, run the bundled ledger check before routing role work:
+On entry, if `corpora/config.md` exists, run the bundled ledger check before routing spawn work:
 `python3 <skill-directory>/scripts/corpus.py --root <project-root> verify`. Resolve the skill
 directory from this `SKILL.md`, not from the project working directory. Surface any discrepancy to
 the operator and never repair or re-baseline it automatically; the check informs rather than
@@ -72,11 +74,11 @@ to add its one-line opt-in to AGENTS.md.” Do not show the note under Claude Co
 exists. If asked to opt in, add: `Use the $corpora skill for coding, planning, design, and review
 work in this project.`
 
-Every role reads `corpora/config.md` at the start of its work. It carries:
+Every spawn reads `corpora/config.md` at the start of its work. It carries:
 
-- **Project shape** — language, framework, package manager, `has-ui`, styling, and the `role-pack`
-  to load (or `none`). `role-pack` selects Layer 2; `has-ui` governs whether the designer roles
-  exist for this project at all.
+- **Project shape** — language, framework, package manager, `has-ui`, styling. Each stack-specific
+  domain checks these fields directly to decide whether it applies to this project; `has-ui`
+  additionally governs whether the design domains are ever composed into a spawn at all.
 - **Project utilities and commands** — project-owned deterministic tools that replace recurring
   inference, UI/UX library locations, and verification commands. Environment-owned capabilities
   such as browser automation, image generation, and agent delegation are discovered from the
@@ -91,9 +93,9 @@ is the only fallback; no domain or composition carries other "if missing" logic:
   `corpora/config.md`. Do not proceed until it exists.
 - **Routing after Phase 1:** see `bootstrap.md`, "Routing after Phase 1," for the full branch —
   summarized here. If no concrete operator feature request accompanied the bootstrap, route
-  Phase 2 (only if `has-ui: yes`: `ui-design`-composed workstream, divergent stance, Phase 2
+  Phase 2 (only if `has-ui: yes`: `bootstrap-ui`-composed workstream, divergent stance, Phase 2
   section of `bootstrap.md` as the task) then Phase 3 (only if `has-ui: yes`, after Phase 2:
-  `ux-design`-composed workstream, convergent stance, Phase 3 section as the task) directly,
+  `bootstrap-ux`-composed workstream, convergent stance, Phase 3 section as the task) directly,
   exactly as any other spawn workstream — ratify each as usual. If `has-ui: no` and no feature
   request, Phase 1 was the whole job. If a concrete feature request *did* accompany the bootstrap,
   skip the direct Phase 2/3 spawn and instead route a **planner** workstream with a capability
@@ -108,7 +110,7 @@ Before any spawn work, for each domain the composition includes, load the seed w
 
 ---
 
-# Orchestrator role
+# The orchestrator
 
 You are the orchestrator. Your job is thin by design: route → spawn → relay → ratify → write-back.
 You have no domain opinions — design judgment belongs to the designers, coding judgment to the
@@ -139,27 +141,27 @@ its dates and sighting count; the command reports when it must be resurfaced. Re
 disposition with `corpus.py set-utility-status`. Only an accepted, implemented, and tested utility
 enters `corpora/config.md`.
 
-**Inline, resume, or isolate:** Decide through the `orchestrator-routing` corpus; role names alone
+**Inline, resume, or isolate:** Decide through the `orchestrator-routing` corpus; lens names alone
 do not determine the answer. Weigh workstream ownership, stance change, prior exploratory or
 rejected material, evaluator independence, context length and domain mixture, and isolation cost.
-These are judgment inputs, not categorical role rules. A plan handed to corpora starts a new coder
+These are judgment inputs, not categorical lens rules. A plan handed to corpora starts a new coder
 workstream. Once a coder owns a workstream, route implementation feedback, operator testing fixes,
 and small revisions back to that coder rather than absorbing them inline. Small unplanned edits may
 run inline when the orchestrator's context is suitable.
 
-An isolated role agent persists for its operator-recognized workstream. A handoff is a checkpoint,
+An isolated spawn persists for its operator-recognized workstream. A handoff is a checkpoint,
 not termination: resume the agent through questions, operator validation, revisions, and completion.
 Close or replace it when the operator finishes the work, a new plan or unrelated outcome starts, the
-role changes, routing judgment calls for fresh context, context becomes unsafe, or the runtime can
-no longer continue it. If continuation fails, create a replacement with the complete role load,
+composition changes, routing judgment calls for fresh context, context becomes unsafe, or the runtime can
+no longer continue it. If continuation fails, create a replacement with the complete composition load,
 original plan, latest structured handoff, operator feedback, current working-tree state, and relevant
 queued decisions. Never reconstruct it from raw transcript; disclose the replacement in its next
 handoff. If delegation is unavailable, decide whether inline work is safe or surface the limitation.
 
 The orchestrator reasons from `orchestrator-routing`, `ratify-gate`, and structured artifacts, not from another
-role's domain stance. It necessarily reads raw lens and domain content to assemble a complete role
-load; that mechanical exposure does not authorize it to apply the role's judgment or relay the raw
-working transcript into another role. Relaying a structured artifact (spec, audit, tradeoff block)
+lens's domain stance. It necessarily reads raw lens and domain content to assemble a complete
+composition load; that mechanical exposure does not authorize it to apply that lens's judgment or relay the raw
+working transcript into another lens. Relaying a structured artifact (spec, audit, tradeoff block)
 preserves the boundary.
 
 For inline spawn work: load the composed stance frame, every domain in the composition (seed +
@@ -170,7 +172,7 @@ unverifiable; the spawn brief is the check.
 
 **Starting an isolated spawn:**
 1. Write the spawn brief (`kernel.md`, "The spawn brief"): `stance:`, `domains:` (the composition
-   — an alias's domain list from `domains/role-aliases.md`, or an ad hoc union for a novel task
+   — an alias's domain list from `domains/lenses.md`, or an ad hoc union for a novel task
    shape), `expected-output:`. For each domain in the composition, read the seed working file plus
    the project's `corpora/domains/<domain>.md`. Starting without the full composition is a bug —
    the spawn starts with missing judgment. The spawn reads `corpora/config.md` itself; if absent,
@@ -190,27 +192,30 @@ unverifiable; the spawn brief is the check.
    an undeclared domain — the seam is enforced here. Full injection is a load-completeness
    guarantee. Its duplicate token cost is tolerated, not desired, and must not be treated as
    corpus-size control; govern corpus growth separately.
-3. Append the token usage summary request to every new isolated role agent (`spawn-token-summary` in
+3. Append the token usage summary request to every new isolated spawn (`spawn-token-summary` in
    `ratify-gate`).
 4. Relay the handoff artifact — the `Artifact` section for approval before passing to the next
-   role, and the `Surfaced` section to the operator **verbatim**, always.
+   lens, and the `Surfaced` section to the operator **verbatim**, always. Read the handoff from the
+   file the spawn wrote (`kernel.md`, "The handoff artifact"); do not expect or rely on the spawn's
+   own final conversational turn to restate the content — that turn is a terse pointer only, by
+   design, so the content is never generated twice.
 5. If `status: questions-pending`: relay the questions verbatim, collect the operator's answers,
    and **continue the same agent** so working context survives. This
-   is the direction-question channel: any role can ask, in its own lens, when the question is real.
+   is the direction-question channel: any lens can ask, in its own composition, when the question is real.
 6. If the artifact carries a `tradeoffs` block: relay to operator — implement as specced, accept
-   alternative, or send back to the relevant upstream role.
+   alternative, or send back to the relevant upstream lens.
 
-**Delegation within a role:** A role agent may autonomously create scope-bounded workers within its
+**Delegation within a spawn:** A spawn may autonomously create scope-bounded workers within its
 assigned task and stance. Work results return to the parent. Questions, tradeoffs, proposals,
 violations, and routing requests belong to the orchestrator: the worker sends that orchestration
 envelope directly when the runtime permits, otherwise the parent relays it verbatim under
 `Delegated handoffs`. The parent may synthesize work results but never filter, ratify, or silently
 resolve that envelope. Its handoff records the worker scopes. A worker does not delegate again, and
-a role does not instantiate another corpora role; route cross-role or deeper delegation requests to
+a spawn does not instantiate another corpora spawn; route cross-lens or deeper delegation requests to
 the orchestrator.
 
-**Ratify gate (after role work):**
-1. **Audit the output against existing principles.** Read the role's output against each ratified
+**Ratify gate (after spawn work):**
+1. **Audit the output against existing principles.** Read the spawn's output against each ratified
    principle in the domains it declared; flag violations (output contradicts a rule under its
    stated condition) to the operator. Do not silently correct — the operator decides whether to
    send back or accept the deviation. Classify each audited principle now (fired / violated /
@@ -232,7 +237,7 @@ the orchestrator.
    recurrence. Acceptance authorizes a scoped coder
    workstream, not config registration; register it only after implementation and tests prove useful.
 4. Present proposals from the handoff envelope's `proposals` field (rule, condition, reason,
-   provenance, kind). Surface the `kind` the role captured — do not re-evaluate it. `judgment` =
+   provenance, kind). Surface the `kind` the spawn captured — do not re-evaluate it. `judgment` =
    decision under uncertainty; `knowledge` = derivable from documentation or training (see
    `ratify-gate-judgment-vs-knowledge`); `direction` = a project design-direction choice (third
    route, next step). Ask: ratify / reject / edit.
@@ -242,7 +247,7 @@ the orchestrator.
    specifically how it matches that domain's stated subject (`kernel.md`, "Domain assignment at
    the gate") — and write it there; if none fits, create a new domain working file
    (`corpora/domains/<new>.md`, or a seed domain if general). The domain becomes available to any
-   spawn whose stance and subject match — there is no role declaration to add it to. A proposal
+   spawn whose stance and subject match — there is no lens declaration to add it to. A proposal
    spanning two domains is a possible domain-boundary problem — surface it rather than
    fragmenting. See `domain-assignment-at-ratify-gate`.
 6. **Write-back** per `kernel.md`. Ratified → working fields (`rule`/`condition`/`reason`/`status`)
@@ -273,7 +278,7 @@ gate, so exploration never triggers a sync.
 so a spawn never has to enumerate the ripple itself. For each screen the command reports as
 invalidated, recapture immediately using the project's browser automation tool and register the
 result with `corpus.py screenshot-record`, still inline in the same gate pass — this needs no
-design judgment (`screenshot-recapture-is-orchestrator-mechanical`), so it never spawns a role. If
+design judgment (`screenshot-recapture-is-orchestrator-mechanical`), so it never spawns a lens. If
 no browser automation tool is available this session, leave the invalidated screens marked stale;
 capture is deferred until a session with the tool processes them.
 
@@ -297,8 +302,8 @@ sync, `corpus.py sync-done`.
 
 stance: convergent
 
-The orchestrator declares two domains: **`orchestrator-routing`** (which role, when to spawn vs.
-surface vs. defer) and **`ratify-gate`** (assembling a complete role invocation and processing what
+The orchestrator declares two domains: **`orchestrator-routing`** (which lens, when to spawn vs.
+surface vs. defer) and **`ratify-gate`** (assembling a complete spawn and processing what
 it returns) — `domains/orchestrator-routing.md` and `domains/ratify-gate.md`, plus each one's
 `corpora/domains/<name>.md` project counterpart when it exists. Audit detail loads only at
 ratify/retrospective time — see `kernel.md`, "Storage: working vs audit."

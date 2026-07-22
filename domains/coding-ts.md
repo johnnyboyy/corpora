@@ -1,14 +1,14 @@
-# Domain: coding-ts (web-frontend pack)
+# Domain: coding-ts
 
 Framework-agnostic JS/TS code patterns — language and module-system judgment that holds regardless
 of which UI framework the project uses. Named for TypeScript rather than JS: TypeScript is this
-pack's default language, even where a given principle's underlying fact would also hold in plain
-JS. Loaded by any convergent coding spawn when `role-pack: web-frontend`. Audit metadata lives in
-`packs/web-frontend/domains/audit.md`, loaded only at ratify/retrospective time.
+domain's default language, even where a given principle's underlying fact would also hold in plain
+JS. Loaded by any convergent coding spawn when `language` is `typescript` or `javascript`. Audit
+metadata lives in `domains/audit.md`, loaded only at ratify/retrospective time.
 
 Settled JS/TS style, held here in the preamble rather than in `principles:` — both are JS
 instances of the base `coding-general` meta-rules, near-unconditional enough that per-case
-condition-weighing is friction without benefit (provenance: `packs/web-frontend/domains/audit.md`):
+condition-weighing is friction without benefit (provenance: `domains/audit.md`):
 
 - **Block arrow bodies always** (`() => { return value; }`) — `{}` after an arrow is a function
   body, not a value; the concise form has a silent failure mode and forces a per-function judgment
@@ -52,8 +52,7 @@ principles:
 - id: no-shell-for-structural-absence
   rule: "If one side of a conditional is a true structural absence — not skipped logic, just nothing to do by definition — don't wrap it in an if/else. Reach for a construct that has no empty branch to begin with, e.g. filter."
   condition: "A branch where one outcome does nothing at all — typically filtering a collection or checking a predicate."
-  reason: "An empty branch beside a real one gives 'nothing happens' the same weight as the real case, though it's incidental, not meaningful. Making it explicit then forces a stray empty block or a comment that just restates the condition. A branchless construct has nothing to fill or comment."
-  see-also: no-early-returns
+  reason: "An empty branch beside a real one gives 'nothing happens' the same weight as the real case, though it's incidental, not meaningful. Making it explicit then forces a stray empty block or a comment that just restates the condition. A branchless construct has nothing to fill or comment. Narrower than this domain's 'no early returns' preamble convention, above — that convention was never meant to force a true structural absence into a populated if/else shell."
 
 killed:
 
