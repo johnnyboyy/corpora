@@ -36,6 +36,43 @@ class CorpusCommandTestCase(unittest.TestCase):
             + "\n```\n"
         )
 
+    def write_manifest(self, entries="screens: []"):
+        manifest_dir = self.root / "corpora" / "screenshots"
+        manifest_dir.mkdir(parents=True, exist_ok=True)
+        (manifest_dir / "manifest.md").write_text(
+            "# Screenshot manifest\n\n```yaml\n"
+            + textwrap.dedent(entries).strip()
+            + "\n```\n"
+        )
+
+    def write_image(self, relative_path):
+        image_path = self.root / "corpora" / "screenshots" / relative_path
+        image_path.parent.mkdir(parents=True, exist_ok=True)
+        image_path.write_bytes(b"fake-png")
+
+    def write_handoff(self, ui_drift="ui-drift:\n  screens: []\n  components: []", status="complete"):
+        path = self.root / "handoff.md"
+        path.write_text(f"""---
+role: coder
+status: {status}
+domains-loaded: [coding-general]
+proposals: []
+utility-candidates: []
+violations-noted: []
+{ui_drift}
+token-usage: "n/a"
+delegated-workers: []
+---
+
+## Artifact
+
+Nothing.
+
+## Surfaced
+
+""")
+        return path
+
     def run_command(self, command):
         command = [command] if isinstance(command, str) else command
         return subprocess.run(
@@ -320,6 +357,293 @@ class DeferredAndUtilityCommandsTest(CorpusCommandTestCase):
         self.assertIn("requires --reason", missing.stderr)
         self.assertEqual(saved.returncode, 0, saved.stderr + saved.stdout)
         self.assertEqual(linted.returncode, 0, linted.stderr + linted.stdout)
+
+
+class LintHandoffUiDriftTest(CorpusCommandTestCase):
+    def test_valid_nested_ui_drift_passes(self):
+        path = self.write_handoff()
+
+        result = self.run_command(["lint-handoff", str(path)])
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        self.assertIn("PASS", result.stdout)
+
+    def test_populated_nested_ui_drift_passes(self):
+        path = self.write_handoff(
+            ui_drift="ui-drift:\n  screens: [now-playing]\n  components: [like-button]"
+        )
+
+        result = self.run_command(["lint-handoff", str(path)])
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+
+    def test_missing_ui_drift_fails(self):
+        path = self.write_handoff(ui_drift="")
+
+        result = self.run_command(["lint-handoff", str(path)])
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("ui-drift.screens missing or not a list", result.stdout)
+        self.assertIn("ui-drift.components missing or not a list", result.stdout)
+
+    def test_old_boolean_shape_fails(self):
+        path = self.write_handoff(ui_drift="ui-drift: no")
+
+        result = self.run_command(["lint-handoff", str(path)])
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("ui-drift.screens missing or not a list", result.stdout)
+        self.assertIn("ui-drift.components missing or not a list", result.stdout)
+
+    def test_missing_components_field_fails(self):
+        path = self.write_handoff(ui_drift="ui-drift:\n  screens: []")
+
+        result = self.run_command(["lint-handoff", str(path)])
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("ui-drift.components missing or not a list", result.stdout)
+        self.assertNotIn("ui-drift.screens missing", result.stdout)
+
+
+class ScreenshotCommandsTest(CorpusCommandTestCase):
+    @staticmethod
+    def screen(identifier="now-playing", components="transport-cluster, like-button",
+               status="current", last_touched="2026-07-21", variant_label="default",
+               variant_path=None, captured="2026-07-21"):
+        variant_path = variant_path or f"{identifier}/{variant_label}.png"
+        return f"""
+        screens:
+          - id: {identifier}
+            components: [{components}]
+            status: {status}
+            last-touched: {last_touched}
+            variants:
+              - label: {variant_label}
+                path: {variant_path}
+                captured: {captured}
+        """
+
+    def test_lint_missing_manifest_fails(self):
+        result = self.run_command("lint-screenshots")
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("no corpora/screenshots/manifest.md", result.stderr)
+
+    def test_lint_valid_manifest_passes(self):
+        self.write_manifest(self.screen())
+        self.write_image("now-playing/default.png")
+
+        result = self.run_command("lint-screenshots")
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        self.assertIn("1 screens", result.stdout)
+
+    def test_lint_empty_manifest_passes(self):
+        self.write_manifest()
+
+        result = self.run_command("lint-screenshots")
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        self.assertIn("0 screens", result.stdout)
+
+    def test_lint_catches_missing_path_on_disk(self):
+        self.write_manifest(self.screen())
+        # deliberately do not write the image file
+
+        result = self.run_command("lint-screenshots")
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("does not exist on disk", result.stdout)
+
+    def test_lint_catches_missing_captured_date(self):
+        self.write_manifest(self.screen(captured=""))
+        self.write_image("now-playing/default.png")
+
+        result = self.run_command("lint-screenshots")
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("missing captured date", result.stdout)
+
+    def test_lint_catches_orphaned_image(self):
+        self.write_manifest()
+        self.write_image("stray/orphan.png")
+
+        result = self.run_command("lint-screenshots")
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("orphaned image not in manifest: stray/orphan.png", result.stdout)
+
+    def test_lint_catches_duplicate_ids(self):
+        first = textwrap.dedent(self.screen()).strip()
+        second = textwrap.dedent(self.screen()).strip().removeprefix("screens:\n")
+        self.write_manifest(first + "\n" + second)
+        self.write_image("now-playing/default.png")
+
+        result = self.run_command("lint-screenshots")
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("duplicate id", result.stdout)
+
+    def test_lint_catches_invalid_status(self):
+        self.write_manifest(self.screen(status="fresh"))
+        self.write_image("now-playing/default.png")
+
+        result = self.run_command("lint-screenshots")
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("status must be one of", result.stdout)
+
+    def test_screenshot_record_creates_new_screen(self):
+        self.write_manifest()
+
+        result = self.run_command([
+            "screenshot-record", "--screen", "now-playing", "--variant", "default",
+            "--path", "now-playing/default.png",
+            "--components", "transport-cluster, like-button",
+        ])
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        manifest_text = (self.root / "corpora" / "screenshots" / "manifest.md").read_text()
+        self.assertIn("id: now-playing", manifest_text)
+        self.assertIn("status: current", manifest_text)
+        self.assertIn("components: [transport-cluster, like-button]", manifest_text)
+        self.assertIn("path: now-playing/default.png", manifest_text)
+
+    def test_screenshot_record_updates_existing_variant(self):
+        self.write_manifest()
+        self.run_command([
+            "screenshot-record", "--screen", "now-playing", "--variant", "default",
+            "--path", "now-playing/default.png", "--components", "transport-cluster",
+        ])
+
+        result = self.run_command([
+            "screenshot-record", "--screen", "now-playing", "--variant", "default",
+            "--path", "now-playing/default.png", "--components", "transport-cluster, queue-sheet",
+        ])
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        manifest_text = (self.root / "corpora" / "screenshots" / "manifest.md").read_text()
+        self.assertIn("components: [transport-cluster, queue-sheet]", manifest_text)
+        # only one variant entry for the same label, not a duplicate
+        self.assertEqual(manifest_text.count("label: default"), 1)
+
+    def test_screenshot_record_adds_second_variant(self):
+        self.write_manifest()
+        self.run_command([
+            "screenshot-record", "--screen", "now-playing", "--variant", "default",
+            "--path", "now-playing/default.png", "--components", "transport-cluster",
+        ])
+
+        result = self.run_command([
+            "screenshot-record", "--screen", "now-playing", "--variant", "dark",
+            "--path", "now-playing/dark.png", "--components", "transport-cluster",
+        ])
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        manifest_text = (self.root / "corpora" / "screenshots" / "manifest.md").read_text()
+        self.assertIn("label: default", manifest_text)
+        self.assertIn("label: dark", manifest_text)
+
+    def test_screenshot_mark_stale_direct_screen(self):
+        self.write_manifest(self.screen())
+        self.write_image("now-playing/default.png")
+
+        result = self.run_command([
+            "screenshot-mark-stale", "--screens", "now-playing", "--components", "",
+        ])
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        self.assertIn("marked stale: now-playing", result.stdout)
+        manifest_text = (self.root / "corpora" / "screenshots" / "manifest.md").read_text()
+        self.assertIn("status: stale", manifest_text)
+
+    def test_screenshot_mark_stale_ripples_via_shared_component(self):
+        entries = (
+            textwrap.dedent(self.screen(identifier="now-playing", components="queue-sheet")).strip()
+            + "\n"
+            + textwrap.dedent(
+                self.screen(identifier="discover", components="queue-sheet",
+                            variant_path="discover/default.png")
+            ).strip().removeprefix("screens:\n")
+        )
+        self.write_manifest(entries)
+        self.write_image("now-playing/default.png")
+        self.write_image("discover/default.png")
+
+        result = self.run_command([
+            "screenshot-mark-stale", "--screens", "", "--components", "queue-sheet",
+        ])
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        self.assertIn("now-playing", result.stdout)
+        self.assertIn("discover", result.stdout)
+        manifest_text = (self.root / "corpora" / "screenshots" / "manifest.md").read_text()
+        self.assertEqual(manifest_text.count("status: stale"), 2)
+
+    def test_screenshot_mark_stale_unknown_screen_is_noop(self):
+        self.write_manifest(self.screen())
+        self.write_image("now-playing/default.png")
+
+        result = self.run_command([
+            "screenshot-mark-stale", "--screens", "nonexistent-screen", "--components", "",
+        ])
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        self.assertIn("marked stale: none", result.stdout)
+
+    def test_screenshot_status_lists_current_and_stale(self):
+        entries = (
+            textwrap.dedent(self.screen(identifier="now-playing")).strip()
+            + "\n"
+            + textwrap.dedent(
+                self.screen(identifier="discover", status="stale", variant_path="discover/default.png")
+            ).strip().removeprefix("screens:\n")
+        )
+        self.write_manifest(entries)
+        self.write_image("now-playing/default.png")
+        self.write_image("discover/default.png")
+
+        result = self.run_command("screenshot-status")
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        self.assertIn("1 current, 1 stale", result.stdout)
+        self.assertIn("now-playing", result.stdout)
+        self.assertIn("discover", result.stdout)
+
+    def test_screenshot_status_absent_manifest(self):
+        result = self.run_command("screenshot-status")
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        self.assertIn("absent", result.stdout)
+
+    def test_screenshot_lookup_finds_matching_screens(self):
+        entries = (
+            textwrap.dedent(self.screen(identifier="now-playing", components="queue-sheet")).strip()
+            + "\n"
+            + textwrap.dedent(
+                self.screen(identifier="discover", components="hero-card",
+                            variant_path="discover/default.png")
+            ).strip().removeprefix("screens:\n")
+        )
+        self.write_manifest(entries)
+        self.write_image("now-playing/default.png")
+        self.write_image("discover/default.png")
+
+        result = self.run_command(["screenshot-lookup", "--component", "queue-sheet"])
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        self.assertIn("now-playing", result.stdout)
+        self.assertIn("now-playing/default.png", result.stdout)
+        self.assertNotIn("discover", result.stdout)
+
+    def test_screenshot_lookup_no_matches(self):
+        self.write_manifest(self.screen())
+        self.write_image("now-playing/default.png")
+
+        result = self.run_command(["screenshot-lookup", "--component", "nonexistent-component"])
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        self.assertIn("no screens tagged", result.stdout)
 
 
 class RecordGateCoOccurrenceAndOriginTest(CorpusCommandTestCase):

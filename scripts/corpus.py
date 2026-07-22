@@ -27,6 +27,11 @@ Commands:
   sync-done                        reset library-drift after a UI-library sync
   adopt --domain D                 locate D's seed/pack file and print it for curation into a
                                    project-local fork (fork-status: forked)
+  screenshot-record [...]          register/update a captured screen variant in the manifest
+  screenshot-mark-stale [...]      invalidate screens by direct id or shared-component ripple
+  screenshot-status                list current/stale screens in the manifest
+  screenshot-lookup --component C  which screens already show component C, and where
+  lint-screenshots                 validate the screenshot manifest structurally
 
 Thresholds (kernel.md, "The retrospective"): retrospective when ratified >= 6,
 or tokens grew >= 50% over baseline, or gate-violations >= 3; library sync when
@@ -54,6 +59,7 @@ DEFERRED_STANCE_ENUM = {"convergent", "divergent"}
 DEFERRED_STATUS_ENUM = {"queued", "resolved"}
 UTILITY_STATUS_ENUM = {"open", "deferred", "denied", "accepted", "implemented"}
 UTILITY_STATUS_REQUIRES_REASON = {"deferred", "denied"}
+SCREENSHOT_STATUS_ENUM = {"current", "stale"}
 
 
 def today() -> str:
@@ -79,6 +85,8 @@ class Project:
         self.handoffs_dir = os.path.join(root, "corpora", "handoffs")
         self.deferred_path = os.path.join(root, "corpora", "deferred-decisions.md")
         self.utility_candidates_path = os.path.join(root, "corpora", "utility-candidates.md")
+        self.screenshots_dir = os.path.join(root, "corpora", "screenshots")
+        self.screenshot_manifest_path = os.path.join(self.screenshots_dir, "manifest.md")
         if not os.path.isdir(self.domains_dir):
             fail(f"no corpora/domains under {root} — run from a bootstrapped project root, or pass --root")
 
@@ -305,7 +313,7 @@ def cmd_verify(project: Project, _args) -> None:
 
 
 def _ids(arg: str) -> list:
-    return [s for s in (arg or "").split(",") if s.strip()]
+    return [s.strip() for s in (arg or "").split(",") if s.strip()]
 
 
 def cmd_record_gate(project: Project, args) -> None:
@@ -370,6 +378,24 @@ def cmd_triggers(project: Project, _args) -> None:
         print("triggers: none")
 
 
+def parse_ui_drift(front: str) -> dict:
+    """Extract the nested `ui-drift: {screens: [...], components: [...]}` field from a
+    handoff's frontmatter. Returns only the sub-fields that are present and shaped as a
+    bracketed list — the old flat `ui-drift: yes|no` shape yields an empty dict, since
+    neither sub-field parses out of it.
+    """
+    m = re.search(r"^ui-drift:\s*\n((?:[ \t]+\S.*\n?)*)", front, re.MULTILINE)
+    if not m:
+        return {}
+    block = m.group(1)
+    result = {}
+    for key in ("screens", "components"):
+        km = re.search(rf"^\s*{key}:\s*(\[.*?\])\s*$", block, re.MULTILINE)
+        if km:
+            result[key] = km.group(1)
+    return result
+
+
 def cmd_lint_handoff(_project: Project, args) -> None:
     path = args.file
     if not os.path.exists(path):
@@ -392,9 +418,10 @@ def cmd_lint_handoff(_project: Project, args) -> None:
     status = field("status")
     if status not in STATUS_ENUM:
         problems.append(f"frontmatter: status '{status}' not in {sorted(STATUS_ENUM)}")
-    drift = field("ui-drift")
-    if drift and drift.split("#")[0].strip() not in {"yes", "no"}:
-        problems.append(f"frontmatter: ui-drift '{drift}' must be yes|no")
+    drift = parse_ui_drift(front)
+    for key in ("screens", "components"):
+        if key not in drift:
+            problems.append(f"frontmatter: ui-drift.{key} missing or not a list")
     prop_block = re.search(r"^proposals:\n((?:[ \t]+.*\n?)*)", front, re.MULTILINE)
     if prop_block and prop_block.group(1).strip() not in ("", "[]"):
         items = re.split(r"^\s*- ", prop_block.group(1), flags=re.MULTILINE)[1:]
@@ -742,6 +769,237 @@ def cmd_set_utility_status(project: Project, args) -> None:
     print(f"utility candidate {args.id}: status={args.status}")
 
 
+# ── screenshot cache: manifest parse / render / commands ────────────────────
+# `screens: [{..., variants: [{...}]}]` is two levels of nested lists — same depth as
+# `candidates: [{..., evidence: [{...}]}]`, so the parser is modeled on
+# `parse_utility_candidates`, not the flat `parse_state`, which cannot represent it.
+
+def parse_screenshot_manifest(path: str) -> list:
+    entries = []
+    item = None
+    variant = None
+    in_screens = False
+    in_variants = False
+    for raw in open(path):
+        line = raw.rstrip()
+        stripped = line.strip()
+        if in_screens and stripped == "```":
+            break
+        if stripped in {"screens:", "screens: []"}:
+            in_screens = True
+            continue
+        if not in_screens or not stripped or stripped.startswith(("#", "```")):
+            continue
+        if re.match(r"^\s{2}-\s+id:\s*", line):
+            item = {"components": [], "variants": []}
+            entries.append(item)
+            item["id"] = stripped.partition(":")[2].strip().strip('"').strip("'")
+            in_variants = False
+            continue
+        if item is None:
+            continue
+        top = re.match(r"^\s{4}([a-z][a-z0-9-]*):\s*(.*)$", line)
+        if top:
+            key, value = top.groups()
+            in_variants = key == "variants"
+            if in_variants:
+                variant = None
+                continue
+            if key == "components":
+                value = value.strip()
+                if value.startswith("[") and value.endswith("]"):
+                    item["components"] = [c.strip() for c in value[1:-1].split(",") if c.strip()]
+                else:
+                    item["components"] = []
+                continue
+            item[key] = value.strip().strip('"').strip("'")
+            continue
+        label_m = re.match(r"^\s{6}-\s+label:\s*(.*)$", line)
+        if in_variants and label_m:
+            variant = {"label": label_m.group(1).strip().strip('"').strip("'")}
+            item["variants"].append(variant)
+            continue
+        field_m = re.match(r"^\s{8}(path|captured):\s*(.*)$", line)
+        if in_variants and variant is not None and field_m:
+            key, value = field_m.groups()
+            variant[key] = value.strip().strip('"').strip("'")
+    return entries
+
+
+def screenshot_manifest_problems(entries: list, screenshots_dir: str) -> list:
+    problems = []
+    seen = set()
+    referenced = set()
+    for index, entry in enumerate(entries, 1):
+        label = entry.get("id") or f"entry {index}"
+        if not entry.get("id"):
+            problems.append(f"{label}: missing id")
+        if entry.get("id") in seen:
+            problems.append(f"{label}: duplicate id")
+        seen.add(entry.get("id"))
+        if entry.get("status") not in SCREENSHOT_STATUS_ENUM:
+            problems.append(f"{label}: status must be one of {sorted(SCREENSHOT_STATUS_ENUM)}")
+        if not entry.get("last-touched"):
+            problems.append(f"{label}: missing last-touched")
+        if not entry.get("variants"):
+            problems.append(f"{label}: requires at least one variant")
+        for vindex, variant in enumerate(entry.get("variants", []), 1):
+            vlabel = f"{label} variant {vindex}"
+            if not variant.get("label"):
+                problems.append(f"{vlabel}: missing label")
+            path = variant.get("path", "")
+            if not path:
+                problems.append(f"{vlabel}: missing path")
+            else:
+                referenced.add(path)
+                if not os.path.exists(os.path.join(screenshots_dir, path)):
+                    problems.append(f"{vlabel}: path '{path}' does not exist on disk")
+            captured = variant.get("captured", "")
+            if not captured:
+                problems.append(f"{vlabel}: missing captured date")
+            else:
+                try:
+                    datetime.date.fromisoformat(captured)
+                except ValueError:
+                    problems.append(f"{vlabel}: captured must be valid YYYY-MM-DD")
+    if os.path.isdir(screenshots_dir):
+        for root, _dirs, files in os.walk(screenshots_dir):
+            for name in files:
+                if not name.endswith(".png"):
+                    continue
+                rel = os.path.relpath(os.path.join(root, name), screenshots_dir)
+                if rel not in referenced:
+                    problems.append(f"orphaned image not in manifest: {rel}")
+    return problems
+
+
+def save_screenshot_manifest(path: str, entries: list) -> None:
+    lines = ["# Screenshot manifest", "", "```yaml"]
+    if not entries:
+        lines.append("screens: []")
+    else:
+        lines.append("screens:")
+        for entry in entries:
+            lines.extend([
+                f"  - id: {entry['id']}",
+                f"    components: [{', '.join(entry.get('components', []))}]",
+                f"    status: {entry['status']}",
+                f"    last-touched: {entry['last-touched']}",
+                "    variants:",
+            ])
+            for variant in entry["variants"]:
+                lines.extend([
+                    f"      - label: {variant['label']}",
+                    f"        path: {variant['path']}",
+                    f"        captured: {variant['captured']}",
+                ])
+    lines.extend(["```", ""])
+    open(path, "w").write("\n".join(lines))
+
+
+def cmd_lint_screenshots(project: Project, _args) -> None:
+    path = project.screenshot_manifest_path
+    if not os.path.exists(path):
+        fail("no corpora/screenshots/manifest.md — create it (e.g. via bootstrap Phase 2's "
+             "seeding step) before linting")
+    entries = parse_screenshot_manifest(path)
+    problems = screenshot_manifest_problems(entries, project.screenshots_dir)
+    if problems:
+        print(f"FAIL {path}")
+        for problem in problems:
+            print(f"  - {problem}")
+        sys.exit(1)
+    print(f"PASS {path} ({len(entries)} screens)")
+
+
+def cmd_screenshot_status(project: Project, _args) -> None:
+    path = project.screenshot_manifest_path
+    if not os.path.exists(path):
+        print("screenshot manifest: absent")
+        return
+    entries = parse_screenshot_manifest(path)
+    if screenshot_manifest_problems(entries, project.screenshots_dir):
+        print("screenshot manifest is invalid; run `lint-screenshots`")
+        sys.exit(1)
+    if not entries:
+        print("screenshot manifest: empty")
+        return
+    current = sorted((e for e in entries if e.get("status") == "current"), key=lambda e: e["id"])
+    stale = sorted((e for e in entries if e.get("status") == "stale"), key=lambda e: e["id"])
+    print(f"screenshot manifest: {len(current)} current, {len(stale)} stale")
+    if current:
+        print("  current:")
+        for entry in current:
+            print(f"    - {entry['id']}  components=[{', '.join(entry.get('components', []))}]")
+    if stale:
+        print("  stale:")
+        for entry in stale:
+            print(f"    - {entry['id']}  components=[{', '.join(entry.get('components', []))}]")
+
+
+def cmd_screenshot_lookup(project: Project, args) -> None:
+    path = project.screenshot_manifest_path
+    if not os.path.exists(path):
+        print("screenshot manifest: absent")
+        return
+    entries = parse_screenshot_manifest(path)
+    if screenshot_manifest_problems(entries, project.screenshots_dir):
+        print("screenshot manifest is invalid; run `lint-screenshots`")
+        sys.exit(1)
+    matches = [e for e in entries if args.component in e.get("components", [])]
+    if not matches:
+        print(f"no screens tagged with component '{args.component}'")
+        return
+    print(f"screens showing '{args.component}':")
+    for entry in matches:
+        for variant in entry.get("variants", []):
+            print(f"  - {entry['id']} ({variant['label']}): {variant['path']}  status={entry['status']}")
+
+
+def cmd_screenshot_record(project: Project, args) -> None:
+    path = project.screenshot_manifest_path
+    entries = parse_screenshot_manifest(path) if os.path.exists(path) else []
+    entry = next((e for e in entries if e["id"] == args.screen), None)
+    if entry is None:
+        entry = {"id": args.screen, "components": [], "status": "current",
+                  "last-touched": today(), "variants": []}
+        entries.append(entry)
+    entry["components"] = _ids(args.components)
+    entry["status"] = "current"
+    entry["last-touched"] = today()
+    variant = next((v for v in entry["variants"] if v["label"] == args.variant), None)
+    if variant is None:
+        entry["variants"].append({"label": args.variant, "path": args.path, "captured": today()})
+    else:
+        variant["path"] = args.path
+        variant["captured"] = today()
+    os.makedirs(project.screenshots_dir, exist_ok=True)
+    save_screenshot_manifest(path, entries)
+    print(f"screenshot recorded: {args.screen}/{args.variant} -> {args.path} "
+          f"(status=current, components=[{', '.join(entry['components'])}])")
+
+
+def cmd_screenshot_mark_stale(project: Project, args) -> None:
+    path = project.screenshot_manifest_path
+    if not os.path.exists(path):
+        print("screenshot manifest: absent — nothing to mark stale")
+        return
+    entries = parse_screenshot_manifest(path)
+    if screenshot_manifest_problems(entries, project.screenshots_dir):
+        fail("screenshot manifest is invalid — run `lint-screenshots`")
+    direct = set(_ids(args.screens))
+    ripple_components = set(_ids(args.components))
+    invalidated = []
+    for entry in entries:
+        rippled = bool(ripple_components & set(entry.get("components", [])))
+        if entry["id"] in direct or rippled:
+            if entry.get("status") != "stale":
+                invalidated.append(entry["id"])
+            entry["status"] = "stale"
+    save_screenshot_manifest(path, entries)
+    print(f"marked stale: {', '.join(invalidated) if invalidated else 'none'}")
+
+
 def cmd_retro_done(project: Project, args) -> None:
     state = load(project)
     for c in state["counters"]:
@@ -1035,6 +1293,18 @@ def main() -> None:
     sub.add_parser("sync-done")
     ad = sub.add_parser("adopt")
     ad.add_argument("--domain", required=True)
+    sr = sub.add_parser("screenshot-record")
+    sr.add_argument("--screen", required=True)
+    sr.add_argument("--variant", required=True)
+    sr.add_argument("--path", required=True)
+    sr.add_argument("--components", default="", help="comma-separated component names")
+    sm = sub.add_parser("screenshot-mark-stale")
+    sm.add_argument("--screens", default="", help="comma-separated screen ids touched directly")
+    sm.add_argument("--components", default="", help="comma-separated shared components changed")
+    sub.add_parser("screenshot-status")
+    sl = sub.add_parser("screenshot-lookup")
+    sl.add_argument("--component", required=True)
+    sub.add_parser("lint-screenshots")
     kr = sub.add_parser("kill-report", help="works on any domains-dir + audit.md pair, not only a project's corpora/domains")
     kr.add_argument("--domains-dir", required=True)
     kr.add_argument("--audit", required=True)
@@ -1060,7 +1330,12 @@ def main() -> None:
      "record-utility-candidate": cmd_record_utility_candidate,
      "set-utility-status": cmd_set_utility_status,
      "retro-done": cmd_retro_done, "sync-done": cmd_sync_done,
-     "adopt": cmd_adopt}[args.cmd](project, args)
+     "adopt": cmd_adopt,
+     "screenshot-record": cmd_screenshot_record,
+     "screenshot-mark-stale": cmd_screenshot_mark_stale,
+     "screenshot-status": cmd_screenshot_status,
+     "screenshot-lookup": cmd_screenshot_lookup,
+     "lint-screenshots": cmd_lint_screenshots}[args.cmd](project, args)
 
 
 if __name__ == "__main__":
