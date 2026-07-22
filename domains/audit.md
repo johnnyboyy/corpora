@@ -146,6 +146,10 @@ provenance:
       type: generalized
       reason: "Reworded from 'spawn the UI Designer' to 'spawn a ui-design-composed spawn' — ui-designer.md no longer exists as a file. No change to the judgment."
 
+- id: screenshot-recapture-is-orchestrator-mechanical
+  domain: orchestrator-routing
+  provenance: "2026-07-22, UI screenshot cache design (docs/superpowers/specs/2026-07-22-ui-screenshot-cache-design.md). A fresh-context review of the design found that grounding orchestrator-run recapture by analogy to `corpus.py` invocation alone was a weaker fit than presented — script invocation has zero interpretation, while navigating to the correct rendered state to capture involves some procedural judgment. This principle states the narrower claim directly and names the boundary against `stop-and-route` explicitly (visual judgment about the recaptured state routes to a role; mechanical recording of current state does not)."
+
 # domain: ratify-gate (split from orchestrator-routing 2026-07-18; see LINEAGE.md, "The ratify-gate split")
 - id: pre-scan-before-spawning
   domain: ratify-gate

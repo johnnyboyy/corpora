@@ -86,6 +86,11 @@ principles:
   condition: "When routing a task whose scope spans many independent files or units."
   reason: "Workstream boundaries affect routing, role ownership, and operator visibility, so they belong to the orchestrator. Local execution decomposition does not change ownership and is cheaper for the role closest to the work to manage."
 
+- id: screenshot-recapture-is-orchestrator-mechanical
+  rule: "Operate the project's browser automation tool directly to recapture a stale screen for the screenshot cache (`corpora/screenshots/manifest.md`), rather than spawning a role for it. Route to a role instead when the task requires visual judgment about what the recaptured state should look like."
+  condition: "At ratify-gate time, once `screenshot-mark-stale` has flagged one or more screens stale from a handoff's `ui-drift` fields."
+  reason: "Recording the current rendered state requires no design or code judgment — only navigating to the right screen and saving what is already there — so it fits the same in-scope-for-the-orchestrator shape as running `corpus.py` directly. This is a narrower claim than script invocation, which has zero interpretation; reaching the correct rendered state to capture involves some procedural judgment, which is why the carve-out to `stop-and-route` names visual judgment specifically rather than treating all browser-tool use as mechanical."
+
 killed:
 
 - id: design-question-during-coder-session
