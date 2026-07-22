@@ -89,7 +89,8 @@ because the audit load is *broad* (the orchestrator pulls the whole layer at onc
       count: 3
 
   library-drift:                   # project layer only, when has-ui: yes
-    since-last-sync: 2             # gates where a handoff carried ui-drift: yes
+    since-last-sync: 2             # gates where a handoff's ui-drift.screens or .components
+                                    #   was non-empty
   ```
 
   Efficacy counts must never enter a working file — a role that sees them will start writing
@@ -408,8 +409,10 @@ proposals:                   # principle proposals, provenance attached at propo
     provenance: "date, task, context"
 utility-candidates: []       # plausible deterministic shortcuts observed during work
 violations-noted: []         # existing principles this work knowingly deviated from, with why
-ui-drift: no                 # yes | no — did this work change the rendered visual system
-                             #   (new component, changed treatment, retired pattern)
+ui-drift:                    # both invalidation signals — a spawn names only what it touched
+  screens: []                 #   screen ids directly worked on, if any
+  components: []               #   shared component names changed, if any (matches
+                                #   ui-library.md's own component vocabulary headings)
 token-usage: "..."           # per spawn-token-summary
 delegated-workers: []        # worker scopes, if this role delegated execution
 ---
@@ -453,10 +456,14 @@ Field notes:
   unavailable, use the structured replacement protocol in
   `SKILL.md`; never rebuild from raw transcript. Same bar as
   gap-closing dialogue: only questions whose answers would produce materially different outputs.
-- **`ui-drift`** is the mechanical staleness signal for the project's UI library, self-reported
-  while the role's context is fresh. It is *counted at the ratify gate* (see the `library-drift`
-  counter below), so experimental work that is discarded never reaches a gate and never triggers
-  a library sync.
+- **`ui-drift`** is the mechanical staleness signal for the project's UI library and its
+  screenshot cache (`corpora/screenshots/manifest.md`), self-reported while the role's context is
+  fresh. `screens:` names what was worked on directly; `components:` names shared components that
+  changed. Empty on both means no drift. A spawn never has to enumerate which *other* screens a
+  changed shared component appears on — at the ratify gate, `screenshot-mark-stale` expands
+  `components:` into every screen the manifest's own tags already show it on, mechanically. It is
+  also *counted at the ratify gate* (see the `library-drift` counter below), so experimental work
+  that is discarded never reaches a gate and never triggers a library sync.
 - **`Surfaced`** is the schema's escape valve: the envelope can under-fit but cannot suppress.
   Recurring traffic of the same *kind* in `Surfaced` is a retrospective signal that the schema
   needs a field — schema evolution from accumulated tension, through the gate, never speculative.
