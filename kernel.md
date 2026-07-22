@@ -308,24 +308,22 @@ carries `date`, `type` (generalized / consolidated / split / moved), and `reason
 ```
 
 Retired principle — folded into scene-setting: when a principle has been ratified long enough that
-checking its `condition` and `reason` before every task is friction without benefit, it does not
-graduate to a separate authority tier. Move its substance into the domain's own **preamble** — the
-scene-setting prose read before the working file's `principles:` list — and remove the entry from
-`principles:`. A preamble doesn't read as more authoritative than a principle; it's just the frame
-read first. Add a `history:` entry (`type: folded-to-preamble`) to the principle's audit-layer
-`provenance` record so the trail stays legible — a principle that reappears as a corpus proposal
-after being folded is a signal of regression, not new insight, exactly as the old `promoted:` log
-was for.
+checking its `condition` and `reason` before every task is friction without benefit, move its
+substance into the domain's own **preamble** — the scene-setting prose read before the working
+file's `principles:` list — and remove the entry from `principles:`. This is not a separate
+authority tier: a preamble doesn't read as more authoritative than a principle, it's just the
+frame read first. Add a `history:` entry (`type: folded-to-preamble`) to the principle's
+audit-layer `provenance` record so the trail stays legible — a principle that reappears as a
+corpus proposal after being folded is a signal of regression, not new insight.
 
-The other job `promoted:` used to do — "this principle has outgrown its narrow domain, belongs
-somewhere more general or deserves a new domain" — is not a distinct mechanism either: it is
-exactly what the structural-kinship/condensation signal (see "The retrospective," below) and the
-gate's ordinary domain-reassignment judgment already catch. No parallel "laws vs. rules" split is
-introduced — an entry exempt from condition-checking is *more* dangerous, not more trustworthy,
-and a separate authority tier would reintroduce the same ossification risk a persistent lens
-file's baked prompt text had.
+A principle that has outgrown its narrow domain — belongs somewhere more general, or warrants a
+new domain of its own — is handled by the same mechanism as any other domain reassignment: the
+structural-kinship/condensation signal (see "The retrospective," below) and the gate's ordinary
+domain-reassignment judgment. No parallel "laws vs. rules" split exists here — an entry exempt
+from condition-checking is *more* dangerous, not more trustworthy, and a separate authority tier
+would carry an ossification risk not worth taking on.
 
-**Promotion restraint** still applies to the fold-to-preamble case: before folding, ask whether the
+**Promotion restraint** applies to the fold-to-preamble case: before folding, ask whether the
 role would still need to reconsider this when the project context changes. Fold only if the
 judgment is stable *across the kinds of projects the domain serves* — or is so foundational that
 contestability has genuinely become noise — not merely because it has repeated inside one project
