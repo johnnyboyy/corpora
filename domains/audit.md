@@ -37,6 +37,10 @@ provenance:
 - id: ceiling-comment-for-deliberate-shortcuts
   domain: coding-general
   provenance: "2026-06-15, adapted from ponytail skill review."
+  history:
+    - date: 2026-07-19
+      type: extended
+      reason: "slider-puzzle project, tag-identity-dependencies-check-before-handoff discussion. Operator pointed out that the rule as written already bounds the comment with a named upgrade condition, but nothing in the principle schedules an actual re-check of that condition — it can drift the same way an unbounded comment would if no one happens to reread that line. Added an explicit re-check anchored to the existing structural-examination-at-working-checkpoint pass rather than leaving the condition to be noticed by chance."
 
 - id: two-approaches-then-decide
   domain: coding-general
@@ -62,6 +66,15 @@ provenance:
   domain: coding-general
   kind: judgment
   provenance: "Promoted from FAMOUS project domain 2026-07-06. Surfaced 2026-07-05, FAMOUS lens system refactoring session: after implementing view transitions + scroll restoration + typed ref registry, the examination pass surfaced the thin useScrollLensRef wrapper, an anonymous scroll-restoration useLayoutEffect, string-selector coupling, and the emergent LensRowEntry grouping. Promoted from FAMOUS to seed — condition makes no reference to FAMOUS-specific structure."
+  history:
+    - date: 2026-07-19
+      type: clarified
+      reason: "slider-puzzle project, tag-identity-dependencies-check-before-handoff discussion. The condition anchored to 'before creating the commit,' but the coder lens doesn't control whether or when a commit happens — the orchestrator does, per the ratify gate's step 9. Re-anchored to the coder's own terminal act, the handoff artifact, which every coder session actually has. The ceiling-comment-for-deliberate-shortcuts amendment made the same day pointed at this principle's checkpoint by name, so it inherited the same fix rather than needing a separate one."
+
+- id: tag-identity-dependencies-check-before-handoff
+  domain: coding-general
+  kind: judgment
+  provenance: "Promoted 2026-07-19 from the slider-puzzle project's coding-general domain. Discovered when a tile-slide CSS transition never animated: renderBoard() reset boardElement.innerHTML and rebuilt every tile element on each render, leaving no persistent DOM node for the transition to interpolate from — a bug invisible to end-state checks (correct final layout, correct CSS, correct before/after screenshots) because none of them can distinguish an animated arrival from an instant one. The principle went through several rounds with the operator before landing here: first scoped narrowly to CSS/DOM animation mechanics, then generalized to any render-time identity/reference dependency (memoization, reference-keyed caches, instance-bound subscriptions), then given an explicit forward-pass tag plus an anchored checkpoint (before the handoff artifact, not 'before commit,' which a coder may not own) after the operator noted that comments drift silently with no compiler check — same objection that produced the ceiling-comment-for-deliberate-shortcuts amendment above. Promoted directly on operator request rather than after multi-project pressure-testing; its condition names no slider-puzzle-specific stack or structure, so it was judged able to argue for itself."
 
 - id: module-boundaries-precede-deployment-separation
   domain: coding-general

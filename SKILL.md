@@ -29,6 +29,11 @@ still frames the task and assembles the role from lens + declared seed domains +
 project domains. Inline, resumed, or isolated execution is decided at route time — see
 "Inline, resume, or isolate."
 
+**Step 0, every session, before bootstrap checks or routing:** load the orchestrator's own
+domains — `domains/orchestrator-routing.md` and `domains/ratify-gate.md`, plus project
+counterparts if present. The orchestrator is a role like any other; it does not get to skip the
+load-before-work rule it applies to everyone else.
+
 ## Role loads and context boundaries
 
 Declaration-level, unconditional: a role's assembled load is its lens file(s) plus its declared
@@ -36,6 +41,10 @@ domains — **nothing from another role's lens or an undeclared domain**. The co
 domains and never design domains. Whether that load enters a fresh or shared context is governed by
 the "Inline, resume, or isolate" routing judgment below; history lives in LINEAGE.md, "Role isolation" and
 "Orchestrator as process."
+
+Any inline switch from one lens to another — in either direction, between any two roles — is a
+role-load event in its own right, not satisfied by an earlier load in the same session. Reload the
+new role's lens + domains at the switch, every time, including the second, third, or Nth switch.
 
 ## Project shape and role packs
 
@@ -72,15 +81,17 @@ is the only fallback; the lens files carry no other "if missing" logic:
   Phase 1 — detect the project's shape, commands, and existing project utilities from the applicable project agent
   instructions, package manifests, lockfiles, and codebase; write
   `corpora/config.md`. Do not proceed until it exists.
-- **Phase 2 (only if `has-ui: yes`):** route a UI designer workstream. Pass the Phase 2 section of
-  `bootstrap.md` as the task, the full content of the `corpora/config.md` just written, and any
-  operator-provided aesthetic references or brand documentation. Ratify its output
-  (`corpora/ui-library.md` and the project's seed design domains) as usual.
-- **Phase 3 (only if `has-ui: yes`, after Phase 2):** route a UX designer workstream with the
-  Phase 3 section of `bootstrap.md` as the task, plus config and the ratified UI library. Ratify
-  its output (`corpora/ux-library.md` + proposals) as usual before role work. UI before UX is
-  deliberate — divergent identity before convergent documentation.
-  If `has-ui: no`, Phase 1 was the whole job.
+- **Routing after Phase 1:** see `bootstrap.md`, "Routing after Phase 1," for the full branch —
+  summarized here. If no concrete operator feature request accompanied the bootstrap, route
+  Phase 2 (only if `has-ui: yes`: UI designer workstream, Phase 2 section of `bootstrap.md` as the
+  task) then Phase 3 (only if `has-ui: yes`, after Phase 2: UX designer workstream, Phase 3 section
+  as the task) directly, exactly as any other role workstream — ratify each as usual. If `has-ui:
+  no` and no feature request, Phase 1 was the whole job. If a concrete feature request *did*
+  accompany the bootstrap, skip the direct Phase 2/3 spawn and instead route a **planner**
+  workstream with a capability description combining the bootstrap need and the feature request;
+  execute the resulting queue (which may include `bootstrap-ui-library`/`bootstrap-ux-library`
+  tasks using the Phase 2/3 sections as their task content, sequenced ahead of the feature's own
+  tasks) per normal routing and ratify-gate judgment, task by task.
 
 Before any role work, for each domain the lens declares, load the seed working file
 (`domains/<domain>.md` in the kernel or pack) then the project working file
@@ -144,7 +155,8 @@ preserves the boundary.
 
 For inline role work: load the role's lens file(s), every domain it declares (seed +
 `corpora/domains/<domain>.md` if it exists), and kernel.md's "The handoff artifact" section into
-the current session before starting.
+the current session before starting. State what was loaded in one line before starting (`Loaded as
+<role>: <lens>, <domains>`) — a silent load is unverifiable; the declaration is the check.
 
 **Starting an isolated role agent:**
 1. Read the role's lens file(s) and, for each declared domain, the seed working file plus the

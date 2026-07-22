@@ -32,6 +32,12 @@ principles:
   reason: "JSON.stringify(NaN) === 'null'. An input cleared to '' → parseFloat('') → NaN → ??(default) still evaluates to NaN. That NaN reaches localStorage as null, breaking any consumer that assumes the TypeScript number type."
   see-also: numeric-inputs-start-empty-not-zero
 
+- id: no-shell-for-structural-absence
+  rule: "If one side of a conditional is a true structural absence — not skipped logic, just nothing to do by definition — don't wrap it in an if/else. Reach for a construct that has no empty branch to begin with, e.g. filter."
+  condition: "A branch where one outcome does nothing at all — typically filtering a collection or checking a predicate."
+  reason: "An empty branch beside a real one gives 'nothing happens' the same weight as the real case, though it's incidental, not meaningful. Making it explicit then forces a stray empty block or a comment that just restates the condition. A branchless construct has nothing to fill or comment."
+  see-also: no-early-returns
+
 killed:
 
 - id: stable-id-not-position-for-deferred-ops

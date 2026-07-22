@@ -21,6 +21,7 @@ plus a settled style stance:
   (`const error = validateRequest(req)`), after which if/else costs nothing. Same Crockford /
   Explicit-by-Default lineage as block arrow bodies; it sits in this pack only because some
   ecosystems (e.g. Go) idiomatically prefer guard clauses — the reasoning itself is general.
+  See also: `no-shell-for-structural-absence`.
 
 ## domains
 

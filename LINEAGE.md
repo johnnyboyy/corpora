@@ -1112,3 +1112,103 @@ files named, not this summary):
 Several pre-existing gaps were found and left as found rather than guess-backfilled: many kills
 and a few active principles across both kernel-seed and pack audit files have no recorded date or
 provenance at all.
+
+---
+
+## Forward-pass identity tagging: a defect class no static check catches
+
+*Decided 2026-07-19 (pre-commit), slider-puzzle three project. Verify current state against
+`domains/coding-general.md` (`tag-identity-dependencies-check-before-handoff`, and the same-day
+amendment to `ceiling-comment-for-deliberate-shortcuts`) and `domains/audit.md`'s provenance for
+both.*
+
+A tile-slide CSS transition never animated: `renderBoard()` reset `boardElement.innerHTML` and
+rebuilt every tile element on each render, leaving no persistent DOM node for the transition to
+interpolate from. The bug was obvious the moment it was encountered — tiles snapped instead of
+sliding — but invisible in the code itself and to every static check available: lint passed,
+type-check passed, the build succeeded, and even an end-state comparison (correct final layout,
+correct CSS, correct before/after screenshots) can't distinguish an animated arrival from an
+instant one, because both produce the identical final DOM. Two locally-correct pieces of code
+(the render function, the CSS transition) broke only in combination, and nothing short of actually
+watching the interaction run would surface it.
+
+The fix is a forward-pass convention, not a review-time check: tag the dependency inline at the
+point of *writing* the code that depends on referential/identity persistence (`//
+[depends-on-identity]: <what must stay the same, and why>`), then grep for the tag and resolve
+every instance — verify-and-delete, or upgrade to an assertion/test if the dependency needs
+protection past the current session — immediately before writing the handoff artifact. The
+principle went through several rounds before landing: first scoped narrowly to CSS/DOM animation
+mechanics, then generalized to any render-time identity dependency (memoization, reference-keyed
+caches, instance-bound subscriptions), then given the anchored pre-handoff checkpoint after the
+operator noted that a comment with no compiler behind it drifts silently from the code it
+describes — the same objection that produced the `ceiling-comment-for-deliberate-shortcuts`
+amendment landed the same day.
+
+**Promoted directly to kernel seed.** The operator built three separate instances of the same
+project; the first two independently reproduced the same bug before the general principle was
+named from the pattern. That satisfies `kernel.md`'s promotion restraint in spirit — the question
+it's protecting against is whether a judgment is stable across the kinds of situations the role
+serves, and independent reproduction across separate build attempts answers that, even though it
+isn't literally cross-project. Its condition also names no slider-puzzle-specific stack or
+structure, so it stands on its own regardless.
+
+---
+
+## Ratify gate gap: no redundancy check against already-loaded principles
+
+*Decided 2026-07-19 (pre-commit), slider-puzzle three project. Verify current state against
+`domains/ratify-gate.md` and the project's own `corpora/domains/ratify-gate.md` at
+`slider-puzzle/three` — this entry records where a gap was found and reasoned about, not that a
+kernel-seed principle now covers it.*
+
+During a project bootstrap (UI/UX library plus proposed principles), two of the proposed
+principles were later found to be redundant with material already loaded at gate time: one
+project-domain principle restated the seed `recoverability.md`'s existing 30-second re-entry
+threshold rather than adding new judgment, and one restated content already committed to the
+ratified `ui-library.md` under `kind: direction`. Both were ratified, then caught and reverted via
+the kill pathway after the fact.
+
+The existing gate audit step checks proposals for *contradiction* against ratified principles
+("audit the output against existing principles... flag violations") but has no step checking for
+*redundancy* — whether a proposal, though internally correct, only restates something the gate
+already has loaded. A role working under "propose liberally" instructions, as bootstrap sessions
+do, is prone to this: it has the full seed corpus loaded (`full-corpus-on-spawn`) but is never
+asked to cross-check novelty against it before proposing. A project-level principle
+(`check-redundancy-before-presenting-proposal`) was written into `slider-puzzle/three`'s
+`corpora/domains/ratify-gate.md` naming this check explicitly. Its condition names no
+project-specific stack or structure, so it may be a promotion candidate — held at project scope
+per `kernel.md`'s promotion restraint pending a second instance, rather than promoted directly on
+one occurrence.
+
+---
+
+## Bootstrap hands off to the planner when a feature request accompanies it
+
+*Decided 2026-07-19 (pre-commit). Verify current state against `bootstrap.md`, "Routing after
+Phase 1," and `SKILL.md`'s bootstrap section.*
+
+Bootstrap's Phase 2 (UI library) and Phase 3 (UX library) had always run as a hardcoded
+orchestrator-driven sequence, spawned unconditionally whenever `has-ui: yes` regardless of what
+triggered the bootstrap. A bootstrap invoked alongside a concrete operator feature request (e.g.
+"make a slider puzzle game") paid for two full designer spawns authoring comprehensive
+from-scratch libraries before the operator got any checkpoint on scope — the feature request
+itself was never decomposed or sequenced, just executed to completion as an afterthought once
+bootstrap finished.
+
+The fix routes the post-Phase-1 decision through the same judgment the orchestrator already
+applies before any spawn (`spawn-threshold-is-spec-scope`): with no concrete feature to scope
+against, Phase 2 then Phase 3 still run directly — there's no real decomposition problem, just a
+fixed two-step, and routing it through the planner would add a hop with nothing to decompose. With
+a feature request, the orchestrator hands off to the **planner** with a capability description
+combining the bootstrap need and the feature, instead of hardcoding the designer spawns. No
+changes were needed to `planner.md` or `domains/planning.md` — the planner already orients,
+decomposes, and sequences by output dependency generically; UI-before-UX ordering falls out on its
+own once the planner notices the UX library genuinely cites the UI library's tokens (a real output
+dependency, not a special-cased ordering rule). One boundary was made explicit in `bootstrap.md`
+rather than left implicit: the planner's dialogue must not ask the audience/aesthetic-direction
+questions Phase 2 opens with — those are the UI designer's own divergent judgment call at
+task-execution time, not decomposition-shaping ambiguity, per the planner lens's existing "do not
+anticipate downstream direction questions" rule. Phase 2 also picked up the restraint clause Phase
+3 already had ("don't invent aspirational patterns; a greenfield project gets a short library that
+grows with the work"), so a planner-scoped task produces a leaner library instead of the same
+speculative one regardless of path.
