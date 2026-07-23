@@ -3,14 +3,15 @@
 The kernel is the shared mechanism every spawn inherits. It is not code — it is a discipline made
 of files plus a loop.
 
-A **spawn** is a *stance* plus a *lens*: a generative posture (the mode of reasoning the agent
-applies) and the **domain corpora**, seeded or ad hoc, the orchestrator applies to the task at
-hand. Spawns do not own corpora. Judgment lives in domains; a lens is the momentary composition
-through which one or more domains are applied to a task. See "Spawns: stance + lens," below.
+A **spawn** is a *stance* plus a *composition*: a generative posture (the mode of reasoning the
+agent applies) and the **domain corpora**, decided fresh by routing judgment each time, the
+orchestrator applies to the task at hand. Spawns do not own corpora. Judgment lives in domains; a
+composition is the momentary combination through which one or more domains are applied to a task.
+See "Spawns: stance + composition," below.
 
 A **domain corpus** is a list of principles about one subject matter, context type, or decision
-class — not a job title. Multiple lenses may declare the same domain, so shared judgment lives
-once. Domain boundaries are *discovered from accumulated tension* (the fork signal in the
+class — not a job title. Multiple compositions may draw on the same domain, so shared judgment
+lives once. Domain boundaries are *discovered from accumulated tension* (the fork signal in the
 retrospective), never declared up front from how a team would be organized.
 
 ---
@@ -123,69 +124,58 @@ every active `id` in a working file has a `provenance` entry in its layer's audi
 
 ---
 
-## Spawns: stance + lens
+## Spawns: stance + composition
 
-A **spawn** is a stance (see "Generative stance," below) plus a **lens** — the composed domain
-subset applied to the task at hand. The orchestrator's actual routing act is *choosing a lens*, not
-assembling a domain list from scratch each time: check whether an existing seeded lens
-(`domains/lenses.md` — `coder`, `ux-design`, `ui-design`, `planner`, `bootstrap-ui`, `bootstrap-ux`,
-and any that have accumulated since) already fits the task's shape, and use it. Only when no seeded
-lens fits — a genuinely novel task shape — does the orchestrator compose an **ad hoc lens**: a fresh
-domain union for this one task, unnamed, not persisted anywhere. Both are the same kind of thing
-(stance + domain subset); "ad hoc" describes how it was assembled, not a different kind of object.
-A spawn is never a persistent named file carrying its own persona prompt and a fixed domain list —
-even a seeded lens carries no persona text, just a domain list and non-normative task-mechanics
-notes (`domains/lenses.md`). Two fixed, universal stance frames exist: convergent and divergent
-(below); everything else about "what this spawn is" comes from the lens.
+A **spawn** is a stance (see "Generative stance," below) plus a **composition** — the domain subset
+applied to the task at hand. The orchestrator's actual routing act is *composing directly*: reading
+the task, deciding stance, and stating the domain subset it needs in the spawn brief (below), every
+time — never through a cached, named intermediate layer. A spawn is never a persistent named file
+carrying its own persona prompt and a fixed domain list; two fixed, universal stance frames exist —
+convergent and divergent (below) — and everything else about "what this spawn is" comes from the
+composed domains themselves, stated fresh in the brief.
 
-A lens's domain subset, seeded or ad hoc, is same-stance domains only — a spawn never mixes domains
-whose principles demand opposite generative stances (see "The hard line," below). A domain is
-available to any lens whose stance and subject match; domains are not "declared by" a lens the way
-principles used to be "declared by" a role.
+A composition's domain subset is same-stance domains only — a spawn never mixes domains whose
+principles demand opposite generative stances (see "The hard line," below). A domain is available
+to any composition whose stance and subject match; domains are not "declared by" a composition the
+way principles used to be "declared by" a role.
 
-**Recognizing that a task needs a *different* lens, not just one more domain, is itself routing
-judgment.** The same task-shape question that produced `bootstrap-ui`/`bootstrap-ux` (a founding-a-
-library task needs a narrower composition than ongoing design work) applies orthogonally to `coder`:
-a task whose actual subject is dependency/version management, not feature work, needs judgment
-(`dependency-management`, seeded 2026-07-22) that has no business loading on every routine coding
-task just because it's also convergent, stack-agnostic prose. The fix is a distinct lens
-(`dependency-management`, alongside `coder`), not folding task-specific judgment into `coder`'s
-always-loaded default (`coding-general`) — a domain composed unconditionally into every spawn of a
-lens should earn that by actually applying to every task the lens handles, not by being convergent
-and general-sounding. Stack-shape (framework/styling/language) already conditions which domains a
-lens's *default* composition includes (`coding-nextjs` only when `framework: nextjs`, etc.);
-task-shape is the same kind of conditioning, checked against what the task is actually about instead
-of what the project is built with — recognized here as a named pattern precisely because the first
-instance of it just got reasoned out from scratch and should not need to be next time.
+**Recognizing that a task needs a *different* domain subset, not just one more domain, is itself
+routing judgment.** A founding-a-library task (standing up a UI or UX library from nothing) needs a
+narrower composition than ongoing design work on an established one. The same task-shape question
+applies orthogonally to coding work: a task whose actual subject is dependency/version management,
+not feature work, needs judgment (`dependency-management`, seeded 2026-07-22) that has no business
+loading on every routine coding task just because it's also convergent, stack-agnostic prose. The
+fix is composing `dependency-management` instead of `coding-general` for that task shape, not
+folding task-specific judgment into `coding-general`'s always-loaded default — a domain composed
+unconditionally into every coding spawn should earn that by actually applying to every task of that
+shape, not by being convergent and general-sounding. Stack-shape (framework/styling/language)
+already conditions which domains a coding composition includes (`coding-nextjs` only when
+`framework: nextjs`, etc.); task-shape is the same kind of conditioning, checked against what the
+task is actually about instead of what the project is built with.
 
-**The lens is deterministic, not a self-selected runtime relevance call by the working agent.** The
-orchestrator fixes which lens applies — seeded or ad hoc — before the spawn runs; the choice is
-inspectable after the fact via the handoff's `domains-loaded:` field (see "The handoff artifact").
-The orchestrator's composition choice is visible before the spawn runs the same way any other
+**The composition is deterministic, not a self-selected runtime relevance call by the working
+agent.** The orchestrator fixes which domains apply before the spawn runs; the choice is inspectable
+after the fact via the handoff's `domains-loaded:` field (see "The handoff artifact"). The
+orchestrator's composition choice is visible before the spawn runs the same way any other
 orchestrator action is; see the spawn brief, below.
 
-**Seeded lenses accumulate the same way domains do — from repeated, observed composition, never
-declared up front.** A lens is not a schema entity and not a file with its own prompt; naming one in
-`domains/lenses.md` is what turns a recurring ad hoc composition into routing shorthand
-(`composition: coder` instead of re-listing every domain), nothing more.
-
-**The orchestrator does not compose domains — every other spawn does, planner included.** The
-distinction is not fixedness (a planner-shaped alias could in principle be renamed or split like
-any other); it is what kind of thing produces what. A lens — any composed stance + domain subset —
-produces a generative artifact *about a subject*: a spec, a plan, code. The orchestrator produces
-routing and gating *decisions about other lenses*, one level up: which stance and domains a task
-needs, whether a proposal ratifies, when a retrospective fires. Something has to occupy that
-position before any composition can happen — otherwise nothing decides what to compose for the
-orchestrator itself, and the regress has no floor. `SKILL.md` states this precisely: the
-orchestrator is "a pure process layer that composes and routes spawns but never takes on a spawn's
-stance itself." `orchestrator-routing`, `ratify-gate`, and `principle-judgment` are its own domains,
-loaded into `SKILL.md`'s own prompt rather than composed fresh per task — not because the orchestrator is
+**The orchestrator does not compose domains for itself — every other spawn is what gets composed.**
+The distinction is not fixedness; it is what kind of thing produces what. A composed spawn produces
+a generative artifact *about a subject*: a spec, a plan, code. The orchestrator produces routing and
+gating *decisions about spawns*, one level up: which stance and domains a task needs, whether a
+proposal ratifies, when a retrospective fires. Something has to occupy that position before any
+composition can happen — otherwise nothing decides what to compose for the orchestrator itself, and
+the regress has no floor. `SKILL.md` states this precisely: the orchestrator is "a pure process
+layer that composes and routes spawns but never takes on a spawn's stance itself."
+`orchestrator-routing`, `ratify-gate`, and `principle-judgment` are its own domains, loaded into
+`SKILL.md`'s own prompt rather than composed fresh per task — not because the orchestrator is
 "fixed" in some special sense, but because a process layer has no subject to compose *for*; it has
 only the process itself.
 
-Multiple domain-subsets can compose into one spawn when a task's coupling warrants it (a
-gesture-transition task might load `motion` + `wizards-flows` + `ranking-evaluation` together in
-one divergent spawn, rather than being forced across two separately-named lenses).
+Multiple domains compose into one spawn whenever a task's coupling warrants it — a
+gesture-transition task might load `motion` + `wizards-flows` + `ranking-evaluation` together in one
+divergent spawn. There is no separately-named grouping to be "forced across"; the orchestrator
+states whatever subset the task needs directly, every time (see LINEAGE.md, "Lenses retired").
 
 ### Two load modes
 
@@ -258,7 +248,7 @@ pre-declaration step required.
 Every cross-boundary change is **propose → ratify → promote**, never write-directly.
 
 - A spawn proposes a principle as part of its output. It cannot write a corpus.
-- The operator (or a ratifying lens acting under standing rules) reviews and ratifies or rejects.
+- The operator (or a ratifying spawn acting under standing rules) reviews and ratifies or rejects.
 - **Rejections are kept** with their reason. The kill log is the highest-signal training data.
 - Structural changes (split a domain, add an explorer, change a route) go through the
   same gate.
@@ -298,7 +288,7 @@ creation time instead of split time.
 A proposal arrives without a home. At the gate the orchestrator decides which domain it belongs to
 and writes it there. If no existing domain fits, a **new domain is born here** — the orchestrator
 creates `domains/<new-domain>.md` (+ audit); the domain becomes available to any spawn whose
-stance and subject match — there is no lens declaration to add it to. This is the one point where
+stance and subject match — there is no composition declaration to add it to. This is the one point where
 domain assignment involves judgment, and it is human-gated. A proposal that spans two domains is a
 signal the domain boundaries may be wrong — surface it rather than fragmenting the principle
 across both.
@@ -431,8 +421,6 @@ principle applied to the handoff file itself, not only to what the handoff point
 ```yaml
 ---
 stance: <convergent|divergent>  # which stance this spawn ran under
-composition: <alias-name-or-omit> # OPTIONAL — the alias name, if the spawn used one, for fast
-                              #   scanning only; never authoritative. Omit for ad hoc composition.
 workstream: <stable-workstream-id> # stable across checkpoints and revisions — not this spawn's
                               #   composition or task name; substitute a real identifier, never
                               #   leave this example value in place
@@ -470,11 +458,10 @@ always present; an empty section is a statement, a missing one is a schema viola
 
 Field notes:
 
-- **`stance`** reports what actually ran, not a claim about what a lens generally does — immune to
-  declaration drift by construction. **`composition`** is a fast-scan label only; the gate never
-  treats it as authoritative, and a spawn with no matching alias simply omits it. Together they
-  replace the old `role:` field: `domains-loaded:` (already on this schema) plus `stance:` report
-  exactly what was applied for *this* spawn, more precisely than a role name did.
+- **`stance`** reports what actually ran, not a claim about what a composition generally does —
+  immune to declaration drift by construction. Together with `domains-loaded:` (already on this
+  schema), it replaces the old `role:` field: the two report exactly what was applied for *this*
+  spawn, more precisely than a role name did.
 - **`workstream`** stays stable across implementation, operator testing, and revisions. A new plan
   or unrelated intended outcome receives a new identifier. **`agent-continuity`** makes a context
   discontinuity visible: `new` starts the workstream, `continued` resumes its owning agent, and
@@ -648,20 +635,18 @@ against contamination — is the working context holding domains from another mo
 1. **Contamination detected** — attention was spent on a domain outside the task's mode. Fix the
    routing or the composition.
 2. **Domain tension → split** — two ratified principles in one domain have conditions that
-   partition the same space and give *opposing* advice. Proposal: split the domain (if the split
-   tracks a lens seam, update the affected lenses' domain lists to match). Advisory only — the
-   operator judges whether the partition is real. *What counts:* one cluster of principles clearly
-   governs one decision class and another governs a different one, and they repeatedly give
+   partition the same space and give *opposing* advice. Proposal: split the domain. Advisory only —
+   the operator judges whether the partition is real. *What counts:* one cluster of principles
+   clearly governs one decision class and another governs a different one, and they repeatedly give
    opposing advice under their conditions. *What doesn't:* two principles on different topics are
    simply different subjects, not a partition. The seam is discovered here, from tension — never
    assumed up front.
 3. **Convergence → explorer** — a domain has stopped changing, corrections rare. Proposal: pair the
-   lenses that use it with an explorer to prevent calcification.
+   compositions that use it with an explorer to prevent calcification.
 4. **Composition drift** — a spawn's composed domain-subset consistently excludes a domain the work
-   actually needed, or includes one it never draws from. Proposal: fix the composition (or, if this
-   recurs on the same task shape, propose the pattern as a new or revised alias). Maps directly onto
-   the co-occurrence tally `corpus.py record-gate` maintains (see "Storage: working vs audit") and
-   the handoff's `Surfaced` field.
+   actually needed, or includes one it never draws from. Proposal: fix the composition going
+   forward. Maps directly onto the co-occurrence tally `corpus.py record-gate` maintains (see
+   "Storage: working vs audit") and the handoff's `Surfaced` field.
 5. **Seed promotion candidate** — a project domain principle whose condition makes no reference to
    this project's stack, domain, or specifics, and has held across enough tasks to read as general.
    Surface it as a candidate for promotion to the seed domain of the same name in the skill repo.
@@ -677,8 +662,8 @@ against contamination — is the working context holding domains from another mo
    (see "Killed entries," above); the retrospective judges whether it is actually safe to demote,
    then `corpus.py graduate-kill` does the removal and audit annotation.
 8. **Misplaced principle → move, not split** — an active principle reads as on-topic for its
-   domain but is actually consumed by a different lens than the one(s) that load this domain, or by
-   no lens's stated concern at all. Distinct from domain tension (#2): no opposing advice, no
+   domain but is actually consumed by a different composition than the one(s) that load this
+   domain, or by no composition's stated concern at all. Distinct from domain tension (#2): no opposing advice, no
    partition to find — just a principle that ended up in a container adjacent to its real subject.
    See `principle-judgment` domain.
 9. **Retrospective re-audit for genuine judgment** — an active principle's own audit provenance
@@ -719,7 +704,7 @@ Each domain working file carries `last-retrospective: <date>` at the top to make
 ## Domain lifecycle
 
 ```
-spawn (stance + lens)
+spawn (stance + composition)
   → accumulate (work + retrospective surface principles; operator ratifies into domains)
   → [retrospective may propose SPLIT if a domain develops tension, FORK if the split tracks a
      project-local seam]

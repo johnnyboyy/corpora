@@ -1,7 +1,7 @@
 # Domain: coding-react
 
 React-specific code patterns — JSX, hooks, refs, and component prop-typing. Declared by the coder
-lens when `framework` is React-based (react, next.js, react native, expo, etc.). Split from
+composition when `framework` is React-based (react, next.js, react native, expo, etc.). Split from
 `coding-js-react` 2026-07-18 once the domain's
 framework-agnostic JS/TS principles were carved into their own `coding-ts` domain — see
 `domains/audit.md` for the migration note. Audit metadata lives in

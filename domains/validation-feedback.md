@@ -1,7 +1,7 @@
 # Domain: validation-feedback
 
-Warnings, validation, and surfacing side effects. Cross-lens — declared by both the **ux-design**
-and **ui-design** lenses (the UX locates the fix; the UI co-locates it visually). Audit metadata
+Warnings, validation, and surfacing side effects. Cross-composition — declared by both the **ux-design**
+and **ui-design** compositions (the UX locates the fix; the UI co-locates it visually). Audit metadata
 lives in `domains/audit.md`, loaded only at ratify/retrospective time.
 
 ```yaml

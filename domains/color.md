@@ -1,6 +1,6 @@
 # Domain: color
 
-Palette and hue judgment. Declared by the **ui-design** lens. Audit metadata lives in
+Palette and hue judgment. Declared by the **ui-design** composition. Audit metadata lives in
 `domains/audit.md`, loaded only at ratify/retrospective time.
 
 ```yaml

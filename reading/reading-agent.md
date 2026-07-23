@@ -1,6 +1,6 @@
 # Reading agent
 
-Reads queued sources through the appropriate domain lens and extracts principle candidates.
+Reads queued sources through the appropriate domain composition and extracts principle candidates.
 Runs weeknights at 2 AM PST. Self-contained — no prior session context needed.
 
 ---
@@ -17,22 +17,22 @@ Runs weeknights at 2 AM PST. Self-contained — no prior session context needed.
 
 ### 1. Compose the stance and domains
 
-From the entry's `domains` field, compose the spawn (see `kernel.md`, "Spawns: stance + lens", and
-`domains/lenses.md` for the seeded lenses):
+From the entry's `domains` field, compose the spawn (see `kernel.md`, "Spawns: stance + composition"):
 - `coding-general` → convergent, load `domains/coding-general.md`
 - `coding-ts` → convergent, load `domains/coding-general.md` + `domains/coding-ts.md`
 - `coding-react` → convergent, load `domains/coding-general.md` + `domains/coding-react.md`
-- `ux-design`, `interaction`, or similar → convergent, load the `ux-design` lens's domains
-  (`domains/lenses.md`)
-- `ui-design` or similar → divergent, load the `ui-design` lens's domains
-  (`domains/lenses.md`)
+- `ux-design`, `interaction`, or similar → convergent, load `wizards-flows`, `ranking-evaluation`,
+  `validation-feedback`, `recoverability`, `lists-selection`, `forms-inputs`, `design-method`
+- `ui-design` or similar → divergent, load `color`, `surfaces-elevation`, `visual-hierarchy`,
+  `motion`, `validation-feedback`, `recoverability`, `lists-selection`, `forms-inputs`,
+  `design-method`
 
 You are now reasoning under that stance, with those domains, for this entry.
 
 ### 2. Fetch and read
 
 Before fetching, check for a saved copy: `reading/saved/<entry-id>.html` (also try `.md`, `.txt`).
-If found, read that file directly — skip WebFetch entirely, go straight to reading through the lens
+If found, read that file directly — skip WebFetch entirely, go straight to reading through the composition
 below. If the entry instead has an explicit `local-content:` field (a saved copy under a different
 name or location), read that file instead. Either way, no fetch is attempted once local content
 exists.
@@ -52,9 +52,9 @@ it reads as more trustworthy than it is (see `principle-judgment` domain,
 `reading-pipeline-provenance-flags-knowledge-risk`, and `LINEAGE.md`'s entry on this). Go to step 4
 and record the failure instead of extracting anything.
 
-Read through the loaded lens. For each claim:
+Read through the loaded composition. For each claim:
 - Does it confirm, extend, or contradict an existing principle? (Note the principle id.)
-- Does it address a gap the lens's domains don't cover?
+- Does it address a gap the composition's domains don't cover?
 - Is it specific enough to encode as `rule` + `condition` + `reason`?
 
 ### 3. Extract candidates

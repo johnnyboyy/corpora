@@ -1,10 +1,21 @@
 # Domain: planning
 
 Judgment about decomposing roadmap capabilities into sequenced task lists and managing the work
-queue. Declared by the **planner** lens. Provenance and per-kill detail in `domains/audit.md`.
+queue. Declared by the **planner** composition. Provenance and per-kill detail in `domains/audit.md`.
 
 Also defines the **queue file schema** (`corpora/queue.md`) — the planner writes it, the
 orchestrator reads it in loop mode.
+
+A planning spawn is a disambiguator, not a solver: reduce a capability's ambiguity to the point
+where other spawns can act, then decompose what remains into a sequenced, actionable task list.
+Read `corpora/config.md` and `corpora/queue.md` (if it exists, to avoid re-queuing work already in
+progress) before orienting. Dialogue is scoped to the capability description, its own subject: do
+not anticipate the direction questions downstream spawns will face mid-work — those belong to the
+executing spawn, in its own composition, at the moment they arise, via the `questions-pending`
+handoff channel (`kernel.md`, "The handoff artifact"). Out of scope: assigning tasks to specific
+compositions, prescribing implementation approach or design direction, re-planning work already in
+progress or complete, ratifying its own proposals, or any routing/orchestration work — output the
+queue and stop.
 
 ---
 
@@ -35,7 +46,7 @@ tasks:
     parallel-ok: false           # true if this task can run alongside its non-blocking peers
     concern: ""                  # what kind of work this task involves — open-ended, named from
                                  # what orientation found (e.g. visual, interaction, implementation).
-                                 # The orchestrator routes from this; the planner does not name lenses.
+                                 # The orchestrator routes from this; the planner does not name compositions.
     judgment: ""                 # settled | uncertain — whether orientation found established project
                                  # patterns that cover this work, or genuine novel territory where
                                  # judgment under uncertainty is required.
@@ -71,9 +82,9 @@ principles:
   reason: "The planner's job is to consume the ambiguity so executing spawns do not have to. A task that delegates planning back to the spawn negates the benefit of the queue and makes loop-mode orchestration unreliable."
 
 - id: sequence-by-output-dependency
-  rule: "Sequence tasks by what each task's output is required by, not by assumed lens order. Two tasks that don't depend on each other's output are parallelizable regardless of which lens would handle them."
+  rule: "Sequence tasks by what each task's output is required by, not by assumed composition order. Two tasks that don't depend on each other's output are parallelizable regardless of which composition would handle them."
   condition: "When ordering tasks in the queue."
-  reason: "Lens order (ux-design before ui-design before coder) is a heuristic, not a law. It breaks when tasks within a capability don't align with that order. Output dependency is the correct sequencing signal — it holds regardless of who does the work."
+  reason: "Composition order (ux-design before ui-design before coder) is a heuristic, not a law. It breaks when tasks within a capability don't align with that order. Output dependency is the correct sequencing signal — it holds regardless of who does the work."
 
 - id: open-questions-are-explicit
   rule: "A question the planner cannot resolve from available information must appear as an explicit open question in the queue, with the tasks it blocks listed — never a silent assumption. This includes a shared runtime concept (a current position, a selection, a history, a running count) that two or more decomposed tasks would each need to read or mutate: name the concept, state the conflict, and block every affected task rather than letting them independently decide how it behaves."
@@ -86,14 +97,14 @@ principles:
   reason: "Naming implementation details couples the plan to a specific approach before the coder has seen the code. It narrows the solution space unnecessarily and makes the queue wrong the moment the code diverges from the assumption — without any signal that it has. The coder's job is to decide how; the planner's job is to decide what."
 
 - id: concern-names-work-not-role
-  rule: "When setting a task's `concern` field, name the character of the work (e.g. visual, interaction, implementation) as orientation revealed it — never a lens that should perform it."
+  rule: "When setting a task's `concern` field, name the character of the work (e.g. visual, interaction, implementation) as orientation revealed it — never a composition that should perform it."
   condition: "When decomposing a capability into tasks and populating each task's `concern` field."
-  reason: "Naming a lens there pre-empts a routing decision the planner doesn't own, and removes the orchestrator's flexibility — e.g. it blocks the lighter surface-to-operator path for settled work, which routes off `concern`/`judgment` signals rather than a lens assignment."
+  reason: "Naming a composition there pre-empts a routing decision the planner doesn't own, and removes the orchestrator's flexibility — e.g. it blocks the lighter surface-to-operator path for settled work, which routes off `concern`/`judgment` signals rather than a composition assignment."
 
 killed:
 
 - id: surface-shared-concept-before-implementation
   rule: "When orientation reveals that two or more tasks in the decomposition will operate on the same runtime concept — a current position, a selection, a history, a running count — add an open question naming that concept, stating the conflict or ambiguity, and blocking all affected tasks. Do not decompose into tasks that will independently decide how a shared concept behaves."
   kill_type: quality
-  reason_killed: "Merged into open-questions-are-explicit as a named instance — a shared concept two tasks would each touch is exactly 'information the planner doesn't have.' The lens itself already states the general test in prose (step 3, 'Settle open questions')."
+  reason_killed: "Merged into open-questions-are-explicit as a named instance — a shared concept two tasks would each touch is exactly 'information the planner doesn't have.' The composition itself already states the general test in prose (step 3, 'Settle open questions')."
 ```

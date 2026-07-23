@@ -1,11 +1,14 @@
 # Domain: dependency-management
 
 Judgment for tasks whose actual subject is upgrading, migrating, or auditing dependencies — not
-feature work that happens to touch a dependency in passing. Loaded by the `dependency-management`
-lens, never by `coder`'s default composition (`domains/lenses.md`): a task's coding-general
-judgment applies to every coding task regardless of shape, but upgrade/migration judgment only
-applies when the task is actually about that. Audit metadata lives in `domains/audit.md`, loaded
-only at ratify/retrospective time.
+feature work that happens to touch a dependency in passing. Composed instead of `coding-general`
+for this task shape: a task's coding-general judgment applies to every coding task regardless of
+shape, but upgrade/migration judgment only applies when the task is actually about that. Audit
+metadata lives in `domains/audit.md`, loaded only at ratify/retrospective time.
+
+Read `corpora/config.md` first, for registered utilities and verification commands. Run the
+project's verification commands before finishing. Report a `tradeoffs` block for any migration step
+where cost clearly outweighs value, rather than proceeding or skipping silently.
 
 ```yaml
 last-retrospective: 2026-07-22

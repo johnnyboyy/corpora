@@ -8,11 +8,11 @@ description: Bootstrap a project's config, UI library, and UX library. Run once,
 Reference for the orchestrator's bootstrap flow, run when `corpora/config.md` is absent — Phase 1
 always runs inline. What happens after Phase 1 branches on whether a concrete operator feature
 request accompanied the bootstrap (see "Routing after Phase 1" below): with no feature request,
-Phase 2 (`bootstrap-ui`-composed, divergent stance) then Phase 3 (`bootstrap-ux`-composed,
-convergent stance) run directly, the original fixed sequence (see `domains/lenses.md` for
-what each composition loads — narrower than `ui-design`/`ux-design`'s ongoing-work compositions,
-since founding a library from nothing doesn't have concrete components/screens for every domain to
-attach to yet); with a feature request, the orchestrator hands off to the planner instead, which
+Phase 2 (divergent stance) then Phase 3 (convergent stance) run directly, the original fixed
+sequence (each phase's section below states what it composes — narrower than `ui-design`/
+`ux-design`'s ongoing-work compositions, since founding a library from nothing doesn't have
+concrete components/screens for every domain to attach to yet); with a feature request, the
+orchestrator hands off to the planner instead, which
 decomposes the bootstrap need and the feature into one sequenced queue. Not a standalone skill.
 
 - **Phase 1 — always, run inline.** Detect the project's shape, commands, and existing utilities; write
@@ -57,7 +57,7 @@ itself is part of the scope being weighed.
   combining both needs — e.g. *"Bootstrap this project's design system (has-ui: yes) and
   implement: \<operator's request, verbatim\>."* This is passed as direct input, not sourced from a
   `ROADMAP.md` (none exists yet for a fresh project). The planner treats it like any other
-  capability: no changes to its `domains/lenses.md` entry or `domains/planning.md` are
+  capability: no changes to `domains/planning.md` are
   needed — it orients (finds
   `corpora/config.md` but no `ui-library.md`, `ux-library.md`, or existing code), decomposes into
   tasks (`bootstrap-ui-library`, `bootstrap-ux-library` when `has-ui: yes`, plus the feature's own
@@ -68,10 +68,10 @@ itself is part of the scope being weighed.
   3 already states below to Phase 2 as well when a planner-produced task frames the ask.
 
   **One boundary to hold:** the planner's dialogue step must not ask the audience/aesthetic-direction
-  questions that open Phase 2 below — those are the `bootstrap-ui`-composed spawn's own divergent
+  questions that open Phase 2 below — those are the Phase 2 spawn's own divergent
   judgment call, asked when its task actually runs, not decomposition-shaping ambiguity the
-  planner should resolve upfront. The `planner` alias's own notes (`domains/lenses.md`)
-  already state this general rule ("do not try to anticipate the direction questions downstream
+  planner should resolve upfront. `domains/planning.md`'s own preamble
+  already states this general rule ("do not anticipate the direction questions downstream
   spawns will face mid-work"); this is that rule's bootstrap instance, named here because it's easy
   to blur in practice.
 
@@ -130,8 +130,11 @@ with an empty `candidates: []` list.
 
 ## Phase 2 — UI library (only when `has-ui: yes`)
 
-You are now a `bootstrap-ui`-composed spawn (divergent stance) bootstrapping a design system for a
-project that has none yet. When this task arrived via a planner-produced queue (see "Routing
+You are now a divergent spawn composing `color`, `surfaces-elevation`, `visual-hierarchy`, `motion`,
+`design-method`, `spawn-integrity`, `interviewing` — narrower than ongoing `ui-design` work, since
+founding a library from nothing doesn't have concrete components/screens for every domain to attach
+to yet — bootstrapping a design system for a project that has none yet. When this task arrived via
+a planner-produced queue (see "Routing
 after Phase 1"), it names a concrete feature to scope against — cover the sections below only to
 the depth that feature actually needs, same restraint Phase 3 applies: do not invent aspirational
 components, sub-systems, or states the feature doesn't touch. A greenfield project gets a short
@@ -436,8 +439,10 @@ this handoff, then route into Phase 3.
 
 ## Phase 3 — UX library (only when `has-ui: yes`, after Phase 2)
 
-You are now a `bootstrap-ux`-composed spawn (convergent stance) bootstrapping the project's
-experience reference. The `bootstrap-ui`-composed Phase 2 spawn has already run — identity is set;
+You are now a convergent spawn composing `recoverability`, `validation-feedback`,
+`lists-selection`, `forms-inputs`, `design-method`, `spawn-integrity`, `interviewing` — narrower
+than ongoing `ux-design` work, same restraint as Phase 2 — bootstrapping the project's
+experience reference. The Phase 2 spawn has already run — identity is set;
 your job is convergent documentation of how the product *works* as an experience, so future UX
 sessions weigh established patterns instead of re-deriving them.
 

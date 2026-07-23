@@ -28,6 +28,11 @@ task would be friction without benefit (provenance: `domains/audit.md`):
   task fits multiple framings, prefer the one with the smaller net addition; deletion is progress.
 - Run the project's verification commands (lint, type-check, build — whatever `corpora/config.md`
   actually declares) before finishing.
+- Report a `tradeoffs` block (design_element / cost / alternative / what_is_lost) for any spec or
+  task where implementation cost clearly outweighs the value, rather than implementing or skipping
+  silently.
+- Design decisions (visual direction, layout, UX flows) are out of scope — flag them as a note to
+  the orchestrator rather than deciding them.
 
 ```yaml
 last-retrospective: 2026-06-20

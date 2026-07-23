@@ -1434,3 +1434,45 @@ risk); 1 (`interop-layer-does-not-cover-native-code-dependencies`) ratified at l
 close to a docs restatement, flagged as such in its own audit provenance. Cross-referenced
 `expo-filesystem-migrate-once-feature-gaps-close` to `dependency-management`'s migration principle
 via `see-also`. `reading/candidates.md` cleared; all 10 given `domains/audit.md` provenance.
+
+---
+
+## 2026-07-22 — Lenses retired: composition stated directly, no cached naming layer
+
+Operator: lenses were meant as a hedge against the orchestrator forgetting a domain a task needed,
+refined by watching what got used. Discussion surfaced that this hedge doesn't actually work the
+way it sounds — the retrospective's composition-drift signal is symptom-based (a spawn produces
+worse output or a gap surfaces in `Surfaced`, and only then does anything get attributed to a
+missing domain), and that detection mechanism doesn't care whether the composition unit is a domain
+or a cached lens: stacking lenses wouldn't catch an omission any earlier, it would only change the
+default breadth pulled in on day one, trading precision for bloat. Once the actual value a lens
+layer delivers narrowed to "a name for a repeatedly-observed domain subset," and the observed cost
+was already showing up as a separate, real problem (cost-driven domain omission trimmed for tokens —
+new principle, `orchestrator-routing.md`'s `no-cost-driven-domain-omission`), retiring the naming
+layer outright was the cleaner fix over either extreme (mandatory lens-stacking or keeping the
+half-used cache).
+
+`domains/lenses.md` deleted. Its per-lens `notes:` field — the only place several pieces of
+operational guidance lived — redistributed by what they actually were, not kept as a single block:
+corpora-mechanics true for any spawn (read `corpora/config.md` first; the UI/UX library's narrative
+format is not the domain-corpus `principles:` shape) into two new `spawn-integrity.md` principles;
+`coder`'s and `dependency-management`'s tradeoffs-block/defer-design-decisions mechanics into
+`coding-general.md`'s and `dependency-management.md`'s own preambles (duplicated across both, since
+`dependency-management` deliberately excludes `coding-general` — see the entry above); the
+planner's disambiguator framing, dialogue scope, and out-of-scope list into `planning.md`'s
+preamble; the UX/UI job-boundary and output-shape rules (relative units only for UI, perception-only
+for UX, `kind`/`ui-drift` defaults) into `design-method.md`'s preamble, which both compositions
+already loaded. `bootstrap.md`'s Phase 2/3 sections now state their own narrower domain lists
+inline instead of pointing at the deleted file.
+
+`kernel.md`'s "Spawns: stance + lens" section rewritten as "Spawns: stance + composition": the
+orchestrator states stance and domain subset directly in the spawn brief every time, no seeded-vs-
+ad-hoc distinction, no cached shorthand to check first. The handoff schema's `composition:
+<alias-name-or-omit>` field removed (fast-scan label with nothing left to scan for). `SKILL.md`,
+`README.md`, and every domain preamble's "declared by the X lens" phrasing swept to "composition"
+— mechanical, same pattern as the earlier "role" sweep; stable principle `id`s and historical
+`audit.md` provenance left untouched (one `id` — `check-principle-against-consuming-lens-not-just-
+domain-topic` — was caught by the sweep and reverted to keep the working/audit `id` link intact).
+Recurring task shapes (`coder`, `ux-design`, `ui-design`, `planner`, `dependency-management`,
+`bootstrap-ui`, `bootstrap-ux`) remain as prose vocabulary for talking about a composition, not a
+schema entity with a file behind it.

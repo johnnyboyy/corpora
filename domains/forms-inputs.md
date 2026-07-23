@@ -1,7 +1,7 @@
 # Domain: forms-inputs
 
-Input fields and their default/empty/derived states. Cross-lens — declared by both the
-**ux-design** and **ui-design** lenses. Audit metadata lives in
+Input fields and their default/empty/derived states. Cross-composition — declared by both the
+**ux-design** and **ui-design** compositions. Audit metadata lives in
 `domains/audit.md`, loaded only at ratify/retrospective time.
 
 ```yaml

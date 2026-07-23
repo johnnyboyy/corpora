@@ -1,7 +1,7 @@
 # Domain: lists-selection
 
-Lists, rows, and active/selected item treatment. Cross-lens — declared by both the **ux-design**
-and **ui-design** lenses. Audit metadata lives in `domains/audit.md`, loaded
+Lists, rows, and active/selected item treatment. Cross-composition — declared by both the **ux-design**
+and **ui-design** compositions. Audit metadata lives in `domains/audit.md`, loaded
 only at ratify/retrospective time.
 
 ```yaml

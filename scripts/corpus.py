@@ -21,7 +21,7 @@ Commands:
   lint-handoff FILE                validate a handoff artifact's envelope
   handoffs                         list lingering handoff files with age
   lint-deferred                    validate the non-blocking UI/UX decision queue
-  deferred                         list queued decisions grouped by owning lens
+  deferred                         list queued decisions grouped by owning composition
   lint-utility-candidates          validate the persistent utility-candidate ledger
   utility-candidates               list candidates with status and sighting count
   record-utility-candidate [...]   append dated evidence to a candidate
@@ -1328,7 +1328,7 @@ def main() -> None:
     cp.add_argument("--stance", required=True, choices=sorted(DEFERRED_STANCE_ENUM))
     cp.add_argument("--domains", required=True, help="comma-separated domain names")
     cp.add_argument("--task-file", required=True, help="path to a file containing the task description")
-    cp.add_argument("--composition", default="", help="alias name, for the output filename and label only")
+    cp.add_argument("--composition", default="", help="descriptive label, for the output filename only")
     cp.add_argument("--output", default="", help="output path; defaults under corpora/session-prompts/")
     sr = sub.add_parser("screenshot-record")
     sr.add_argument("--screen", required=True)

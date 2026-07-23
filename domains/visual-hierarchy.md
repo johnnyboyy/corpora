@@ -1,6 +1,6 @@
 # Domain: visual-hierarchy
 
-Emphasis, grouping, and legibility weight. Declared by the **ui-design** lens. Audit metadata
+Emphasis, grouping, and legibility weight. Declared by the **ui-design** composition. Audit metadata
 lives in `domains/audit.md`, loaded only at ratify/retrospective time.
 
 ```yaml

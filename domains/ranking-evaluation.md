@@ -1,6 +1,6 @@
 # Domain: ranking-evaluation
 
-Ranking, scoring, triage, and reference-building tools. Declared by the **ux-design** lens. Several
+Ranking, scoring, triage, and reference-building tools. Declared by the **ux-design** composition. Several
 principles here are flagged provisional in the audit (earned in a single tool) — weigh that before
 promoting. Audit metadata lives in `domains/audit.md`, loaded only at
 ratify/retrospective time.

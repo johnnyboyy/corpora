@@ -3,10 +3,10 @@
 Judgment about whether a principle — proposed or already ratified — actually encodes earned
 judgment, and whether it lives in the domain its real consumer needs it in. Distinct from
 `ratify-gate`'s judgment about assembling and processing a spawn, and from `orchestrator-routing`'s
-judgment about which lens to invoke: this is about the corpus's own content, at the moment a
+judgment about which composition to invoke: this is about the corpus's own content, at the moment a
 proposal is judged and again, periodically, after ratification, since gate-time discipline can
 lapse under session-context pressure and a principle ratified in error otherwise sits unexamined
-indefinitely. Declared by the **orchestrator** lens, alongside `orchestrator-routing` and
+indefinitely. Declared by the **orchestrator** composition, alongside `orchestrator-routing` and
 `ratify-gate`. Seeded 2026-07-22 from the criteria used in a full-corpus domain-and-principle audit
 this session — see `LINEAGE.md` for the audit's own findings; this domain generalizes the method,
 not the specific findings. Audit metadata lives in `domains/audit.md`, loaded only at
@@ -28,8 +28,8 @@ principles:
   reason: "Every knowledge-kill from this session's audit (css.md's two, color.md's two) originated from reading-pipeline provenance — a real, non-coincidental correlation between source type and knowledge-not-judgment risk, worth naming directly rather than re-discovering it fresh on every future audit."
 
 - id: check-principle-against-consuming-lens-not-just-domain-topic
-  rule: "When auditing a domain's principles, check each one against which lens actually needs and applies it — not only whether it plausibly fits the domain's stated topic. A principle can read as on-topic for its domain while actually encoding a different lens's job entirely (e.g., framework-specific implementation mechanics sitting in a design domain no coder composition ever loads)."
-  condition: "During a principle audit or retrospective, for any domain loaded by more than one lens, or whose principles reference an implementation-specific mechanism (a named library, hook, framework API, or file format)."
+  rule: "When auditing a domain's principles, check each one against which composition actually needs and applies it — not only whether it plausibly fits the domain's stated topic. A principle can read as on-topic for its domain while actually encoding a different composition's job entirely (e.g., framework-specific implementation mechanics sitting in a design domain no coder composition ever loads)."
+  condition: "During a principle audit or retrospective, for any domain loaded by more than one composition, or whose principles reference an implementation-specific mechanism (a named library, hook, framework API, or file format)."
   reason: "`kernel.md`'s domain-tension retrospective signal only catches principles that give *opposing* advice under partitioned conditions — it structurally cannot see a principle that is simply misplaced without contradicting anything. This session found three such cases (`optimistic-ui-for-high-confidence-mutations` and its pair sitting in `recoverability` though no design alias's notes ever claimed implementation as their concern; `progressive-disclosure-for-primary-advanced-split` sitting in `design-method` though it's a substantive interaction pattern, not a process rule) with zero textual contradiction to trigger the existing signal. This test fills that structural gap: check consumption, not only topical fit."
 
 - id: lead-with-the-nonobvious-half-when-refining

@@ -166,6 +166,11 @@ provenance:
   domain: orchestrator-routing
   provenance: "2026-07-22, UI screenshot cache design (docs/superpowers/specs/2026-07-22-ui-screenshot-cache-design.md). A fresh-context review of the design found that grounding orchestrator-run recapture by analogy to `corpus.py` invocation alone was a weaker fit than presented — script invocation has zero interpretation, while navigating to the correct rendered state to capture involves some procedural judgment. This principle states the narrower claim directly and names the boundary against `stop-and-route` explicitly (visual judgment about the recaptured state routes to a role; mechanical recording of current state does not)."
 
+- id: no-cost-driven-domain-omission
+  domain: orchestrator-routing
+  kind: judgment
+  provenance: "2026-07-22, operator conversation on lens/domain composition design. Discussion of whether lenses should be the mandatory composition unit (to guard against relevant domains going unloaded) surfaced a distinct, already-observed failure: the orchestrator thinning a composition to save tokens rather than never having known a domain was relevant in the first place. Paired with spawn-integrity's checkpoint-on-context-pressure-tell, added the same session, as the two sides (routing-time vs. spawn-side) of the same pressure."
+
 # domain: ratify-gate (split from orchestrator-routing 2026-07-18; see LINEAGE.md, "The ratify-gate split")
 - id: pre-scan-before-spawning
   domain: ratify-gate
@@ -301,6 +306,21 @@ provenance:
   domain: spawn-integrity
   kind: judgment
   provenance: "2026-07-22, domain-decomposition audit. Generalized and promoted from the former web-frontend pack's design-method domain (no-readme-or-agent-instructions-as-role-instruction; see that entry's own history, below, now merged into this same file) — widened from 'any design spawn' to 'any spawn,' since a coder mistaking a project's AGENTS.md for role instruction is the identical failure mode."
+
+- id: checkpoint-on-context-pressure-tell
+  domain: spawn-integrity
+  kind: judgment
+  provenance: "2026-07-22, operator conversation on lens/domain composition design. Operator reported repeatedly observing a concrete tell in practice — dragged-out reasoning and task logic leaking into code comments — under large composed contexts, and framed it as a symptom worth self-monitoring rather than a model competence failure."
+
+- id: read-config-before-composing
+  domain: spawn-integrity
+  kind: knowledge
+  provenance: "2026-07-22, lens retirement. Migrated from domains/lenses.md's per-lens notes field (near-identical text repeated in coder, dependency-management, ux-design, and ui-design's notes) to a single universal home once lenses were retired as a schema layer — see LINEAGE.md."
+
+- id: library-is-narrative-not-corpus-shape
+  domain: spawn-integrity
+  kind: knowledge
+  provenance: "2026-07-22, lens retirement. Migrated from ux-design's and ui-design's near-identical notes text in domains/lenses.md, generalized to any spawn touching either library file rather than only the two design compositions — see LINEAGE.md."
 
 # ---- domains: coding-ts, coding-react (split from coding-js-react 2026-07-18; see LINEAGE.md,
 #      "The coding-ts / coding-react split") ----

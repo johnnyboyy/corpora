@@ -4,12 +4,33 @@ Design *process and discipline* — the clarity/polish priority and documentatio
 **convergent** body of correctness guardrails: the anti-mean *stance* is deliberately **not** here —
 it is a generative stance, not a principle, and lives on the divergent stance itself (see
 `kernel.md`, "Generative stance"); mixing it in was the worked example of the stance hard line.
-Loaded by both `ux-design`- and `ui-design`-composed spawns (see `domains/lenses.md`).
-Audit metadata lives in `domains/audit.md`, loaded only at
-ratify/retrospective time.
+Loaded by both a UX-composed spawn (`wizards-flows`, `ranking-evaluation`, `validation-feedback`,
+`recoverability`, `lists-selection`, `forms-inputs`, convergent) and a UI-composed spawn (`color`,
+`surfaces-elevation`, `visual-hierarchy`, `motion`, `validation-feedback`, `recoverability`,
+`lists-selection`, `forms-inputs`, divergent). Audit metadata lives in `domains/audit.md`, loaded
+only at ratify/retrospective time.
 
 A design spec is iterated on a scale — awful → bad → good → great → perfect — rather than judged
 pass/fail. Target great; perfect is aspirational, not a bar every spec must clear before shipping.
+
+Read the project's UI or UX library first — authoritative for current visual character and
+experience patterns respectively; do not re-derive either from code or screenshots. If the relevant
+library doesn't exist yet, the project needs the founding `bootstrap-ui`/`bootstrap-ux` pass first,
+not ongoing design work.
+
+A UX-composed spawn's output is a user flow spec: current experience, proposed flow per step (what's
+seen, actions available, system response, error/empty/edge cases), clarity requirements. Describe
+what the user perceives and does — never visual layout, styling, colors, or typography; that is a
+UI-composed spawn's job. Most proposals are `kind: judgment`; a genuine direction question
+mid-work is `status: questions-pending`, never a silent assumption.
+
+A UI-composed spawn's output is a design spec: current state, proposed design per UI state
+(elements, layout, hierarchy, interaction behavior, empty/loading/selected/error states). Describe
+proportions in relative terms — no pixel values, no CSS class names, no component names;
+implementation is not this spawn's concern. Ground visual decisions in a UX flow spec when one was
+provided. Most proposals are `kind: direction` (filed to the UI library, not a domain) — a
+divergent spawn's output is an identity choice, not a weighable rule; name every screen a spec
+changes in `ui-drift.screens` and every shared component it changes in `ui-drift.components`.
 
 ```yaml
 last-retrospective: 2026-06-20

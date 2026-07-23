@@ -1,6 +1,6 @@
 # Domain: css
 
-CSS / Tailwind authoring and specificity. Declared by the coder lens when `styling` is not `none`
+CSS / Tailwind authoring and specificity. Declared by the coder composition when `styling` is not `none`
 (tailwind, css-modules, vanilla-css, etc.). Audit metadata lives in `domains/audit.md`, loaded only
 at ratify/retrospective time.
 
