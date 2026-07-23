@@ -1476,3 +1476,24 @@ domain-topic` — was caught by the sweep and reverted to keep the working/audit
 Recurring task shapes (`coder`, `ux-design`, `ui-design`, `planner`, `dependency-management`,
 `bootstrap-ui`, `bootstrap-ux`) remain as prose vocabulary for talking about a composition, not a
 schema entity with a file behind it.
+
+---
+
+## 2026-07-23 — `coding-expo` extended, `dependency-management-expo` seeded: FAMOUS skill-doc mining
+
+Mined FAMOUS's local `.agents/skills/` directory (14 Expo/React Native team-authored skill docs) for
+principles — a new source shape, distinct from the URL-based reading pipeline. A general-purpose
+agent read every SKILL.md and references/*.md file and drafted ~45 candidates; the operator ratified
+in domain-grouped batches over several rounds. Final tally: 28 ratified to `coding-expo`, 7 ratified
+to a new `dependency-management-expo` domain (seeded alongside it — Expo/RN-specific dependency,
+upgrade, and migration judgment, not general enough for stack-agnostic `dependency-management`), 10
+killed, 6 dropped without a kill-log entry (a coherent migration workflow from
+`.agents/skills/web-to-native/` that doesn't decompose into independent atoms — see the new
+`mined-workflow-stays-a-workflow` principle in `principle-judgment.md`). Two ratify-time judgment
+calls from this session were generalized into new `principle-judgment.md` principles rather than left
+as one-off narrative here — see that domain for the reusable form.
+
+`reading/candidates.md` untouched — mined content went straight through operator ratification in
+this conversation rather than the queued reading-pipeline surfacing step. `domains/audit.md`
+provenance for every ratified and killed entry cites the specific FAMOUS skill-doc file path as its
+source rather than a URL.

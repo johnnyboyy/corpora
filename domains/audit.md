@@ -138,6 +138,10 @@ provenance:
   domain: orchestrator-routing
   provenance: "2026-07-18, operator observation: the orchestrator already splits steps and roles well informally, but ambiguous-scope requests were often absorbed by the superpowers:brainstorming skill where the planner would be the better-fit reach — brainstorming has no corpus artifact, so that path leaves the planning domain permanently thin (planning had never had a retrospective at the time this was surfaced)."
 
+- id: prefer-independent-evaluation
+  domain: orchestrator-routing
+  provenance: "2026-07-17, retrospective on review-composition cost. A standing reviewer composition was cut the same day for low uptake relative to its cost — this principle captures the replacement approach: an independent coder instance scoped to the review gets the same fresh-context benefit without a rarely-invoked dedicated composition."
+
 - id: inline-coder-session-protocol
   domain: orchestrator-routing
   provenance: "2026-06-17, orchestrator retrospective. Merged from inline-session-enters-coder-role and close-inline-role-at-approval-gate."
@@ -845,6 +849,16 @@ provenance:
   kind: judgment
   provenance: "2026-07-22, domain-and-principle audit session. Generalized from the same session's refinement of visual-hierarchy.md's hierarchy-through-scarcity, reworded to foreground its earned insight (subordinate without degrading legibility) instead of the design-101 framing (one dominant element) it originally led with."
 
+- id: consuming-lens-includes-agent-vs-human-gap
+  domain: principle-judgment
+  kind: judgment
+  provenance: "2026-07-23, FAMOUS skill-mining ratify session. Generalized from that session's four-candidate borderline review (coding-expo.md): three killed for targeting human-specific habits/memory rather than agent-relevant mechanism risk, one kept for naming a concrete trap in the agent's own verification workflow — see LINEAGE.md."
+
+- id: mined-workflow-stays-a-workflow
+  domain: principle-judgment
+  kind: judgment
+  provenance: "2026-07-23, FAMOUS skill-mining ratify session. Generalized from that session's decision to drop six web-to-native candidates that atomized a coherent migration workflow rather than encoding independent mechanism-level judgment — see LINEAGE.md."
+
 # reading-pipeline candidates, processed against the new principle-judgment domain (2026-07-22)
 - id: immutable-by-default
   domain: coding-general
@@ -938,4 +952,195 @@ provenance:
   domain: coding-expo
   kind: judgment
   provenance: "2026-07-22, reading pipeline (buildmvpfast.com/blog/expo-sdk-56-inline-native-modules-router-fork-new-features-2026). Ratified directly to seed — a global-fetch swap invisible in application-code diffs, with concrete named breakages (an AT Protocol OAuth client, a crash-reporting SDK) rather than a hypothetical risk."
+
+- id: no-color-platformcolor-values-in-reanimated-styles
+  domain: coding-expo
+  kind: judgment
+  provenance: "2026-07-23, mined from FAMOUS's local Expo/React Native team skill docs (.agents/skills/building-native-ui/SKILL.md, references/animations.md), not the URL reading pipeline. Ratified directly to seed — names the specific silent-failure mechanism (opaque platform color handle vs. interpolable JS value) rather than a generic animation-API caveat."
+
+- id: medialibrary-save-requires-local-file-not-base64
+  domain: coding-expo
+  kind: judgment
+  provenance: "2026-07-23, mined from FAMOUS's local Expo/React Native team skill docs (.agents/skills/building-native-ui/references/media.md). Ratified directly to seed — a sharp, specific API gotcha (no inline-data code path) rather than an API-reference restatement."
+
+- id: liquid-glass-feature-detect-with-blur-fallback
+  domain: coding-expo
+  kind: judgment
+  provenance: "2026-07-23, mined from FAMOUS's local Expo/React Native team skill docs (.agents/skills/building-native-ui/references/visual-effects.md). Ratified directly to seed — names the specific OS-version coupling risk of treating a newest-iOS-only material as always available."
+
+- id: blurview-requires-overflow-hidden-for-rounded-corners
+  domain: coding-expo
+  kind: judgment
+  provenance: "2026-07-23, mined from FAMOUS's local Expo/React Native team skill docs (.agents/skills/building-native-ui/references/visual-effects.md). Ratified directly to seed — a concrete, silent visual bug (blur bleeding past rounded corners) with no compiler or runtime signal."
+
+- id: css-gradients-require-new-architecture
+  domain: coding-expo
+  kind: judgment
+  provenance: "2026-07-23, mined from FAMOUS's local Expo/React Native team skill docs (.agents/skills/building-native-ui/references/gradients.md). Ratified directly to seed — names what the experimental_ prefix actually gates (Fabric-only, not general instability) rather than a generic 'experimental APIs are risky' truism."
+
+- id: expo-go-default-until-native-code-needed
+  domain: coding-expo
+  kind: judgment
+  provenance: "2026-07-23, mined from FAMOUS's local Expo/React Native team skill docs (.agents/skills/building-native-ui/SKILL.md, .agents/skills/expo-dev-client/SKILL.md). Merged from two drafted candidates (expo-go-before-custom-native-build, expo-go-outgrown-once-native-code-needed) covering the same default from both directions — ratified as one entry rather than two near-duplicates."
+
+- id: expo-ui-list-not-virtualized-avoid-for-large-lists
+  domain: coding-expo
+  kind: judgment
+  provenance: "2026-07-23, mined from FAMOUS's local Expo/React Native team skill docs (.agents/skills/web-to-native/references/native-patterns.md, .agents/skills/expo-ui/references/jetpack-compose.md, references/universal.md). Merged from two near-identical drafted candidates (expo-ui-list-not-for-large-feeds, expo-ui-list-not-virtualized) surfaced independently from web-to-native and expo-ui sources — ratified as one entry."
+
+- id: expo-router-toolbar-children-not-behind-wrapper
+  domain: coding-expo
+  kind: judgment
+  provenance: "2026-07-23, mined from FAMOUS's local Expo/React Native team skill docs (.agents/skills/expo-router/references/toolbar-and-headers.md). Ratified over operator's non-obviousness challenge to the batch: Stack.Toolbar is a newer, sparsely-documented API whose children-introspection mechanism isn't the kind of thing a generic search on the blank-toolbar symptom surfaces — distinct from the sibling candidates killed in the same batch for being easily-searchable, well-documented gotchas."
+
+- id: expo-router-always-resolve-root-path (killed)
+  domain: coding-expo
+  kind: knowledge
+  provenance: "2026-07-23, mined from FAMOUS's local Expo/React Native team skill docs (.agents/skills/expo-router/SKILL.md). Killed at ratify — see kill_type/reason_killed in domains/coding-expo.md's killed: log."
+
+- id: no-bare-group-route-file (killed)
+  domain: coding-expo
+  kind: knowledge
+  provenance: "2026-07-23, mined from FAMOUS's local Expo/React Native team skill docs (.agents/skills/expo-router/references/route-structure.md). Killed at ratify — see kill_type/reason_killed in domains/coding-expo.md's killed: log."
+
+- id: expo-router-renamed-initialroutename-to-anchor (killed)
+  domain: coding-expo
+  kind: knowledge
+  provenance: "2026-07-23, mined from FAMOUS's local Expo/React Native team skill docs (.agents/skills/expo-router/references/route-structure.md). Operator asked to verify against real FAMOUS usage before ratifying; grep found zero instances of initialRouteName/unstable_settings in the project. Killed — see kill_type/reason_killed in domains/coding-expo.md's killed: log."
+
+- id: expo-router-array-group-for-shared-tab-screens
+  domain: coding-expo
+  kind: judgment
+  provenance: "2026-07-23, mined from FAMOUS's local Expo/React Native team skill docs (.agents/skills/expo-router/SKILL.md). Ratified directly to seed — names a real route-identity divergence risk (duplicated screens carrying independent back-stack/state) not obvious from the array-group feature's own name."
+
+- id: native-tabs-must-be-statically-defined
+  domain: coding-expo
+  kind: judgment
+  provenance: "2026-07-23, mined from FAMOUS's local Expo/React Native team skill docs (.agents/skills/expo-router/references/tabs.md). Ratified directly to seed — a silent full-navigator remount triggered by what reads as an ordinary conditional render, genuinely hard to attribute without knowing the native-controller mechanism."
+
+- id: native-tabs-bottomaccessory-state-outside-component
+  domain: coding-expo
+  kind: judgment
+  provenance: "2026-07-23, mined from FAMOUS's local Expo/React Native team skill docs (.agents/skills/expo-router/references/tabs.md). Ratified directly to seed — the dual-instance mounting behavior (regular + inline placement simultaneously) is a non-obvious mechanism no amount of staring at the component's own code would reveal."
+
+- id: native-tabs-transparency-requires-first-opaque-child-not-collapsed
+  domain: coding-expo
+  kind: judgment
+  provenance: "2026-07-23, mined from FAMOUS's local Expo/React Native team skill docs (.agents/skills/expo-router/references/tabs.md). Ratified directly to seed — reproduces only in optimized/release builds where View-collapsing actually happens, a classic dev-vs-release divergence that's hard to nail down from the release-build symptom alone."
+
+- id: zoom-transition-dismissal-bounds-for-inner-scrollview
+  domain: coding-expo
+  kind: judgment
+  provenance: "2026-07-23, mined from FAMOUS's local Expo/React Native team skill docs (.agents/skills/expo-router/references/zoom-transitions.md). Ratified directly to seed — a gesture-arbitration conflict between two independently-reasonable-looking APIs (zoom dismissal + inner scroll), not discoverable by reading either API's docs in isolation."
+
+- id: formsheet-detent-index-controls-background-interactivity
+  domain: coding-expo
+  kind: judgment
+  provenance: "2026-07-23, mined from FAMOUS's local Expo/React Native team skill docs (.agents/skills/expo-router/references/form-sheet.md). Ratified directly to seed — the default-dims-at-every-detent behavior is a specific, non-obvious default that only a form-sheet-specific prop (sheetLargestUndimmedDetentIndex) resolves."
+
+# domain: dependency-management-expo (new domain, seeded 2026-07-23)
+- id: pin-multi-package-versions-for-native-graphics-stack
+  domain: dependency-management-expo
+  kind: judgment
+  provenance: "2026-07-23, mined from FAMOUS's local Expo/React Native team skill docs (.agents/skills/building-native-ui/references/webgpu-three.md), not the URL reading pipeline. Ratified directly to seed — names a real compatibility-contract gap semver doesn't express, not a restatement of 'pin your versions.'"
+
+- id: recheck-workaround-artifacts-every-sdk-upgrade
+  domain: dependency-management-expo
+  kind: judgment
+  provenance: "2026-07-23, mined from FAMOUS's local Expo/React Native team skill docs (.agents/skills/upgrading-expo/SKILL.md). Ratified directly to seed — same failure shape as ceiling-comment-for-deliberate-shortcuts, applied to expo.install.exclude/patches specifically."
+
+- id: codemod-deprecation-check-after-rewrite
+  domain: dependency-management-expo
+  kind: judgment
+  provenance: "2026-07-23, mined from FAMOUS's local Expo/React Native team skill docs (.agents/skills/upgrading-expo/references/react-navigation-to-expo-router.md). Operator flagged the initial draft's rule for leaking its reason (naming the specific migration inline instead of stating the general check) — reworded so rule states the generalizable guidance and condition carries the SDK-56-specific instance. Filed to a new dependency-management-expo domain rather than directly into stack-agnostic dependency-management: not general enough on a single data point, and specifically a codemod-migration judgment that may fork further if a comparable non-Expo codemod scenario surfaces."
+
+- id: escalate-unmapped-symbols-dont-diy-workaround
+  domain: dependency-management-expo
+  kind: judgment
+  provenance: "2026-07-23, mined from FAMOUS's local Expo/React Native team skill docs (.agents/skills/upgrading-expo/references/react-navigation-to-expo-router.md). Ratified directly to seed — same dependency-management-expo homing reasoning as codemod-deprecation-check-after-rewrite; also codemod-migration-shaped rather than strictly Expo-specific."
+
+- id: reanimated-worklets-new-required-peer-post-newarch
+  domain: dependency-management-expo
+  kind: judgment
+  provenance: "2026-07-23, mined from FAMOUS's local Expo/React Native team skill docs (.agents/skills/upgrading-expo/references/new-architecture.md). Operator flagged the initial draft's rule for leaking its reason (SDK-54/worklets specifics stated as the rule itself) — reworded so rule states the general 'check for new required peer deps after a major upgrade' guidance and condition carries the Reanimated/worklets specifics."
+
+- id: root-stack-vs-js-stack-codemod-collision
+  domain: dependency-management-expo
+  kind: judgment
+  provenance: "2026-07-23, mined from FAMOUS's local Expo/React Native team skill docs (.agents/skills/upgrading-expo/references/react-navigation-to-expo-router.md). Operator flagged the initial draft's rule for leaking its reason (the Stack/js-stack distinction stated inline in the rule) — reworded so rule states the pure directive and reason carries the explanation. Routed to dependency-management-expo rather than coding-expo on operator's call: migration/codemod-specific judgment, not general Expo implementation judgment."
+
+- id: expo-av-video-android-parity-gap-fails-silently
+  domain: dependency-management-expo
+  kind: judgment
+  provenance: "2026-07-23, mined from FAMOUS's local Expo/React Native team skill docs (.agents/skills/upgrading-expo/references/expo-av-to-video.md). Ratified directly — every named failure mode is a silent Android-only visual regression invisible to iOS-only testing. Routed to dependency-management-expo alongside root-stack-vs-js-stack-codemod-collision: migration-verification judgment, not general Expo implementation judgment."
+
+- id: dom-component-router-hooks-not-callable
+  domain: coding-expo
+  kind: judgment
+  provenance: "2026-07-23, mined from FAMOUS's local Expo/React Native team skill docs (.agents/skills/web-to-native/references/false-friends.md, .agents/skills/use-dom/SKILL.md — same rule surfaced independently from both sources, merged into one entry). Kept as coding-expo mechanism judgment (not migration-workflow-shaped, per operator's web-to-native split): fires whenever a DOM component touches route state, not only during a bulk migration."
+
+- id: layout-route-cannot-be-a-dom-component
+  domain: coding-expo
+  kind: judgment
+  provenance: "2026-07-23, mined from FAMOUS's local Expo/React Native team skill docs (.agents/skills/web-to-native/references/false-friends.md). Kept as coding-expo mechanism judgment per the same web-to-native split: a structural DOM-component/layout-route rule, not migration-sequencing advice."
+
+- id: streaming-fetch-requires-expo-fetch-not-rn-fetch
+  domain: coding-expo
+  kind: judgment
+  provenance: "2026-07-23, mined from FAMOUS's local Expo/React Native team skill docs (.agents/skills/web-to-native/references/false-friends.md). Kept as coding-expo mechanism judgment: fires whenever native code reads a streaming response, independent of migration context. Six sibling web-to-native candidates (expo-dom-shell-ships-before-nativizing, dom-screen-runtime-cost-caps-nativize-scope, nativize-means-redesign-not-reskin, iap-required-for-digital-goods-decide-at-assess, async-server-components-must-split-before-porting, motion-and-touch-are-part-of-native-not-polish) dropped entirely rather than ratified or kill-logged — operator judgment: these atomize the FAMOUS web-to-native skill's own coherent workflow sequencing, and lose the ordering/connective 'why this step before that step' reasoning the skill file already carries; the skill itself is the better artifact to load for that workflow, not a container mismatch worth a kill-log entry. Two more (stale-expo-go-bundle-trap, verify-migration-by-running-not-compiling) dropped earlier in the same review for being easily-searchable/generic, also not kill-logged since they were never ratified into a domain to begin with."
+
+- id: release-build-cannot-hot-reload-reuse-is-wrong-tool
+  domain: coding-expo
+  kind: judgment
+  provenance: "2026-07-23, mined from FAMOUS's local Expo/React Native team skill docs (.agents/skills/eas-simulator/SKILL.md, references/run-your-app.md, references/troubleshooting.md). Operator questioned whether an agent (vs. a human) would actually trip on this; kept on reasoning that it's a concrete trap in the agent's own verification workflow specifically — screenshotting a stale release build via /run or /verify and misattributing 'no visible change' to a failed fix rather than a stale bundle, with no error signal to distinguish the two."
+
+- id: expo-public-env-vars-are-client-visible (killed)
+  domain: coding-expo
+  kind: knowledge
+  provenance: "2026-07-23, mined from FAMOUS's local Expo/React Native team skill docs (.agents/skills/native-data-fetching/SKILL.md). Killed after operator's consuming-lens challenge — see kill_type/reason_killed in domains/coding-expo.md's killed: log."
+
+- id: dom-component-isolated-context-no-shared-state (killed)
+  domain: coding-expo
+  kind: knowledge
+  provenance: "2026-07-23, mined from FAMOUS's local Expo/React Native team skill docs (.agents/skills/use-dom/SKILL.md). Killed after operator's consuming-lens challenge — redundant with the already-ratified dom-component-router-hooks-not-callable. See kill_type/reason_killed in domains/coding-expo.md's killed: log."
+
+- id: expo-ui-universal-before-platform-specific (killed)
+  domain: coding-expo
+  kind: knowledge
+  provenance: "2026-07-23, mined from FAMOUS's local Expo/React Native team skill docs (.agents/skills/expo-ui/SKILL.md). Killed after operator's consuming-lens challenge, contrasted directly against the kept release-build-cannot-hot-reload-reuse-is-wrong-tool in the same review. See kill_type/reason_killed in domains/coding-expo.md's killed: log."
+
+- id: nativewind-inline-variables-breaks-platform-color
+  domain: coding-expo
+  kind: judgment
+  provenance: "2026-07-23, mined from FAMOUS's local Expo/React Native team skill docs (.agents/skills/expo-tailwind-setup/SKILL.md). Ratified directly to seed — a specific, silent config-interaction break (inlineVariables optimization vs. platformColor's need for a live native reference) with no error signal."
+
+- id: expo-router-loader-data-cached-for-session
+  domain: coding-expo
+  kind: judgment
+  provenance: "2026-07-23, mined from FAMOUS's local Expo/React Native team skill docs (.agents/skills/native-data-fetching/references/expo-router-loaders.md). Ratified directly to seed — a documented-as-limitation-not-cache-control behavior that silently violates the SPA assumption of fresh data per revisit."
+
+- id: expo-router-loader-request-object-mode-dependent
+  domain: coding-expo
+  kind: judgment
+  provenance: "2026-07-23, mined from FAMOUS's local Expo/React Native team skill docs (.agents/skills/native-data-fetching/references/expo-router-loaders.md). Ratified directly to seed — a config-flip-triggered crash (server mode populates request, static mode never does) invisible until the output mode actually changes."
+
+- id: eas-hosting-api-routes-run-on-workers-not-node
+  domain: coding-expo
+  kind: judgment
+  provenance: "2026-07-23, mined from FAMOUS's local Expo/React Native team skill docs (.agents/skills/expo-api-routes/SKILL.md). Ratified directly to seed — classic works-locally-fails-in-production trap (local npx expo serve runs Node, EAS Hosting deploys to Cloudflare Workers)."
+
+- id: expo-ui-platform-specific-import-crashes-wrong-platform
+  domain: coding-expo
+  kind: judgment
+  provenance: "2026-07-23, mined from FAMOUS's local Expo/React Native team skill docs (.agents/skills/expo-ui/SKILL.md). Ratified directly to seed — a runtime-only crash ('Unable to get view config') from an import that resolves fine in JS and only fails at native view registration."
+
+- id: expo-router-no-platform-extension-route-files
+  domain: coding-expo
+  kind: judgment
+  provenance: "2026-07-23, mined from FAMOUS's local Expo/React Native team skill docs (.agents/skills/expo-ui/references/universal.md). Ratified directly to seed — names the specific conflict between two independently-reasonable filename conventions (Metro's platform-extension resolution vs. Expo Router's route resolution)."
+
+- id: expo-ui-usenativestate-silently-degrades-without-worklets
+  domain: coding-expo
+  kind: judgment
+  provenance: "2026-07-23, mined from FAMOUS's local Expo/React Native team skill docs (.agents/skills/expo-ui/references/drop-in-replacements.md). Ratified directly to seed — a silent fallback to normal React render cycle that's easy to misdiagnose as an API limitation rather than a missing prerequisite."
 ```

@@ -44,6 +44,8 @@ rules and principles from my time as a software engineer.
   check if it actually was," and essentially loop that until it thought it had something. A quick
   color utility script later and I had 9 full color scheme options for a 10th of the cost. And they
   didn't suck!
+- **You can eat other skills!** You can mine other skills for new principles and domains! Other people
+  have good ideas too, believe it or not.
 - **It can review it's own plan.** Typically, I ask it to make a high-level plan, and then do a pass
   for any gaps or improvements. It's never come back without something. That's codified in a planning
   principle.
