@@ -73,6 +73,11 @@ principles:
   condition: "When reviewing a useEffect whose body contains zero external interaction and whose only effect is one or more setState calls gated by a dependency-array change."
   reason: "The effect only defers a derivable computation to a second render pass for no benefit — an extra render plus an unneeded node in the effect dependency graph. Confirmed as a recurring miss, not a one-off: found independently in FAMOUS (PlayerBarContent's track-change scrubber reset) and Blog (ResultBar's useResultFlash throttled counter), both effects existing purely to adjust local state with no external interaction."
 
+- id: use-transition-vs-deferred-value
+  rule: "Use useTransition when you control the state setter that triggers the expensive render — wrap the setter call inside startTransition. Use useDeferredValue when the value arrives from props or a source whose setter you don't control. Apply either only after confirming that the UI exhibits visible lag that React.memo or useMemo cannot fix."
+  condition: "When de-prioritizing an expensive re-render in React to keep the UI responsive during user input. The access-level test applies first: do you own the setter, or only the value?"
+  reason: "Both hooks de-prioritize a render pass, but they attach at different points in the data flow. useTransition wraps the setter call and requires setter access; useDeferredValue wraps the value at the consumer and requires only that the value is available. The decision signal is access level, not state vs. props semantics. Applying either hook before confirming visible lag adds complexity with no UX benefit — the optimization targets a rendering symptom that may not exist, and simpler memoization should be tried first."
+
 - id: optimistic-ui-for-high-confidence-mutations
   rule: "Apply optimistic UI (show assumed-success state immediately) only for mutations where server failure is rare and a visible rollback carries low cost — toggles, likes, reorders, non-destructive inline updates. Do not use optimistic UI for destructive actions, payment flows, or any mutation whose failure would require significant user re-entry."
   condition: "When deciding whether to apply optimistic state patterns (React 19 `useOptimistic`, or manual optimistic state) to a user-triggered server mutation."

@@ -738,7 +738,7 @@ class RecordGateCoOccurrenceAndOriginTest(CorpusCommandTestCase):
 class ArbitraryLayerOverrideTest(unittest.TestCase):
     """measure/verify/record-gate must work on any domains-dir + audit.md pair — e.g. the
     kernel-seed layer, not only a project's own corpora/domains — the same treatment
-    kill-report/graduate-kill/adopt already have."""
+    kill-report/graduate-kill already have."""
 
     def setUp(self):
         self.tempdir = tempfile.TemporaryDirectory()
@@ -800,50 +800,6 @@ class ArbitraryLayerOverrideTest(unittest.TestCase):
         self.assertIn("color:", result.stdout)
 
 
-class AdoptCommandTest(CorpusCommandTestCase):
-    def test_adopt_finds_kernel_seed_domain(self):
-        result = self.run_command(["adopt", "--domain", "coding-general"])
-
-        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
-        self.assertIn("domains/coding-general.md", result.stdout)
-        self.assertIn("ask-before-architecture", result.stdout)
-        self.assertIn("fork-status: forked", result.stdout)
-
-    def test_adopt_finds_stack_specific_domain_regardless_of_config(self):
-        # No role-pack concept anymore — domains/ is flat, so a stack-specific domain like
-        # css resolves the same way coding-general does, with no config.md needed at all.
-        result = self.run_command(["adopt", "--domain", "css"])
-
-        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
-        self.assertIn("domains/css.md", result.stdout)
-
-    def test_adopt_fails_for_domain_with_no_seed_counterpart(self):
-        result = self.run_command(["adopt", "--domain", "not-a-real-domain"])
-
-        self.assertEqual(result.returncode, 2)
-        self.assertIn("nothing to fork from", result.stderr)
-
-    def test_adopt_refuses_audit_which_is_the_ledger_not_a_domain(self):
-        result = self.run_command(["adopt", "--domain", "audit"])
-
-        self.assertEqual(result.returncode, 2)
-        self.assertIn("nothing to fork from", result.stderr)
-
-    def test_adopt_refuses_to_resync_an_already_forked_domain(self):
-        (self.root / "corpora" / "domains" / "coding-general.md").write_text(
-            "# Domain: coding-general\n\n```yaml\n"
-            "fork-status: forked\n"
-            "forked-from: domains/coding-general.md\n"
-            "forked-date: 2026-07-18\n\n"
-            "principles:\n\nkilled:\n```\n"
-        )
-
-        result = self.run_command(["adopt", "--domain", "coding-general"])
-
-        self.assertEqual(result.returncode, 2)
-        self.assertIn("already forked", result.stderr)
-
-
 class ComposeSpawnPromptTest(CorpusCommandTestCase):
     def write_task(self, content="Implement the thing."):
         path = self.root / "task.md"
@@ -881,13 +837,14 @@ class ComposeSpawnPromptTest(CorpusCommandTestCase):
         first_id_line = next(line for line in seed_text.splitlines() if line.strip().startswith("- id:"))
         self.assertIn(first_id_line.strip(), text)
 
-    def test_forked_project_domain_skips_the_seed(self):
+    def test_project_domain_always_merges_with_seed(self):
+        # No fork mechanism — a project's own domain file merges with the seed by concatenation,
+        # always, regardless of what the project file's content looks like.
         task = self.write_task()
         out = self.root / "out.md"
         (self.root / "corpora" / "domains" / "coding-general.md").write_text(
-            "# Domain: coding-general (forked)\n\n```yaml\n"
-            "fork-status: forked\nforked-from: domains/coding-general.md\nforked-date: 2026-07-01\n\n"
-            "principles:\n\nkilled:\n```\n"
+            "# Domain: coding-general (project)\n\n```yaml\n"
+            "principles:\n\n- id: project-only-rule\n  rule: \"R\"\n  condition: \"C\"\n  reason: \"Why.\"\n\nkilled:\n```\n"
         )
 
         result = self.run_command([
@@ -897,8 +854,10 @@ class ComposeSpawnPromptTest(CorpusCommandTestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
         text = out.read_text()
-        self.assertIn("forked", text)
-        self.assertNotIn("<!-- seed:", text)
+        self.assertIn("<!-- seed:", text)
+        self.assertIn("<!-- project:", text)
+        self.assertIn("project-only-rule", text)
+        self.assertIn("ask-before-architecture", text)
 
     def test_project_only_domain_with_no_seed_counterpart(self):
         task = self.write_task()

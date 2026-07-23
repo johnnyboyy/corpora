@@ -124,4 +124,9 @@ principles:
   see-also: module-boundaries-precede-deployment-separation, code-lives-at-consumer-level
 
 killed:
+
+- id: immutable-by-default
+  rule: "Declare variables, parameters, and data structures in their immutable form by default. Reach for const, readonly, and frozen or value types before their mutable counterparts; only use a mutable form when the variable or structure genuinely needs to change."
+  kill_type: knowledge
+  reason_killed: "Reading-pipeline sourced (kevlinhenney.medium.com) and close to universal, linter-enforced JS/TS doctrine — the knowledge-risk correlation principle-judgment's reading-pipeline-provenance-flags-knowledge-risk names directly. Also redundant with judgment already captured: the domain's own preamble already states prefer-error-exposing-form as a meta-convention (\"when two forms produce the same result but one has a silent failure mode, choose the form that exposes the error\") — an unintended reassignment is exactly that silent failure mode this candidate would have re-described as a new standalone principle."
 ```

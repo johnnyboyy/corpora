@@ -26,6 +26,11 @@ principles:
   reason: "Extracting a component from a loop to 'remove duplication' creates a component with exactly one callsite — the loop body — adding indirection with no reuse benefit. The authoring-level source of truth is already unique; only the rendered output repeats. The duplication concern that motivates component extraction is when independent elements in different templates share a style — not when one template loop generates identical markup."
   see-also: tailwind-extract-component-before-apply
 
+- id: container-queries-for-component-scope
+  rule: "Use container queries when a component's layout should adapt to its own available width, regardless of viewport size. Use media queries for page-level layout breakpoints and browser feature detection. The two coexist: media queries set top-level column structure; container queries govern how individual components render within those columns."
+  condition: "When adding responsive behavior to a CSS component that may be placed in varying container widths across different page contexts — sidebars, dialogs, full-width slots — or when the component needs to change layout independently of the viewport size."
+  reason: "A media-queried component responds to viewport width, which does not change when the component moves from a wide content area to a narrow sidebar. A container query responds to the component's own allocated width, making it context-portable. Relying on media queries for component-level layout adaptations creates a hidden coupling between the component's style and its position in the page — moving it to a different context breaks its layout. Container queries remove that coupling."
+
 killed:
 
 - id: mobile-fixed-bar-bottom-gap

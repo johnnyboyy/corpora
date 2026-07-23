@@ -39,7 +39,8 @@ project domains). Inline, resumed, or isolated execution is decided at route tim
 "Inline, resume, or isolate."
 
 **Step 0, every session, before bootstrap checks or routing:** load the orchestrator's own
-domains — `domains/orchestrator-routing.md` and `domains/ratify-gate.md`, plus project
+domains — `domains/orchestrator-routing.md`, `domains/ratify-gate.md`, and
+`domains/principle-judgment.md`, plus project
 counterparts if present. The orchestrator is a spawn like any other; it does not get to skip the
 load-before-work rule it applies to everyone else.
 
@@ -229,7 +230,10 @@ the orchestrator.
 2. **Check reading candidates.** If `reading/candidates.md` in the corpora skill repo has entries
    whose `domains` match a domain this project declares, surface them alongside session proposals,
    marked `[reading pipeline: <source URL>]`. Same ratify/kill decision; ratified or killed
-   entries are removed from `candidates.md`.
+   entries are removed from `candidates.md`. Also check `reading/queue.md` for any `status:
+   fetch-failed` entries — surface each to the operator verbatim (source URL, `error:`) so they can
+   save a copy and add `local-content:` themselves; this is the reading agent's hard-stop-on-fetch-
+   failure guard reaching the operator, not a routine status to skip past.
 3. **Persist utility candidates.** For every `utility-candidates` entry, match by operation shape
    against `corpora/utility-candidates.md`, then call `corpus.py record-utility-candidate` before
    deleting the handoff. Surface it to the operator for accept / deny / defer and persist that
@@ -240,7 +244,9 @@ the orchestrator.
    provenance, kind). Surface the `kind` the spawn captured — do not re-evaluate it. `judgment` =
    decision under uncertainty; `knowledge` = derivable from documentation or training (see
    `ratify-gate-judgment-vs-knowledge`); `direction` = a project design-direction choice (third
-   route, next step). Ask: ratify / reject / edit.
+   route, next step). If a proposal's provenance names a reading-pipeline source rather than an
+   earned incident, flag that alongside it — a real correlation with knowledge-not-judgment risk
+   (`reading-pipeline-provenance-flags-knowledge-risk` in `principle-judgment`). Ask: ratify / reject / edit.
 5. **Assign a home.** A `direction` proposal is filed into the project's `ui-library.md`
    (provenance to the audit layer) — never into a domain, never killed, never a seed candidate
    (`kernel.md`, "The ratify gate"). For each ratified *principle*, decide its domain — citing
@@ -302,8 +308,10 @@ sync, `corpus.py sync-done`.
 
 stance: convergent
 
-The orchestrator declares two domains: **`orchestrator-routing`** (which lens, when to spawn vs.
-surface vs. defer) and **`ratify-gate`** (assembling a complete spawn and processing what
-it returns) — `domains/orchestrator-routing.md` and `domains/ratify-gate.md`, plus each one's
+The orchestrator declares three domains: **`orchestrator-routing`** (which lens, when to spawn vs.
+surface vs. defer), **`ratify-gate`** (assembling a complete spawn and processing what
+it returns), and **`principle-judgment`** (whether a proposed or already-ratified principle is
+genuine judgment and lives in the right domain) — `domains/orchestrator-routing.md`,
+`domains/ratify-gate.md`, and `domains/principle-judgment.md`, plus each one's
 `corpora/domains/<name>.md` project counterpart when it exists. Audit detail loads only at
 ratify/retrospective time — see `kernel.md`, "Storage: working vs audit."

@@ -10,7 +10,7 @@ Domains, not roles, own corpora — so shared judgment lives once and is availab
 
 **One flat domain pool, one fixed process layer:**
 
-- **The orchestrator** (`SKILL.md`, declares `orchestrator-routing` and `ratify-gate`) is the one fixed thing: a process layer that composes and routes spawns but never takes on a spawn's stance itself, so something occupies that position before any composition can happen. The **planner** is not fixed the same way — it's a seeded alias (`domains/lenses.md`, domains `planning` + `interviewing`) that composes like any other spawn. Every working spawn composes from `coding-general` at minimum; there is no fixed "base coder" file.
+- **The orchestrator** (`SKILL.md`, declares `orchestrator-routing`, `ratify-gate`, and `principle-judgment`) is the one fixed thing: a process layer that composes and routes spawns but never takes on a spawn's stance itself, so something occupies that position before any composition can happen. The **planner** is not fixed the same way — it's a seeded alias (`domains/lenses.md`, domains `planning` + `interviewing`) that composes like any other spawn. Every working spawn composes from `coding-general` at minimum; there is no fixed "base coder" file.
 - **Domains** — stack-agnostic (`coding-general`, `orchestrator-routing`, `spawn-integrity`, ...) and stack-specific (`coding-react`, `css`, `color`, ...) domains live together in one flat `domains/`, not two separate layers. There's no "role pack" selected by a project-config field: each stack-specific domain states its own load condition directly against `corpora/config.md`'s shape fields (`language`, `framework`, `styling`, `has-ui`) in its own preamble — retired 2026-07-22, since a `role-pack:` field only ever bundled conditions the domains already carried individually, all-or-nothing.
 
 `domains/lenses.md` names the recurring compositions (`coder`, `ux-design`, `ui-design`, `planner`) as routing shorthand, not a schema entity — domains available to an alias are not new fixed roles. One composed spawn per named alias runs at a time per project; a domain splits into scoped instances only when the retrospective surfaces a fork signal (conditions that partition the space and give opposing advice), never from an org chart.
@@ -33,7 +33,7 @@ For each domain a spawn's composition includes, both apply when it runs — seed
 
 - `SKILL.md` — the shared orchestrator entrypoint for Claude Code (`/corpora`) and Codex (`$corpora`): routes workstreams, assembles complete spawn loads, relays handoffs, and drives the ratify gate.
 - `kernel.md` — the schema, stance+composition model, ratify gate, write-back format, two load modes, retrospective signals, and domain lifecycle. Reference document.
-- `domains/` — every seed domain, flat: stack-agnostic (`coding-general.md`, `orchestrator-routing.md`, `ratify-gate.md`, `planning.md`, `interviewing.md`, `spawn-integrity.md`) and stack-specific (`coding-ts.md`, `coding-react.md`, `coding-nextjs.md`, `css.md`, and the design domains `color.md`/`motion.md`/`recoverability.md`/etc.) alike, each stating its own load condition in its own preamble. Plus `lenses.md` (routing shorthand, not a domain, seeds `coder`/`ux-design`/`ui-design`/`planner`) and `audit.md` (provenance/kill detail for the layer, loaded only at ratify/retrospective time).
+- `domains/` — every seed domain, flat: stack-agnostic (`coding-general.md`, `orchestrator-routing.md`, `ratify-gate.md`, `principle-judgment.md`, `planning.md`, `interviewing.md`, `spawn-integrity.md`) and stack-specific (`coding-ts.md`, `coding-react.md`, `coding-nextjs.md`, `css.md`, and the design domains `color.md`/`motion.md`/`recoverability.md`/etc.) alike, each stating its own load condition in its own preamble. Plus `lenses.md` (routing shorthand, not a domain, seeds `coder`/`ux-design`/`ui-design`/`planner`) and `audit.md` (provenance/kill detail for the layer, loaded only at ratify/retrospective time).
 - `bootstrap.md` — one-time project setup. Phase 1 detects project shape and writes `corpora/config.md`. Phases 2 and 3 (UI projects only) generate `corpora/ui-library.md` (`ui-design`-composed, divergent) then `corpora/ux-library.md` (`ux-design`-composed, convergent) and propose seed design principles.
 - `LINEAGE.md` — intellectual history: why conventions became law, key kills, design decisions.
 - `reader-tax-and-the-model.md` — a living, multi-model assessment of whether Explicit by Default helps the model itself, not only the human reviewer.
@@ -48,6 +48,8 @@ ln -s /absolute/path/to/corpora ~/.codex/skills/corpora
 ```
 
 Claude Code invokes it as `/corpora`. Codex invokes it as `$corpora` and may also activate it implicitly. A managed project's `AGENTS.md` can opt into automatic Codex activation with the one-line instruction offered by the skill.
+
+**Diverging from the shared skill.** A project that wants its own frozen copy of the seed domains — deliberately not tracking future changes to this repo — copies it instead of symlinking. That's a whole-skill decision made once, at install time; re-copy later to pick up upstream changes on your own schedule. There is no per-domain equivalent — a project's own `corpora/domains/<domain>.md` always merges with the seed by concatenation, live, with no opt-out (`kernel.md`, "Project corpora").
 
 ## Using in a project
 

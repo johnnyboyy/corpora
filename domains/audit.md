@@ -803,4 +803,57 @@ provenance:
 - id: no-shell-for-structural-absence
   domain: coding-ts
   provenance: "2026-07-19, sibling-implementation review (slider-puzzle/four vs one, two, three). Surfaced from four/script.js's repeated empty-else-with-restating-comment pattern (getAdjacentPositions, isBoardSolved, ensureTileElements, stopTimer, setCaption, handleTileClick — six instances). Weighed against no-early-returns: that principle governs branches where both sides do real work; this one covers the narrower case of a branch with no true opposite side, which the guard-clause reasoning was never meant to force into a populated shell. Held as a see-also peer, not a caveat rewrite of the existing bullet."
+
+# domain: principle-judgment (new domain, seeded 2026-07-22)
+- id: reaudit-ratified-principles-against-genuine-fork-test
+  domain: principle-judgment
+  kind: judgment
+  provenance: "2026-07-22, domain-and-principle audit session. Generalized from the session's own method: css.md's grid-for-layout-flexbox-for-flow and color.md's semantic-token-names-by-role-not-value were both tagged kind: knowledge in their own audit provenance at ratification time yet were still ratified into principles: — direct evidence that gate-time discipline alone is not sufficient and a periodic re-audit catches what it misses."
+
+- id: reading-pipeline-provenance-flags-knowledge-risk
+  domain: principle-judgment
+  kind: judgment
+  provenance: "2026-07-22, domain-and-principle audit session. All four knowledge-kills that session (css.md's two, color.md's two) originated from reading-pipeline provenance rather than an earned project incident — named directly as a risk correlation rather than left to be re-discovered on each future audit."
+
+- id: check-principle-against-consuming-lens-not-just-domain-topic
+  domain: principle-judgment
+  kind: judgment
+  provenance: "2026-07-22, domain-and-principle audit session. Generalized from three misplaced-principle findings that session (optimistic-ui-for-high-confidence-mutations + its pair, moved recoverability→coding-react; progressive-disclosure-for-primary-advanced-split, moved design-method→forms-inputs) — none of which the existing domain-tension retrospective signal could have caught, since none contradicted anything else in their birth domain."
+
+- id: lead-with-the-nonobvious-half-when-refining
+  domain: principle-judgment
+  kind: judgment
+  provenance: "2026-07-22, domain-and-principle audit session. Generalized from the same session's refinement of visual-hierarchy.md's hierarchy-through-scarcity, reworded to foreground its earned insight (subordinate without degrading legibility) instead of the design-101 framing (one dominant element) it originally led with."
+
+# reading-pipeline candidates, processed against the new principle-judgment domain (2026-07-22)
+- id: immutable-by-default
+  domain: coding-general
+  kind: knowledge
+  provenance: "2026-07-20, reading pipeline (kevlinhenney.medium.com/restrict-mutability-of-state). Killed on first review rather than ratified — see coding-general.md's killed log for the reasoning."
+  killed: 2026-07-22
+
+- id: use-transition-vs-deferred-value
+  domain: coding-react
+  kind: judgment
+  provenance: "2026-07-20, reading pipeline (developerway.com/posts/use-transition). Ratified directly to seed — the access-level test (setter ownership vs. value-only access) is a genuine decision heuristic for a commonly-conflated hook pair, not a restatement of React's own docs."
+
+- id: container-queries-for-component-scope
+  domain: css
+  kind: judgment
+  provenance: "2026-07-20, reading pipeline (blog.logrocket.com/choose-between-media-container-queries). Ratified directly to seed — container queries are recent enough (broad support ~2023) to carry real judgment risk rather than being settled textbook knowledge; the component-width-vs-viewport-width distinction is architectural, not syntax."
+
+- id: server-components-for-initial-data
+  domain: coding-nextjs
+  kind: judgment
+  provenance: "2026-07-20, reading pipeline (vercel.com/blog/common-mistakes-with-the-next-js-app-router-and-how-to-fix-them). Ratified directly to seed — names a real, plausible wrong default (client-side fetching out of pre-RSC habit), framed as an observed mistake rather than pure API reference."
+
+- id: revalidate-tag-over-path
+  domain: coding-nextjs
+  kind: judgment
+  provenance: "2026-07-20, reading pipeline (vercel.com/blog/common-mistakes-with-the-next-js-app-router-and-how-to-fix-them). Ratified directly to seed — companion finding from the same source; a genuine precision-vs-simplicity tradeoff (revalidateTag vs. revalidatePath), not a lookup fact."
+
+- id: server-actions-for-mutations-not-queries
+  domain: coding-nextjs
+  kind: judgment
+  provenance: "2026-07-20, reading pipeline (vercel.com/blog/common-mistakes-with-the-next-js-app-router-and-how-to-fix-them). Ratified directly to seed — companion finding from the same source; guards against the plausible default of reaching for Server Actions as a general-purpose endpoint since they're the newer API."
 ```

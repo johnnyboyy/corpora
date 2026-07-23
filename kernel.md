@@ -159,8 +159,8 @@ needs, whether a proposal ratifies, when a retrospective fires. Something has to
 position before any composition can happen — otherwise nothing decides what to compose for the
 orchestrator itself, and the regress has no floor. `SKILL.md` states this precisely: the
 orchestrator is "a pure process layer that composes and routes spawns but never takes on a spawn's
-stance itself." `orchestrator-routing` and `ratify-gate` are its own domains, loaded into
-`SKILL.md`'s own prompt rather than composed fresh per task — not because the orchestrator is
+stance itself." `orchestrator-routing`, `ratify-gate`, and `principle-judgment` are its own domains,
+loaded into `SKILL.md`'s own prompt rather than composed fresh per task — not because the orchestrator is
 "fixed" in some special sense, but because a process layer has no subject to compose *for*; it has
 only the process itself.
 
@@ -587,23 +587,19 @@ lifecycle) and is indifferent to how many domains exist.
 Seed domain = general judgment that travels across projects (lives in the skill's `domains/`, one
 flat pool — stack-agnostic and stack-specific domains alike; see "One flat seed layer," below).
 Project domain = judgment earned in this specific project.
-Both apply when a spawn runs: for each domain the spawn's composition includes, load the seed
-domain (if any) then the project domain (if any) of the same name — unless the project domain file's preamble declares
-`fork-status: forked`, in which case load only the project file; the seed is no longer consulted
-for that domain. A project may also have domains with no seed counterpart (project-specific
-subjects, e.g. `spatial-metaphor`).
+Both always apply when a spawn runs: for each domain the spawn's composition includes, load the
+seed domain (if any), then the project domain (if any) of the same name, concatenated in full — no
+exceptions, no per-domain opt-out. A project may also have domains with no seed counterpart
+(project-specific subjects, e.g. `spatial-metaphor`).
 
-### Forking a domain
-
-A project can adopt a seed domain instead of always merging live with it — useful once a domain
-has diverged enough, or has principles that don't fit the project, that the live merge is more
-noise than signal. Run `corpus.py adopt --domain <domain>` (skill-repo script, project root as
-`--root`): it locates the domain's seed file and prints its principles — mechanics only, no
-judgment. From there: propose which principles are project-relevant vs. droppable with a reason
-each, get operator approval, then write the curated result to `corpora/domains/<domain>.md` —
-merged by `id` with any principles already there — with `fork-status: forked`, `forked-from: <seed
-path>`, and `forked-date: <date>` in its preamble. Forking is one-way: it stops the live merge for
-that domain going forward. Re-syncing a fork against later seed changes is not yet supported.
+A project that wants to genuinely diverge from the shared skill — not just accumulate its own
+principles alongside the seed, which needs no special mechanism at all, but stop tracking the
+seed's future changes — does that at install time, not per-domain: copy the skill instead of
+symlinking it (`README.md`, "Installation"). That's a whole-skill decision, made once, easy to redo
+by copying again later if wanted. A per-domain fork mechanism existed here previously
+(`corpus.py adopt`); retired 2026-07-22 for never having been exercised by a real project and for
+solving a problem — merge-time conflict — that concatenation never actually created; see
+`LINEAGE.md`.
 
 ### One flat seed layer
 
@@ -661,6 +657,16 @@ against contamination — is the working context holding domains from another mo
    for a risk that has stopped materializing. Mechanically surfaced by `corpus.py kill-report`
    (see "Killed entries," above); the retrospective judges whether it is actually safe to demote,
    then `corpus.py graduate-kill` does the removal and audit annotation.
+8. **Misplaced principle → move, not split** — an active principle reads as on-topic for its
+   domain but is actually consumed by a different lens than the one(s) that load this domain, or by
+   no lens's stated concern at all. Distinct from domain tension (#2): no opposing advice, no
+   partition to find — just a principle that ended up in a container adjacent to its real subject.
+   See `principle-judgment` domain.
+9. **Retrospective re-audit for genuine judgment** — an active principle's own audit provenance
+   already records `kind: knowledge`, or cites a reading-pipeline/secondary source rather than an
+   earned incident, without ever having been re-examined since ratification. Gate-time discipline
+   can lapse under session-context pressure; the retrospective is the backstop, not a formality.
+   See `principle-judgment` domain.
 
 **Anti-overfitting (any domain whose principles were earned in a single project shape):** surface
 which ratified principles should stay provisional — weighable, not promoted — until tested against

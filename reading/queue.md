@@ -1,7 +1,13 @@
 # Reading queue
 
 Sources queued by the discovery agent, awaiting the reading agent.
-Format: url, domains, gap addressed, status (unread | read), source (discovery | manual).
+Format: url, domains, gap addressed, status (unread | read | fetch-failed), source (discovery |
+manual). A `fetch-failed` entry means the reading agent could not actually retrieve the source and
+stopped rather than substitute training-data recall (`reading-agent.md`) — it carries `attempted:`
+and `error:` instead of `read:`/`candidates:`, and is surfaced at the ratify gate (`SKILL.md`) for
+the operator to resolve. To resolve one: save a copy of the content somewhere reachable and add a
+`local-content: <path>` field naming it, then reset `status: unread` — the reading agent reads that
+file directly on its next run instead of fetching.
 
 ```yaml
 queue:

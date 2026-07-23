@@ -12,7 +12,7 @@ by markers — the script never touches anything outside its markers.
 Commands:
   measure [--domains-dir --audit]  update working-file-tokens for every domain (defaults to the
                                    project layer; override to measure any domains-dir + audit.md
-                                   pair — e.g. the kernel-seed layer, same as kill-report/adopt)
+                                   pair — e.g. the kernel-seed layer, same as kill-report)
   verify [--domains-dir --audit]   reconcile ledger against working files (detects
                                    unrecorded gates and gate-bypassing writes)
   record-gate --domain D [...]     record a ratify gate's outcomes (same --domains-dir/--audit
@@ -28,8 +28,6 @@ Commands:
   set-utility-status [...]         record the operator's candidate disposition
   retro-done --domain D            reset counters after a retrospective
   sync-done                        reset library-drift after a UI-library sync
-  adopt --domain D                 locate D's seed file and print it for curation into a
-                                   project-local fork (fork-status: forked)
   compose-spawn-prompt [...]       mechanically assemble a spawn-ready prompt: stance frame +
                                    full seed/project domain files + handoff schema + task, no
                                    summarization step
@@ -1039,8 +1037,6 @@ def cmd_sync_done(project: Project, _args) -> None:
     print("library-drift reset to 0")
 
 
-# ── adopt: fork a seed domain into the project layer ──────────────────
-
 def skill_root() -> str:
     return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -1050,39 +1046,6 @@ def seed_domain_path(domain: str) -> str:
         return ""
     kernel_path = os.path.join(skill_root(), "domains", f"{domain}.md")
     return kernel_path if os.path.exists(kernel_path) else ""
-
-
-def fork_info(path: str) -> dict:
-    info = {}
-    for raw in open(path):
-        line = raw.strip()
-        if re.fullmatch(r"principles:\s*", line):
-            break
-        m = re.match(r"(fork-status|forked-from|forked-date):\s*(.+)", line)
-        if m:
-            info[m.group(1)] = m.group(2).strip()
-    return info
-
-
-def cmd_adopt(project: Project, args) -> None:
-    domain = args.domain
-    seed_path = seed_domain_path(domain)
-    if not seed_path:
-        fail(f"no seed file for domain '{domain}' — nothing to fork from")
-    project_path = os.path.join(project.domains_dir, f"{domain}.md")
-    if os.path.exists(project_path):
-        info = fork_info(project_path)
-        if info.get("fork-status") == "forked":
-            fail(f"'{domain}' is already forked (forked-from {info.get('forked-from', '?')}) "
-                 "— adopt is one-way, not a resync")
-    print(f"seed file for '{domain}': {seed_path}\n")
-    print(open(seed_path).read())
-    rel_seed = os.path.relpath(seed_path, skill_root())
-    print(f"---\nPropose which principles above are project-relevant vs. droppable (with a reason "
-          f"each). After operator approval, write the curated result to {project_path} — merged by "
-          f"`id` with any principles already there — with this preamble:\n"
-          f"  fork-status: forked\n  forked-from: {rel_seed}\n  forked-date: {today()}\n"
-          "From then on this domain loads only the project file; the seed is no longer consulted.")
 
 
 # ── compose-spawn-prompt: mechanical, no-summarization spawn-prompt assembly ─────────────────
@@ -1126,11 +1089,10 @@ def cmd_compose_spawn_prompt(project: Project, args) -> None:
         seed_path = seed_domain_path(domain)
         project_path = os.path.join(project.domains_dir, f"{domain}.md")
         project_exists = os.path.exists(project_path)
-        forked = project_exists and fork_info(project_path).get("fork-status") == "forked"
         if not seed_path and not project_exists:
             fail(f"domain '{domain}' has no seed or project file — nothing to compose")
         parts.append(f"\n### Domain: {domain}\n")
-        if seed_path and not forked:
+        if seed_path:
             parts.append(f"<!-- seed: {os.path.relpath(seed_path, skill_root())} -->\n")
             parts.append(open(seed_path).read().rstrip("\n"))
         if project_exists:
@@ -1360,8 +1322,6 @@ def main() -> None:
     r = sub.add_parser("retro-done")
     r.add_argument("--domain", required=True)
     sub.add_parser("sync-done")
-    ad = sub.add_parser("adopt")
-    ad.add_argument("--domain", required=True)
     cp = sub.add_parser("compose-spawn-prompt",
                         help="mechanically concatenate a composition's full domain files, the "
                              "stance frame, and the handoff schema into one spawn-ready prompt file")
@@ -1409,7 +1369,6 @@ def main() -> None:
      "record-utility-candidate": cmd_record_utility_candidate,
      "set-utility-status": cmd_set_utility_status,
      "retro-done": cmd_retro_done, "sync-done": cmd_sync_done,
-     "adopt": cmd_adopt,
      "compose-spawn-prompt": cmd_compose_spawn_prompt,
      "screenshot-record": cmd_screenshot_record,
      "screenshot-mark-stale": cmd_screenshot_mark_stale,

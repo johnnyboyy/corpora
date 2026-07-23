@@ -28,7 +28,19 @@ You are now reasoning under that stance, with those domains, for this entry.
 
 ### 2. Fetch and read
 
-WebFetch the URL. If the URL is unknown (flagged in the entry), search for it first.
+If the entry has a `local-content:` field (the operator saved a copy after a prior fetch
+failure), read that file instead of fetching — skip straight to reading through the lens below.
+
+Otherwise: WebFetch the URL. If the URL is unknown (flagged in the entry), search for it first.
+
+**Hard stop on fetch failure — no recall fallback.** If the fetch errors (non-success response,
+timeout, blocked, paywalled) or returns something that isn't the actual article (a bot-block page,
+a stub, garbled content), stop working this entry immediately. Do **not** reconstruct the article's
+likely content from training-data familiarity and continue as if it had been read — a citation to a
+source that was never actually retrieved is worse grounding than no citation, because it reads as
+more trustworthy than it is (see `principle-judgment` domain, `reading-pipeline-provenance-flags-
+knowledge-risk`, and `LINEAGE.md`'s entry on this). Go to step 4 and record the failure instead of
+extracting anything.
 
 Read through the loaded lens. For each claim:
 - Does it confirm, extend, or contradict an existing principle? (Note the principle id.)
@@ -56,15 +68,27 @@ inside the `candidates:` block:
 If the source yields nothing principled, write nothing. Do not force candidates from
 weak material.
 
-### 4. Mark entry as read
+### 4. Mark the entry
 
-Update the entry in `reading/queue.md`:
+On a successful read, update the entry in `reading/queue.md`:
 
 ```yaml
   status: read
   read: [YYYY-MM-DD]
   candidates: [N]
 ```
+
+On a fetch failure (step 2's hard stop), update it instead with:
+
+```yaml
+  status: fetch-failed
+  attempted: [YYYY-MM-DD]
+  error: "[what happened: HTTP status, timeout, bot-block page, paywall, etc.]"
+```
+
+Leave `candidates.md` untouched for this entry — a `fetch-failed` entry is not retried
+automatically on the next run; it waits for the operator to either provide `local-content:` (a
+saved copy) or resolve it another way, per `SKILL.md`'s ratify-gate surfacing step.
 
 ## Commit and push
 
@@ -73,3 +97,6 @@ git add reading/queue.md reading/candidates.md
 git commit -m "reading: [source-id] → [N] candidate(s)"
 git push
 ```
+
+If any entries hit a fetch failure this run, commit those too (`reading: [N] fetch failure(s)`) —
+`status: fetch-failed` is itself the durable record; nothing else needs to happen in this agent.

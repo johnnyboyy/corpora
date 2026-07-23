@@ -31,6 +31,10 @@ For each author in `config.md`:
 For each feed in `config.md`:
 - WebFetch to retrieve current content
 - Scan titles/summaries for topic match against identified gaps
+- If a fetch fails or returns something that isn't real feed content (blocked, empty, garbled),
+  skip that feed this run — do not reconstruct likely titles/summaries from training-data
+  familiarity with the feed or its usual authors. The reading agent's hard-stop-on-fetch-failure
+  rule (`reading-agent.md`) applies here too: no candidate is worth manufacturing content for.
 
 Also follow one citation hop from listed authors: if a source by a listed author cites
 someone, add that cited source to the candidate pool for argument-density check.

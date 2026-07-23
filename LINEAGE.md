@@ -1507,3 +1507,108 @@ the spawn's own return text. Cross-referenced from `SKILL.md`'s relay step (step
 isolated spawn"). No corpus.py or schema change needed — this reaches every spawn automatically
 because `compose-spawn-prompt` already inlines the whole "The handoff artifact" section verbatim
 into every dispatched prompt; verified the new paragraph survives that extraction.
+
+---
+
+## 2026-07-22 — `principle-judgment`: the audit's own criteria, captured as a domain
+
+Operator: "we had some criteria we used when reviewing all the principles in this project. I'd
+like to capture that in a principle-judgment domain as a backstop against operator error or
+forgetfulness." The domain-and-principle audit earlier this session (four knowledge-kills, three
+misplaced-principle moves, one refinement) was done by ad hoc reasoning, session by session — real,
+but not durable. Without capturing the method as ratified judgment, the next audit starts from
+scratch and depends on someone remembering to apply the same tests.
+
+Four principles seeded into a new `domains/principle-judgment.md`, generalized from what this
+session's audit actually found rather than declared abstractly:
+`reaudit-ratified-principles-against-genuine-fork-test` (gate-time discipline lapses — two
+knowledge-kills this session had already been tagged `kind: knowledge` in their own audit
+provenance at ratification time, yet were ratified anyway; a periodic re-audit is the backstop, not
+a formality); `reading-pipeline-provenance-flags-knowledge-risk` (all four knowledge-kills
+originated from reading-pipeline provenance — a real correlation, not a coincidence);
+`check-principle-against-consuming-lens-not-just-domain-topic` (the misplaced-principle pattern —
+`optimistic-ui-for-high-confidence-mutations` and `progressive-disclosure-for-primary-advanced-
+split` both fit their birth domain's *topic* without contradicting anything in it, which is exactly
+why `kernel.md`'s existing domain-tension signal, built to catch *opposing* advice, structurally
+could not see either); and `lead-with-the-nonobvious-half-when-refining` (generalized from the
+`hierarchy-through-scarcity` reword — a principle that survives the judgment test but foregrounds
+its obvious half keeps reading as filler on every future pass even when it has a real kernel).
+
+Declared by the orchestrator, third alongside `orchestrator-routing` and `ratify-gate` — loaded at
+Step 0 every session, not gated behind a retrospective trigger, the same load-before-work treatment
+those two already get. Two new retrospective signals added to `kernel.md` (#8 misplaced principle,
+#9 retrospective re-audit for genuine judgment), since neither of the seven signals already listed
+there could express what this session's audit actually found. `SKILL.md`'s ratify-gate step 4 also
+flags reading-pipeline provenance inline, at the moment a new proposal is judged, not only in
+retrospect.
+
+---
+
+## 2026-07-22 — `adopt`/fork retired; diverging from the skill is a whole-skill install choice
+
+Same day, sixth follow-on, working out from a clarifying question about `adopt`. Operator's
+original mental model: forking a domain resolves a *conflict* between a seed domain and a
+same-named project domain. Checked directly against `compose-spawn-prompt`'s own implementation:
+there is no conflict to resolve — seed and project files of the same domain are concatenated in
+full, unconditionally, with no reconciliation step at all. A project's own principles accumulate in
+`corpora/domains/<domain>.md` and merge with the seed automatically, live, with zero forking
+involved; that was never what `fork-status: forked` was for.
+
+Once that was cleared up, the operator asked the sharper question directly: is there any reason
+left to keep `adopt`? Checked the actual evidence rather than reasoning from the concept alone:
+`fork-status: forked` has never appeared in a real downstream project, ever — a fact already noted
+once before, in the 2026-07-21 v3 entry, and re-confirmed here by a fresh repo-wide grep turning up
+nothing. The one motivation that survives the corrected mental model — a project deliberately
+wanting to stop tracking the seed's future changes for a domain — the operator countered with a
+cleaner mechanism that already existed one layer up and needed no new code at all: copy the skill
+instead of symlinking it. That's a whole-skill decision made once, at install time, trivially
+re-doable (re-copy) whenever the project wants to pick up upstream changes again — strictly better
+than fork's design, which was one-way with no re-sync support at all, for a granularity (per-domain
+freezing) nothing has ever actually needed either.
+
+**What changed.** `corpus.py`: removed `cmd_adopt`, `fork_info`, the `adopt` subparser and dispatch
+entry; `compose-spawn-prompt` no longer checks `fork-status` before including a domain's seed
+content — seed and project now always merge, matching what was already true in practice for every
+other file in the flow. `kernel.md`'s "Forking a domain" section replaced with a shorter note
+pointing at the install-time alternative. `README.md`'s Installation section gained a "Diverging
+from the shared skill" paragraph naming copy-vs-symlink explicitly, so the capability that fork
+used to (theoretically) provide isn't quietly lost, just relocated to where it was always the
+better fit. `AdoptCommandTest` removed from `tests/test_corpus.py`; the one `compose-spawn-prompt`
+test that exercised fork-skipping rewritten to assert the opposite — that a project domain always
+merges with its seed, unconditionally.
+
+---
+
+## 2026-07-22 — reading agent: hard stop on fetch failure, no recall fallback
+
+Same day, seventh follow-on, prompted by trying `principle-judgment` against real reading
+candidates. Operator recalled being told the reading pipeline once used training-data recall
+instead of a real fetch. Checked `domains/audit.md`: confirmed, five times, all one session
+(2026-07-18) — each provenance string reads "source URL returned 403 ... content pulled from
+training-data knowledge." Investigated whether this was a local permission gate (a hook blocking
+`WebFetch`): checked this session's own settings and the project's `.claude/settings.json` — no
+hook or permission restricts `WebFetch` here. A `403` is the remote server explicitly refusing the
+request, which reached it; more consistent with target-site bot-blocking (Medium, dev.to, and
+Smashing Magazine all commonly block automated fetchers) than a local access problem, though the
+reading/discovery agents run as scheduled routines outside this session with their own tool
+permissions this repo can't inspect directly.
+
+**Why this matters, precisely** (the operator asked directly rather than accepting "bad" at face
+value): two distinct risks, not one. (1) Accuracy — reconstructing an article from training-data
+familiarity is lossy and can conflate similar sources or misstate a specific detail while sounding
+confident. (2) Provenance laundering, the sharper reason: a principle's citation to a real,
+named source is supposed to be evidence it was *actually surfaced* from somewhere outside the
+model's own prior belief — the whole basis for `principle-judgment`'s knowledge-vs-judgment test.
+A citation to a source that was never actually fetched reads as *more* trustworthy than "the model
+already believed this," which is worse than no citation, because it defeats the provenance trail's
+purpose at the point of creation rather than leaving a visible gap.
+
+**Fix.** `reading-agent.md`: hard stop on any fetch failure (non-success response, timeout, block,
+paywall, garbled content) — no recall-based extraction, ever. New `status: fetch-failed` state in
+`reading/queue.md` (with `attempted:`/`error:` fields) replaces silent success. A `local-content:`
+field lets the operator hand the agent a saved copy to read next run instead of fetching, so a
+failure doesn't dead-end the source — it waits for a human to actually retrieve the content by
+whatever means, then resumes automatically. `discovery-agent.md` got the same no-fabrication rule
+for feed fetches. `SKILL.md`'s ratify-gate step 2 now surfaces `status: fetch-failed` entries to the
+operator explicitly, the same treatment reading candidates already get — so this doesn't require
+remembering to check `reading/queue.md` manually.
