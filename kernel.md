@@ -3,11 +3,10 @@
 The kernel is the shared mechanism every spawn inherits. It is not code — it is a discipline made
 of files plus a loop.
 
-A **spawn** is a *stance* plus a *composed domain subset*: a generative posture (the mode of
-reasoning the agent applies) and the **domain corpora** the orchestrator assembles fresh for the
-task at hand. Spawns do not own corpora. Judgment lives in domains; a spawn is the momentary lens
-through which one or more domains are applied to a task. See "Spawns: stance + composed domain
-subset," below.
+A **spawn** is a *stance* plus a *lens*: a generative posture (the mode of reasoning the agent
+applies) and the **domain corpora**, seeded or ad hoc, the orchestrator applies to the task at
+hand. Spawns do not own corpora. Judgment lives in domains; a lens is the momentary composition
+through which one or more domains are applied to a task. See "Spawns: stance + lens," below.
 
 A **domain corpus** is a list of principles about one subject matter, context type, or decision
 class — not a job title. Multiple lenses may declare the same domain, so shared judgment lives
@@ -124,31 +123,51 @@ every active `id` in a working file has a `provenance` entry in its layer's audi
 
 ---
 
-## Spawns: stance + composed domain subset
+## Spawns: stance + lens
 
-A **spawn** is a stance (see "Generative stance," below) plus a domain subset the orchestrator
-composes fresh for the task at hand — never a persistent named file carrying its own persona
-prompt and a fixed domain list. Two fixed, universal frames exist: convergent and divergent
-(below). Everything else about "what this spawn is" is assembled per task.
+A **spawn** is a stance (see "Generative stance," below) plus a **lens** — the composed domain
+subset applied to the task at hand. The orchestrator's actual routing act is *choosing a lens*, not
+assembling a domain list from scratch each time: check whether an existing seeded lens
+(`domains/lenses.md` — `coder`, `ux-design`, `ui-design`, `planner`, `bootstrap-ui`, `bootstrap-ux`,
+and any that have accumulated since) already fits the task's shape, and use it. Only when no seeded
+lens fits — a genuinely novel task shape — does the orchestrator compose an **ad hoc lens**: a fresh
+domain union for this one task, unnamed, not persisted anywhere. Both are the same kind of thing
+(stance + domain subset); "ad hoc" describes how it was assembled, not a different kind of object.
+A spawn is never a persistent named file carrying its own persona prompt and a fixed domain list —
+even a seeded lens carries no persona text, just a domain list and non-normative task-mechanics
+notes (`domains/lenses.md`). Two fixed, universal stance frames exist: convergent and divergent
+(below); everything else about "what this spawn is" comes from the lens.
 
-The orchestrator decides which domains a task needs and unions them into one working
-declaration, same-stance domains only — a spawn never mixes domains whose principles demand
-opposite generative stances (see "The hard line," below). A domain is available to any spawn
-whose stance and subject match; domains are not "declared by" a lens.
+A lens's domain subset, seeded or ad hoc, is same-stance domains only — a spawn never mixes domains
+whose principles demand opposite generative stances (see "The hard line," below). A domain is
+available to any lens whose stance and subject match; domains are not "declared by" a lens the way
+principles used to be "declared by" a role.
 
-**The declaration is deterministic, not a self-selected runtime relevance call by the working
-agent.** The orchestrator fixes which domains apply before the spawn runs; the choice is
+**Recognizing that a task needs a *different* lens, not just one more domain, is itself routing
+judgment.** The same task-shape question that produced `bootstrap-ui`/`bootstrap-ux` (a founding-a-
+library task needs a narrower composition than ongoing design work) applies orthogonally to `coder`:
+a task whose actual subject is dependency/version management, not feature work, needs judgment
+(`dependency-management`, seeded 2026-07-22) that has no business loading on every routine coding
+task just because it's also convergent, stack-agnostic prose. The fix is a distinct lens
+(`dependency-management`, alongside `coder`), not folding task-specific judgment into `coder`'s
+always-loaded default (`coding-general`) — a domain composed unconditionally into every spawn of a
+lens should earn that by actually applying to every task the lens handles, not by being convergent
+and general-sounding. Stack-shape (framework/styling/language) already conditions which domains a
+lens's *default* composition includes (`coding-nextjs` only when `framework: nextjs`, etc.);
+task-shape is the same kind of conditioning, checked against what the task is actually about instead
+of what the project is built with — recognized here as a named pattern precisely because the first
+instance of it just got reasoned out from scratch and should not need to be next time.
+
+**The lens is deterministic, not a self-selected runtime relevance call by the working agent.** The
+orchestrator fixes which lens applies — seeded or ad hoc — before the spawn runs; the choice is
 inspectable after the fact via the handoff's `domains-loaded:` field (see "The handoff artifact").
 The orchestrator's composition choice is visible before the spawn runs the same way any other
 orchestrator action is; see the spawn brief, below.
 
-**Recurring domain-subsets get an informal alias.** `coder`, `ux-design`, `ui-design`, `planner`,
-and the narrower bootstrap-only `bootstrap-ui`/`bootstrap-ux` are the seeded entries in
-`domains/lenses.md` — a label for a domain-subset + stance combination the orchestrator reuses
-often enough to be worth naming as routing shorthand.
-An alias is not a schema entity and not a file with its own prompt — it carries no persona text.
-New aliases accumulate the same way domains do — from repeated, observed composition, never
-declared up front.
+**Seeded lenses accumulate the same way domains do — from repeated, observed composition, never
+declared up front.** A lens is not a schema entity and not a file with its own prompt; naming one in
+`domains/lenses.md` is what turns a recurring ad hoc composition into routing shorthand
+(`composition: coder` instead of re-listing every domain), nothing more.
 
 **The orchestrator does not compose domains — every other spawn does, planner included.** The
 distinction is not fixedness (a planner-shaped alias could in principle be renamed or split like
@@ -700,7 +719,7 @@ Each domain working file carries `last-retrospective: <date>` at the top to make
 ## Domain lifecycle
 
 ```
-spawn (stance + composed domain subset)
+spawn (stance + lens)
   → accumulate (work + retrospective surface principles; operator ratifies into domains)
   → [retrospective may propose SPLIT if a domain develops tension, FORK if the split tracks a
      project-local seam]

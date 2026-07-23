@@ -1,7 +1,8 @@
 # Lenses — routing shorthand, not a schema entity
 
-A **lens** is a stance + domain-subset composition (`kernel.md`, "Spawns: stance + composed domain
-subset") the orchestrator has reused often enough to be worth naming, so a spawn brief (see
+A **lens** is a stance + domain-subset composition (`kernel.md`, "Spawns: stance + lens") the
+orchestrator checks first before composing anything ad hoc, and has reused often enough to be worth
+naming, so a spawn brief (see
 `kernel.md`, "The spawn brief") can write `composition: coder` instead of re-listing every domain.
 Not a domain: no `principles:`, no ratify gate, no kill log. Lenses accumulate the same way domains
 do — from repeated, observed composition, never declared up front. Adding, renaming, or retiring a
@@ -18,8 +19,9 @@ lenses:
     stance: convergent
     domains: [coding-general, spawn-integrity]  # + coding-ts (language is js/ts), coding-react
                                 #   (framework is React-based), css (styling is not none),
-                                #   coding-nextjs (framework: nextjs) — each conditionally, per its
-                                #   own preamble's stated condition against corpora/config.md
+                                #   coding-nextjs (framework: nextjs), coding-expo (framework is
+                                #   Expo/React Native via Expo) — each conditionally, per its own
+                                #   preamble's stated condition against corpora/config.md
     notes: >
       Read corpora/config.md first for the project's registered utilities and verification
       commands; use a utility when its use-when condition matches. Load whichever stack-specific
@@ -31,6 +33,24 @@ lenses:
       implementation cost clearly outweighs the value, rather than implementing or skipping
       silently. Design decisions (visual direction, layout, UX flows) are out of scope — flag them
       as a note to the orchestrator rather than deciding them.
+
+  - name: dependency-management
+    stance: convergent
+    domains: [dependency-management, spawn-integrity]  # + coding-ts (language is js/ts),
+                                #   coding-react (framework is React-based), css (styling is not
+                                #   none), coding-nextjs (framework: nextjs), coding-expo (framework
+                                #   is Expo/React Native via Expo) — each conditionally, per its own
+                                #   preamble's stated condition against corpora/config.md
+    notes: >
+      For tasks whose actual subject is upgrading, migrating, or managing dependencies — not
+      feature work that happens to touch a dependency in passing. Route here instead of `coder`
+      when the task is framed as an upgrade/migration itself (a major framework bump, adopting a
+      newly-mandatory architecture ahead of its deadline, auditing for silently-dropped transitive
+      dependencies after an upgrade). Read corpora/config.md first for the project's registered
+      utilities and verification commands. Load whichever stack-specific domains this project's
+      shape actually matches, same as `coder`. Run the project's verification commands before
+      finishing. Report a `tradeoffs` block for any migration step where cost clearly outweighs
+      value rather than proceeding or skipping silently.
 
   - name: ux-design
     stance: convergent

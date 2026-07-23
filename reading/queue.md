@@ -5,9 +5,12 @@ Format: url, domains, gap addressed, status (unread | read | fetch-failed), sour
 manual). A `fetch-failed` entry means the reading agent could not actually retrieve the source and
 stopped rather than substitute training-data recall (`reading-agent.md`) — it carries `attempted:`
 and `error:` instead of `read:`/`candidates:`, and is surfaced at the ratify gate (`SKILL.md`) for
-the operator to resolve. To resolve one: save a copy of the content somewhere reachable and add a
-`local-content: <path>` field naming it, then reset `status: unread` — the reading agent reads that
-file directly on its next run instead of fetching.
+the operator to resolve. To resolve one: save a copy of the article as `reading/saved/<id>.html`
+(the entry's own `id`, not a name derived from the URL — also accepts `.md`/`.txt`) — no status edit
+needed, the reading agent checks that path automatically before fetching, for `fetch-failed` entries
+same as fresh ones. `local-content: <path>` still works as an override if the saved copy lives
+somewhere else or under a different name. `reading/saved/` is gitignored by default (copyrighted
+article text, not meant to live in git history) — see `reading/saved/README.md`.
 
 ```yaml
 queue:
@@ -198,4 +201,74 @@ queue:
   added: 2026-07-17
   source: discovery
   fetch-note: "URL returned 403; argument extracted from search result summaries. Post covers App Router mistakes including: fetching data inside Client Components when Server Components would serve the data directly (adding a round-trip for no reason); wrapping non-suspending client components in Suspense (which coding-nextjs already has a principle for); using revalidatePath vs revalidateTag incorrectly; treating Server Actions as general-purpose API endpoints when they can only return void or updated state. Each mistake carries a because. Multiple candidate principles expected on read."
+
+- id: expo-router-introduction
+  url: https://docs.expo.dev/router/introduction/
+  domains: [coding-expo]
+  gap: "no coding-expo domain exists yet — FAMOUS is Expo/React Native and gets no stack-specific judgment beyond coding-react today. File-based routing conventions and their rationale are a plausible source of real judgment (when a route pattern is warranted vs. overkill), not just API surface."
+  status: read
+  read: 2026-07-22
+  candidates: 1
+  added: 2026-07-22
+  source: manual
+
+- id: expo-new-architecture-guide
+  url: https://docs.expo.dev/guides/new-architecture/
+  domains: [coding-expo]
+  gap: "no coding-expo domain exists yet. New Architecture migration carries real tradeoffs (compatibility, timing, what breaks) — judgment-shaped, not just a feature description."
+  status: read
+  read: 2026-07-22
+  candidates: 2
+  added: 2026-07-22
+  source: manual
+
+- id: expo-router-vs-react-navigation
+  url: https://dev.to/bhupeshchandrajoshi/expo-router-vs-react-navigation-which-one-should-you-use-in-2026-3khj
+  domains: [coding-expo]
+  gap: "no coding-expo domain exists yet. Direct comparison piece — a genuine library-choice decision with stated tradeoffs, the clearest argument-density candidate in this batch."
+  status: read
+  read: 2026-07-22
+  candidates: 1
+  added: 2026-07-22
+  source: manual
+
+- id: expo-sdk-56-inline-native-modules
+  url: https://www.buildmvpfast.com/blog/expo-sdk-56-inline-native-modules-router-fork-new-features-2026
+  domains: [coding-expo]
+  gap: "no coding-expo domain exists yet. Covers three concurrent SDK 56 changes (inline native modules, router fork, Expo UI) — plausible source of when-to-use judgment for each, not just a changelog restatement."
+  status: read
+  read: 2026-07-22
+  candidates: 4
+  added: 2026-07-22
+  source: manual
+
+- id: expo-sdk-56-clicked-into-place
+  url: https://dev.to/manthan_kasle/expo-sdk-56-is-out-and-a-few-things-finally-clicked-into-place-478h
+  domains: [coding-expo]
+  gap: "no coding-expo domain exists yet. Reflective personal writeup (title implies working through real confusion, not just listing features) — more likely to carry an earned 'because' than a release-notes summary."
+  status: read
+  read: 2026-07-22
+  candidates: 2
+  added: 2026-07-22
+  source: manual
+
+- id: expo-build-and-deployment-deepwiki
+  url: https://deepwiki.com/expo/expo/9-build-and-deployment
+  domains: [coding-expo]
+  gap: "no coding-expo domain exists yet. Architecture-level documentation of the build/deployment system — candidate for real structural judgment about EAS Build's design, not just a how-to."
+  status: read
+  read: 2026-07-22
+  candidates: 1
+  added: 2026-07-22
+  source: manual
+
+- id: react-native-expo-2026-production-guide
+  url: https://farooxium.dev/blog/react-native-expo-2026-guide
+  domains: [coding-expo]
+  gap: "no coding-expo domain exists yet. Framed as a production guide covering New Architecture, Expo Router, and EAS Build together — likely to carry real production-tradeoff judgment across the stack rather than isolated feature notes."
+  status: read
+  read: 2026-07-22
+  candidates: 1
+  added: 2026-07-22
+  source: manual
 ```

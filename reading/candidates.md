@@ -5,5 +5,5 @@ for domains matching the current project's composed domains. Candidates are remo
 once ratified or killed.
 
 ```yaml
-candidates: []
+candidates:
 ```

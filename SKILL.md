@@ -6,12 +6,12 @@ description: "Role-kernel orchestrator — entry point for a multi-lens design+c
 # Role-Kernel System
 
 Entry point for a portable spawn-composition system. A **spawn** is a *stance*
-(convergent or divergent) plus a *composed domain subset* — the orchestrator's per-task
-assembly, never a persistent named file with its own declaration; judgment lives in domains, not
-fixed roles. `kernel.md` is the canonical reference: schema, stance+composition model, generative
+(convergent or divergent) plus a *lens* — the orchestrator applies an existing seeded lens when one
+fits the task, and composes an ad hoc domain subset only when none does; judgment lives in domains,
+not fixed roles. `kernel.md` is the canonical reference: schema, stance+lens model, generative
 stance, ratify gate, write-back, handoff artifact, retrospective. `domains/lenses.md` names
-the recurring compositions (`coder`, `ux-design`, `ui-design`, `planner`, plus the narrower
-bootstrap-only `bootstrap-ui`/`bootstrap-ux`) as routing shorthand.
+the seeded lenses (`coder`, `ux-design`, `ui-design`, `planner`, `dependency-management`, plus the
+narrower bootstrap-only `bootstrap-ui`/`bootstrap-ux`) the orchestrator checks first.
 
 **One flat domain pool.** All seed domains — stack-agnostic (`coding-general`,
 `orchestrator-routing`, `ratify-gate`, `planning`, `interviewing`, `spawn-integrity`) and
@@ -231,9 +231,10 @@ the orchestrator.
    whose `domains` match a domain this project declares, surface them alongside session proposals,
    marked `[reading pipeline: <source URL>]`. Same ratify/kill decision; ratified or killed
    entries are removed from `candidates.md`. Also check `reading/queue.md` for any `status:
-   fetch-failed` entries — surface each to the operator verbatim (source URL, `error:`) so they can
-   save a copy and add `local-content:` themselves; this is the reading agent's hard-stop-on-fetch-
-   failure guard reaching the operator, not a routine status to skip past.
+   fetch-failed` entries — surface each to the operator verbatim: the source URL, `error:`, and the
+   exact expected save path (`reading/saved/<id>.html`, per `reading/saved/README.md`) so they know
+   precisely where to drop a copy with no further status edit needed. This is the reading agent's
+   hard-stop-on-fetch-failure guard reaching the operator, not a routine status to skip past.
 3. **Persist utility candidates.** For every `utility-candidates` entry, match by operation shape
    against `corpora/utility-candidates.md`, then call `corpus.py record-utility-candidate` before
    deleting the handoff. Surface it to the operator for accept / deny / defer and persist that

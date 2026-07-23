@@ -856,4 +856,66 @@ provenance:
   domain: coding-nextjs
   kind: judgment
   provenance: "2026-07-20, reading pipeline (vercel.com/blog/common-mistakes-with-the-next-js-app-router-and-how-to-fix-them). Ratified directly to seed — companion finding from the same source; guards against the plausible default of reaching for Server Actions as a general-purpose endpoint since they're the newer API."
+
+# domain: dependency-management (new domain + lens, seeded 2026-07-22)
+- id: adopt-forced-migration-early-on-disposable-branch
+  domain: dependency-management
+  kind: judgment
+  provenance: "2026-07-22, reading pipeline (docs.expo.dev/guides/new-architecture), reworded from Expo-specific to general form when moved out of the then-uncreated coding-expo domain. Originally weighed for a kill-as-knowledge ('fairly standard') but held as judgment on review: the operator's own framing was that this is standard-but-under-practiced discipline (deferring an optional migration to its deadline is a real, recurring failure mode despite being agreed-upon in the abstract), which is exactly what the genuine-fork test is for — distinct from a lookup fact. Reassigned from coding-general to a new dependency-management domain + matching lens: this judgment applies to tasks actually about upgrading/migrating, not to every convergent coding spawn regardless of task shape (kernel.md, 'Recognizing that a task needs a different lens')."
+
+- id: audit-transitive-dependencies-after-major-upgrade
+  domain: dependency-management
+  kind: judgment
+  provenance: "2026-07-22, reading pipeline (buildmvpfast.com/blog/expo-sdk-56-inline-native-modules-router-fork-new-features-2026), reworded from Expo-specific to general form. Same reassignment reasoning as adopt-forced-migration-early-on-disposable-branch — held as judgment, moved to the new dependency-management domain rather than coding-general."
+
+# domain: coding-expo (new domain, seeded 2026-07-22)
+- id: expo-router-typed-routes-for-link-safety
+  domain: coding-expo
+  kind: judgment
+  provenance: "2026-07-22, reading pipeline (docs.expo.dev/router/introduction/). Ratified directly to seed — names the specific compile-time-vs-runtime gap Typed Routes closes, not a restatement of the feature's existence."
+
+- id: expo-router-default-react-navigation-for-low-level-native-control
+  domain: coding-expo
+  kind: judgment
+  provenance: "2026-07-22, reading pipeline (dev.to/bhupeshchandrajoshi/expo-router-vs-react-navigation-which-one-should-you-use-in-2026-3khj). Ratified directly to seed — a genuine library-choice tradeoff with stated conditions on both sides, not a changelog restatement."
+
+- id: interop-layer-does-not-cover-native-code-dependencies
+  domain: coding-expo
+  kind: judgment
+  provenance: "2026-07-22, reading pipeline (docs.expo.dev/guides/new-architecture/). Ratified at lower confidence than the domain's other candidates — the operator did not object on review, but the finding is closer to a direct restatement of Expo's own documentation than the domain's more clearly earned judgment calls; kept because it still names a specific, plausible wrong assumption (treating the interop layer as a blanket guarantee) rather than pure lookup fact."
+
+- id: expo-router-no-direct-react-navigation-imports
+  domain: coding-expo
+  kind: judgment
+  provenance: "2026-07-22, reading pipeline (dev.to/manthan_kasle/expo-sdk-56-is-out-and-a-few-things-finally-clicked-into-place-478h). Ratified directly to seed — explains why a previously-working import pattern silently breaks post-SDK-56, a real judgment about dependency-architecture change rather than a release-notes restatement."
+
+- id: expo-filesystem-migrate-once-feature-gaps-close
+  domain: coding-expo
+  kind: judgment
+  provenance: "2026-07-22, reading pipeline (dev.to/manthan_kasle/expo-sdk-56-is-out-and-a-few-things-finally-clicked-into-place-478h). Ratified directly to seed — names the specific closed feature gaps rather than a generic 'upgrade when you can' statement. see-also added to dependency-management's adopt-forced-migration-early-on-disposable-branch: both test re-checking a deferred/provisional decision once its blocking condition changes, at different specificity levels (this one is Expo-FileSystem-specific; that one is the general adopt-early-on-a-disposable-branch judgment)."
+
+- id: ota-update-scope-excludes-native-changes
+  domain: coding-expo
+  kind: judgment
+  provenance: "2026-07-22, reading pipeline (farooxium.dev/blog/react-native-expo-2026-guide). Ratified directly to seed — a specific, non-obvious release-planning constraint (the OTA/native-change boundary) distinct from feature-description content also covered in the same source."
+
+- id: expo-native-dirs-generated-not-hand-edited
+  domain: coding-expo
+  kind: judgment
+  provenance: "2026-07-22, reading pipeline (deepwiki.com/expo/expo/9-build-and-deployment). Ratified directly to seed — a structural design claim about the CNG model's treatment of native directories as ephemeral generated output, the same failure shape coding-general's scripts-over-hand-editing-structured-data already names for generated artifacts generally, applied to the Expo-specific case."
+
+- id: expo-inline-native-modules-before-ejecting
+  domain: coding-expo
+  kind: judgment
+  provenance: "2026-07-22, reading pipeline (buildmvpfast.com/blog/expo-sdk-56-inline-native-modules-router-fork-new-features-2026). Ratified directly to seed — names how SDK 56's inline native modules change the actual build-vs-workaround decision for capabilities not previously worth the ceremony of ejecting or scaffolding a standalone native module package."
+
+- id: expo-sequential-sdk-upgrade-across-router-fork
+  domain: coding-expo
+  kind: judgment
+  provenance: "2026-07-22, reading pipeline (buildmvpfast.com/blog/expo-sdk-56-inline-native-modules-router-fork-new-features-2026). Ratified directly to seed — a distinct version-skip risk from the same SDK-56 router fork, separate from the import-rewrite mechanics already captured in expo-router-no-direct-react-navigation-imports."
+
+- id: expo-sdk56-fetch-default-swap-breaks-oauth
+  domain: coding-expo
+  kind: judgment
+  provenance: "2026-07-22, reading pipeline (buildmvpfast.com/blog/expo-sdk-56-inline-native-modules-router-fork-new-features-2026). Ratified directly to seed — a global-fetch swap invisible in application-code diffs, with concrete named breakages (an AT Protocol OAuth client, a crash-reporting SDK) rather than a hypothetical risk."
 ```

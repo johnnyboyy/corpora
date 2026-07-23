@@ -1310,305 +1310,127 @@ its original words since LINEAGE is historical record, not living spec.
 
 ---
 
-## 2026-07-22 — v3 close-out: planner→alias, role-pack retired, lenses renamed, handoff dedup
+## 2026-07-22 — v3 close-out: planner→lens, role-pack retired, lenses renamed, handoff dedup
 
-One day, one continuous thread: a full end-to-end dry run of the pipeline (bootstrap → planner →
-parallel ux-design/coder → ui-design → coder) on a throwaway project surfaced a punch list, worked
-through in order (mechanical fixes, then tooling, then the architecture question the exercise's own
-reasoning raised, then prompt-content polish); each fix then prompted the operator to ask the next
-sharper question, through role-pack retirement, the bootstrap-ui/bootstrap-ux split, the
-role→lens/spawn vocabulary sweep, and finally the handoff artifact's own double-generation gap. The
-working punch list (`docs/known-issues-from-pokemon-exercise.md`) and `v3-redesign-proposal.md` are
-both removed now that every item is done; this entry is the retained record for the whole day.
+One-day punch-list pass following an end-to-end dry run (bootstrap → planner → parallel
+ux-design/coder → ui-design → coder). `docs/known-issues-from-pokemon-exercise.md` and
+`v3-redesign-proposal.md` removed once done; this is the retained record.
 
-**Mechanical (v3 phase 5's cleanup, finished):** `lint-handoff` validated a retired `role:`
-frontmatter field years after the schema moved to `stance:`/`composition:` — every handoff this
-exercise produced failed the check. Fixed to validate `stance` against the enum and `composition`
-(non-empty if present); found and fixed a latent bug in the same frontmatter-field regex along the
-way (`\s*` after a field's colon was consuming the field's own newline and swallowing the next
-line's value when the field was empty). All ten web-frontend pack design-domain files still named
-the retired `ux-designer`/`ui-designer` lens files in their preambles — confirmed live, not just
-historical, since two real spawn prompts this exercise produced had copied the stale header
-verbatim. Find-and-replaced to `ux-design`/`ui-design`.
-
-**Tooling — `corpus.py compose-spawn-prompt`:** the exercise checked what was actually inlined into
-five real spawn prompts against the source domain files on disk. Two were fully compliant with
-`full-corpus-on-spawn`; two coder spawns weren't — one summarized three domains' kill logs instead
-of reproducing them, a later one in the same session silently dropped kill logs entirely and
-stripped a domain down to `id`/`rule` only. The violation got worse as the session accumulated
-context — hand-discipline alone wasn't holding the guarantee. New subcommand mechanically
-concatenates each composed domain's full working file byte-for-byte (through the existing
-seed→pack→project layering, respecting `fork-status: forked`), plus the stance frame and handoff
-schema read verbatim from `kernel.md`, plus the task — no generative or summarization step in the
-assembly, so there is nowhere for compression to enter. One output file serves as both the
-dispatched prompt and the saved-for-review copy, which also closed a separate finding: the
-"inline, not point-at" rule for spawn prompts had no answer for wanting a record copy, and pointing
-the spawn at that record file (rather than pasting it) was exactly the shortcut-read failure mode
-the rule exists to prevent. Wired into `SKILL.md`'s own spawn-assembly instructions so it's the
-actual mechanism used, not a tool that exists unreferenced. Separately, `record-gate`/`measure`/
-`verify` gained the same `--domains-dir`/`--audit` override `kill-report`/`graduate-kill`/`adopt`
-already had — discovered directly, when there was no way to gate-record this exercise's own edits
-to the kernel-seed layer's domains against `domains/audit.md`.
-
-**Architecture — the planner collapses into the alias model.** The exercise's own reasoning led
-here: kernel.md excluded "the orchestrator and the planner" from the stance-composition model as
-"the fixed, named entities doing the composing." Decomposing the planner's dialogue step (below)
-showed the planner doesn't actually need that exclusion — it composes `planning` + `interviewing`
-like any other spawn. Once it moved, the orchestrator was the only thing left in that excluded
-category, which exposed that *fixedness* was never the real criterion — it invited exactly the
-question of whether the orchestrator could collapse too. It can't, but not because it's "still
-fixed": a lens (any composed stance + domain subset, planner included now) produces a generative
-artifact about a subject; the orchestrator produces routing and gating decisions *about other
-lenses*, one level up, and something has to occupy that position before any composition can
-happen — the regress has no floor otherwise. `SKILL.md` already had the right words for this
-("a pure process layer that composes and routes spawns but never takes on a spawn's stance
-itself"); `kernel.md`'s framing was rewritten around process-layer-vs-lens instead of
-fixed-vs-composed, with `SKILL.md`'s phrasing made canonical. `planner` became a fourth seeded
-entry in `domains/role-aliases.md` (stance: convergent, domains: `planning` + `interviewing`);
-`planner.md` was deleted, its genuinely planner-specific procedure (orient, decompose, sequence,
-self-check, write-queue, plus the dialogue-scoping rule that downstream direction questions belong
-to the executing spawn, not the planner) folded into the alias's `notes:` field — longer than the
-other three aliases' notes, accepted as this alias's shape rather than forced to condense further.
-
-**New domain — `interviewing`.** Decomposing the planner's "Dialogue" step through a genuine-fork
-test with the operator cut 3 of 8 candidate proposals as "an agent would reasonably do this
-anyway," not earned corrections. Survivors seeded a new kernel-level `domains/interviewing.md`
-(`ask-one-question-at-a-time`, `name-clear-direction-dont-manufacture-choice`,
-`frame-questions-for-cheap-answers`) — stance-agnostic, consumed by any convergent lens that hits a
-genuine clarifying moment, not owned by a single role — plus two new `domains/planning.md`
-principles (`concern-names-work-not-role`, `self-check-against-domain-before-finalizing`).
-`orchestrator-routing`'s `surface-design-questions-neutrally` was retired via `history: type:
-moved` (not silently duplicated) once `frame-questions-for-cheap-answers` generalized past its
-original UX/UI-specific condition.
-
-**Prompt-content polish.** The handoff-artifact schema's inlined illustrative example
-(`composition: ux-design`, `workstream: checkout-redesign`, `domains-loaded: [ux-design,
-recoverability]`) read as plausible real values, not obviously placeholders — the one planner
-prompt in the exercise left them unchanged where they didn't belong. Genericized to
-`<convergent|divergent>`, `<alias-name-or-omit>`, `<stable-workstream-id>` (with a note not to
-leave the placeholder in place), `[<domain-a>, <domain-b>, ...]`. The ux-design/ui-design alias
-notes gained an explicit warning against conflating a project's UX/UI library (`bootstrap.md`'s
-narrative, prose-section format) with the domain-corpus `principles:` YAML shape, after a bootstrap
-run produced a `ux-library.md` draft in the wrong shape. A separate idea — reordering the handoff
-schema ahead of composition-varying domain content for prefix-based prompt-cache reuse across
-spawns — was investigated and not applied: Anthropic's cache keys off explicit `cache_control`
-breakpoints placed by whatever turns assembled prompt text into an API call, and nothing on the
-Agent-tool surface used here exposes control over where that breakpoint lands, so reordering prose
-alone has no confirmed mechanism to produce a win.
-
-**Role-pack retired.** `role-pack: web-frontend` was a project-config field that gated a whole
-stack's domains behind one coarse flag, all-or-nothing. Every domain it gated already stated its
-own real load condition in prose (`coding-nextjs` already said "when `framework: nextjs`," not
-"when `role-pack: web-frontend`") — the field added an indirection over conditions that already
-existed, the same container shape the fixed-role collapse had already removed one layer up.
-Operator: "the role-pack idea has become obsolete... it can be flat domains and lenses going
-forward." `packs/web-frontend/domains/*.md` merged into the flat `domains/`; each stack-specific
-domain's preamble now names its real condition directly (`css` loads when `styling` is not `none`,
-`coding-react` when `framework` is React-based, etc.); `corpus.py`'s `seed_domain_path` dropped its
-pack-fallback lookup entirely; `ORIGIN_ENUM` dropped `pack` (seed/project only, since there's no
-longer a structurally distinct pack layer to have originated from). `config.md`'s `role-pack:`
-field retired from the schema.
-
-**bootstrap-ui / bootstrap-ux.** Prompted by: "what domains are needed for the bootstrapping
-process? If there's a convergent/divergent seam, then possibly two lenses." First pass at this
-question wrongly checked "does this composition already match an existing alias" and concluded no
-new lens was warranted, since `bootstrap.md` Phase 2/3 already borrowed `ui-design`/`ux-design`
-wholesale. Operator correction: that's backwards — ask what the task itself needs first, compare to
-existing aliases second. Redone domain-first: Phase 2 (founding `ui-library.md`) draws on much less
-than `ui-design`'s full composition — `validation-feedback`, `recoverability`, `lists-selection`,
-and `forms-inputs` are all about the behavior of a specific, already-built component, and nothing
-concrete exists yet on a from-scratch pass for those to attach to. Phase 3 (founding
-`ux-library.md`) narrows less — it drops only `wizards-flows` and `ranking-evaluation` (both
-narrow, specific-tool-shape domains), because documenting general *conventions* (state/feedback
-patterns, recoverability conventions) is decidable in the abstract before a concrete screen exists,
-unlike Phase 2's visual specifics. That asymmetry between how much each phase narrows — not the
-same domain set wearing two stances — is the actual finding. Seeded as two new aliases:
-`bootstrap-ui` (divergent: `color`, `surfaces-elevation`, `visual-hierarchy`, `motion`,
-`design-method`, `spawn-integrity`, `interviewing`) and `bootstrap-ux` (convergent:
-`recoverability`, `validation-feedback`, `lists-selection`, `forms-inputs`, `design-method`,
-`spawn-integrity`, `interviewing` — `forms-inputs` kept in deliberately even though marginal,
-operator's call, rather than pre-emptively split out before real tension earns the split).
-`bootstrap.md` and `SKILL.md` now name these instead of borrowing `ui-design`/`ux-design`
-wholesale; `ux-design`'s alias notes lost the "if the library doesn't exist yet, this spawn is in
-bootstrap" carve-out, since that's `bootstrap-ux`'s job now.
-
-**The general principle, not just this instance.** Operator: composable lenses should be
-*expected* to run narrower than a general-purpose one covering the same territory — narrowness
-isn't a special case needing justification each time a narrow alias is added, it's the normal shape
-a task-specific composition takes once checked against what the task actually exercises. The broad
-lens (`ui-design`/`ux-design`) exists as the catch-all for whatever a narrower, more specific lens
-doesn't cover — and if on-demand lens composition (naming an ad hoc domain subset per task, rather
-than always reaching for a named alias) becomes the normal way of working, that catch-all case may
-rarely if ever actually fire, since most tasks would get their own honestly-scoped composition
-directly rather than falling back to the broad one. Operator guidance: don't restate "why this
-alias is narrower than that one" reasoning in `role-aliases.md`'s `notes:` field going forward —
-that field is task-mechanics only (what to read, what to produce), explicitly non-normative; the
-reasoning for a structural choice like a domain-subset belongs here, in LINEAGE, not there.
-
-**`role-aliases.md` renamed to `lenses.md`; "role" swept from the working vocabulary.** Operator:
-"are lenses first-class right now? Is the orchestrator still thinking in terms of roles?" Checked
-directly rather than guessed: `orchestrator-routing.md`,
-`ratify-gate.md`, and `planning.md` — the three domains the orchestrator and planner actually read
-every session — were saturated with "the role," "role agent," "designer role," "role ownership,"
-"cross-role." Worse than cosmetic: `ratify-gate.md`'s `spawn-token-summary` principle, live and
-loaded on every isolated spawn, had `condition: "Every new isolated role agent (UI Designer, UX
-Designer, Coder)."` — the literal retired fixed-role names, capitalized as proper nouns, sitting in
-ratified corpus content years after the architecture moved past them. The architecture had changed;
-the vocabulary the orchestrator actually reasons in, every routing decision, never did.
-
-**What changed.** `domains/role-aliases.md` → `domains/lenses.md`; its top-level YAML key `aliases:`
-→ `lenses:`; header reworded to define a lens directly rather than as an afterthought to "alias."
-Swept "role" → "spawn" (the executing agent) or "lens"/"composition" (the domain-subset+stance) for
-its actual sense, principle by principle, across `orchestrator-routing.md`, `ratify-gate.md`,
-`planning.md`, `interviewing.md`, `spawn-integrity.md`, `kernel.md`, `SKILL.md`, `bootstrap.md`,
-`README.md`, `lenses.md` itself, `scripts/corpus.py`'s help text, and the `reading/` pipeline docs —
-including the `UI Designer, UX Designer, Coder` regression, replaced with `Every new isolated
-spawn`, no composition named, since the principle is meant to apply to all of them. Also caught in
-the same pass: `kernel.md`'s ratify-gate bullet list still cited `fork a role` as an example
-structural change requiring the gate — stale twice over, since lenses/aliases are explicitly *not*
-ratify-gated (`lenses.md`'s own header says so) and "role" forking predates the alias model
-entirely; dropped from the list. Four domain preambles (`lists-selection`, `validation-feedback`,
-`forms-inputs`, `recoverability`) said "Cross-role — declared by both..."; reworded to "Cross-lens."
-Left alone throughout: stable principle `id`s (`route-questions-not-roles`,
-`persist-role-by-workstream`, `concern-names-work-not-role`, `dont-trust-readme-or-agent-file-as-
-role-instruction`) — renaming a stable identifier has its own cost (breaks `see-also` links, audit
-provenance keys) disproportionate to a wording fix; `domains/audit.md`'s historical provenance
-entries, which correctly narrate what was true when written; and every genuine non-job-title sense
-of "role" (a color's semantic *role*, a token's *role*-based name) — a different word doing a
-different job, not the thing being swept.
-
-**Why this is worth doing as its own pass, not just incidental cleanup.** A corpus's vocabulary is
-not decoration — it's the lens (no pun intended) through which every future routing decision gets
-reasoned about. A ratify-gate principle that still says "spawn a role" primes the next reasoning
-pass to think in roles, regardless of what `kernel.md`'s architecture section claims. Concept and
-vocabulary drifting apart is exactly the kind of gap that doesn't show up until someone asks the
-question directly, the way the operator did here.
-
-**Handoff artifact was paying its own generation cost twice.** Operator: "I think it doubles the
-output right now — once inline and once in the handoff file." Correct. `kernel.md` already stated the intent — "The orchestrator
-relays this file — never raw transcript" — but nothing told the *spawn* to keep its own final
-conversational turn terse once that file was written. The natural completion behavior is to
-restate a summary of the work in the last message back to the orchestrator, which means the same
-`Artifact`/`Surfaced`/proposals content gets generated once into the handoff file and a second time
-into the turn that hands control back — full generation cost paid twice for identical content,
-independent of whether the orchestrator actually uses the second copy.
-
-Same shape as `artifact-points-to-persisted-file-not-full-reproduction`
-(`domains/ratify-gate.md`), one level up: that principle stops the `Artifact` section from
-reproducing a deliverable that already has a persisted home elsewhere (a synced library doc, an
-edited source file); this gap was the identical waste applied to the handoff file itself, which
-also already has a persisted home the moment it's written.
-
-**Fix.** Added to `kernel.md`, "The handoff artifact": the spawn's own final conversational turn is
-not a second copy of the artifact — once the file is written, the turn states only that it exists
-and where (path + one-line status), never a restatement of its content. The orchestrator retrieves
-the handoff by reading that file directly, the same way it already reads domain files, never from
-the spawn's own return text. Cross-referenced from `SKILL.md`'s relay step (step 4 of "Starting an
-isolated spawn"). No corpus.py or schema change needed — this reaches every spawn automatically
-because `compose-spawn-prompt` already inlines the whole "The handoff artifact" section verbatim
-into every dispatched prompt; verified the new paragraph survives that extraction.
+- **Mechanical:** `lint-handoff` still validated the retired `role:` frontmatter field instead of
+  `stance:`/`composition:` — fixed, plus a regex bug (`\s*` swallowing the next field's value on an
+  empty field). Ten pack domain files still named the retired `ux-designer`/`ui-designer` files —
+  find-and-replaced to `ux-design`/`ui-design`.
+- **`corpus.py compose-spawn-prompt`:** auditing real spawn prompts found coder spawns silently
+  summarizing or dropping domain kill logs instead of reproducing them verbatim. New subcommand
+  mechanically concatenates full domain files + stance frame + handoff schema + task, no
+  generative step. Also serves as the saved prompt-review copy. `record-gate`/`measure`/`verify`
+  gained the `--domains-dir`/`--audit` override `kill-report`/`graduate-kill`/`adopt` already had.
+- **Planner collapsed into the lens model.** Decomposing why "the orchestrator and planner" were
+  excluded from stance-composition showed the planner doesn't need the exclusion — it composes
+  `planning` + `interviewing` like any spawn. Only the orchestrator stays excluded, and not because
+  it's "fixed": a lens produces a generative artifact about a subject, the orchestrator produces
+  routing/gating decisions *about other lenses*, one level up. `planner.md` deleted; folded into a
+  new `planner` lens entry. New stance-agnostic `domains/interviewing.md` (3 principles) and 2 new
+  `planning.md` principles seeded from decomposing the planner's dialogue step.
+- **Prompt polish:** handoff schema's example values genericized (read as real values, not
+  placeholders); ux/ui-design notes warn against confusing a project's library (prose) with a
+  domain's `principles:` YAML shape.
+- **Role-pack retired.** `role-pack: web-frontend` gated a whole stack behind one flag when every
+  domain it gated already stated its own real load condition in prose. Flattened into `domains/`;
+  each stack-specific domain's preamble states its condition directly; `corpus.py`'s pack-fallback
+  and `ORIGIN_ENUM`'s `pack` value dropped.
+- **`bootstrap-ui`/`bootstrap-ux` split**, reasoned domain-first (not alias-first, per operator
+  correction) from what each bootstrap phase actually needs — Phase 2 (UI library) needs much less
+  than full `ui-design`; Phase 3 (UX library) drops only the narrowest two domains. Seeded as two
+  new lenses. General takeaway: composable lenses should be *expected* to run narrower than a
+  broad one covering the same territory — not a special case needing justification each time.
+- **`role-aliases.md` → `lenses.md`; "role" swept from the working vocabulary.** Direct check found
+  `orchestrator-routing.md`/`ratify-gate.md`/`planning.md` saturated with role language, including a
+  live ratified principle's condition still naming the retired fixed roles verbatim. Swept "role" →
+  "spawn" or "lens/composition" across the corpus per its actual sense; stable principle `id`s and
+  historical audit provenance left untouched.
+- **Handoff double-generation fixed.** The spawn's own final turn was restating the handoff file's
+  content a second time. `kernel.md` now states the final turn should only point at the file
+  (path + status), never reproduce it — same shape as the existing
+  artifact-points-to-persisted-file principle, one level up.
 
 ---
 
 ## 2026-07-22 — `principle-judgment`: the audit's own criteria, captured as a domain
 
-Operator: "we had some criteria we used when reviewing all the principles in this project. I'd
-like to capture that in a principle-judgment domain as a backstop against operator error or
-forgetfulness." The domain-and-principle audit earlier this session (four knowledge-kills, three
-misplaced-principle moves, one refinement) was done by ad hoc reasoning, session by session — real,
-but not durable. Without capturing the method as ratified judgment, the next audit starts from
-scratch and depends on someone remembering to apply the same tests.
-
-Four principles seeded into a new `domains/principle-judgment.md`, generalized from what this
-session's audit actually found rather than declared abstractly:
-`reaudit-ratified-principles-against-genuine-fork-test` (gate-time discipline lapses — two
-knowledge-kills this session had already been tagged `kind: knowledge` in their own audit
-provenance at ratification time, yet were ratified anyway; a periodic re-audit is the backstop, not
-a formality); `reading-pipeline-provenance-flags-knowledge-risk` (all four knowledge-kills
-originated from reading-pipeline provenance — a real correlation, not a coincidence);
-`check-principle-against-consuming-lens-not-just-domain-topic` (the misplaced-principle pattern —
-`optimistic-ui-for-high-confidence-mutations` and `progressive-disclosure-for-primary-advanced-
-split` both fit their birth domain's *topic* without contradicting anything in it, which is exactly
-why `kernel.md`'s existing domain-tension signal, built to catch *opposing* advice, structurally
-could not see either); and `lead-with-the-nonobvious-half-when-refining` (generalized from the
-`hierarchy-through-scarcity` reword — a principle that survives the judgment test but foregrounds
-its obvious half keeps reading as filler on every future pass even when it has a real kernel).
-
-Declared by the orchestrator, third alongside `orchestrator-routing` and `ratify-gate` — loaded at
-Step 0 every session, not gated behind a retrospective trigger, the same load-before-work treatment
-those two already get. Two new retrospective signals added to `kernel.md` (#8 misplaced principle,
-#9 retrospective re-audit for genuine judgment), since neither of the seven signals already listed
-there could express what this session's audit actually found. `SKILL.md`'s ratify-gate step 4 also
-flags reading-pipeline provenance inline, at the moment a new proposal is judged, not only in
-retrospect.
+Operator: capture the criteria used in this session's own principle audit as a backstop against
+future forgetfulness. New `domains/principle-judgment.md`, 4 principles generalized from what the
+audit actually found: re-audit ratified principles against the genuine-fork test periodically;
+reading-pipeline provenance correlates with knowledge-risk; check a principle against its
+*consuming lens*, not just its birth domain's topic (catches misplaced-but-non-contradicting
+principles the existing domain-tension signal structurally can't see); lead with a principle's
+non-obvious half when refining it. Declared a third orchestrator domain alongside
+`orchestrator-routing`/`ratify-gate`, loaded at Step 0 every session. Two new `kernel.md`
+retrospective signals added (#8 misplaced principle, #9 periodic re-audit); `SKILL.md`'s ratify
+gate now flags reading-pipeline provenance inline at proposal time.
 
 ---
 
 ## 2026-07-22 — `adopt`/fork retired; diverging from the skill is a whole-skill install choice
 
-Same day, sixth follow-on, working out from a clarifying question about `adopt`. Operator's
-original mental model: forking a domain resolves a *conflict* between a seed domain and a
-same-named project domain. Checked directly against `compose-spawn-prompt`'s own implementation:
-there is no conflict to resolve — seed and project files of the same domain are concatenated in
-full, unconditionally, with no reconciliation step at all. A project's own principles accumulate in
-`corpora/domains/<domain>.md` and merge with the seed automatically, live, with zero forking
-involved; that was never what `fork-status: forked` was for.
-
-Once that was cleared up, the operator asked the sharper question directly: is there any reason
-left to keep `adopt`? Checked the actual evidence rather than reasoning from the concept alone:
-`fork-status: forked` has never appeared in a real downstream project, ever — a fact already noted
-once before, in the 2026-07-21 v3 entry, and re-confirmed here by a fresh repo-wide grep turning up
-nothing. The one motivation that survives the corrected mental model — a project deliberately
-wanting to stop tracking the seed's future changes for a domain — the operator countered with a
-cleaner mechanism that already existed one layer up and needed no new code at all: copy the skill
-instead of symlinking it. That's a whole-skill decision made once, at install time, trivially
-re-doable (re-copy) whenever the project wants to pick up upstream changes again — strictly better
-than fork's design, which was one-way with no re-sync support at all, for a granularity (per-domain
-freezing) nothing has ever actually needed either.
-
-**What changed.** `corpus.py`: removed `cmd_adopt`, `fork_info`, the `adopt` subparser and dispatch
-entry; `compose-spawn-prompt` no longer checks `fork-status` before including a domain's seed
-content — seed and project now always merge, matching what was already true in practice for every
-other file in the flow. `kernel.md`'s "Forking a domain" section replaced with a shorter note
-pointing at the install-time alternative. `README.md`'s Installation section gained a "Diverging
-from the shared skill" paragraph naming copy-vs-symlink explicitly, so the capability that fork
-used to (theoretically) provide isn't quietly lost, just relocated to where it was always the
-better fit. `AdoptCommandTest` removed from `tests/test_corpus.py`; the one `compose-spawn-prompt`
-test that exercised fork-skipping rewritten to assert the opposite — that a project domain always
-merges with its seed, unconditionally.
+Clarifying the `adopt` command surfaced that seed and project domains of the same name were never
+actually reconciled — they always concatenate in full, unconditionally; there was no conflict for
+`fork-status: forked` to resolve. `fork-status: forked` has also never appeared in any real
+downstream project. The one surviving motivation (a project wanting to stop tracking a seed
+domain's future changes) is better served by an existing, simpler mechanism: copy the skill
+instead of symlinking it at install time — trivially re-doable, unlike fork's one-way design.
+Removed `cmd_adopt`/`fork_info`/the `adopt` subparser from `corpus.py`; `compose-spawn-prompt` now
+always merges seed+project unconditionally; `README.md` documents copy-vs-symlink as the install-
+time alternative; `AdoptCommandTest` removed from the test suite.
 
 ---
 
 ## 2026-07-22 — reading agent: hard stop on fetch failure, no recall fallback
 
-Same day, seventh follow-on, prompted by trying `principle-judgment` against real reading
-candidates. Operator recalled being told the reading pipeline once used training-data recall
-instead of a real fetch. Checked `domains/audit.md`: confirmed, five times, all one session
-(2026-07-18) — each provenance string reads "source URL returned 403 ... content pulled from
-training-data knowledge." Investigated whether this was a local permission gate (a hook blocking
-`WebFetch`): checked this session's own settings and the project's `.claude/settings.json` — no
-hook or permission restricts `WebFetch` here. A `403` is the remote server explicitly refusing the
-request, which reached it; more consistent with target-site bot-blocking (Medium, dev.to, and
-Smashing Magazine all commonly block automated fetchers) than a local access problem, though the
-reading/discovery agents run as scheduled routines outside this session with their own tool
-permissions this repo can't inspect directly.
+Operator recalled the reading pipeline once substituted training-data recall for a failed fetch —
+confirmed in `domains/audit.md` (5 instances, one 2026-07-18 session, each a 403 met with "content
+pulled from training-data knowledge"). Not a local permission issue (no hook restricts `WebFetch`
+here); more consistent with target-site bot-blocking. The sharper risk beyond inaccuracy:
+provenance laundering — a citation to a source that was never actually fetched reads as *more*
+trustworthy than no citation at all, defeating the point of a provenance trail. Fix:
+`reading-agent.md` now hard-stops on any fetch failure, no recall or search-summary substitution
+ever. New `status: fetch-failed` queue state (`attempted:`/`error:` fields); a `local-content:`
+field or a file dropped in the new `reading/saved/` folder lets the operator hand over a manually-
+retrieved copy for the next run. `discovery-agent.md` got the same rule; `SKILL.md`'s ratify gate
+now surfaces `fetch-failed` entries to the operator explicitly.
 
-**Why this matters, precisely** (the operator asked directly rather than accepting "bad" at face
-value): two distinct risks, not one. (1) Accuracy — reconstructing an article from training-data
-familiarity is lossy and can conflate similar sources or misstate a specific detail while sounding
-confident. (2) Provenance laundering, the sharper reason: a principle's citation to a real,
-named source is supposed to be evidence it was *actually surfaced* from somewhere outside the
-model's own prior belief — the whole basis for `principle-judgment`'s knowledge-vs-judgment test.
-A citation to a source that was never actually fetched reads as *more* trustworthy than "the model
-already believed this," which is worse than no citation, because it defeats the provenance trail's
-purpose at the point of creation rather than leaving a visible gap.
+---
 
-**Fix.** `reading-agent.md`: hard stop on any fetch failure (non-success response, timeout, block,
-paywall, garbled content) — no recall-based extraction, ever. New `status: fetch-failed` state in
-`reading/queue.md` (with `attempted:`/`error:` fields) replaces silent success. A `local-content:`
-field lets the operator hand the agent a saved copy to read next run instead of fetching, so a
-failure doesn't dead-end the source — it waits for a human to actually retrieve the content by
-whatever means, then resumes automatically. `discovery-agent.md` got the same no-fabrication rule
-for feed fetches. `SKILL.md`'s ratify-gate step 2 now surfaces `status: fetch-failed` entries to the
-operator explicitly, the same treatment reading candidates already get — so this doesn't require
-remembering to check `reading/queue.md` manually.
+## 2026-07-22 — `dependency-management`: task-shape as a third composition axis, lenses as the primitive
+
+Ratifying the Expo reading batch, 2 candidates were about *upgrading* generally, not Expo
+specifically. First instinct was `coding-general` or a knowledge-kill; operator rejected both —
+"standard but under-practiced" is exactly what the genuine-fork test is for, and `coding-general`
+is `coder`'s *unconditional* default, so anything placed there loads on every coding task
+regardless of relevance. Task-shape (is this task actually about upgrading?) is the same kind of
+conditioning axis stack-shape already uses, just orthogonal to it. New `domains/dependency-
+management.md` (2 principles, reworded to general form, Expo kept as evidence in `reason`) plus a
+new `dependency-management` lens that deliberately excludes `coding-general`.
+
+This also surfaced a standing framing bug: `kernel.md`'s "Spawns" section described domain-
+selection as the orchestrator's primitive act with lens as a secondary label. Operator: "The
+orchestrator should be applying lenses, not domains." Rewritten (`kernel.md`, "Spawns: stance +
+lens") so checking `domains/lenses.md` for an existing fit is the primitive act, ad hoc domain
+composition the fallback — same wording pass applied to `SKILL.md`, `lenses.md`, and
+`reading-agent.md` so the vocabulary doesn't regress in the one place that executes it mechanically.
+
+---
+
+## 2026-07-22 — `coding-expo` seeded: 10 candidates ratified
+
+Closed out the Expo reading batch. New `domains/coding-expo.md`, loaded by `coder`'s stack-
+conditional composition when the project's framework is Expo/React Native via Expo (same pattern as
+`coding-ts`/`coding-react`/`coding-nextjs`/`css`); `lenses.md`'s `coder` and `dependency-management`
+entries updated to list it. 9 candidates ratified at high confidence (Typed Routes, Expo Router as
+default navigation, no direct `@react-navigation/*` imports post-SDK-56, deferred FileSystem-API
+re-evaluation, OTA's native-change boundary, generated native dirs never hand-edited, inline native
+modules before ejecting, sequential SDK upgrade across the router fork, SDK-56's fetch-swap OAuth
+risk); 1 (`interop-layer-does-not-cover-native-code-dependencies`) ratified at lower confidence,
+close to a docs restatement, flagged as such in its own audit provenance. Cross-referenced
+`expo-filesystem-migrate-once-feature-gaps-close` to `dependency-management`'s migration principle
+via `see-also`. `reading/candidates.md` cleared; all 10 given `domains/audit.md` provenance.
