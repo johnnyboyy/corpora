@@ -1,7 +1,7 @@
 # Domain: motion
 
-Animation and motion as signal. Declared by the **ui-design** and **ux-design** compositions. Audit
-metadata lives in `domains/audit.md`, loaded only at ratify/retrospective time.
+Animation and motion as signal. Cross-composition domain. Audit metadata lives in `domains/audit.md`,
+loaded only at ratify/retrospective time.
 
 ```yaml
 last-retrospective: 2026-06-20

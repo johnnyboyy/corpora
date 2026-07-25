@@ -1,4 +1,4 @@
-# The Role Kernel
+# The Corpora Kernel
 
 The kernel is the shared mechanism every spawn inherits. It is not code — it is a discipline made
 of files plus a loop.
@@ -407,6 +407,15 @@ instead of parsing prose. The schema structures the *envelope* (what the gate an
 mechanically consume), not the *thinking*: the artifact body stays freeform in the spawn's own
 form.
 
+**Before writing it, re-read the output against the composed domains.** Re-read the deliverable
+against the ratified principles in every domain the composition included and revise any violation
+found — this is part of what producing a valid handoff requires, not a domain judgment call, so it
+lives here rather than in a domain's `principles:` list. Passing tools (lint, typecheck, tests) is
+not evidence this happened: tooling only catches what produces a hard error and is structurally
+blind to soft principles (comment discipline, naming, structural conventions) that have no
+mechanical enforcement — green tooling means "no hard errors," not "checked." Catching a violation
+here is cheaper than the external ratify gate finding it after the fact.
+
 **The spawn's own final conversational turn is not a second copy of the artifact.** Once the
 handoff file is written, the spawn's actual return to the orchestrator (its last message) states
 only that the file exists and where — a path and a one-line status, never a restatement of the
@@ -474,7 +483,8 @@ Field notes:
   divergent spawn's output is a choice, so most UI-identity proposals are direction, not principle.
 - **`utility-candidates`** is deliberately liberal. Each entry names an observed inference burden
   and concrete deterministic operation shape; it need not prove recurrence or specify a finished
-  CLI. The orchestrator transfers it to the persistent project ledger before deleting the handoff.
+  CLI. The orchestrator transfers it to the persistent project ledger before closing the handoff
+  (`corpus.py handoff-done`).
 - **`status: questions-pending`** — the spawn hit a genuine direction question mid-work: it stops,
   puts the questions in `Surfaced` (each with what has been established so far and what turns on
   the answer), and the orchestrator relays them and resumes the same workstream agent with the
@@ -499,11 +509,15 @@ Field notes:
   ratify them.
 
 Lifecycle: handoff files are working state, not corpus. Once the gate has ratified, killed, or
-filed each proposal and written back, the file is deleted; the audit layer holds the durable
-record. An unratified handoff file *is* the deferred-proposal queue — a directory of lingering
-handoffs is a visible backlog. Inline sessions producing zero proposals, zero tradeoffs, and no
-drift may skip the file; the session-harvest pipeline is the backstop for what that exemption
-misses.
+filed each proposal and written back, close it with `corpus.py handoff-done <file>`: the audit
+layer already holds the durable record, so by default (`corpora/config.md` has no `debug: yes`)
+the script deletes the file. When `debug: yes`, it archives the file to
+`corpora/handoffs/archive/` instead — never deleted there, kept purely so a project that wants to
+audit past spawn output can. An unratified handoff file *is* the deferred-proposal queue — a
+directory of lingering handoffs is a visible backlog; the archive directory is not part of that
+backlog and is never read for it, since it holds only already-ratified handoffs. Inline sessions
+producing zero proposals, zero tradeoffs, and no drift may skip the file; the session-harvest
+pipeline is the backstop for what that exemption misses.
 
 ---
 

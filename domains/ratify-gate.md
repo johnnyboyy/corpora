@@ -11,15 +11,15 @@ last-retrospective: 2026-07-18
 
 principles:
 
-- id: pre-scan-before-spawning
-  rule: "Before spawning agents, run codebase discovery (file listings, key greps) in the orchestrator and paste the findings directly into each agent's prompt."
-  condition: "When spawning multiple agents that will each need to understand the same codebase structure."
-  reason: "Each agent starts cold and pays discovery tokens independently. Pre-scanning once in the orchestrator and passing findings forward amortizes that cost — paid once instead of N times per agent."
-
 - id: surface-utility-candidates-liberally
   rule: "Surface a plausible project utility whenever work reveals a concrete deterministic operation with noticeable inference, precision, or repetition cost. Require evidence to build it, not to mention it. Persist every disposition and resurface recurrence with prior evidence."
   condition: "When a spawn's handoff reports a possible deterministic shortcut after checking existing libraries, dependencies, runtime tools, and registered utilities."
   reason: "The operator can deny a weak candidate cheaply, while a candidate lost with a deleted handoff depends on human memory to be recognized next time. Persistent low-threshold surfacing lets recurrence supply the evidence without filling active config with speculation."
+
+- id: narrated-computation-is-sufficient-utility-evidence
+  rule: "Treat a single instance of a spawn narrating its way step-by-step through a deterministic, checkable procedure — arithmetic, color-space or geometric math, date math, precise counting or sorting — as sufficient evidence to build a utility on its own, without waiting for recurrence. This is the exception to requiring accumulated evidence before building."
+  condition: "When a spawn's transcript or handoff shows guess-and-check or step-by-step narrated reasoning standing in for a process that has an exact, deterministic procedure, rather than a plausible-but-unverifiable judgment call."
+  reason: "A model does not perform computation directly — it predicts a plausible reasoning trace that arrives at an answer, which is why trivial arithmetic gets narrated ('I have 2 apples, someone gives 2 more, now I have 4') instead of simply computed. That approximation holds for small cases and compounds into guess-and-check for anything with real numeric or geometric complexity. The degradation is structural, not incidental to one bad session — a single clear instance of it already proves the operation is deterministic and checkable, which is the only fact `surface-utility-candidates-liberally`'s repeated-evidence requirement exists to establish for fuzzier candidates in the first place."
 
 - id: spawn-token-summary
   rule: "Append the following section to every new isolated spawn's prompt, after the task: '## Token usage summary\nAt the end of your output, add a `### token usage` section listing: every file you read and its approximate line count, how many corpus principles you referenced, and your estimate of the single heaviest cost item.'"
@@ -57,6 +57,11 @@ principles:
   reason: "The schema's 'freeform' Artifact field left an implicit default of pasting the whole document, which pays real token cost once and is then discarded when the handoff file is deleted after ratification — the diff is what the audit trail actually needs going forward. A pointer plus a diff gives the orchestrator everything the ratify gate's audit-against-principles step requires, without the throwaway cost."
 
 killed:
+
+- id: pre-scan-before-spawning
+  rule: "Before spawning agents, run codebase discovery (file listings, key greps) in the orchestrator and paste the findings directly into each agent's prompt."
+  kill_type: container
+  reason_killed: "Purely temporal (do discovery before that) with no domain-specific judgment of its own. Folded into `SKILL.md`'s \"Starting an isolated spawn\" as step 0 so corpora keeps the behavior standalone; the general version (precondition-gathering before an action that touches shared or hard-to-reverse state) now lives as praxis's `context-discovery` phase for any project running praxis."
 
 - id: surface-nested-handoffs-verbatim
   rule: "If a spawned agent's own transcript shows it invoked the Agent/Task tool, retrieve and relay that nested handoff to the operator directly and verbatim rather than trusting the parent spawn's summary."

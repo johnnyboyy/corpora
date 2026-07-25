@@ -309,6 +309,12 @@ color or other deterministic script into the general utility registry. Also drop
   only note a path here if it's non-standard. `none` for projects with no UI.
 - **Verification commands** — the project's lint, type-check, build, and/or test commands. Record
   only what the project actually has.
+- **`debug`** — not detected during bootstrap; leave `no` (or omit) unless the operator asks for it.
+  When `yes`, `compose-spawn-prompt` saves its default session-prompt file (`kernel.md`, "The spawn
+  brief") and a ratified handoff is archived under `corpora/handoffs/archive/` instead of deleted
+  (`kernel.md`, "The handoff artifact"). Both are audit trails with no functional role otherwise —
+  the gate exists so a project only pays that disk/history cost when someone actually wants to
+  inspect past spawn prompts and handoffs, not by default.
 
 ### Schema
 
@@ -350,6 +356,9 @@ lint: <the project's lint command, or none>
 check: <static analysis or type-check command, or none>
 build: <the project's build command, or none>
 test: <the project's test command, or none>
+
+## debug
+debug: <yes | no>  # optional; omit or leave "no" unless the operator asks. See "The config file" above.
 ```
 
 ## Output format

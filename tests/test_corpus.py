@@ -885,7 +885,25 @@ class ComposeSpawnPromptTest(CorpusCommandTestCase):
         self.assertEqual(result.returncode, 2)
         self.assertIn("nothing to compose", result.stderr)
 
-    def test_defaults_output_path_under_session_prompts(self):
+    def test_no_output_path_and_no_debug_writes_nothing(self):
+        task = self.write_task()
+
+        result = self.run_command([
+            "compose-spawn-prompt", "--stance", "convergent", "--domains", "coding-general",
+            "--task-file", str(task), "--composition", "coder",
+        ])
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        self.assertIn("### Domain: coding-general", result.stdout)
+        self.assertIn("debug not enabled", result.stderr)
+        expected_dir = self.root / "corpora" / "session-prompts"
+        self.assertFalse(expected_dir.exists())
+
+    def test_debug_true_defaults_output_path_under_session_prompts(self):
+        self.write_config()
+        (self.root / "corpora" / "config.md").write_text(
+            (self.root / "corpora" / "config.md").read_text() + "debug: yes\n"
+        )
         task = self.write_task()
 
         result = self.run_command([
@@ -898,6 +916,67 @@ class ComposeSpawnPromptTest(CorpusCommandTestCase):
         self.assertTrue(expected_dir.is_dir())
         written = list(expected_dir.glob("*-coder.md"))
         self.assertEqual(len(written), 1)
+
+    def test_explicit_output_writes_regardless_of_debug(self):
+        task = self.write_task()
+        out = self.root / "out.md"
+
+        result = self.run_command([
+            "compose-spawn-prompt", "--stance", "convergent", "--domains", "coding-general",
+            "--task-file", str(task), "--output", str(out),
+        ])
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        self.assertTrue(out.exists())
+
+
+class HandoffDoneTest(CorpusCommandTestCase):
+    def write_handoff_in_dir(self, name="2026-07-24-coder-task.md"):
+        handoffs_dir = self.root / "corpora" / "handoffs"
+        handoffs_dir.mkdir(parents=True, exist_ok=True)
+        path = handoffs_dir / name
+        path.write_text("---\nstatus: complete\n---\n\n## Artifact\n\nDone.\n\n## Surfaced\n\n")
+        return path
+
+    def test_deletes_by_default(self):
+        path = self.write_handoff_in_dir()
+
+        result = self.run_command(["handoff-done", str(path)])
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        self.assertFalse(path.exists())
+        self.assertIn("deleted", result.stdout)
+
+    def test_archives_when_debug_true(self):
+        (self.root / "corpora" / "config.md").write_text("# Config\n\nhas-ui: no\ndebug: yes\n")
+        path = self.write_handoff_in_dir()
+
+        result = self.run_command(["handoff-done", str(path)])
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        self.assertFalse(path.exists())
+        archived = self.root / "corpora" / "handoffs" / "archive" / path.name
+        self.assertTrue(archived.exists())
+        self.assertIn("archived", result.stdout)
+
+    def test_rejects_file_outside_handoffs_dir(self):
+        path = self.root / "handoff.md"
+        path.write_text("---\nstatus: complete\n---\n\n## Artifact\n\nDone.\n\n## Surfaced\n\n")
+
+        result = self.run_command(["handoff-done", str(path)])
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("not directly inside", result.stderr)
+
+    def test_archived_handoff_not_counted_in_backlog(self):
+        (self.root / "corpora" / "config.md").write_text("# Config\n\nhas-ui: no\ndebug: yes\n")
+        path = self.write_handoff_in_dir()
+        self.run_command(["handoff-done", str(path)])
+
+        result = self.run_command(["handoffs"])
+
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        self.assertIn("handoff backlog: empty", result.stdout)
 
 
 class KillGraduationTest(unittest.TestCase):

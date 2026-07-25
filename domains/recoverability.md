@@ -1,9 +1,8 @@
 # Domain: recoverability
 
-Destructive actions, confirmation, undo, and recovery. The canonical cross-composition domain — declared by
-both the **ux-design** and **ui-design** compositions (the UX flow and the visible recovery affordance
-are one concern). Audit metadata lives in `domains/audit.md`, loaded only at
-ratify/retrospective time.
+Destructive actions, confirmation, undo, and recovery. The canonical cross-composition domain — the flow
+and the visible recovery affordance are one concern. Audit metadata lives in `domains/audit.md`, loaded
+only at ratify/retrospective time.
 
 ```yaml
 last-retrospective: 2026-06-20

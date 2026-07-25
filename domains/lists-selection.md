@@ -1,8 +1,7 @@
 # Domain: lists-selection
 
-Lists, rows, and active/selected item treatment. Cross-composition — declared by both the **ux-design**
-and **ui-design** compositions. Audit metadata lives in `domains/audit.md`, loaded
-only at ratify/retrospective time.
+Lists, rows, and active/selected item treatment. Cross-composition domain. Audit metadata lives in
+`domains/audit.md`, loaded only at ratify/retrospective time.
 
 ```yaml
 last-retrospective: 2026-06-20
@@ -29,5 +28,5 @@ killed:
 - id: active-row-is-inert
   rule: "The currently active entry in a selection list must suppress its hover state and produce no action on click. Do not give the active row an interactive cursor or hover background."
   kill_type: quality
-  reason_killed: "Superseded by active-row-is-inert-exact-route-only. The condition 'one row represents the currently active item' didn't distinguish exact-route match from section/prefix match, so a coder applying it to a multi-route nav section (Meridian's Sidebar: a Clients item active across both the list screen and every client-detail sub-page) suppressed a real, meaningful click. Refined 2026-07-10 rather than discarded — the core insight about false affordance on a true no-op item still holds, narrowed to where it actually applies."
+  reason_killed: "Superseded by active-row-is-inert-exact-route-only. The condition 'one row represents the currently active item' didn't distinguish exact-route match from section/prefix match, so applying it to a multi-route nav section (Meridian's Sidebar: a Clients item active across both the list screen and every client-detail sub-page) suppressed a real, meaningful click. Refined 2026-07-10 rather than discarded — the core insight about false affordance on a true no-op item still holds, narrowed to where it actually applies."
 ```

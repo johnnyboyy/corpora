@@ -1,9 +1,9 @@
 ---
 name: corpora
-description: "Role-kernel orchestrator — entry point for a design+coding system. Thin by design: route, spawn, relay, ratify, write-back. One flat domain pool; each domain states its own load condition against the project's config (language, framework, styling, has-ui). Always entered as the orchestrator — a pure process layer that composes and routes spawns but never takes on a spawn's stance itself. A named arg (e.g. coder) is a routing hint, not a bypass."
+description: "Corpora orchestrator — entry point for a design+coding system. Thin by design: route, spawn, relay, ratify, write-back. One flat domain pool; each domain states its own load condition against the project's config (language, framework, styling, has-ui). Always entered as the orchestrator — a pure process layer that composes and routes spawns but never takes on a spawn's stance itself. A named arg (e.g. coder) is a routing hint, not a bypass."
 ---
 
-# Role-Kernel System
+# Corpora
 
 Entry point for a portable spawn-composition system. A **spawn** is a *stance*
 (convergent or divergent) plus a **composition** — the orchestrator states stance and domain subset
@@ -84,6 +84,10 @@ Every spawn reads `corpora/config.md` at the start of its work. It carries:
   inference, UI/UX library locations, and verification commands. Environment-owned capabilities
   such as browser automation, image generation, and agent delegation are discovered from the
   current runtime rather than persisted here.
+- **`debug`** — optional, operator-set, defaults to no. Gates two audit-trail writes that otherwise
+  don't happen: `compose-spawn-prompt`'s default saved copy under `corpora/session-prompts/`, and
+  retaining a ratified handoff under `corpora/handoffs/archive/` instead of deleting it (`corpus.py
+  handoff-done`). See `bootstrap.md`, "The config file," and `kernel.md`, "The handoff artifact."
 
 If `corpora/config.md` does not exist, the project is not bootstrapped. Run bootstrap first — this
 is the only fallback; no domain or composition carries other "if missing" logic:
@@ -136,7 +140,7 @@ the durable record of a design decision.
 candidate needs a concrete operation shape and observed inference burden, not proof of recurrence or
 a finished CLI design. Before proposing, check the standard library, installed dependencies,
 current runtime tools, and registered project utilities. Transfer every candidate from the handoff
-to `corpora/utility-candidates.md` before deleting the handoff. Record accept, deny, or defer. When
+to `corpora/utility-candidates.md` before closing the handoff (`corpus.py handoff-done`). Record accept, deny, or defer. When
 the same operation returns, use `corpus.py record-utility-candidate` to append evidence and derive
 its dates and sighting count; the command reports when it must be resurfaced. Record operator
 disposition with `corpus.py set-utility-status`. Only an accepted, implemented, and tested utility
@@ -171,6 +175,10 @@ the current session before starting. State what was loaded in one line before st
 <stance>, <domains>`) — a silent load is unverifiable; the spawn brief is the check.
 
 **Starting an isolated spawn:**
+0. When spawning multiple agents that will each need to understand the same codebase structure, run
+   codebase discovery (file listings, key greps) once and paste the findings directly into each
+   agent's prompt — this is orchestrator procedure, not domain judgment, so it isn't gated behind any
+   composed domain. Each agent starts cold and would otherwise pay discovery tokens independently.
 1. Write the spawn brief (`kernel.md`, "The spawn brief"): `stance:`, `domains:` (the domain subset
    this task shape needs, decided fresh from routing judgment), `expected-output:`. For each domain
    in the composition, read the seed working file plus the project's
@@ -183,11 +191,14 @@ the current session before starting. State what was loaded in one line before st
    this with `scripts/corpus.py compose-spawn-prompt --stance <s> --domains <d1,d2,...>
    --task-file <path>` rather than hand-assembling it: the command
    concatenates each piece byte-for-byte with no generative or summarization step, so there is no
-   place for compression to sneak in as a session's context accumulates. It writes one file that
-   serves as both the dispatched prompt and the saved-for-review copy — read that file yourself and
-   paste its content into the spawn; do not point the spawn at the file, for the same reason domains
-   are inlined rather than referenced: a spawn told to read a file it thinks it knows may shortcut
-   the read and pattern-match a near-miss envelope. Include prior spawn output as its structured
+   place for compression to sneak in as a session's context accumulates. It always prints the
+   composed prompt to stdout; read that output yourself and paste its content into the spawn — do
+   not point the spawn at a file, for the same reason domains are inlined rather than referenced: a
+   spawn told to read a file it thinks it knows may shortcut the read and pattern-match a near-miss
+   envelope. Passing `--output <path>` also saves a copy to that path, always. With no `--output`,
+   the command additionally saves its default copy under `corpora/session-prompts/` only when
+   `corpora/config.md` sets `debug: yes` — otherwise nothing is written to disk, since the saved
+   copy is a pure audit trail with no role after the paste. Include prior spawn output as its structured
    artifact, not raw transcript, appended after the task. Never include the other stance's frame or
    an undeclared domain — the seam is enforced here. Full injection is a load-completeness
    guarantee. Its duplicate token cost is tolerated, not desired, and must not be treated as
@@ -236,7 +247,7 @@ requests to the orchestrator.
    hard-stop-on-fetch-failure guard reaching the operator, not a routine status to skip past.
 3. **Persist utility candidates.** For every `utility-candidates` entry, match by operation shape
    against `corpora/utility-candidates.md`, then call `corpus.py record-utility-candidate` before
-   deleting the handoff. Surface it to the operator for accept / deny / defer and persist that
+   closing the handoff (`corpus.py handoff-done`). Surface it to the operator for accept / deny / defer and persist that
    judgment with `corpus.py set-utility-status`. The script derives counts and dates and identifies
    recurrence. Acceptance authorizes a scoped coder
    workstream, not config registration; register it only after implementation and tests prove useful.
@@ -263,8 +274,11 @@ requests to the orchestrator.
    `attribution-noise`), and `reason_killed`; per-kill provenance to the audit file. Edited →
    ratify operator's version.
 7. If the operator defers review, the unratified handoff file *is* the queue — leave it in
-   `corpora/handoffs/`; a directory of lingering handoffs is a visible backlog. Delete each
-   handoff once its proposals are ratified/killed and written back.
+   `corpora/handoffs/`; a directory of lingering handoffs is a visible backlog. Once a handoff's
+   proposals are ratified/killed and written back, close it: `corpus.py handoff-done <file>`. By
+   default this deletes it; when `corpora/config.md` sets `debug: yes`, it archives the file to
+   `corpora/handoffs/archive/` instead so the operator can audit past handoffs — the archive is not
+   part of the pending backlog.
 8. **Check triggers.** `record-gate` prints fired triggers automatically (or run `corpus.py
    triggers`). Relay any that fire as suggestions to the operator. Suggestions only.
 9. Commit the corpus — domain working files and the audit file together — alongside the code

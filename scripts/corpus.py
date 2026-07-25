@@ -20,6 +20,8 @@ Commands:
   triggers                         evaluate thresholds; print what fires
   lint-handoff FILE                validate a handoff artifact's envelope
   handoffs                         list lingering handoff files with age
+  handoff-done FILE                close a ratified handoff: delete it, or archive it under
+                                   corpora/handoffs/archive/ when corpora/config.md sets debug: yes
   lint-deferred                    validate the non-blocking UI/UX decision queue
   deferred                         list queued decisions grouped by owning composition
   lint-utility-candidates          validate the persistent utility-candidate ledger
@@ -30,7 +32,8 @@ Commands:
   sync-done                        reset library-drift after a UI-library sync
   compose-spawn-prompt [...]       mechanically assemble a spawn-ready prompt: stance frame +
                                    full seed/project domain files + handoff schema + task, no
-                                   summarization step
+                                   summarization step; saves a copy under corpora/session-prompts/
+                                   only with --output or when corpora/config.md sets debug: yes
   screenshot-record [...]          register/update a captured screen variant in the manifest
   screenshot-mark-stale [...]      invalidate screens by direct id or shared-component ripple
   screenshot-status                list current/stale screens in the manifest
@@ -79,6 +82,15 @@ def fail(msg: str) -> None:
     sys.exit(2)
 
 
+def project_debug(project: "Project") -> bool:
+    """corpora/config.md's `debug: yes` opt-in — gates audit-trail writes that have no
+    functional role otherwise (saved session-prompt copies, retained ratified handoffs)."""
+    if not os.path.exists(project.config_path):
+        return False
+    text = open(project.config_path).read()
+    return re.search(r"^debug:\s*(yes|true)\s*$", text, re.MULTILINE | re.IGNORECASE) is not None
+
+
 # ── project layout ──────────────────────────────────────────────────────────
 
 class Project:
@@ -87,6 +99,8 @@ class Project:
         self.domains_dir = domains_dir or os.path.join(root, "corpora", "domains")
         self.audit_path = audit_path or os.path.join(self.domains_dir, "audit.md")
         self.handoffs_dir = os.path.join(root, "corpora", "handoffs")
+        self.handoffs_archive_dir = os.path.join(self.handoffs_dir, "archive")
+        self.config_path = os.path.join(root, "corpora", "config.md")
         self.deferred_path = os.path.join(root, "corpora", "deferred-decisions.md")
         self.utility_candidates_path = os.path.join(root, "corpora", "utility-candidates.md")
         self.screenshots_dir = os.path.join(root, "corpora", "screenshots")
@@ -474,6 +488,25 @@ def cmd_handoffs(project: Project, _args) -> None:
         front = open(path).read(2000)
         sm = re.search(r"^status:\s*(\S+)", front, re.MULTILINE)
         print(f"  - {name}  status={sm.group(1) if sm else '?'}  age={age}d")
+
+
+def cmd_handoff_done(project: Project, args) -> None:
+    """Close a ratified handoff: delete it, or archive it under corpora/handoffs/archive/ when
+    corpora/config.md sets debug: yes. The archive is never part of the pending backlog
+    `handoffs` reports — it holds only handoffs whose proposals are already written back."""
+    path = os.path.abspath(args.file)
+    if not os.path.exists(path):
+        fail(f"no such file: {args.file}")
+    if os.path.dirname(path) != os.path.abspath(project.handoffs_dir):
+        fail(f"{args.file} is not directly inside {project.handoffs_dir}")
+    if project_debug(project):
+        os.makedirs(project.handoffs_archive_dir, exist_ok=True)
+        dest = os.path.join(project.handoffs_archive_dir, os.path.basename(path))
+        os.replace(path, dest)
+        print(f"archived to {dest}")
+    else:
+        os.remove(path)
+        print(f"deleted {path}")
 
 
 def parse_deferred(path: str) -> list:
@@ -1105,13 +1138,20 @@ def cmd_compose_spawn_prompt(project: Project, args) -> None:
 
     if args.output:
         out_path = args.output
-    else:
+    elif project_debug(project):
         slug = args.composition or "-".join(domains)
         out_path = os.path.join(project.root, "corpora", "session-prompts", f"{today()}-{slug}.md")
-    os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
-    open(out_path, "w").write(prompt)
+    else:
+        out_path = ""
+
     print(prompt)
-    print(f"--- wrote {out_path} ---", file=sys.stderr)
+    if out_path:
+        os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
+        open(out_path, "w").write(prompt)
+        print(f"--- wrote {out_path} ---", file=sys.stderr)
+    else:
+        print("--- debug not enabled (corpora/config.md) — session prompt not saved to disk; "
+              "pass --output to save explicitly ---", file=sys.stderr)
 
 
 # ── kill-log graduation: age out killed entries with a recorded, stale kill date ─────────────
@@ -1305,6 +1345,10 @@ def main() -> None:
     lh = sub.add_parser("lint-handoff")
     lh.add_argument("file")
     sub.add_parser("handoffs")
+    hd = sub.add_parser("handoff-done",
+                         help="close a ratified handoff: delete it, or archive it under "
+                              "corpora/handoffs/archive/ when corpora/config.md sets debug: yes")
+    hd.add_argument("file")
     sub.add_parser("lint-deferred")
     sub.add_parser("deferred")
     sub.add_parser("lint-utility-candidates")
@@ -1362,7 +1406,7 @@ def main() -> None:
                       domains_dir=getattr(args, "domains_dir", "") or "",
                       audit_path=getattr(args, "audit", "") or "")
     {"measure": cmd_measure, "verify": cmd_verify, "record-gate": cmd_record_gate, "triggers": cmd_triggers,
-     "lint-handoff": cmd_lint_handoff, "handoffs": cmd_handoffs,
+     "lint-handoff": cmd_lint_handoff, "handoffs": cmd_handoffs, "handoff-done": cmd_handoff_done,
      "lint-deferred": cmd_lint_deferred, "deferred": cmd_deferred,
      "lint-utility-candidates": cmd_lint_utility_candidates,
      "utility-candidates": cmd_utility_candidates,

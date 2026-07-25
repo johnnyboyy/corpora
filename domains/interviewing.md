@@ -4,13 +4,13 @@ Judgment about conducting a clarifying dialogue and framing a question so it's c
 distinct from `orchestrator-routing`'s judgment about *whether* to ask and *who* owns the answer,
 and from `planning`'s judgment about decomposing a capability once ambiguity is resolved.
 Stance-agnostic: consumed by any composition that hits a genuine clarifying moment, not owned by a single
-composition and not restricted to convergent ones — a divergent spawn's own dialogue (e.g. `ui-design`
-narrowing to two aesthetic-direction questions during bootstrap) needs the same discipline. Seeded
-2026-07-22 from decomposing `planner.md`'s "Dialogue" step and absorbing `orchestrator-routing`'s
+composition and not restricted to convergent ones — a divergent spawn's own dialogue (e.g. narrowing to
+two aesthetic-direction questions during a design bootstrap) needs the same discipline. Seeded
+2026-07-22 from decomposing an early planning step and absorbing `orchestrator-routing`'s
 `surface-design-questions-neutrally` (see that principle's audit history); widened 2026-07-22 from
-"any convergent composition" once `ui-design`'s own clarifying-dialogue moments showed the restriction was
-never load-bearing — none of the three principles below actually condition on stance. Audit
-metadata lives in `domains/audit.md`, loaded only at ratify/retrospective time.
+"any convergent composition" once a divergent composition's own clarifying-dialogue moments showed the
+restriction was never load-bearing — none of the three principles below actually condition on stance.
+Audit metadata lives in `domains/audit.md`, loaded only at ratify/retrospective time.
 
 ```yaml
 last-retrospective: none

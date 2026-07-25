@@ -98,6 +98,15 @@ provenance:
   kind: judgment
   provenance: "2026-07-18, FAMOUS strip-comments-and-biome-ignores gate. Surfaced from reading pipeline (youtube.com/watch?v=4qfsmE11Ejo), companion to module-boundaries-precede-deployment-separation from the same source. Ratified directly to seed for the same reason."
 
+- id: minimize-comments-prefer-self-documenting-code
+  domain: coding-general
+  kind: judgment
+  provenance: "2026-07-15, FAMOUS full-player redesign session. Operator flagged a pattern of liberal inline commenting (layout math, gesture-conflict resolution, UI/UX design rationale) after several of those comments had already gone stale mid-session — a 'shared across three variants' comment surviving two variant deletions, a symmetry comment whose claimed math stopped matching the code, an edge-hint comment describing removed functionality."
+  history:
+    - date: 2026-07-23
+      type: generalized
+      reason: "Promoted from FAMOUS's project-level coding-general domain to seed. `spawn-integrity`'s checkpoint-on-context-pressure-tell had referenced 'this project's comment-discipline conventions' as a seed-level given since it was authored, but the underlying rule was never actually promoted alongside it — a dangling reference in the seed layer, caught by an operator noticing verbose comments in a downstream project (motors-and-controls) that had no such rule anywhere in its composed domains. Condition genericized (dropped 'in this project'); rule and reason otherwise unchanged from the FAMOUS original."
+
 # domain: orchestrator-routing
 - id: brief-ends-at-what
   domain: orchestrator-routing
@@ -204,7 +213,16 @@ provenance:
   domain: ratify-gate
   provenance: "Meridian project, 2026-07-17, retrospective conversation. Operator flagged that UI-library sync handoffs reproduced the whole ui-library.md document in the Artifact section despite the role having written directly to the file — real token cost paid once and then discarded when the handoff is deleted post-ratify. The schema's 'freeform' Artifact field never mandated full reproduction; this names the actual dividing line (does the content already have a persisted home the orchestrator can read) that the freeform language left implicit."
 
+- id: narrated-computation-is-sufficient-utility-evidence
+  domain: ratify-gate
+  provenance: "2026-07-25, backlog-triage/praxis-design discussion. Generalized from the color-utility precedent (a coder guessing warmer/cooler colors by narrated trial and error, resolved by building a deterministic color utility instead) once the operator named the underlying tell directly: narrated step-by-step simulation of an exact procedure is itself sufficient single-instance evidence, distinguishable from the fuzzier candidates surface-utility-candidates-liberally's repeated-evidence requirement is actually meant for."
+
 # domain: interviewing (new domain, seeded 2026-07-22)
+# scope note: widened 2026-07-22 from "any convergent composition" to composition-agnostic once
+# ui-design's own clarifying-dialogue moments (e.g. narrowing to two aesthetic-direction questions
+# during bootstrap) showed the convergent-only restriction was never load-bearing — moved out of the
+# working file's own prose 2026-07-25 (composition names in a domain loaded by every composition put
+# every other composition's name in whichever spawn is currently reading it, for no functional benefit).
 - id: ask-one-question-at-a-time
   domain: interviewing
   kind: judgment
@@ -325,6 +343,15 @@ provenance:
   domain: spawn-integrity
   kind: knowledge
   provenance: "2026-07-22, lens retirement. Migrated from ux-design's and ui-design's near-identical notes text in domains/lenses.md, generalized to any spawn touching either library file rather than only the two design compositions — see LINEAGE.md."
+
+- id: tool-passing-is-not-a-principle-check
+  domain: spawn-integrity
+  kind: judgment
+  provenance: "2026-07-?? (exact date not recorded in the FAMOUS project audit at time of promotion), FAMOUS project. One session produced three misses across two soft principles — a comment duplicating ux-library.md content written twice in QueueRows.tsx, the same architectural point re-explained three times in player.tsx, and tag-identity-dependencies-check-before-handoff never once applied to a matching ref-based committer pattern — while self-check-against-composed-domains-before-finalizing was already loaded and verification commands stayed green throughout."
+  history:
+    - date: 2026-07-23
+      type: generalized
+      reason: "Promoted from FAMOUS's project-level spawn-integrity domain to seed, alongside minimize-comments-prefer-self-documenting-code (its reason text names 'comment discipline' as one of the unenforced-principle examples this principle guards). Rule/reason otherwise unchanged from the FAMOUS original."
 
 # ---- domains: coding-ts, coding-react (split from coding-js-react 2026-07-18; see LINEAGE.md,
 #      "The coding-ts / coding-react split") ----
@@ -581,6 +608,8 @@ provenance:
   provenance: "2026-06-09, Box Selector desktop text legibility audit."
 
 # ---- domain: motion ----
+# composition: declared by ui-design and ux-design (moved out of the working file's own prose 2026-07-25
+# so a consuming spawn's context doesn't carry the sibling composition's name for no functional benefit)
 - id: motion-as-accent
   domain: motion
   provenance: "2026-06-03, taste training session."
@@ -596,6 +625,8 @@ provenance:
   see-also: motion-as-accent, prefers-reduced-motion-requires-js-hook
 
 # ---- domain: recoverability ----
+# composition: declared by ux-design and ui-design (moved out of the working file's own prose 2026-07-25
+# so a consuming spawn's context doesn't carry the sibling composition's name for no functional benefit)
 - id: recovery-path-replaces-confirmation
   domain: recoverability
   provenance: "2026-06-14, load-calculator audit."
@@ -647,6 +678,8 @@ provenance:
       reason: "Same domain-decomposition finding as optimistic-ui-for-high-confidence-mutations — moved from recoverability to coding-react alongside it."
 
 # ---- domain: validation-feedback ----
+# composition: declared by ux-design and ui-design (moved out of the working file's own prose 2026-07-25
+# so a consuming spawn's context doesn't carry the sibling composition's name for no functional benefit)
 - id: warning-colocated-with-resolution
   domain: validation-feedback
   provenance: "2026-06-02, Box Selector visual spec."
@@ -660,6 +693,8 @@ provenance:
   provenance: "2026-06-02, Box Selector UX review."
 
 # ---- domain: forms-inputs ----
+# composition: declared by ux-design and ui-design (moved out of the working file's own prose 2026-07-25
+# so a consuming spawn's context doesn't carry the sibling composition's name for no functional benefit)
 - id: numeric-inputs-start-empty-not-zero
   domain: forms-inputs
   provenance: "2026-06-14, load-calculator UX audit."
@@ -689,6 +724,8 @@ provenance:
   see-also: warning-colocated-with-resolution
 
 # ---- domain: lists-selection ----
+# composition: declared by ux-design and ui-design (moved out of the working file's own prose 2026-07-25
+# so a consuming spawn's context doesn't carry the sibling composition's name for no functional benefit)
 - id: indicator-weight-matches-job
   domain: lists-selection
   provenance: "2026-06-16, load calculator history redesign."
@@ -858,6 +895,16 @@ provenance:
   domain: principle-judgment
   kind: judgment
   provenance: "2026-07-23, FAMOUS skill-mining ratify session. Generalized from that session's decision to drop six web-to-native candidates that atomized a coherent migration workflow rather than encoding independent mechanism-level judgment — see LINEAGE.md."
+
+- id: cost-of-discovery-is-not-judgment-evidence
+  domain: principle-judgment
+  kind: judgment
+  provenance: "2026-07-24, backlog-triage discussion. Named directly from a recurring rationalization pattern the operator has observed agents use — arguing a hard-to-trace bug fix should become a principle because it was difficult or costly to find, independent of whether the insight recurs."
+
+- id: strip-specifics-to-find-the-transferable-method
+  domain: principle-judgment
+  kind: judgment
+  provenance: "2026-07-24, backlog-triage discussion. Paired with cost-of-discovery-is-not-judgment-evidence as the constructive counterpart: rather than reject every hard-won-fix candidate outright, test whether a transferable diagnostic method survives once the specific facts are stripped out."
 
 # reading-pipeline candidates, processed against the new principle-judgment domain (2026-07-22)
 - id: immutable-by-default
@@ -1144,3 +1191,355 @@ provenance:
   kind: judgment
   provenance: "2026-07-23, mined from FAMOUS's local Expo/React Native team skill docs (.agents/skills/expo-ui/references/drop-in-replacements.md). Ratified directly to seed — a silent fallback to normal React render cycle that's easy to misdiagnose as an API limitation rather than a missing prerequisite."
 ```
+
+<!-- corpus-script:begin — maintained by scripts/corpus.py; do not edit by hand -->
+
+## counters (script-maintained)
+
+```yaml
+counters:
+  - domain: coding-expo
+    origin: project
+    since: 2026-07-23
+    ratified: 0
+    killed: 0
+    gate-violations: 0
+    working-file-tokens: 9663
+    baseline-tokens: 9663
+    principles-at-baseline: 35
+    kills-at-baseline: 6
+  - domain: coding-general
+    origin: seed
+    since: 2026-07-23
+    ratified: 0
+    killed: 0
+    gate-violations: 0
+    working-file-tokens: 5011
+    baseline-tokens: 5335
+    principles-at-baseline: 18
+    kills-at-baseline: 1
+  - domain: coding-nextjs
+    origin: project
+    since: 2026-07-23
+    ratified: 0
+    killed: 0
+    gate-violations: 0
+    working-file-tokens: 1119
+    baseline-tokens: 1119
+    principles-at-baseline: 5
+    kills-at-baseline: 0
+  - domain: coding-react
+    origin: seed
+    since: 2026-07-23
+    ratified: 0
+    killed: 0
+    gate-violations: 0
+    working-file-tokens: 4514
+    baseline-tokens: 4514
+    principles-at-baseline: 13
+    kills-at-baseline: 9
+  - domain: coding-ts
+    origin: seed
+    since: 2026-07-23
+    ratified: 0
+    killed: 0
+    gate-violations: 0
+    working-file-tokens: 1560
+    baseline-tokens: 1560
+    principles-at-baseline: 5
+    kills-at-baseline: 2
+  - domain: color
+    origin: project
+    since: 2026-07-23
+    ratified: 0
+    killed: 0
+    gate-violations: 0
+    working-file-tokens: 775
+    baseline-tokens: 775
+    principles-at-baseline: 2
+    kills-at-baseline: 2
+  - domain: css
+    origin: project
+    since: 2026-07-23
+    ratified: 0
+    killed: 0
+    gate-violations: 0
+    working-file-tokens: 1474
+    baseline-tokens: 1474
+    principles-at-baseline: 4
+    kills-at-baseline: 4
+  - domain: dependency-management-expo
+    origin: project
+    since: 2026-07-23
+    ratified: 0
+    killed: 0
+    gate-violations: 0
+    working-file-tokens: 2035
+    baseline-tokens: 2035
+    principles-at-baseline: 7
+    kills-at-baseline: 0
+  - domain: dependency-management
+    origin: project
+    since: 2026-07-23
+    ratified: 0
+    killed: 0
+    gate-violations: 0
+    working-file-tokens: 891
+    baseline-tokens: 891
+    principles-at-baseline: 2
+    kills-at-baseline: 0
+  - domain: design-method
+    origin: project
+    since: 2026-07-23
+    ratified: 0
+    killed: 0
+    gate-violations: 0
+    working-file-tokens: 1331
+    baseline-tokens: 1330
+    principles-at-baseline: 4
+    kills-at-baseline: 0
+  - domain: forms-inputs
+    origin: project
+    since: 2026-07-23
+    ratified: 0
+    killed: 0
+    gate-violations: 0
+    working-file-tokens: 1511
+    baseline-tokens: 1526
+    principles-at-baseline: 7
+    kills-at-baseline: 0
+  - domain: interviewing
+    origin: project
+    since: 2026-07-23
+    ratified: 0
+    killed: 0
+    gate-violations: 0
+    working-file-tokens: 810
+    baseline-tokens: 810
+    principles-at-baseline: 3
+    kills-at-baseline: 0
+  - domain: lists-selection
+    origin: project
+    since: 2026-07-23
+    ratified: 0
+    killed: 0
+    gate-violations: 0
+    working-file-tokens: 1010
+    baseline-tokens: 1027
+    principles-at-baseline: 3
+    kills-at-baseline: 1
+  - domain: motion
+    origin: project
+    since: 2026-07-23
+    ratified: 0
+    killed: 0
+    gate-violations: 0
+    working-file-tokens: 789
+    baseline-tokens: 798
+    principles-at-baseline: 4
+    kills-at-baseline: 0
+  - domain: orchestrator-routing
+    origin: project
+    since: 2026-07-23
+    ratified: 0
+    killed: 0
+    gate-violations: 0
+    working-file-tokens: 3459
+    baseline-tokens: 3460
+    principles-at-baseline: 16
+    kills-at-baseline: 1
+  - domain: planning
+    origin: seed
+    since: 2026-07-23
+    ratified: 0
+    killed: 0
+    gate-violations: 0
+    working-file-tokens: 2145
+    baseline-tokens: 2145
+    principles-at-baseline: 5
+    kills-at-baseline: 1
+  - domain: principle-judgment
+    origin: seed
+    since: 2026-07-23
+    ratified: 2
+    killed: 0
+    gate-violations: 0
+    working-file-tokens: 2575
+    baseline-tokens: 2016
+    principles-at-baseline: 6
+    kills-at-baseline: 0
+  - domain: ranking-evaluation
+    origin: project
+    since: 2026-07-23
+    ratified: 0
+    killed: 0
+    gate-violations: 0
+    working-file-tokens: 853
+    baseline-tokens: 853
+    principles-at-baseline: 5
+    kills-at-baseline: 0
+  - domain: ratify-gate
+    origin: seed
+    since: 2026-07-23
+    ratified: 1
+    killed: 0
+    gate-violations: 0
+    working-file-tokens: 2373
+    baseline-tokens: 2030
+    principles-at-baseline: 9
+    kills-at-baseline: 1
+  - domain: recoverability
+    origin: seed
+    since: 2026-07-23
+    ratified: 0
+    killed: 0
+    gate-violations: 0
+    working-file-tokens: 577
+    baseline-tokens: 595
+    principles-at-baseline: 2
+    kills-at-baseline: 1
+  - domain: spawn-integrity
+    origin: project
+    since: 2026-07-23
+    ratified: 0
+    killed: 0
+    gate-violations: 0
+    working-file-tokens: 1780
+    baseline-tokens: 1856
+    principles-at-baseline: 6
+    kills-at-baseline: 0
+  - domain: surfaces-elevation
+    origin: project
+    since: 2026-07-23
+    ratified: 0
+    killed: 0
+    gate-violations: 0
+    working-file-tokens: 479
+    baseline-tokens: 479
+    principles-at-baseline: 3
+    kills-at-baseline: 0
+  - domain: validation-feedback
+    origin: project
+    since: 2026-07-23
+    ratified: 0
+    killed: 0
+    gate-violations: 0
+    working-file-tokens: 376
+    baseline-tokens: 390
+    principles-at-baseline: 3
+    kills-at-baseline: 0
+  - domain: visual-hierarchy
+    origin: project
+    since: 2026-07-23
+    ratified: 0
+    killed: 0
+    gate-violations: 0
+    working-file-tokens: 762
+    baseline-tokens: 762
+    principles-at-baseline: 4
+    kills-at-baseline: 0
+  - domain: wizards-flows
+    origin: project
+    since: 2026-07-23
+    ratified: 0
+    killed: 0
+    gate-violations: 0
+    working-file-tokens: 468
+    baseline-tokens: 499
+    principles-at-baseline: 3
+    kills-at-baseline: 0
+efficacy:
+  - id: task-is-actionable-without-planning
+    fired: 1
+    violated: 0
+    idle: 0
+  - id: sequence-by-output-dependency
+    fired: 1
+    violated: 0
+    idle: 0
+  - id: open-questions-are-explicit
+    fired: 1
+    violated: 0
+    idle: 0
+  - id: task-describes-output-not-implementation
+    fired: 1
+    violated: 0
+    idle: 0
+  - id: concern-names-work-not-role
+    fired: 1
+    violated: 0
+    idle: 0
+  - id: structural-examination-at-working-checkpoint
+    fired: 3
+    violated: 0
+    idle: 0
+  - id: no-single-char-names
+    fired: 1
+    violated: 0
+    idle: 0
+  - id: unified-representation-no-type-leakage
+    fired: 4
+    violated: 0
+    idle: 0
+  - id: code-lives-at-consumer-level
+    fired: 7
+    violated: 0
+    idle: 0
+  - id: minimize-comments-prefer-self-documenting-code
+    fired: 5
+    violated: 0
+    idle: 0
+  - id: named-exports-over-default
+    fired: 1
+    violated: 0
+    idle: 0
+  - id: null-first-ternary
+    fired: 1
+    violated: 0
+    idle: 0
+  - id: single-callsite-helper-scoped
+    fired: 2
+    violated: 0
+    idle: 0
+  - id: behavior-flags-in-refs
+    fired: 4
+    violated: 0
+    idle: 0
+  - id: ceiling-comment-for-deliberate-shortcuts
+    fired: 2
+    violated: 0
+    idle: 0
+  - id: custom-hook-owns-its-concern
+    fired: 1
+    violated: 0
+    idle: 0
+  - id: scripts-over-hand-editing-structured-data
+    fired: 1
+    violated: 0
+    idle: 0
+  - id: utility-over-guesswork
+    fired: 1
+    violated: 0
+    idle: 0
+  - id: ask-before-architecture
+    fired: 1
+    violated: 0
+    idle: 0
+  - id: no-shell-for-structural-absence
+    fired: 1
+    violated: 0
+    idle: 0
+  - id: atomic-delete-of-wired-component
+    fired: 0
+    violated: 0
+    idle: 1
+  - id: recovery-path-replaces-confirmation
+    fired: 1
+    violated: 0
+    idle: 0
+co-occurrence:
+library-drift:
+  since-last-sync: 0
+```
+
+<!-- corpus-script:end -->

@@ -23,7 +23,7 @@ principles:
 
 - id: frame-before-routing
   rule: "Before routing, frame what each composition is being asked to answer, not which pipeline to follow. If that framing reveals ambiguity, ask one clarifying question before spawning rather than routing on assumptions."
-  condition: "Any task entering the role-kernel system, especially ambiguous or multi-domain requests."
+  condition: "Any task entering the corpora system, especially ambiguous or multi-domain requests."
   reason: "Routing judgment is about matching questions to the composition that owns them, not following a sequence. Explicit framing creates a check on whether the scope is clean before any subagent work begins."
 
 - id: route-questions-not-roles

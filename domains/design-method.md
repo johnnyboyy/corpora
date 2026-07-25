@@ -55,7 +55,7 @@ principles:
 - id: check-existing-patterns-before-specifying-new
   rule: "Before specifying a new flow pattern, navigation convention, or UI component, check the project's UX/UI library and existing component documentation for one that already covers the need."
   condition: "Any design spec that introduces a flow step, interaction pattern, or visual component not already named in the project's library documentation."
-  reason: "A design spec is read by a coder who implements it as written. Specifying a near-duplicate of an existing pattern creates two conventions where one would do, and the coder has no way to know a simpler existing option was available — the check has to happen at design time, not implementation time."
+  reason: "A design spec is read downstream and implemented as written. Specifying a near-duplicate of an existing pattern creates two conventions where one would do, and the implementer has no way to know a simpler existing option was available — the check has to happen at design time, not implementation time."
 
 killed:
 ```

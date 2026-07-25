@@ -183,7 +183,7 @@ named the cost too — the **Reader Tax**, paid by whoever reads the code next. 
 is `content/posts/coding/explicit-by-default.mdx`.
 
 Two things came out of that. First, the principle. Second, and more important: the realization that
-*reasons travel further than rules* — which is the insight this entire role-kernel system is built on
+*reasons travel further than rules* — which is the insight this entire corpora system is built on
 (every principle carries a `reason` field; see "Why reason travels with the rule"). Explicit by
 Default is also itself an instance of the system surfacing a principle the operator hadn't named —
 Claude articulated it — and the standing hope is that it keeps doing that: teaching the operator
