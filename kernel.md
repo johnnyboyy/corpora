@@ -253,10 +253,19 @@ Every cross-boundary change is **propose → ratify → promote**, never write-d
 - Structural changes (split a domain, add an explorer, change a route) go through the
   same gate.
 - A proposal of `kind: direction` takes a **third route**: filed into the project's
-  `ui-library.md` (provenance to the audit layer as usual) — never ratified into a domain, never
-  killed, never a seed-promotion candidate. A direction is an identity decision, not a weighable
-  rule; it carries no condition/reason obligation, and the library is the project's identity
-  record. Processing a sound direction as a failed principle is a container-kill in new clothes.
+  `ui-library.md` — never ratified into a domain, never killed, never a seed-promotion candidate.
+  A direction is an identity decision, not a weighable rule; it carries no condition/reason
+  obligation, and the library is the project's identity record. Processing a sound direction as a
+  failed principle is a container-kill in new clothes. **No parallel audit file exists for
+  `ui-library.md`/`ux-library.md`, and none should be created.** The working/audit split above is
+  real infrastructure built specifically for domain corpora (a per-domain working file plus one
+  audit file per layer, both maintained by `corpus.py`) — it does not extend to the library docs by
+  default, and "as usual" language here would wrongly imply it does. `ui-library.md` describes only
+  current application state; git history is its complete audit trail, the same way it is for any
+  other versioned source file — do not write "(direction, <date>, implemented)" tags,
+  "supersedes..." lead-ins, or trailing "*Provenance*" paragraphs into the library itself. A spawn
+  updating the library replaces superseded content outright rather than layering a correction on
+  top of it.
 
 ### The genuine-fork test
 

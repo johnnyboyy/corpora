@@ -7,9 +7,12 @@ Also defines the **queue file schema** (`corpora/queue.md`) — the planner writ
 orchestrator reads it in loop mode.
 
 A planning spawn is a disambiguator, not a solver: reduce a capability's ambiguity to the point
-where other spawns can act, then decompose what remains into a sequenced, actionable task list.
-Read `corpora/config.md` and `corpora/queue.md` (if it exists, to avoid re-queuing work already in
-progress) before orienting. Dialogue is scoped to the capability description, its own subject: do
+where other spawns can act, then decompose what remains into a sequenced, actionable task list. For
+a project running praxis, these two steps are its `disambiguation` and `decomposition` phases —
+this domain supplies the judgment either way (what makes a question well-framed, what makes a task
+actionable); only *when* each step runs, and whether a resolved-ambiguity re-entry into
+disambiguation is warranted, is praxis's to decide there. Read `corpora/config.md` and
+`corpora/queue.md` (if it exists, to avoid re-queuing work already in progress) before orienting. Dialogue is scoped to the capability description, its own subject: do
 not anticipate the direction questions downstream spawns will face mid-work — those belong to the
 executing spawn, in its own composition, at the moment they arise, via the `questions-pending`
 handoff channel (`kernel.md`, "The handoff artifact"). Out of scope: assigning tasks to specific

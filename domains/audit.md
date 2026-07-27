@@ -107,6 +107,16 @@ provenance:
       type: generalized
       reason: "Promoted from FAMOUS's project-level coding-general domain to seed. `spawn-integrity`'s checkpoint-on-context-pressure-tell had referenced 'this project's comment-discipline conventions' as a seed-level given since it was authored, but the underlying rule was never actually promoted alongside it — a dangling reference in the seed layer, caught by an operator noticing verbose comments in a downstream project (motors-and-controls) that had no such rule anywhere in its composed domains. Condition genericized (dropped 'in this project'); rule and reason otherwise unchanged from the FAMOUS original."
 
+- id: derivable-arithmetic-is-not-a-hidden-constraint
+  domain: coding-general
+  kind: judgment
+  provenance: "2026-07-26, motors-and-controls mobile-ux workstream. Commented `minZoom={0.4}` with the ratio to the library's 0.5 default ('~25% more canvas'). Operator's first challenge correctly identified a separate narrative sentence (naming the bug report) as reasoning-leak; the ratio sentence survived that pass. Operator's second challenge caught that the surviving sentence was itself just derivable arithmetic, not new information — self-review had checked for reasoning-leak but not against minimize-comments-prefer-self-documenting-code's own bar."
+
+- id: co-derive-coupled-values-in-one-place
+  domain: coding-general
+  kind: judgment
+  provenance: "2026-07-26, FAMOUS PlayerBarContent.tsx review. A `playbackPhase()`/`PHASE_LABELS` split (state → phase enum → lookup table) was simplified to one function returning both a status label and an action label together per branch, then the underlying feature was cut entirely. Operator generalized the surviving code-organization lesson from the specific status/action-label shape into a standalone principle, and asked to keep its reasoning free of any comparison to single-callsite-helper-scoped so the new principle doesn't read as arguing against its counterpart — the two are disambiguated by their condition fields alone, linked only via see-also."
+
 # domain: orchestrator-routing
 - id: brief-ends-at-what
   domain: orchestrator-routing
@@ -150,6 +160,7 @@ provenance:
 - id: prefer-independent-evaluation
   domain: orchestrator-routing
   provenance: "2026-07-17, retrospective on review-composition cost. A standing reviewer composition was cut the same day for low uptake relative to its cost — this principle captures the replacement approach: an independent coder instance scoped to the review gets the same fresh-context benefit without a rarely-invoked dedicated composition."
+  killed: 2026-07-27
 
 - id: inline-coder-session-protocol
   domain: orchestrator-routing
@@ -161,6 +172,9 @@ provenance:
     - date: 2026-07-21
       type: generalized
       reason: "Reworded from 'load the coder lens and its declared domains' to 'compose the coder alias' to match v3-redesign-proposal.md's stance+composition model — coder.md no longer exists as a file. No change to the judgment."
+    - date: 2026-07-27
+      type: trimmed
+      reason: "Session-mining background-agent audit (FAMOUS project) flagged this as a mixed principle under principle-judgment.md's mined-workflow-stays-a-workflow test: its rule was a three-stage ordered workflow (compose domains, flag in-flight, ask at the seam) rather than a single resolved tradeoff. The domain-composing step was confirmed a near-verbatim duplicate of SKILL.md's own 'For inline spawn work' instructions — not unmined process needing a praxis phase, just redundant restatement — so it was dropped rather than routed anywhere. The judgment kernel (inline work gets the same corpus discipline as a formal spawn; capture principle candidates at the natural seam, not deferred to session-end) was kept, reworded to lead with it directly instead of the procedural framing."
 
 - id: design-question-during-coder-session
   domain: orchestrator-routing
@@ -178,11 +192,21 @@ provenance:
 - id: screenshot-recapture-is-orchestrator-mechanical
   domain: orchestrator-routing
   provenance: "2026-07-22, UI screenshot cache design (docs/superpowers/specs/2026-07-22-ui-screenshot-cache-design.md). A fresh-context review of the design found that grounding orchestrator-run recapture by analogy to `corpus.py` invocation alone was a weaker fit than presented — script invocation has zero interpretation, while navigating to the correct rendered state to capture involves some procedural judgment. This principle states the narrower claim directly and names the boundary against `stop-and-route` explicitly (visual judgment about the recaptured state routes to a role; mechanical recording of current state does not)."
+  killed: 2026-07-27
 
 - id: no-cost-driven-domain-omission
   domain: orchestrator-routing
   kind: judgment
   provenance: "2026-07-22, operator conversation on lens/domain composition design. Discussion of whether lenses should be the mandatory composition unit (to guard against relevant domains going unloaded) surfaced a distinct, already-observed failure: the orchestrator thinning a composition to save tokens rather than never having known a domain was relevant in the first place. Paired with spawn-integrity's checkpoint-on-context-pressure-tell, added the same session, as the two sides (routing-time vs. spawn-side) of the same pressure."
+
+- id: spawn-only-when-judgment-remains
+  domain: orchestrator-routing
+  kind: judgment
+  provenance: "2026-07-26, Blog UI-library-sync task. The task brief for a ui-design-composed spawn already specified the exact before/after text for every edit — no design decision remained; the spawn's job had degraded to text transcription, and the isolation overhead (composed prompt, spawn execution, handoff review) cost more than making the edit directly would have."
+  history:
+    - date: 2026-07-26
+      type: moved
+      reason: "Ratified into Blog's project-layer orchestrator-routing domain first, then promoted to this kernel-seed layer the same day — operator confirmed the pattern had recurred across projects (Blog, FAMOUS, Meridian) and was part of the original motivation for building corpora/praxis at all: superpowers' plan-then-execute skills were solving the same ambiguity-resolution problem twice, once in the plan and again when agents re-litigated it during execution."
 
 # domain: ratify-gate (split from orchestrator-routing 2026-07-18; see LINEAGE.md, "The ratify-gate split")
 - id: pre-scan-before-spawning
@@ -942,12 +966,12 @@ provenance:
 - id: adopt-forced-migration-early-on-disposable-branch
   domain: dependency-management
   kind: judgment
-  provenance: "2026-07-22, reading pipeline (docs.expo.dev/guides/new-architecture), reworded from Expo-specific to general form when moved out of the then-uncreated coding-expo domain. Originally weighed for a kill-as-knowledge ('fairly standard') but held as judgment on review: the operator's own framing was that this is standard-but-under-practiced discipline (deferring an optional migration to its deadline is a real, recurring failure mode despite being agreed-upon in the abstract), which is exactly what the genuine-fork test is for — distinct from a lookup fact. Reassigned from coding-general to a new dependency-management domain + matching lens: this judgment applies to tasks actually about upgrading/migrating, not to every convergent coding spawn regardless of task shape (kernel.md, 'Recognizing that a task needs a different lens')."
+  provenance: "2026-07-22, reading pipeline (docs.expo.dev/guides/new-architecture), reworded from Expo-specific to general form when moved out of the then-uncreated coding-expo domain. Originally weighed for a kill-as-knowledge ('fairly standard') but held as judgment on review: the operator's own framing was that this is standard-but-under-practiced discipline (deferring an optional migration to its deadline is a real, recurring failure mode despite being agreed-upon in the abstract), which is exactly what the genuine-fork test is for — distinct from a lookup fact. Reassigned from coding-general to a new dependency-management domain + matching lens: this judgment applies to tasks actually about upgrading/migrating, not to every convergent coding spawn regardless of task shape (kernel.md, 'Recognizing that a task needs a different lens'). First seen concretely in Expo's New Architecture migration (support for the old architecture ends at SDK 55 while still optional at the time of writing) — real breakage there was only discoverable by running the app against it, not by reading the migration guide."
 
 - id: audit-transitive-dependencies-after-major-upgrade
   domain: dependency-management
   kind: judgment
-  provenance: "2026-07-22, reading pipeline (buildmvpfast.com/blog/expo-sdk-56-inline-native-modules-router-fork-new-features-2026), reworded from Expo-specific to general form. Same reassignment reasoning as adopt-forced-migration-early-on-disposable-branch — held as judgment, moved to the new dependency-management domain rather than coding-general."
+  provenance: "2026-07-22, reading pipeline (buildmvpfast.com/blog/expo-sdk-56-inline-native-modules-router-fork-new-features-2026), reworded from Expo-specific to general form. Same reassignment reasoning as adopt-forced-migration-early-on-disposable-branch — held as judgment, moved to the new dependency-management domain rather than coding-general. First seen concretely when Expo SDK 56 stopped bundling @expo/vector-icons as a transitive dependency."
 
 # domain: coding-expo (new domain, seeded 2026-07-22)
 - id: expo-router-typed-routes-for-link-safety
@@ -1211,10 +1235,10 @@ counters:
   - domain: coding-general
     origin: seed
     since: 2026-07-23
-    ratified: 0
+    ratified: 2
     killed: 0
     gate-violations: 0
-    working-file-tokens: 5011
+    working-file-tokens: 5683
     baseline-tokens: 5335
     principles-at-baseline: 18
     kills-at-baseline: 1
@@ -1341,10 +1365,10 @@ counters:
   - domain: orchestrator-routing
     origin: project
     since: 2026-07-23
-    ratified: 0
-    killed: 0
+    ratified: -1
+    killed: 2
     gate-violations: 0
-    working-file-tokens: 3459
+    working-file-tokens: 3715
     baseline-tokens: 3460
     principles-at-baseline: 16
     kills-at-baseline: 1
@@ -1486,7 +1510,7 @@ efficacy:
     violated: 0
     idle: 0
   - id: minimize-comments-prefer-self-documenting-code
-    fired: 5
+    fired: 6
     violated: 0
     idle: 0
   - id: named-exports-over-default

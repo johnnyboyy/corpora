@@ -56,15 +56,10 @@ principles:
   condition: "When routing follow-up work after a spawn has returned a handoff."
   reason: "Small revisions benefit from the spawn's live understanding of the implementation and prior decisions. Replacing it at every handoff discards useful context, while carrying it into a new planned outcome risks reviving settled or rejected work through pattern matching."
 
-- id: prefer-independent-evaluation
-  rule: "Prefer a fresh isolated context when a spawn evaluates work produced by the current agent or context. There is no standing reviewer composition — when code review is warranted, spawn a fresh coder agent scoped to the review, not the coder that produced the work."
-  condition: "When routing review or other evaluative work."
-  reason: "Producer context carries prior rationale and commitments that can make the evaluator less likely to recognize faults. An independent coder instance gets the same fresh-context benefit as a dedicated reviewer composition would, without the cost of maintaining a rarely-invoked composition solely for that purpose. For small mechanical checks, the orchestrator may judge that isolation cost outweighs this risk."
-
 - id: inline-coder-session-protocol
-  rule: "Before any inline coder work: compose the coder composition — convergent stance, `coding-general` plus whichever stack-conditioned domains the project's shape matches — plus the project domains if not already in context, then apply its constraints throughout. During the session: flag interesting decisions in-flight as potential principles. At the natural seam (feature complete, direction approved, conversation shifts away from code): ask 'any of these decisions worth encoding as a principle?' Don't defer to end of session — the seam is the close."
+  rule: "Inline/informal coder work carries the same corpus discipline as a formal isolated spawn — compose the full coder composition before starting (see SKILL.md, 'For inline spawn work'), not a lighter version because it's inline. Flag interesting decisions as potential principles as they happen; ask 'any of these worth encoding?' at the natural seam (feature complete, direction approved, conversation shifts away from code) — not deferred to end of session, since decisions evaporate if not captured at the moment they're made."
   condition: "Any inline coding work in the orchestrator session — small tasks, experiments, pair-programming — where spawning a coder subagent would cost more than the isolation is worth."
-  reason: "Corpus loading must happen before constraints are applied. In-flight flagging prevents decisions from evaporating in a long session. Binding the principles question to the natural seam rather than a formal spawn-exit event makes the check structural."
+  reason: "Corpus loading must happen before constraints are applied, same as a formal spawn — the 'inline' framing tempts skipping that because there's no separate spawn boundary to enforce it. In-flight flagging prevents decisions from evaporating in a long session. Binding the principles question to the natural seam rather than a formal spawn-exit event makes the check structural rather than optional."
 
 - id: audit-request-means-spawn-designer
   rule: "When the operator uses the phrase 'full audit' or 'UI/UX audit', spawn a `ui-design`-composed spawn for a holistic review even if specific operator-stated concerns were also provided. Specific concerns are context for the audit, not a substitute for it."
@@ -81,17 +76,28 @@ principles:
   condition: "When routing a task whose scope spans many independent files or units."
   reason: "Workstream boundaries affect routing, workstream ownership, and operator visibility, so they belong to the orchestrator. Local execution decomposition does not change ownership and is cheaper for the spawn closest to the work to manage."
 
-- id: screenshot-recapture-is-orchestrator-mechanical
-  rule: "Operate the project's browser automation tool directly to recapture a stale screen for the screenshot cache (`corpora/screenshots/manifest.md`), rather than spawning a composition for it. Route to a composition instead when the task requires visual judgment about what the recaptured state should look like."
-  condition: "At ratify-gate time, once `screenshot-mark-stale` has flagged one or more screens stale from a handoff's `ui-drift` fields."
-  reason: "Recording the current rendered state requires no design or code judgment — only navigating to the right screen and saving what is already there — so it fits the same in-scope-for-the-orchestrator shape as running `corpus.py` directly. This is a narrower claim than script invocation, which has zero interpretation; reaching the correct rendered state to capture involves some procedural judgment, which is why the carve-out to `stop-and-route` names visual judgment specifically rather than treating all browser-tool use as mechanical."
-
 - id: no-cost-driven-domain-omission
   rule: "Once routing judgment has determined a domain is relevant to a task, never drop it from the composition to save tokens or shorten the context. If total composition cost is a genuine concern, surface it as a tradeoff — decompose the task into smaller checkpointed spawns, or flag the cost to the operator — rather than silently thinning the domain set a relevant task would otherwise load."
   condition: "When composing domains for a spawn and the total token cost of the composed set is a concern."
   reason: "Observed in practice: cutting a relevant domain for cost produces worse output and dropped principles, the same attention-fighting failure as an oversized context. The honest move is to make the cost tradeoff visible — split the work or flag it — never to omit unilaterally."
 
+- id: spawn-only-when-judgment-remains
+  rule: "Before spawning an isolated composition, check whether the task brief already resolves every content decision — exact before/after state, no open questions. If so, execute directly instead of spawning; do not write a more detailed brief in place of acting."
+  condition: "Any time about to spawn an isolated subagent for a task whose brief already specifies exact edits, verbatim text, or a fully-determined outcome, with no perceptual/aesthetic judgment, large unread context, or evaluator-independence need remaining downstream."
+  reason: "Isolation cost — composing the full domain prompt, the spawn's own execution, and reviewing its handoff — buys nothing when no judgment, context-discovery, or independent evaluation is actually needed; the spawn's job degrades to pure text transcription. This is the inverse of stop-and-route: that principle guards against the orchestrator doing domain judgment itself, this one guards against over-resolving a brief until it reads like a diff and still paying for isolation as if judgment remained."
+  see-also: stop-and-route, spawn-threshold-is-spec-scope
+
 killed:
+
+- id: prefer-independent-evaluation
+  rule: "Prefer a fresh isolated context when a spawn evaluates work produced by the current agent or context. There is no standing reviewer composition — when code review is warranted, spawn a fresh coder agent scoped to the review, not the coder that produced the work."
+  kill_type: container
+  reason_killed: "The default (fresh context, no standing reviewer role) is a routing rule with no real per-instance judgment beyond the cost/risk tradeoff, which SKILL.md's \"Inline, resume, or isolate\" already named as a factor (`evaluator independence`) — that section now states the default directly. Folded into praxis's `independent-review` phase as the general, reusable version for a project running praxis, distinct from that phase's producer-side counterpart, `self-verification`."
+
+- id: screenshot-recapture-is-orchestrator-mechanical
+  rule: "Operate the project's browser automation tool directly to recapture a stale screen for the screenshot cache, rather than spawning a composition for it. Route to a composition instead when the task requires visual judgment about what the recaptured state should look like."
+  kill_type: container
+  reason_killed: "Its own reason field states it outright: 'requires no design or code judgment' — a process-not-judgment admission about as direct as the corpus has. Folded into praxis's `screenshot-recapture` phase for a project running praxis; SKILL.md's \"Screenshot cache upkeep\" already carries the mechanical procedure corpora needs standalone, so nothing else changes there beyond the cross-reference."
 
 - id: design-question-during-coder-session
   rule: "When a UX or UI question surfaces during inline coder work, pause and surface it to the operator: name the domain (UX or UI), the specific decision needed, and the context required to answer it. Present two options explicitly — operator resolves directly (coder continues with that answer), or operator escalates to the appropriate designer (spawn, relay output, coder resumes with spec)."

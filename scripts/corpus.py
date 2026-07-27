@@ -1098,7 +1098,16 @@ def extract_section(text: str, heading_pattern: str, source: str) -> str:
     if start is None:
         fail(f"could not find a section matching {heading_pattern!r} in {source}")
     end = len(lines)
+    in_fence = False
     for i in range(start + 1, len(lines)):
+        if lines[i].strip().startswith("```"):
+            in_fence = not in_fence
+            continue
+        if in_fence:
+            # A bare "---" (e.g. a YAML document separator) inside a fenced
+            # code block is section content, not a boundary marker — only a
+            # heading or "---" outside any fence ends the section.
+            continue
         if re.match(r"^#{1,6}\s", lines[i]) or lines[i].strip() == "---":
             end = i
             break

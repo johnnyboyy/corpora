@@ -93,9 +93,10 @@ If `corpora/config.md` does not exist, the project is not bootstrapped. Run boot
 is the only fallback; no domain or composition carries other "if missing" logic:
 
 - **Phase 1 (inline):** read the bundled `bootstrap.md` adjacent to this `SKILL.md`, then follow
-  Phase 1 — detect the project's shape, commands, and existing project utilities from the applicable project agent
-  instructions, package manifests, lockfiles, and codebase; write
-  `corpora/config.md`. Do not proceed until it exists.
+  Phase 1 — read shape and verification commands from `praxis/config.md` if it already exists,
+  otherwise detect the project's shape and commands from the applicable project agent instructions,
+  package manifests, lockfiles, and codebase; detect existing project utilities directly either way;
+  write `corpora/config.md`. Do not proceed until it exists.
 - **Routing after Phase 1:** see `bootstrap.md`, "Routing after Phase 1," for the full branch —
   summarized here. If no concrete operator feature request accompanied the bootstrap, route
   Phase 2 (only if `has-ui: yes`: `bootstrap-ui`-composed workstream, divergent stance, Phase 2
@@ -149,7 +150,12 @@ enters `corpora/config.md`.
 **Inline, resume, or isolate:** Decide through the `orchestrator-routing` corpus; a task-shape name
 alone does not determine the answer. Weigh workstream ownership, stance change, prior exploratory or
 rejected material, evaluator independence, context length and domain mixture, and isolation cost.
-These are judgment inputs, not categorical rules keyed to a name. A plan handed to corpora starts a new coder
+These are judgment inputs, not categorical rules keyed to a name. Default for evaluator independence:
+when a spawn evaluates work produced by the current agent or context, prefer a fresh isolated
+context — there is no standing reviewer composition; spawn a fresh instance of the producer's own
+composition scoped to the review, not the producer continuing into evaluating itself. Weigh isolation
+cost against this default for small mechanical checks, same as any other isolation judgment. A plan
+handed to corpora starts a new coder
 workstream. Once a coder owns a workstream, route implementation feedback, operator testing fixes,
 and small revisions back to that coder rather than absorbing them inline. Small unplanned edits may
 run inline when the orchestrator's context is suitable.
@@ -226,6 +232,13 @@ a spawn does not instantiate another corpora spawn; route cross-composition or d
 requests to the orchestrator.
 
 **Ratify gate (after spawn work):**
+
+If the project runs praxis, its `phases/ratify-checkpoint.md` may batch this procedure across
+multiple spawns' proposals into one gate pass instead of running it immediately after each spawn —
+sequencing is praxis's job when the project runs it. The procedure below (steps 1-6) stays exactly
+the same either way; only its trigger timing changes. A project running corpora without praxis keeps
+the immediate-after-each-spawn default described below, unchanged.
+
 1. **Audit the output against existing principles.** Read the spawn's output against each ratified
    principle in the domains it declared; flag violations (output contradicts a rule under its
    stated condition) to the operator. Do not silently correct — the operator decides whether to
@@ -258,9 +271,10 @@ requests to the orchestrator.
    route, next step). If a proposal's provenance names a reading-pipeline source rather than an
    earned incident, flag that alongside it — a real correlation with knowledge-not-judgment risk
    (`reading-pipeline-provenance-flags-knowledge-risk` in `principle-judgment`). Ask: ratify / reject / edit.
-5. **Assign a home.** A `direction` proposal is filed into the project's `ui-library.md`
-   (provenance to the audit layer) — never into a domain, never killed, never a seed candidate
-   (`kernel.md`, "The ratify gate"). For each ratified *principle*, decide its domain — citing
+5. **Assign a home.** A `direction` proposal is filed into the project's `ui-library.md`, describing
+   only current state — never into a domain, never killed, never a seed candidate, and never with
+   an inline provenance/history note (git history is the library's audit trail; no parallel
+   audit file exists for it) (`kernel.md`, "The ratify gate"). For each ratified *principle*, decide its domain — citing
    specifically how it matches that domain's stated subject (`kernel.md`, "Domain assignment at
    the gate") — and write it there; if none fits, create a new domain working file
    (`corpora/domains/<new>.md`, or a seed domain if general). The domain becomes available to any
@@ -285,7 +299,14 @@ requests to the orchestrator.
    change so they don't drift. Run `corpus.py verify` first; a discrepancy means a gate went
    unrecorded — heal it with a retroactive `record-gate` before committing.
 
-**UI library upkeep:** `direction` filings update the library directly at the gate. Coder-side
+**UI library upkeep:** `direction` filings update the library directly at the gate — write the
+entry as a standing description of current state, not a copy of the spawn's own narrated
+reasoning. A spawn's handoff Artifact legitimately explains its thinking (that's what a freeform
+Artifact is for); the library entry the orchestrator writes from it is a different, more
+restricted document that never inherits that narration — no "(direction, <date>, implemented)"
+tags, no "supersedes the prior X" lead-ins, no dates, no naming what was rejected or why. When a
+direction replaces an existing entry, overwrite it outright rather than layering the correction on
+top; the library should never require reading two versions to know the current one. Coder-side
 drift is mechanical: handoffs self-report `ui-drift`, the gate counts it, and the `library-drift`
 threshold — or any change that *retired* something the library still teaches — triggers a sync
 suggestion: documentation work against the rendered state, run as a `ui-design`-composed spawn. A
@@ -298,9 +319,10 @@ gate, so exploration never triggers a sync.
 so a spawn never has to enumerate the ripple itself. For each screen the command reports as
 invalidated, recapture immediately using the project's browser automation tool and register the
 result with `corpus.py screenshot-record`, still inline in the same gate pass — this needs no
-design judgment (`screenshot-recapture-is-orchestrator-mechanical`), so it never spawns a design composition. If
-no browser automation tool is available this session, leave the invalidated screens marked stale;
-capture is deferred until a session with the tool processes them.
+design judgment, so it never spawns a design composition (a project running praxis runs this as its
+`screenshot-recapture` phase instead; see that phase's Provenance section). If no browser automation
+tool is available this session, leave the invalidated screens marked stale; capture is deferred until
+a session with the tool processes them.
 
 ## What you don't do
 

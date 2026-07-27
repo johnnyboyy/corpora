@@ -1,39 +1,44 @@
 ---
 name: corpora:bootstrap
-description: Bootstrap a project's config, UI library, and UX library. Run once, before any feature design work. Works from existing design documentation, brand guidelines, aesthetic references, or from scratch with operator guidance. Outputs corpora/config.md (project shape, commands, and registered utilities), and — via a direct designer sequence or a planner-produced queue, depending on whether a concrete feature accompanied the bootstrap request — corpora/ui-library.md, corpora/ux-library.md, proposed design principles ratified into the project's design domains, and corpora/screenshots/manifest.md (one canonical screenshot per identified screen, seeding the visual reuse cache). The library documents themselves stay text-only — no screenshots or image exports embedded in ui-library.md or ux-library.md (see LINEAGE.md for why).
+description: Bootstrap a project's config, UI library, and UX library. Run once, before any feature design work. Works from existing design documentation, brand guidelines, aesthetic references, or from scratch with operator guidance. Outputs corpora/config.md (project shape, commands, and registered utilities), and — via a direct designer sequence or a planner-produced queue, depending on whether a concrete feature accompanied the bootstrap request — a UI library, a UX library, proposed design principles ratified into the project's design domains, and a screenshot manifest (one canonical screenshot per identified screen, seeding the visual reuse cache). The library documents themselves stay text-only — no screenshots or image exports embedded (see LINEAGE.md for why).
 ---
 
 # Project Bootstrap
 
 Reference for the orchestrator's bootstrap flow, run when `corpora/config.md` is absent — Phase 1
-always runs inline. What happens after Phase 1 branches on whether a concrete operator feature
-request accompanied the bootstrap (see "Routing after Phase 1" below): with no feature request,
-Phase 2 (divergent stance) then Phase 3 (convergent stance) run directly, the original fixed
-sequence (each phase's section below states what it composes — narrower than `ui-design`/
-`ux-design`'s ongoing-work compositions, since founding a library from nothing doesn't have
-concrete components/screens for every domain to attach to yet); with a feature request, the
-orchestrator hands off to the planner instead, which
-decomposes the bootstrap need and the feature into one sequenced queue. Not a standalone skill.
+(below) always runs inline and is corpora's own: it is what makes corpora itself routable, the one
+fallback corpora needs regardless of what else is installed. Not a standalone skill.
 
-- **Phase 1 — always, run inline.** Detect the project's shape, commands, and existing utilities; write
-  **`corpora/config.md`** (schema below: shape — language, framework, package manager, `has-ui`,
-  styling; project resources — registered utilities, UI library location, verification
-  commands). This flips the project to "bootstrapped" and runs for
-  every project type.
+**Sequencing (Phases 2 and 3) is praxis's job when the project runs praxis.** This file used to
+declare a fixed Phase-1-then-2-then-3 pipeline; that framing duplicated what praxis's phase model
+now owns generally (`kernel.md`'s "No phase-graph" — a hand-declared fixed sequence is exactly the
+shape that argues against). If the project runs praxis, its `phases/bootstrap-ui-library.md` and
+`phases/bootstrap-ux-library.md` own *when* Phases 2 and 3 run and under what stance; the sections
+below remain the domain content those phases invoke — what corpora composes and what each library
+must cover — unchanged either way. A project running corpora without praxis follows the same
+two-step order directly, inline below: the order isn't a process choice being made here, it's a
+content dependency (the UX library cites the UI library's tokens and components), so it holds
+regardless of what's sequencing it.
+
+- **Phase 1 — always, run inline, corpora's own regardless of praxis.** Always ensures
+  **`corpora/config.md`** exists (schema below: shape — language, framework, package manager,
+  `has-ui`, styling; project resources — registered utilities, UI library location, verification
+  commands) — this flips the project to "bootstrapped" and runs for every project type. Detecting
+  the shape and commands that go into it is the one sub-step that isn't unconditionally corpora's
+  own: it defers to `praxis/config.md` first when that file already exists (see Phase 1 below),
+  falling back to detecting them itself otherwise. Existing project utilities are always detected by
+  corpora directly — that part of Phase 1 has no praxis counterpart.
 - **Phase 2 — only when `has-ui: yes`, `bootstrap-ui`-composed workstream.** Bootstrap the design
-  system: **`corpora/ui-library.md`** (or the project's chosen path — the living design system
-  reference) plus **proposed design principles** distilled from the foundational decisions and
-  surfaced in the standard proposed-principles block; the orchestrator ratifies them into the
+  system: the UI library (the living design system reference, at its registered path — see "The
+  config file" below) plus **proposed design principles** distilled from the foundational decisions
+  and surfaced in the standard proposed-principles block; the orchestrator ratifies them into the
   project's design domains (`corpora/domains/<domain>.md`), assigning each a domain at the gate.
   This is the foundational work — get it right and every subsequent design session starts with
   real constraints; get it wrong and every session invents in a vacuum.
 - **Phase 3 — only when `has-ui: yes`, `bootstrap-ux`-composed workstream, after Phase 2.**
-  Bootstrap the experience reference: **`corpora/ux-library.md`** plus proposed
-  principles/directions, same gate. UI runs first deliberately — the divergent stance sets
-  identity before the convergent stance documents constraints (see LINEAGE.md, "UI/UX seam
-  settled"). When a planner queue is driving the sequence instead (see below), this ordering falls
-  out on its own: the UX library cites the UI library's tokens and components, so the UX bootstrap
-  task is genuinely blocked-by the UI bootstrap task, not just stylistically sequenced after it.
+  Bootstrap the experience reference: the UX library plus proposed principles/directions, same
+  gate. UI runs first deliberately — the divergent stance sets identity before the convergent stance
+  documents constraints (see LINEAGE.md, "UI/UX seam settled").
 
 The library and corpus are text-only. See LINEAGE.md for why text outperforms design artifacts
 for this purpose.
@@ -82,6 +87,17 @@ itself is part of the scope being weighed.
 ---
 
 ## Phase 1 — Project shape and config (always)
+
+Check for `praxis/config.md` before detecting anything yourself. If it exists, it already carries
+this project's general shape and verification commands — read `## project-shape` and `##
+verification-commands` from there instead of re-detecting them, the same precedent already applied
+to `ui-library:` below ("that registry's path wins — corpora doesn't decide this unilaterally when
+something else already owns artifact placement"). `corpora/config.md` is still always written in
+this case — it remains the marker for corpora's own bootstrapped state (project-domains, utilities
+registry, debug flag) — but its `## project-shape` and `## verification-commands` sections become a
+one-line pointer to `praxis/config.md` instead of duplicated values (see the schema below). If
+`praxis/config.md` does not exist — whether praxis isn't installed, or is installed but hasn't
+written a config yet — proceed exactly as below: detect shape yourself and write it in full.
 
 Detect the project's shape before anything else. Read the platform's applicable project agent
 instructions (`AGENTS.md` under Codex; `CLAUDE.md` under Claude Code), package manifest
@@ -302,11 +318,21 @@ color or other deterministic script into the general utility registry. Also drop
 `role-pack:` line if present — retired 2026-07-22; the fields already here (`language`, `framework`,
 `styling`) are what each stack-specific domain now checks directly.
 
+- **Project shape and verification commands** — if `praxis/config.md` already exists for this
+  project, that file's path wins for these two sections the same way an external artifact-location
+  registry wins for `ui-library` below — corpora doesn't re-detect or duplicate what praxis's config
+  already owns. Write `## project-shape` and `## verification-commands` here as a one-line pointer
+  to `praxis/config.md` in that case (see the schema below); otherwise write the detected values in
+  full, exactly as before.
 - **Utilities** — deterministic project-owned tools that replace recurring inference. Record their
   purpose, triggering condition, exact invocation, operations, and output shape. An empty registry
   is normal; do not speculate during bootstrap.
-- **UI library** — where does the design system reference live? Default `corpora/ui-library.md`;
-  only note a path here if it's non-standard. `none` for projects with no UI.
+- **UI library** — where does the design system reference live? If an external artifact-location
+  registry already exists for this project (a file recording where UI/UX libraries and screenshot
+  caches are placed, maintained outside corpora's own state), that registry's path wins — corpora
+  doesn't decide this unilaterally when something else already owns artifact placement. Otherwise,
+  default `corpora/ui-library.md`; only note a path here if it's non-standard. `none` for projects
+  with no UI.
 - **Verification commands** — the project's lint, type-check, build, and/or test commands. Record
   only what the project actually has.
 - **`debug`** — not detected during bootstrap; leave `no` (or omit) unless the operator asks for it.
@@ -336,6 +362,12 @@ package-manager: <e.g. pnpm, npm, bun, uv, cargo, go>
 has-ui: <yes | no>
 styling: <e.g. tailwind, css-modules, vanilla-css, none>
 
+<!-- When `praxis/config.md` already exists, replace the block above with a one-line pointer
+instead of duplicating values:
+## project-shape
+see: praxis/config.md
+-->
+
 ## utilities
 utilities:
   - id: <e.g. color-math>
@@ -356,6 +388,11 @@ lint: <the project's lint command, or none>
 check: <static analysis or type-check command, or none>
 build: <the project's build command, or none>
 test: <the project's test command, or none>
+
+<!-- Same pointer form as project-shape above when `praxis/config.md` already owns these:
+## verification-commands
+see: praxis/config.md
+-->
 
 ## debug
 debug: <yes | no>  # optional; omit or leave "no" unless the operator asks. See "The config file" above.

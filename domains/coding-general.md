@@ -122,6 +122,12 @@ principles:
   reason: "Comments drift out of sync with the code they describe — one earned instance required fixing three stale ones in a single session, each describing behavior or symmetry that had since changed or been deleted. Needing a comment to explain what code does is itself a sign the code isn't clear enough. UI/UX documentation has a dedicated home in this system — `ui-library.md`/`ux-library.md` — with its own staleness-detection (the ratify gate's sync trigger); inline comments duplicating that have no equivalent mechanism keeping them honest."
   see-also: ceiling-comment-for-deliberate-shortcuts
 
+- id: derivable-arithmetic-is-not-a-hidden-constraint
+  rule: "Don't justify a numeric or config literal with a comment that only restates arithmetic performed on values already visible at the call site — a ratio, percentage, or unit conversion against a library default or a neighboring literal. That derivation is recoverable by any reader in the time it takes to compute it, so it fails minimize-comments-prefer-self-documenting-code's 'not recoverable by reading the code itself' bar. A literal earns a comment only when it encodes information from outside the code that reading the value can't reveal — a spec, a hardware limit, a prior incident, a compatibility requirement."
+  condition: "When about to write a comment justifying a numeric or config literal, especially one framed as a derivation from a library default or another value already present nearby."
+  reason: "Being able to show your work computing where a number came from feels like satisfying 'non-obvious constraint,' but the test is whether the reader gains information they couldn't already reconstruct from what's on screen — not whether the author can narrate a derivation. `minZoom={0.4}` commented as '0.5 / 0.4 = 1.25, ~25% more canvas' restates the literal in different notation; it survived one round of self-review (which correctly cut a different, narrative sentence naming the bug report that prompted the change) before a second challenge exposed that the remaining arithmetic sentence had the same defect. The self-review only checked for reasoning-leak, not for whether the surviving justification met the actual originating principle's bar."
+  see-also: minimize-comments-prefer-self-documenting-code
+
 - id: module-boundaries-precede-deployment-separation
   rule: "Before splitting code into separately-deployed services or packages, verify that the equivalent module boundaries are already clean in the existing codebase — no cycles, no cross-module access to internals. Deploy the boundary only after the code already respects it."
   condition: "When planning a migration from a monolith to microservices, separate repositories, or separately-deployed packages — at the point of deciding whether the split is ready to make."
@@ -133,6 +139,12 @@ principles:
   condition: "When verifying that two modules are genuinely isolated — before any structural separation such as package extraction, service split, or repository division — or when a stated architecture diverges from observed runtime or import behavior."
   reason: "An architecture diagram captures intent, not implementation. Two modules can be depicted as isolated boxes with a single interface arrow while one has twelve files importing from eight internal files of the other. The dependency graph is always current; a diagram is only current until the next unreviewed commit. If clean boundaries are the goal, the test is the dependency graph — a diagram that agrees with it is a summary, not evidence."
   see-also: module-boundaries-precede-deployment-separation, code-lives-at-consumer-level
+
+- id: co-derive-coupled-values-in-one-place
+  rule: "When two or more values are derived from the same input conditions and must always change together, derive them from a single computation with one branch per input case — never from separate independent conditionals or lookups that happen to key off the same condition."
+  condition: "Whenever a state/condition maps to more than one dependent output that must stay consistent with each other — a label and the action it describes, a color and the icon that must match it, an error code and its message — and computing them separately risks one being edited without the other."
+  reason: "Separate conditionals over the same input have no structural link between them; nothing stops one from being edited while the other is missed. Keeping one branch per case, in one place, makes the coupling visible at the point of edit instead of relying on the editor's memory to update both sites."
+  see-also: single-callsite-helper-scoped
 
 killed:
 
