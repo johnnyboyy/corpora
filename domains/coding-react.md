@@ -1,7 +1,8 @@
 # Domain: coding-react
 
-React-specific code patterns — JSX, hooks, refs, and component prop-typing. Declared by the coder
-composition when `framework` is React-based (react, next.js, react native, expo, etc.). Split from
+React-specific code patterns — JSX, hooks, refs, and component prop-typing. Declared by the
+convergent implementation composition when `framework` is React-based (react, next.js, react
+native, expo, etc.). Split from
 `coding-js-react` 2026-07-18 once the domain's
 framework-agnostic JS/TS principles were carved into their own `coding-ts` domain — see
 `domains/audit.md` for the migration note. Audit metadata lives in
@@ -125,7 +126,7 @@ killed:
 - id: no-read-after-set-in-same-scope
   rule: "Never read a state value in the same synchronous scope as the setter call that changes it."
   kill_type: knowledge
-  reason_killed: "React's setState is async/enqueued is a first-day React fact derivable from training data. No project-specific judgment encoded — same class as preserve-3d-on-every-ancestor. A coder who needs the reminder will find it in the React docs."
+  reason_killed: "React's setState is async/enqueued is a first-day React fact derivable from training data. No project-specific judgment encoded — same class as preserve-3d-on-every-ancestor. An implementer who needs the reminder will find it in the React docs."
 
 - id: css-var-over-mapped-class-for-dynamic-color
   rule: "When a component's fill color must track a CSS custom property that changes based on an ancestor's data attribute, use an inline style rather than a Record mapping prop values to utility class names."

@@ -1497,3 +1497,105 @@ as one-off narrative here — see that domain for the reusable form.
 this conversation rather than the queued reading-pipeline surfacing step. `domains/audit.md`
 provenance for every ratified and killed entry cites the specific FAMOUS skill-doc file path as its
 source rather than a URL.
+
+---
+
+## 2026-07-28 — Praxis-active projects: routing must check the phase pool first
+
+Observed live in the FAMOUS project, which runs both skills together: a planning-shaped task ("plan
+roadmap capability X into a task queue") was handled five times in a row by the orchestrator
+composing a bundled `--domains planning,interviewing` spawn directly and running its own internal
+multi-round dialogue-then-decompose loop inline, writing its output to `corpora/queue.md`. This
+fully bypassed praxis's `disambiguation` and `decomposition` phases — which already exist for
+exactly this shape and already write to `praxis/queue.md` per `planning.md`'s own schema — even
+though that same project's `praxis/run-log.md` shows the correct phase-based pattern had been used
+once before, for a different workstream. The operator confirmed they like the resulting behavior
+(one continuing workstream, ask-then-decompose, revise on new direction) — they just want it owned
+by praxis's phase model, not reimplemented ad hoc inside a corpora spawn each time.
+
+The gap was that nothing in the orchestrator's own routing judgment (`orchestrator-routing.md`) ever
+checked "does praxis's phase pool already cover this task shape" before self-composing. Added
+`praxis-owns-active-phase-routing`: when praxis is active in the project, check every file in its
+`phases/` for a matching entry condition before composing a spawn directly; hand off to praxis's
+phase router if one matches, and let corpora domains get invoked narrowly underneath whichever phase
+is running, per that phase's own `invocations` field, rather than as one wholesale multi-domain
+composition. `phases/disambiguation.md`, `phases/decomposition.md`, and `planning.md` itself already
+documented the intended split correctly at the phase/domain level — only the routing trigger into
+that split was missing. See praxis's own `LINEAGE.md` for the mirror entry on that side.
+
+---
+
+## Corpora stops being an active orchestrator
+
+*Decided 2026-07-28, same day as and superseding the `praxis-owns-active-phase-routing` entry
+immediately above. Verify current state against `SKILL.md`, `kernel.md`, `domains/ratify-gate.md`,
+`domains/principle-judgment.md`, and `domains/audit.md`'s retirement callout note.*
+
+The entry above added `praxis-owns-active-phase-routing`: a conditional deferral rule, live only
+"when praxis is active in the project," telling corpora's orchestrator to check praxis's phase pool
+before self-composing a bundled spawn. Working through the fix exposed that it was a patch on a
+deeper design mistake, not the actual fix. The principle presupposed that corpora's orchestrator
+*had* an independent routing initiative that needed to be told, conditionally, to defer — but the
+whole reason the FAMOUS planning-task bug happened five times was that corpora's orchestrator had
+never stopped having that initiative in the first place. A conditional deferral rule is exactly the
+shape of thing that keeps recreating the two-process-owner problem: it works only as long as every
+call site remembers to check "is praxis active this session" first, and a corpora orchestrator that
+still has its own default routing behavior when praxis *isn't* active is still an orchestrator with
+initiative, just a dormant one waiting for the next project that runs corpora standalone to wake it
+back up.
+
+The cleaner fix, reached the same day: corpora stops being an active orchestrator, full stop — not
+conditionally, not "unless praxis is active." It becomes a pure queryable service with no initiative
+of its own, in any configuration:
+
+1. Given a task or spawn description, it answers "which stance + domain subset applies" and hands
+   back that composed content. It does not decide *when* to ask this question, whether to spawn,
+   inline vs. isolated, or how to sequence a session — none of that is corpora's concern anymore, in
+   any configuration, standalone or alongside praxis.
+2. It keeps managing its own ratify-gate procedure and bookkeeping ledgers (deferred UI/UX
+   decisions, deterministic-shortcut-candidates, screenshot-cache manifest, UI-library sync) —
+   framed as a procedure/service invoked by whoever is driving, not as something corpora
+   autonomously decides to run after every spawn on its own initiative.
+3. Whatever drives a session — direct execution by default, or praxis's phase router when praxis is
+   installed — decides when to query corpora and when to invoke its ratify-gate procedure. This is
+   symmetric: corpora behaves identically whether or not praxis happens to be present, because it
+   never had a competing initiative to reconcile in the first place.
+
+Praxis becomes the process driver unconditionally, not "the process owner when both are active,
+otherwise defer to corpora" — see praxis's own `LINEAGE.md` for the mirror entry, and its
+`kernel.md` for the replacement of the conditional "when both are active..." paragraph with a plain,
+unconditional statement.
+
+**Consequence for `orchestrator-routing`.** This domain's actual content — frame-before-routing
+judgment, when to queue a deferred decision vs. surface it immediately, the inline/resume/isolate
+tradeoff, spawn-dispatch sequencing, deterministic-shortcut surfacing judgment — was exactly the
+process-timing judgment being removed from corpora's active behavior. It was retired outright
+(follow the same precedent already set by the role-pack retirement — see "The kernel / role-pack
+split" above — a real `LINEAGE.md` entry, a domain merge/audit note, no orphaned live references):
+
+- Judgment that was genuinely about *assembling* a complete spawn (brief content, composition
+  completeness even when inline) moved into `ratify-gate`, unchanged in substance:
+  `brief-ends-at-what`, `defer-only-nonblocking-design-decisions`, `no-cost-driven-domain-omission`,
+  and `inline-coder-session-protocol` (retitled `inline-execution-carries-full-composition-discipline`
+  now that "the coder" and "the orchestrator" are no longer personas in this system).
+- Judgment that was genuinely about *when* to act — `frame-before-routing`,
+  `route-questions-not-roles`, `spawn-threshold-is-spec-scope`, `planner-over-brainstorming-for-scope`,
+  `audit-request-means-spawn-designer`, `design-pattern-application-lighter-path`,
+  `workstream-ownership-is-orchestrator-scoped`, `persist-role-by-workstream`,
+  `spawn-only-when-judgment-remains` — moved to praxis's `kernel.md`, translated from corpora's
+  `principles: [{id, rule, condition, reason}]` schema into praxis's own phase-entry-condition prose,
+  not pasted verbatim (praxis expresses judgment as phase/entry-condition narrative, not a YAML
+  principle list).
+- `stop-and-route` had no surviving referent and was killed outright: it was purely about the
+  orchestrator catching *itself*, mid-task, doing domain work it should have routed instead — a
+  persona-specific self-check with nothing left to catch once that persona is gone.
+- `praxis-owns-active-phase-routing` (the entry immediately above this one) was killed as
+  superseded same-day, not as an independent quality kill — the observation behind it was correct
+  and is fully preserved, just relocated to praxis's `kernel.md` as unconditional fact rather than a
+  corpora-side conditional deferral rule.
+
+`ratify-gate` and `principle-judgment` stay corpora domains — the operator was clear these are fine
+for corpora to keep owning — but both were reworded to drop language that assumed "the orchestrator"
+was an autonomous actor making these decisions on its own initiative, reframing each as a procedure
+invoked on request. See `domains/audit.md`'s retirement callout note for the full per-principle
+disposition and provenance trail.

@@ -1,6 +1,6 @@
 # Domain: wizards-flows
 
-Multi-step wizards, navigation, and step state. Declared by the **ux-design** composition. Audit
+Multi-step wizards, navigation, and step state. Declared by the **convergent UX-flow** composition. Audit
 metadata lives in `domains/audit.md`, loaded only at ratify/retrospective time.
 
 ```yaml

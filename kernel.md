@@ -4,9 +4,10 @@ The kernel is the shared mechanism every spawn inherits. It is not code — it i
 of files plus a loop.
 
 A **spawn** is a *stance* plus a *composition*: a generative posture (the mode of reasoning the
-agent applies) and the **domain corpora**, decided fresh by routing judgment each time, the
-orchestrator applies to the task at hand. Spawns do not own corpora. Judgment lives in domains; a
-composition is the momentary combination through which one or more domains are applied to a task.
+agent applies) and the **domain corpora** — decided fresh each time by whoever is composing a task
+against corpora, whether that's direct execution or a phase in praxis's router. Spawns do not own
+corpora. Judgment lives in domains; a composition is the momentary combination through which one or
+more domains are applied to a task.
 See "Spawns: stance + composition," below.
 
 A **domain corpus** is a list of principles about one subject matter, context type, or decision
@@ -49,14 +50,14 @@ Notes on fields:
 Working and audit metadata are split so a spawn's working context carries only the fields it weighs
 during a task. **File granularity matches load granularity:** working files are per-domain because
 the working load is *selective* (only composed domains); audit metadata is one file per layer
-because the audit load is *broad* (the orchestrator pulls the whole layer at once).
+because the audit load is *broad* (whoever runs the ratify gate pulls the whole layer at once).
 
 - **Working file** (`domains/<domain>.md`) — one per domain. The active `principles:` with their
   `id / rule / condition / reason / see-also`, plus the `killed:` log. This is the only
   part loaded when a spawn works, inline or spawned.
 - **Audit file** (`domains/audit.md`, one per layer — kernel-seed and each project) —
   per-principle `provenance` keyed by `id` (each entry noting its `domain`) and per-kill audit
-  metadata. Loaded only at ratify and retrospective time, by the orchestrator —
+  metadata. Loaded only at ratify and retrospective time, by whoever runs the ratify gate —
   never in a spawn's working context. The audit file also carries the layer's **counters** — the
   mechanical signals that replace operator feel. **Never write or edit these by hand, including
   when creating a fresh audit file**: `scripts/corpus.py` alone creates them (`measure`) and
@@ -98,8 +99,8 @@ because the audit load is *broad* (the orchestrator pulls the whole layer at onc
   consumed only by the retrospective.
 
   The script (in the skill repo: `record-gate`, `measure`, `triggers`, `lint-handoff`,
-  `lint-deferred`, `deferred`, `lint-utility-candidates`, `utility-candidates`,
-  `record-utility-candidate`, `set-utility-status`, `retro-done`, `sync-done`) does all counting,
+  `lint-deferred`, `deferred`, `lint-deterministic-shortcut-candidates`, `deterministic-shortcut-candidates`,
+  `record-deterministic-shortcut-candidate`, `set-deterministic-shortcut-status`, `retro-done`, `sync-done`) does all counting,
   measuring, validation, and threshold math. The model supplies
   judgments as arguments — fired/violated/idle classification, ratify counts — and never does the
   arithmetic or the YAML writing. Bookkeeping done by attention is bookkeeping that silently
@@ -127,7 +128,7 @@ every active `id` in a working file has a `provenance` entry in its layer's audi
 ## Spawns: stance + composition
 
 A **spawn** is a stance (see "Generative stance," below) plus a **composition** — the domain subset
-applied to the task at hand. The orchestrator's actual routing act is *composing directly*: reading
+applied to the task at hand. Corpora's actual composing act is *composing directly*: reading
 the task, deciding stance, and stating the domain subset it needs in the spawn brief (below), every
 time — never through a cached, named intermediate layer. A spawn is never a persistent named file
 carrying its own persona prompt and a fixed domain list; two fixed, universal stance frames exist —
@@ -137,7 +138,7 @@ composed domains themselves, stated fresh in the brief.
 A composition's domain subset is same-stance domains only — a spawn never mixes domains whose
 principles demand opposite generative stances (see "The hard line," below). A domain is available
 to any composition whose stance and subject match; domains are not "declared by" a composition the
-way principles used to be "declared by" a role.
+way principles used to be "declared by" a fixed role.
 
 **Recognizing that a task needs a *different* domain subset, not just one more domain, is itself
 routing judgment.** A founding-a-library task (standing up a UI or UX library from nothing) needs a
@@ -154,34 +155,37 @@ already conditions which domains a coding composition includes (`coding-nextjs` 
 task is actually about instead of what the project is built with.
 
 **The composition is deterministic, not a self-selected runtime relevance call by the working
-agent.** The orchestrator fixes which domains apply before the spawn runs; the choice is inspectable
+agent.** Corpora fixes which domains apply before the spawn runs; the choice is inspectable
 after the fact via the handoff's `domains-loaded:` field (see "The handoff artifact"). The
-orchestrator's composition choice is visible before the spawn runs the same way any other
-orchestrator action is; see the spawn brief, below.
+composition choice is visible before the spawn runs the same way any other
+composition decision is; see the spawn brief, below.
 
-**The orchestrator does not compose domains for itself — every other spawn is what gets composed.**
+**Corpora does not compose domains for itself — every other spawn is what gets composed.**
 The distinction is not fixedness; it is what kind of thing produces what. A composed spawn produces
-a generative artifact *about a subject*: a spec, a plan, code. The orchestrator produces routing and
-gating *decisions about spawns*, one level up: which stance and domains a task needs, whether a
+a generative artifact *about a subject*: a spec, a plan, code. Corpora itself produces composition
+and gating *decisions about spawns*, one level up: which stance and domains a task needs, whether a
 proposal ratifies, when a retrospective fires. Something has to occupy that position before any
-composition can happen — otherwise nothing decides what to compose for the orchestrator itself, and
-the regress has no floor. `SKILL.md` states this precisely: the orchestrator is "a pure process
-layer that composes and routes spawns but never takes on a spawn's stance itself."
-`orchestrator-routing`, `ratify-gate`, and `principle-judgment` are its own domains, loaded into
-`SKILL.md`'s own prompt rather than composed fresh per task — not because the orchestrator is
-"fixed" in some special sense, but because a process layer has no subject to compose *for*; it has
-only the process itself.
+composition can happen — otherwise nothing decides what to compose for corpora itself, and
+the regress has no floor. `SKILL.md` states this precisely: corpora is "a queryable judgment service
+and ratify-gate procedure... it has no initiative of its own."
+`ratify-gate` and `principle-judgment` are corpora's own standing domains, loaded into
+`SKILL.md`'s own prompt rather than composed fresh per task — not because corpora is
+"fixed" in some special sense, but because this process has no subject to compose *for*; it has
+only the process itself. (Corpora's process/timing judgment — when to invoke it at all, spawn vs.
+surface vs. defer — lived in the `orchestrator-routing` domain until it was retired 2026-07-28,
+see `LINEAGE.md`, "Corpora stops being an active orchestrator"; that judgment now lives with
+whoever is driving the session, praxis's kernel when installed.)
 
 Multiple domains compose into one spawn whenever a task's coupling warrants it — a
 gesture-transition task might load `motion` + `wizards-flows` + `ranking-evaluation` together in one
-divergent spawn. There is no separately-named grouping to be "forced across"; the orchestrator
+divergent spawn. There is no separately-named grouping to be "forced across"; corpora
 states whatever subset the task needs directly, every time (see LINEAGE.md, "Lenses retired").
 
 ### Two load modes
 
 - **Working load** (generation): a spawn's composed domains, *working files only*. Lean and
   inspectable. This is every new isolated spawn and every inline spawn segment.
-- **Audit load** (synthesis, human-gated): the orchestrator loads relevant domains *broadly,
+- **Audit load** (synthesis, human-gated): whoever runs the ratify gate loads relevant domains *broadly,
   including audit and kill metadata*, at ratify and retrospective time. Breadth is safe here
   because it is not constrained generation and it is gated by the operator.
 
@@ -222,10 +226,10 @@ proposal is wrong — surface it (a fork candidate), do not force the fit.
 
 ## The spawn brief
 
-Before spawning, the orchestrator states its composition choice in a short, fixed-field brief —
+Before spawning, corpora states its composition choice in a short, fixed-field brief —
 the schema structures the envelope, not the thinking. No decision-procedure is baked into the
-schema for *how* the orchestrator picks these values; that judgment stays as flexible as ever and
-accumulates the normal way, through `domains/orchestrator-routing.md`'s own principles.
+schema for *how* these values are picked; that judgment stays as flexible as ever and
+accumulates the normal way, through the `ratify-gate` domain's own principles.
 
 ```yaml
 stance: divergent
@@ -233,8 +237,8 @@ domains: [color, visual-hierarchy, motion]
 expected-output: "Design spec for the settings-panel color treatment."
 ```
 
-This is visibility, not a pre-spawn approval gate — the orchestrator's routing choice (which
-domains, why) is already visible before a spawn runs, the same way any other orchestrator action
+This is visibility, not a pre-spawn approval gate — the composition choice (which
+domains, why) is already visible before a spawn runs, the same way any other composition decision
 is. The real gate stays exactly where it already is: the ratify gate, for anything proposing new
 corpus content, never for the working composition itself. A genuinely novel subject with no
 existing domain simply runs guardrail-light; the new-domain need surfaces through the spawn's own
@@ -294,8 +298,8 @@ creation time instead of split time.
 
 ### Domain assignment at the gate
 
-A proposal arrives without a home. At the gate the orchestrator decides which domain it belongs to
-and writes it there. If no existing domain fits, a **new domain is born here** — the orchestrator
+A proposal arrives without a home. At the gate, whoever runs it decides which domain it belongs to
+and writes it there. If no existing domain fits, a **new domain is born here** — the gate
 creates `domains/<new-domain>.md` (+ audit); the domain becomes available to any spawn whose
 stance and subject match — there is no composition declaration to add it to. This is the one point where
 domain assignment involves judgment, and it is human-gated. A proposal that spans two domains is a
@@ -410,7 +414,7 @@ projects.
 ## The handoff artifact
 
 A spawn's terminal output is a **handoff artifact**: one file per spawn session, written by the
-spawn as its final act, at `corpora/handoffs/<date>-<composition>-<slug>.md`. The orchestrator
+spawn as its final act, at `corpora/handoffs/<date>-<composition>-<slug>.md`. Whoever is driving
 relays this file — never raw transcript — and the ratify gate reads proposals from its fields
 instead of parsing prose. The schema structures the *envelope* (what the gate and relay
 mechanically consume), not the *thinking*: the artifact body stays freeform in the spawn's own
@@ -426,9 +430,9 @@ mechanical enforcement — green tooling means "no hard errors," not "checked." 
 here is cheaper than the external ratify gate finding it after the fact.
 
 **The spawn's own final conversational turn is not a second copy of the artifact.** Once the
-handoff file is written, the spawn's actual return to the orchestrator (its last message) states
+handoff file is written, the spawn's actual return (its last message) states
 only that the file exists and where — a path and a one-line status, never a restatement of the
-`Artifact`/`Surfaced` content or the proposals. The orchestrator retrieves the handoff by reading
+`Artifact`/`Surfaced` content or the proposals. Whoever is driving retrieves the handoff by reading
 the file directly, the same way it already reads domain files, never from the spawn's own return
 text. Paying full generation cost for the same content twice — once into the file, once again into
 the conversational turn that hands control back — is the same waste
@@ -452,7 +456,7 @@ proposals:                   # principle proposals, provenance attached at propo
     reason: "..."
     kind: judgment           # judgment | knowledge | direction
     provenance: "date, task, context"
-utility-candidates: []       # plausible deterministic shortcuts observed during work
+deterministic-shortcut-candidates: []  # narrated inference the spawn performed, not code it duplicated
 violations-noted: []         # existing principles this work knowingly deviated from, with why
 ui-drift:                    # both invalidation signals — a spawn names only what it touched
   screens: []                 #   screen ids directly worked on, if any
@@ -490,13 +494,15 @@ Field notes:
   `knowledge` = derivable from documentation or training; `direction` = a project design-direction
   choice — an identity decision, not a weighable rule. The stance model predicts `direction`: a
   divergent spawn's output is a choice, so most UI-identity proposals are direction, not principle.
-- **`utility-candidates`** is deliberately liberal. Each entry names an observed inference burden
-  and concrete deterministic operation shape; it need not prove recurrence or specify a finished
-  CLI. The orchestrator transfers it to the persistent project ledger before closing the handoff
-  (`corpus.py handoff-done`).
+- **`deterministic-shortcut-candidates`** is deliberately liberal. Each entry names a narrated,
+  step-by-step reasoning trace the spawn produced in place of invoking an exact, deterministic,
+  checkable procedure (arithmetic, color-space or geometric math, date math, precise
+  counting/sorting/parsing) — that narration is what qualifies an entry. A single clear instance is
+  sufficient; it need not recur or specify a finished CLI. The gate transfers it to the
+  persistent project ledger before closing the handoff (`corpus.py handoff-done`).
 - **`status: questions-pending`** — the spawn hit a genuine direction question mid-work: it stops,
   puts the questions in `Surfaced` (each with what has been established so far and what turns on
-  the answer), and the orchestrator relays them and resumes the same workstream agent with the
+  the answer), and whoever is driving relays them and resumes the same workstream agent with the
   operator's answers when available, so working context survives the exchange. If continuation is
   unavailable, use the structured replacement protocol in
   `SKILL.md`; never rebuild from raw transcript. Same bar as
@@ -512,7 +518,7 @@ Field notes:
 - **`Surfaced`** is the schema's escape valve: the envelope can under-fit but cannot suppress.
   Recurring traffic of the same *kind* in `Surfaced` is a retrospective signal that the schema
   needs a field — schema evolution from accumulated tension, through the gate, never speculative.
-- **`delegated-workers`** lists each worker scope. When direct worker-to-orchestrator relay is not
+- **`delegated-workers`** lists each worker scope. When direct worker-to-driver relay is not
   available, append a `## Delegated handoffs` section containing every worker's questions,
   tradeoffs, proposals, violations, and routing requests verbatim; the parent may not filter or
   ratify them.
@@ -534,8 +540,8 @@ pipeline is the backstop for what that exemption misses.
 
 `corpora/deferred-decisions.md` is a project working queue for unresolved design questions that do
 not block current implementation. It is not a substitute for a handoff or a place to hide blockers.
-Every queued item names a narrow reversible provisional treatment so the coder can proceed without
-turning that treatment into settled direction.
+Every queued item names a narrow reversible provisional treatment so implementation can proceed
+without turning that treatment into settled direction.
 
 ````markdown
 # Deferred decisions
@@ -575,11 +581,11 @@ may need them. They are project-owned deterministic tools that replace recurring
 or disproportionately token-expensive inference. Environment-owned tools are discovered from the
 current runtime instead.
 
-Candidates live separately in `corpora/utility-candidates.md` so cheap denials and recurrence
-evidence survive handoff deletion without taxing every spawn's load:
+Candidates live separately in `corpora/deterministic-shortcut-candidates.md` so cheap denials and
+recurrence evidence survive handoff deletion without taxing every spawn's load:
 
 ````markdown
-# Utility candidates
+# Deterministic shortcut candidates
 
 ```yaml
 candidates:
@@ -597,12 +603,12 @@ candidates:
 
 Surface a plausible candidate whenever denial is cheap. Before recording it, check the standard
 library, installed dependencies, current runtime tools, and active project utilities. The operator
-accepts, denies, or defers it. Record evidence with `corpus.py record-utility-candidate`; the script
-derives sighting count and first/last dates and resurfaces recurrence or a prior denial. Record the
-operator's disposition with `corpus.py set-utility-status`. Only an accepted utility that is
-implemented and tested enters config. Denied candidates remain historical memory; retrospectives
-may consolidate duplicates or obsolete entries. Candidate status is `open`, `deferred`, `denied`,
-`accepted`, or `implemented`.
+accepts, denies, or defers it. Record evidence with `corpus.py record-deterministic-shortcut-candidate`;
+the script derives sighting count and first/last dates and resurfaces recurrence or a prior denial.
+Record the operator's disposition with `corpus.py set-deterministic-shortcut-status`. Only an
+accepted utility that is implemented and tested enters config. Denied candidates remain historical
+memory; retrospectives may consolidate duplicates or obsolete entries. Candidate status is `open`,
+`deferred`, `denied`, `accepted`, or `implemented`.
 
 ---
 
@@ -633,7 +639,7 @@ solving a problem — merge-time conflict — that concatenation never actually 
 ### One flat seed layer
 
 The skill's `domains/` is one flat pool — no separate "role pack" layer selected by a project-config
-field. A stack-agnostic domain (`coding-general`, `orchestrator-routing`, `spawn-integrity`, ...)
+field. A stack-agnostic domain (`coding-general`, `ratify-gate`, `spawn-integrity`, ...)
 and a stack-specific one (`coding-react`, `css`, `color`, ...) live side by side; each states its own
 load condition directly against `corpora/config.md`'s existing project-shape fields (`language`,
 `framework`, `styling`, `has-ui`) in its own preamble — `coding-nextjs` loads when `framework:
@@ -702,7 +708,7 @@ Sharpened by efficacy counts: a provisional principle with real `fired` counts u
 project shape has earned its promotion case; one that has only ever fired in its birth project
 stays provisional.
 
-**Triggers (mechanical, checked by the orchestrator at every ratify gate; always a suggestion,
+**Triggers (mechanical, checked at every ratify gate; always a suggestion,
 never automatic):** suggest `retrospective <domain>` when, since the last one, `ratified ≥ 6`, or
 `working-file-tokens` grew by ≥ 50%, or `gate-violations ≥ 3`. Suggest a **UI-library sync** when
 `library-drift.since-last-sync ≥ 3`, or immediately when a drifting change *retired* something the

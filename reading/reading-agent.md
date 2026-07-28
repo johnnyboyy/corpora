@@ -21,11 +21,12 @@ From the entry's `domains` field, compose the spawn (see `kernel.md`, "Spawns: s
 - `coding-general` → convergent, load `domains/coding-general.md`
 - `coding-ts` → convergent, load `domains/coding-general.md` + `domains/coding-ts.md`
 - `coding-react` → convergent, load `domains/coding-general.md` + `domains/coding-react.md`
-- `ux-design`, `interaction`, or similar → convergent, load `wizards-flows`, `ranking-evaluation`,
-  `validation-feedback`, `recoverability`, `lists-selection`, `forms-inputs`, `design-method`
-- `ui-design` or similar → divergent, load `color`, `surfaces-elevation`, `visual-hierarchy`,
-  `motion`, `validation-feedback`, `recoverability`, `lists-selection`, `forms-inputs`,
-  `design-method`
+- a UX-flow/interaction tag (`ux-design`, `interaction`, or similar) → convergent, load
+  `wizards-flows`, `ranking-evaluation`, `validation-feedback`, `recoverability`,
+  `lists-selection`, `forms-inputs`, `design-method`
+- a visual-identity tag (`ui-design` or similar) → divergent, load `color`, `surfaces-elevation`,
+  `visual-hierarchy`, `motion`, `validation-feedback`, `recoverability`, `lists-selection`,
+  `forms-inputs`, `design-method`
 
 You are now reasoning under that stance, with those domains, for this entry.
 

@@ -30,8 +30,8 @@ class CorpusCommandTestCase(unittest.TestCase):
         )
 
     def write_candidates(self, entries="candidates: []"):
-        (self.root / "corpora" / "utility-candidates.md").write_text(
-            "# Utility candidates\n\n```yaml\n"
+        (self.root / "corpora" / "deterministic-shortcut-candidates.md").write_text(
+            "# Deterministic shortcut candidates\n\n```yaml\n"
             + textwrap.dedent(entries).strip()
             + "\n```\n"
         )
@@ -58,7 +58,7 @@ composition: coder
 status: {status}
 domains-loaded: [coding-general]
 proposals: []
-utility-candidates: []
+deterministic-shortcut-candidates: []
 violations-noted: []
 {ui_drift}
 token-usage: "n/a"
@@ -116,7 +116,7 @@ Nothing.
                 burden: "Repeated manual color derivation."{'\n              - date: 2026-08-03\n                workstream: reporting-redesign\n                burden: "Manual compositing recurred."' if second_evidence else ''}{disposition}
         """
 
-class DeferredAndUtilityCommandsTest(CorpusCommandTestCase):
+class DeferredAndShortcutCommandsTest(CorpusCommandTestCase):
     def test_valid_queue_passes(self):
         self.write_config()
         self.write_queue(self.entry())
@@ -221,84 +221,84 @@ class DeferredAndUtilityCommandsTest(CorpusCommandTestCase):
         self.assertEqual(result.returncode, 2)
         self.assertIn("has no corpora/deferred-decisions.md", result.stderr)
 
-    def test_valid_utility_candidate_passes(self):
+    def test_valid_deterministic_shortcut_candidate_passes(self):
         self.write_candidates(self.candidate())
 
-        result = self.run_command("lint-utility-candidates")
+        result = self.run_command("lint-deterministic-shortcut-candidates")
 
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
         self.assertIn("1 entries", result.stdout)
 
-    def test_empty_utility_candidate_ledger_passes(self):
+    def test_empty_deterministic_shortcut_candidate_ledger_passes(self):
         self.write_candidates()
 
-        result = self.run_command("lint-utility-candidates")
+        result = self.run_command("lint-deterministic-shortcut-candidates")
 
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
         self.assertIn("0 entries", result.stdout)
 
-    def test_missing_utility_candidate_ledger_fails(self):
-        result = self.run_command("lint-utility-candidates")
+    def test_missing_deterministic_shortcut_candidate_ledger_fails(self):
+        result = self.run_command("lint-deterministic-shortcut-candidates")
 
         self.assertEqual(result.returncode, 2)
-        self.assertIn("no corpora/utility-candidates.md", result.stderr)
+        self.assertIn("no corpora/deterministic-shortcut-candidates.md", result.stderr)
 
-    def test_invalid_utility_candidate_status_and_date_fail(self):
+    def test_invalid_deterministic_shortcut_candidate_status_and_date_fail(self):
         self.write_candidates(
             self.candidate(status="maybe").replace("date: 2026-07-14", "date: today")
         )
 
-        result = self.run_command("lint-utility-candidates")
+        result = self.run_command("lint-deterministic-shortcut-candidates")
 
         self.assertEqual(result.returncode, 1)
         self.assertIn("status must be", result.stdout)
         self.assertIn("date must be valid YYYY-MM-DD", result.stdout)
 
-    def test_utility_candidate_requires_evidence(self):
+    def test_deterministic_shortcut_candidate_requires_evidence(self):
         candidate = self.candidate().replace(
             '            evidence:\n              - date: 2026-07-14\n                workstream: settings-redesign\n                burden: "Repeated manual color derivation."',
             "",
         )
         self.write_candidates(candidate)
 
-        result = self.run_command("lint-utility-candidates")
+        result = self.run_command("lint-deterministic-shortcut-candidates")
 
         self.assertEqual(result.returncode, 1)
         self.assertIn("requires at least one evidence record", result.stdout)
 
-    def test_denied_utility_candidate_requires_reason(self):
+    def test_denied_deterministic_shortcut_candidate_requires_reason(self):
         self.write_candidates(self.candidate(status="denied"))
 
-        result = self.run_command("lint-utility-candidates")
+        result = self.run_command("lint-deterministic-shortcut-candidates")
 
         self.assertEqual(result.returncode, 1)
         self.assertIn("denied status requires disposition reason", result.stdout)
 
-    def test_duplicate_utility_candidate_ids_fail(self):
+    def test_duplicate_deterministic_shortcut_candidate_ids_fail(self):
         first = textwrap.dedent(self.candidate()).strip()
         second = textwrap.dedent(self.candidate()).strip().removeprefix("candidates:\n")
         self.write_candidates(first + "\n" + second)
 
-        result = self.run_command("lint-utility-candidates")
+        result = self.run_command("lint-deterministic-shortcut-candidates")
 
         self.assertEqual(result.returncode, 1)
         self.assertIn("duplicate id", result.stdout)
 
-    def test_utility_candidates_lists_status_and_sightings(self):
+    def test_deterministic_shortcut_candidates_lists_status_and_sightings(self):
         self.write_candidates(
             self.candidate(status="denied", reason="Wait for recurrence.", second_evidence=True)
         )
 
-        result = self.run_command("utility-candidates")
+        result = self.run_command("deterministic-shortcut-candidates")
 
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
         self.assertIn("color-math  status=denied  sightings=2", result.stdout)
         self.assertIn("first=2026-07-14  last=2026-08-03", result.stdout)
 
-    def test_record_utility_candidate_creates_and_resurfaces_recurrence(self):
+    def test_record_deterministic_shortcut_candidate_creates_and_resurfaces_recurrence(self):
         self.write_candidates()
         base = [
-            "record-utility-candidate",
+            "record-deterministic-shortcut-candidate",
             "--id", "color-math",
             "--operation-shape", "Deterministic perceptual color transformation.",
             "--workstream", "settings-redesign",
@@ -307,14 +307,14 @@ class DeferredAndUtilityCommandsTest(CorpusCommandTestCase):
 
         first = self.run_command([*base, "--date", "2026-07-14"])
         second = self.run_command([
-            "record-utility-candidate",
+            "record-deterministic-shortcut-candidate",
             "--id", "color-math",
             "--operation-shape", "Deterministic perceptual color transformation.",
             "--workstream", "reporting-redesign",
             "--burden", "Manual compositing recurred.",
             "--date", "2026-08-03",
         ])
-        listing = self.run_command("utility-candidates")
+        listing = self.run_command("deterministic-shortcut-candidates")
 
         self.assertEqual(first.returncode, 0, first.stderr + first.stdout)
         self.assertIn("recorded sighting 1", first.stdout)
@@ -323,10 +323,10 @@ class DeferredAndUtilityCommandsTest(CorpusCommandTestCase):
         self.assertIn("sightings=2", listing.stdout)
         self.assertIn("first=2026-07-14  last=2026-08-03", listing.stdout)
 
-    def test_record_utility_candidate_deduplicates_identical_evidence(self):
+    def test_record_deterministic_shortcut_candidate_deduplicates_identical_evidence(self):
         self.write_candidates()
         command = [
-            "record-utility-candidate",
+            "record-deterministic-shortcut-candidate",
             "--id", "color-math",
             "--operation-shape", "Deterministic perceptual color transformation.",
             "--workstream", "settings-redesign",
@@ -336,23 +336,23 @@ class DeferredAndUtilityCommandsTest(CorpusCommandTestCase):
         self.run_command(command)
 
         duplicate = self.run_command(command)
-        listing = self.run_command("utility-candidates")
+        listing = self.run_command("deterministic-shortcut-candidates")
 
         self.assertEqual(duplicate.returncode, 0, duplicate.stderr + duplicate.stdout)
         self.assertIn("identical evidence already recorded", duplicate.stdout)
         self.assertIn("sightings=1", listing.stdout)
 
-    def test_set_utility_status_requires_and_persists_denial_reason(self):
+    def test_set_deterministic_shortcut_status_requires_and_persists_denial_reason(self):
         self.write_candidates(self.candidate())
 
         missing = self.run_command([
-            "set-utility-status", "--id", "color-math", "--status", "denied"
+            "set-deterministic-shortcut-status", "--id", "color-math", "--status", "denied"
         ])
         saved = self.run_command([
-            "set-utility-status", "--id", "color-math", "--status", "denied",
+            "set-deterministic-shortcut-status", "--id", "color-math", "--status", "denied",
             "--reason", "Wait for recurrence.",
         ])
-        linted = self.run_command("lint-utility-candidates")
+        linted = self.run_command("lint-deterministic-shortcut-candidates")
 
         self.assertEqual(missing.returncode, 2)
         self.assertIn("requires --reason", missing.stderr)

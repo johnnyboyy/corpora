@@ -86,7 +86,7 @@ principles:
   reason: "Leaking the internal distinction forces every consumer to replicate the branching logic. The unit already owns the data; it should own the routing too."
 
 - id: utility-over-guesswork
-  rule: "When work is deterministic, precision-sensitive, or disproportionately expensive to solve by inference — color/LCH math, date and timezone arithmetic, geometric layout, hashing, unit conversion, and similar — use the project's registered utility for it if one exists. If none exists, propose one as a utility candidate in the handoff rather than solving it by inference every time."
+  rule: "When work is deterministic, precision-sensitive, or disproportionately expensive to solve by inference — color/LCH math, date and timezone arithmetic, geometric layout, hashing, unit conversion, and similar — use the project's registered utility for it if one exists. If none exists, propose one as a deterministic-shortcut candidate in the handoff rather than solving it by inference every time."
   condition: "When a task requires computing or verifying a value where getting it right by inference is unreliable, slow, or has recurred across sessions — not for one-off trivial arithmetic. Color is the canonical case: perceptual variants, palette stops, opacity blends over a backdrop, or any case where color relationships need to be derived rather than chosen arbitrarily. In React Native specifically, CSS custom properties are unavailable to component props at runtime (tintColor, tabBarActiveTintColor, inline style.color, etc.) — reference values from a JS token module rather than hardcoding hex literals there."
   reason: "Color/LCH relationships are the case that founded this principle: guessing produces inaccurate results and burns many tokens iterating toward something correct, while a small script computes the exact answer for near-zero cost. The same logic applies to any deterministic or repeatedly-recurring computation — the operator can deny a weak candidate cheaply; grinding it out by inference every session cannot be undone."
 
@@ -112,13 +112,13 @@ principles:
 
 - id: tag-identity-dependencies-check-before-handoff
   rule: "When writing code that depends on an object's identity or reference persisting across a sequence of states — an animated element, a memoized value, a reference-keyed cache entry, an instance-bound subscription — tag it inline at the point of writing: `// [depends-on-identity]: <what must stay the same, and why>`. Before finishing, grep for the tag, verify each one against the code that now owns that object's lifecycle, then resolve it: delete the tag once verified, or replace it with an assertion or test if the invariant needs protection past this session."
-  condition: "Any coder session creating a dependency on referential/identity persistence over time. Tag at creation; resolve before considering the work done. Never leave the tag in shipped code past that point."
+  condition: "Any implementation session creating a dependency on referential/identity persistence over time. Tag at creation; resolve before considering the work done. Never leave the tag in shipped code past that point."
   reason: "A comment has no compiler and can silently drift from the code it describes — a named upgrade condition (see ceiling-comment-for-deliberate-shortcuts) doesn't help if nothing schedules an actual check of it. This tag pairs the marker with your own terminal checkpoint — the point immediately before you finish — so the condition actually gets evaluated instead of only sitting in prose. Its lifetime is bounded to one session: verified and deleted, never trusted at a distance."
   see-also: ceiling-comment-for-deliberate-shortcuts, structural-examination-at-working-checkpoint
 
 - id: minimize-comments-prefer-self-documenting-code
   rule: "Default to no comments; precise naming and clear structure should communicate intent. Add a comment only to explain a genuinely non-obvious constraint, invariant, or deliberate workaround that isn't recoverable by reading the code itself — never to describe what the code does, and never to document UI/UX look, layout reasoning, or behavior."
-  condition: "When writing or editing any code, inline or via a spawned coder agent."
+  condition: "When writing or editing any code, inline or via a spawned implementation agent."
   reason: "Comments drift out of sync with the code they describe — one earned instance required fixing three stale ones in a single session, each describing behavior or symmetry that had since changed or been deleted. Needing a comment to explain what code does is itself a sign the code isn't clear enough. UI/UX documentation has a dedicated home in this system — `ui-library.md`/`ux-library.md` — with its own staleness-detection (the ratify gate's sync trigger); inline comments duplicating that have no equivalent mechanism keeping them honest."
   see-also: ceiling-comment-for-deliberate-shortcuts
 

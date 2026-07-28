@@ -1,6 +1,6 @@
 ---
 name: corpora:bootstrap
-description: Bootstrap a project's config, UI library, and UX library. Run once, before any feature design work. Works from existing design documentation, brand guidelines, aesthetic references, or from scratch with operator guidance. Outputs corpora/config.md (project shape, commands, and registered utilities), and — via a direct designer sequence or a planner-produced queue, depending on whether a concrete feature accompanied the bootstrap request — a UI library, a UX library, proposed design principles ratified into the project's design domains, and a screenshot manifest (one canonical screenshot per identified screen, seeding the visual reuse cache). The library documents themselves stay text-only — no screenshots or image exports embedded (see LINEAGE.md for why).
+description: Bootstrap a project's config, UI library, and UX library. Run once, before any feature design work. Works from existing design documentation, brand guidelines, aesthetic references, or from scratch with operator guidance. Outputs corpora/config.md (project shape, commands, and registered utilities), and — via a direct designer sequence or a planning/decomposition-produced queue, depending on whether a concrete feature accompanied the bootstrap request — a UI library, a UX library, proposed design principles ratified into the project's design domains, and a screenshot manifest (one canonical screenshot per identified screen, seeding the visual reuse cache). The library documents themselves stay text-only — no screenshots or image exports embedded (see LINEAGE.md for why).
 ---
 
 # Project Bootstrap
@@ -49,19 +49,22 @@ for this purpose.
 
 Once `corpora/config.md` exists, decide whether a concrete operator feature request accompanied
 this bootstrap (the request that triggered `corpora:bootstrap` named something to build, not just
-"set this project up"). This is the same judgment the orchestrator always applies before spawning —
-`orchestrator-routing.md`'s `spawn-threshold-is-spec-scope` — applied to the case where bootstrapping
-itself is part of the scope being weighed.
+"set this project up"). This is the same process/timing judgment always applied before spawning a
+full workstream — praxis's `kernel.md` overrouting guard, if praxis is installed, or the equivalent
+judgment applied inline otherwise — applied to the case where bootstrapping itself is part of the
+scope being weighed.
 
 - **No concrete feature request.** Nothing exists yet to scope a design system against, and the
   remaining work (stand up the UI library, then the UX library) has no real decomposition or
   sequencing ambiguity — it's a fixed two-step, not a planning problem. Run Phase 2 then Phase 3
-  directly, exactly as below. Skip the planner — it would add a hop with nothing to decompose.
+  directly, exactly as below. Skip planning/decomposition — it would add a hop with nothing to
+  decompose.
   (`has-ui: no` with no feature request: Phase 1 was already the whole job, per Phase 1 above.)
-- **A concrete feature request exists.** Hand off to the planner with a capability description
+- **A concrete feature request exists.** Hand off to a convergent planning/decomposition spawn
+  with a capability description
   combining both needs — e.g. *"Bootstrap this project's design system (has-ui: yes) and
   implement: \<operator's request, verbatim\>."* This is passed as direct input, not sourced from a
-  `ROADMAP.md` (none exists yet for a fresh project). The planner treats it like any other
+  `ROADMAP.md` (none exists yet for a fresh project). That spawn treats it like any other
   capability: no changes to `domains/planning.md` are
   needed — it orients (finds
   `corpora/config.md` but no `ui-library.md`, `ux-library.md`, or existing code), decomposes into
@@ -70,12 +73,14 @@ itself is part of the scope being weighed.
   system tasks when `has-ui: yes`, since it needs their output; UX is blocked-by UI, see above).
   Scoping each design-system task to what the feature actually needs — rather than a fully
   speculative library — is exactly the outcome this routing is for: apply the same restraint Phase
-  3 already states below to Phase 2 as well when a planner-produced task frames the ask.
+  3 already states below to Phase 2 as well when a planning/decomposition-produced task frames
+  the ask.
 
-  **One boundary to hold:** the planner's dialogue step must not ask the audience/aesthetic-direction
+  **One boundary to hold:** the planning spawn's dialogue step must not ask the
+  audience/aesthetic-direction
   questions that open Phase 2 below — those are the Phase 2 spawn's own divergent
-  judgment call, asked when its task actually runs, not decomposition-shaping ambiguity the
-  planner should resolve upfront. `domains/planning.md`'s own preamble
+  judgment call, asked when its task actually runs, not decomposition-shaping ambiguity that
+  spawn should resolve upfront. `domains/planning.md`'s own preamble
   already states this general rule ("do not anticipate the direction questions downstream
   spawns will face mid-work"); this is that rule's bootstrap instance, named here because it's easy
   to blur in practice.
@@ -130,32 +135,35 @@ runtime already exposes browser automation, image generation, delegation, and si
 **If `has-ui: no` and no concrete feature request accompanied this bootstrap, Phase 1 is the whole
 job.** Write `corpora/config.md` and stop — no UI library, no design principles, no design spawns
 for this project. Note to the operator that divergent/visual-identity domains are inactive and the
-project runs on the kernel layer (the orchestrator, the planner, and coder-composed spawns only).
-(If `has-ui: no` but a feature request *was* given, see "Routing after Phase 1" — the planner
-still decomposes the feature into coder tasks, just with no design-system tasks in the queue.)
+project runs on the kernel layer (the orchestrator, and convergent planning/decomposition and
+implementation spawns only).
+(If `has-ui: no` but a feature request *was* given, see "Routing after Phase 1" —
+planning/decomposition still decomposes the feature into implementation tasks, just with no
+design-system tasks in the queue.)
 
 **If `has-ui: yes`, see "Routing after Phase 1" below** to decide whether Phases 2 and 3 run
-directly or via a planner-produced queue.
+directly or via a planning/decomposition-produced queue.
 
 For a UI project, also create `corpora/deferred-decisions.md` from `kernel.md`, "Deferred UI/UX
 decisions," with an empty `decisions: []` list. This queue is project working state, not corpus.
-For every project, create `corpora/utility-candidates.md` from `kernel.md`, "Project utilities,"
-with an empty `candidates: []` list.
+For every project, create `corpora/deterministic-shortcut-candidates.md` from `kernel.md`, "Project
+utilities," with an empty `candidates: []` list.
 
 ---
 
 ## Phase 2 — UI library (only when `has-ui: yes`)
 
 You are now a divergent spawn composing `color`, `surfaces-elevation`, `visual-hierarchy`, `motion`,
-`design-method`, `spawn-integrity`, `interviewing` — narrower than ongoing `ui-design` work, since
+`design-method`, `spawn-integrity`, `interviewing` — narrower than ongoing divergent
+visual-identity work, since
 founding a library from nothing doesn't have concrete components/screens for every domain to attach
 to yet — bootstrapping a design system for a project that has none yet. When this task arrived via
-a planner-produced queue (see "Routing
+a planning/decomposition-produced queue (see "Routing
 after Phase 1"), it names a concrete feature to scope against — cover the sections below only to
 the depth that feature actually needs, same restraint Phase 3 applies: do not invent aspirational
 components, sub-systems, or states the feature doesn't touch. A greenfield project gets a short
 library that grows with the work, not a fully speculative one authored sight-unseen. When there is
-no feature to scope against (the direct, no-planner path), cover the sections at the depth needed
+no feature to scope against (the direct, no-planning-hop path), cover the sections at the depth needed
 for a foundational first pass.
 
 The orchestrator should pass any of the following that exist; work with what's provided and ask for
@@ -268,11 +276,12 @@ to mark state changes. No decorative elements. Data reads as the hero; chrome re
 ### 6. Project utilities
 
 Use existing registered utilities when their `use-when` conditions match. Do not invent utilities
-during bootstrap or search for named categories. If this work itself exposes a deterministic,
-precision-sensitive, or disproportionately token-expensive operation, surface it as a utility
-candidate using the handoff schema. Color math is one example: a project may register a script for
-OKLCH adjustment or alpha compositing because exact computation is cheaper than repeated inference.
-The observed burden earns the proposal; the category does not.
+during bootstrap or search for named categories. If this work itself exposes a spawn narrating its
+way through a deterministic, precision-sensitive, or disproportionately token-expensive operation
+rather than simply invoking it, surface it as a deterministic-shortcut candidate using the handoff
+schema. Color math is one example: a project may register a script for OKLCH adjustment or alpha
+compositing because exact computation is cheaper than repeated inference. The observed narration
+earns the proposal; the category does not.
 
 ### 7. Interaction and motion
 
@@ -420,12 +429,12 @@ decisions: []
 
 For `has-ui: no`, do not create a queue.
 
-### corpora/utility-candidates.md
+### corpora/deterministic-shortcut-candidates.md
 
 Create the persistent candidate ledger for every project:
 
 ````markdown
-# Utility candidates
+# Deterministic shortcut candidates
 
 ```yaml
 candidates: []
@@ -435,7 +444,7 @@ candidates: []
 ### corpora/ui-library.md
 
 Structure the document with a section per topic above. Use concrete, precise language.
-Every value that a designer or coder will need to use should be named — not "a dark
+Every value that a designer or implementer will need to use should be named — not "a dark
 background" but "the page background: `--background` (gray-950 in dark mode)."
 
 Include a short intro paragraph explaining: what this document is, who reads it, and
@@ -476,10 +485,9 @@ transcribe the relevant values and add the sections the source document missed
 
 ---
 
-**Checkpoint — reapply the orchestrator.** Phase 2's output is a handoff, not a finished
+**Checkpoint — run the ratify gate.** Phase 2's output is a handoff, not a finished
 write-back: it still needs the ratify gate (audit, proposal review, write-back) before Phase 3
-can use it. You are the orchestrator from here on — drop the Phase 2 composition, run the gate on
-this handoff, then route into Phase 3.
+can use it. Drop the Phase 2 composition, run the gate on this handoff, then proceed into Phase 3.
 
 ---
 
@@ -487,7 +495,7 @@ this handoff, then route into Phase 3.
 
 You are now a convergent spawn composing `recoverability`, `validation-feedback`,
 `lists-selection`, `forms-inputs`, `design-method`, `spawn-integrity`, `interviewing` — narrower
-than ongoing `ux-design` work, same restraint as Phase 2 — bootstrapping the project's
+than ongoing convergent UX-flow work, same restraint as Phase 2 — bootstrapping the project's
 experience reference. The Phase 2 spawn has already run — identity is set;
 your job is convergent documentation of how the product *works* as an experience, so future UX
 sessions weigh established patterns instead of re-deriving them.
@@ -521,7 +529,7 @@ handoff's `proposals` field with entries the gate can only kill.
 
 Route findings to the handoff's `Surfaced` section, one line each: what was observed, where, and
 why it reads as unintended rather than chosen. The orchestrator relays `Surfaced` verbatim; the
-operator triages — fix now, queue as coder work, or declare it intended (at which point it may
+operator triages — fix now, queue as implementation work, or declare it intended (at which point it may
 become a direction).
 
 The library records the **intended** pattern, not the defect: where the dominant convention is
@@ -546,6 +554,6 @@ each a domain at the gate, after operator review.
 
 ---
 
-**Checkpoint — reapply the orchestrator.** Bootstrap is now complete. Drop whichever composition
-produced the last handoff, run the ratify gate on it, and resume as the orchestrator for
-everything from here forward — routing, further spawn work, all of it.
+**Checkpoint — run the ratify gate.** Bootstrap is now complete. Drop whichever composition
+produced the last handoff, run the ratify gate on it, and resume whatever was driving before
+bootstrap started — routing, further spawn work, all of it — now with `corpora/config.md` in place.

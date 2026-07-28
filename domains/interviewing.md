@@ -1,13 +1,15 @@
 # Domain: interviewing
 
 Judgment about conducting a clarifying dialogue and framing a question so it's cheap to answer —
-distinct from `orchestrator-routing`'s judgment about *whether* to ask and *who* owns the answer,
-and from `planning`'s judgment about decomposing a capability once ambiguity is resolved.
+distinct from *whether* to ask and *who* owns the answer, which is process/timing judgment that
+lives with whoever is driving the session (direct execution by default, praxis's phase router when
+installed — see `LINEAGE.md`, "Corpora stops being an active orchestrator"), and from `planning`'s
+judgment about decomposing a capability once ambiguity is resolved.
 Stance-agnostic: consumed by any composition that hits a genuine clarifying moment, not owned by a single
 composition and not restricted to convergent ones — a divergent spawn's own dialogue (e.g. narrowing to
 two aesthetic-direction questions during a design bootstrap) needs the same discipline. Seeded
-2026-07-22 from decomposing an early planning step and absorbing `orchestrator-routing`'s
-`surface-design-questions-neutrally` (see that principle's audit history); widened 2026-07-22 from
+2026-07-22 from decomposing an early planning step and absorbing the former `orchestrator-routing`
+domain's `surface-design-questions-neutrally` (see that principle's audit history); widened 2026-07-22 from
 "any convergent composition" once a divergent composition's own clarifying-dialogue moments showed the
 restriction was never load-bearing — none of the three principles below actually condition on stance.
 Audit metadata lives in `domains/audit.md`, loaded only at ratify/retrospective time.
@@ -29,7 +31,7 @@ principles:
 
 - id: frame-questions-for-cheap-answers
   rule: "When surfacing a question to another party, include enough framing — the subject, what decision is needed, and what context the answerer needs — to make the answer cheap. Do not include a tentative recommendation or opinion when the question is being routed for someone else's judgment, not your own."
-  condition: "When asking a clarifying or direction question of the operator or of another composition, whether during a planner's dialogue, an orchestrator routing a design question outward, or any composition's `questions-pending` pause."
+  condition: "When asking a clarifying or direction question of the operator or of another composition, whether during a planning spawn's dialogue, an orchestrator routing a design question outward, or any composition's `questions-pending` pause."
   reason: "Under-framed questions force the answerer to reconstruct context the asker already has; over-framed with a baked-in opinion risks anchoring the answer instead of genuinely eliciting judgment. Both failure modes are avoidable by explicitly separating 'here is the decision and its context' from 'here is what I think.'"
 
 killed:

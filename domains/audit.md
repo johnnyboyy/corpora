@@ -12,6 +12,29 @@ working files so they are available in the working context.)
 
 > **Web-frontend domain merge (2026-07-22).** The former web-frontend pack layer's domains and audit history were merged flat into this single kernel-seed layer once `role-pack` was retired as a project-config concept (see kernel.md, "Project corpora") — every stack-specific domain now states its own load condition directly against `language`/`framework`/`styling`/`has-ui`, rather than through a pack-name indirection. The provenance entries from that merged layer carry their own migration note below.
 
+> **`orchestrator-routing` domain retired (2026-07-28).** Corpora stopped being an active
+> orchestrator with any initiative of its own — it is now a pure queryable service (stance +
+> domain composition, plus the `ratify-gate` procedure and its bookkeeping ledgers), invoked by
+> whoever drives a session: direct execution by default, or praxis's phase router when installed.
+> `orchestrator-routing` held two kinds of content that this split pulled apart: (1) judgment about
+> *assembling* a complete spawn and its brief — genuinely still corpora's, moved into `ratify-gate`
+> (`brief-ends-at-what`, `defer-only-nonblocking-design-decisions`, `no-cost-driven-domain-omission`,
+> `inline-execution-carries-full-composition-discipline`, retitled from
+> `inline-coder-session-protocol`); and (2) judgment about *when* to spawn vs. surface vs. defer,
+> session/workstream sequencing, and routing enactment — process/timing judgment with no home in a
+> domain pool at all now that nothing routes "to itself" — moved to praxis's `kernel.md` (see that
+> file's new section folding this content, and `LINEAGE.md` in both skills for the full reasoning).
+> Two principles had no surviving referent and were killed outright: `stop-and-route` (it was purely
+> about the orchestrator catching *itself* doing domain work — there is no orchestrator persona left
+> to catch itself), and `praxis-owns-active-phase-routing` (added the same day as an intermediate,
+> conditional fix — "when praxis is active, defer to it" — superseded same-day by this full
+> architectural split, which makes praxis the unconditional process driver rather than something
+> corpora conditionally defers to). Each surviving principle's entry below carries a `history` note
+> recording where it went; see also this layer's per-domain counters, which retained a stale
+> `orchestrator-routing` entry from before this retirement — informational only, not corrected by
+> hand per `kernel.md`'s "never write or edit these by hand" rule; the next `corpus.py measure` pass
+> reconciles it.
+
 > **Migration note (2026-06-22).** These principles were re-homed from the old role corpora
 > (`coder.md` pack overlay, `ui-designer.md`, `ux-designer.md`) into domain working files as part of
 > the corpus redesign. The role→domain move is uniform and recorded here once rather than as a
@@ -117,18 +140,35 @@ provenance:
   kind: judgment
   provenance: "2026-07-26, FAMOUS PlayerBarContent.tsx review. A `playbackPhase()`/`PHASE_LABELS` split (state → phase enum → lookup table) was simplified to one function returning both a status label and an action label together per branch, then the underlying feature was cut entirely. Operator generalized the surviving code-organization lesson from the specific status/action-label shape into a standalone principle, and asked to keep its reasoning free of any comparison to single-callsite-helper-scoped so the new principle doesn't read as arguing against its counterpart — the two are disambiguated by their condition fields alone, linked only via see-also."
 
-# domain: orchestrator-routing
+# domain: orchestrator-routing (retired 2026-07-28; see the retirement callout note above this
+#   file's provenance block for the full redistribution. Entries below keep their original
+#   `domain:` attribution per this file's existing convention for moved/folded principles — see,
+#   e.g., surface-design-questions-neutrally below — and each carries a `history` entry recording
+#   where its judgment went.)
 - id: brief-ends-at-what
   domain: orchestrator-routing
   provenance: "2026-06-01, box-fill calculator box picker. Orchestrator computed SVG coordinates and TypeScript types in the brief, leaving the coder nothing to transcribe."
+  history:
+    - date: 2026-07-28
+      type: moved
+      reason: "orchestrator-routing retired as corpora stopped being an active orchestrator. Brief-content judgment is spawn-assembly judgment, not process/timing judgment — moved to ratify-gate, unchanged."
 
 - id: stop-and-route
   domain: orchestrator-routing
   provenance: "2026-06-01, box-fill calculator redesign. Orchestrator entered designer mode and produced the full design spec inline rather than spawning the designer role."
+  killed: 2026-07-28
+  history:
+    - date: 2026-07-28
+      type: killed
+      reason: "orchestrator-routing retired. This principle was purely about the orchestrator catching itself mid-task doing domain work it should have routed instead — a persona-specific self-check with no referent once that persona is gone: corpora has no domain work of its own left to catch itself doing."
 
 - id: frame-before-routing
   domain: orchestrator-routing
   provenance: "2026-06-01, orchestrator corpus setup."
+  history:
+    - date: 2026-07-28
+      type: moved
+      reason: "orchestrator-routing retired. Framing what's being asked before acting is process/timing judgment (when and how to act on a task), not domain-composition judgment — folded into praxis's kernel.md alongside the overrouting guard."
 
 - id: route-questions-not-roles
   domain: orchestrator-routing
@@ -140,6 +180,9 @@ provenance:
     - date: 2026-07-18
       type: narrowed
       reason: "Dropped the code-question clause. Operator reported never observing a code question routed to the coder in practice; the theoretical case (coder signal on a design tradeoff) is already better served by the coder's own tradeoffs block, surfaced once actually implementing rather than via a separate pre-implementation question."
+    - date: 2026-07-28
+      type: moved
+      reason: "orchestrator-routing retired. The judgment of *when* to queue a question vs. surface it immediately vs. spawn is process/timing judgment — folded into praxis's kernel.md. Corpora keeps maintaining the deferred-decisions ledger itself (schema, narrow-reversible-treatment discipline), unchanged, as bookkeeping invoked by whoever is driving."
 
 - id: surface-design-questions-neutrally
   domain: orchestrator-routing
@@ -152,10 +195,18 @@ provenance:
 - id: spawn-threshold-is-spec-scope
   domain: orchestrator-routing
   provenance: "2026-06-12, operator noted spawn cost often exceeds decision value."
+  history:
+    - date: 2026-07-28
+      type: moved
+      reason: "orchestrator-routing retired. Whether to spawn at all vs. surface a single decision point is process/timing judgment — folded into praxis's kernel.md, reinforcing the overrouting guard."
 
 - id: planner-over-brainstorming-for-scope
   domain: orchestrator-routing
   provenance: "2026-07-18, operator observation: the orchestrator already splits steps and roles well informally, but ambiguous-scope requests were often absorbed by the superpowers:brainstorming skill where the planner would be the better-fit reach — brainstorming has no corpus artifact, so that path leaves the planning domain permanently thin (planning had never had a retrospective at the time this was surfaced)."
+  history:
+    - date: 2026-07-28
+      type: moved
+      reason: "orchestrator-routing retired. Routing ambiguous scope to a decomposition-shaped phase rather than an ad hoc dialogue is process/timing judgment — folded into praxis's kernel.md, reinforcing the disambiguation/decomposition phase pair already in the seed pool."
 
 - id: prefer-independent-evaluation
   domain: orchestrator-routing
@@ -175,6 +226,9 @@ provenance:
     - date: 2026-07-27
       type: trimmed
       reason: "Session-mining background-agent audit (FAMOUS project) flagged this as a mixed principle under principle-judgment.md's mined-workflow-stays-a-workflow test: its rule was a three-stage ordered workflow (compose domains, flag in-flight, ask at the seam) rather than a single resolved tradeoff. The domain-composing step was confirmed a near-verbatim duplicate of SKILL.md's own 'For inline spawn work' instructions — not unmined process needing a praxis phase, just redundant restatement — so it was dropped rather than routed anywhere. The judgment kernel (inline work gets the same corpus discipline as a formal spawn; capture principle candidates at the natural seam, not deferred to session-end) was kept, reworded to lead with it directly instead of the procedural framing."
+    - date: 2026-07-28
+      type: moved
+      reason: "orchestrator-routing retired. This is composition-completeness judgment (full discipline applies even inline), not process/timing judgment — moved to ratify-gate as inline-execution-carries-full-composition-discipline, reworded to drop 'coder'/orchestrator-specific framing now that any driver may compose corpora inline."
 
 - id: design-question-during-coder-session
   domain: orchestrator-routing
@@ -188,6 +242,9 @@ provenance:
     - date: 2026-07-21
       type: generalized
       reason: "Reworded from 'spawn the UI Designer' to 'spawn a ui-design-composed spawn' — ui-designer.md no longer exists as a file. No change to the judgment."
+    - date: 2026-07-28
+      type: moved
+      reason: "orchestrator-routing retired. Whether an operator's 'full audit' phrase warrants a holistic spawn rather than addressing only the concerns they named is process/timing judgment (what to invoke, at what scope) — folded into praxis's kernel.md."
 
 - id: screenshot-recapture-is-orchestrator-mechanical
   domain: orchestrator-routing
@@ -198,6 +255,10 @@ provenance:
   domain: orchestrator-routing
   kind: judgment
   provenance: "2026-07-22, operator conversation on lens/domain composition design. Discussion of whether lenses should be the mandatory composition unit (to guard against relevant domains going unloaded) surfaced a distinct, already-observed failure: the orchestrator thinning a composition to save tokens rather than never having known a domain was relevant in the first place. Paired with spawn-integrity's checkpoint-on-context-pressure-tell, added the same session, as the two sides (routing-time vs. spawn-side) of the same pressure."
+  history:
+    - date: 2026-07-28
+      type: moved
+      reason: "orchestrator-routing retired. Never thinning a composition for cost is composition-completeness judgment, not process/timing judgment — moved to ratify-gate, unchanged."
 
 - id: spawn-only-when-judgment-remains
   domain: orchestrator-routing
@@ -207,6 +268,63 @@ provenance:
     - date: 2026-07-26
       type: moved
       reason: "Ratified into Blog's project-layer orchestrator-routing domain first, then promoted to this kernel-seed layer the same day — operator confirmed the pattern had recurred across projects (Blog, FAMOUS, Meridian) and was part of the original motivation for building corpora/praxis at all: superpowers' plan-then-execute skills were solving the same ambiguity-resolution problem twice, once in the plan and again when agents re-litigated it during execution."
+    - date: 2026-07-28
+      type: moved
+      reason: "orchestrator-routing retired. Whether to spawn at all vs. execute directly is exactly the overrouting-guard question — folded into praxis's kernel.md, reinforcing that section directly rather than duplicating it as a separate domain principle."
+
+- id: praxis-owns-active-phase-routing
+  domain: orchestrator-routing
+  kind: judgment
+  provenance: "2026-07-28, FAMOUS project, operator noticed live: a planning-shaped task was handled five times in a row by the orchestrator directly composing a bundled planning+interviewing spawn with its own internal dialogue-then-decompose loop, writing to corpora/queue.md, instead of going through praxis's disambiguation/decomposition phases and their praxis/queue.md artifact — even though that project's own run-log shows the correct phase-based pattern had been used once before. The operator confirmed they like the resulting behavior (one continuing workstream, ask-then-decompose, revise on new direction); they want it owned by praxis's phase model rather than reimplemented ad hoc inside a corpora spawn each time."
+  killed: 2026-07-28
+  history:
+    - date: 2026-07-28
+      type: killed
+      reason: "Superseded same-day by the full architectural split (see the retirement callout note above): this principle was an intermediate, conditional fix —'when praxis is active, defer to it' — for a corpora that still had its own routing initiative to defer *from*. Once corpora has no routing initiative at all, in any configuration, there is nothing left to conditionally defer; praxis is unconditionally the process driver whenever installed, not something corpora defers to only when it happens to be active. Not an independent quality kill — the underlying observation was correct and is fully preserved, just relocated to praxis's kernel.md as unconditional fact rather than a corpora-side deferral rule."
+
+# domain: (backfilled — the five principles below never received a provenance entry when
+#   originally ratified into orchestrator-routing, a pre-existing gap in this file discovered while
+#   retiring the domain, same shape as the open-questions-are-explicit backfill above)
+- id: defer-only-nonblocking-design-decisions
+  domain: orchestrator-routing
+  provenance: "No provenance was ever recorded for this principle at ratification — a pre-existing gap, backfilled here at the domain's 2026-07-28 retirement rather than left orphaned. Its rule concerned queuing only narrow, reversible, non-blocking UI/UX decisions."
+  history:
+    - date: 2026-07-28
+      type: moved
+      reason: "orchestrator-routing retired. This governs the shape of an entry in corpora's own deferred-decisions ledger — bookkeeping corpora still maintains as a service — moved to ratify-gate, unchanged."
+
+- id: batch-deferred-decisions-coherently
+  domain: orchestrator-routing
+  provenance: "No provenance was ever recorded for this principle at ratification — same pre-existing gap as defer-only-nonblocking-design-decisions, backfilled here at retirement. Its rule concerned grouping queued decisions by owning composition and surface, and routing a workstream once several need coherent judgment."
+  killed: 2026-07-28
+  history:
+    - date: 2026-07-28
+      type: split
+      reason: "orchestrator-routing retired. Split on its own fork line: grouping queued items by composition/surface is ledger bookkeeping corpora already states as plain prose in SKILL.md's deferred-decisions section (no separate principle needed); deciding *when* accumulated queued items warrant starting a workstream is process/timing judgment, folded into praxis's kernel.md (task-queuing). Killed here as a redundant/split container rather than moved wholesale, since no single new home matched the whole rule."
+
+- id: workstream-ownership-is-orchestrator-scoped
+  domain: orchestrator-routing
+  provenance: "No provenance was ever recorded for this principle at ratification — same pre-existing gap, backfilled here at retirement. Its rule concerned deciding workstream ownership in the orchestrator when a task's scope spans many independent workstreams, while letting an owning spawn create autonomous scope-bounded workers within its own assignment."
+  history:
+    - date: 2026-07-28
+      type: moved
+      reason: "orchestrator-routing retired. Deciding workstream ownership across a multi-workstream task is process/timing judgment — folded into praxis's kernel.md, alongside its existing workstream/run-log model. The worker-delegation half (an owning spawn may create scope-bounded workers) was already duplicated in ratify-gate's own worker-handoffs-reach-orchestrator; no separate move needed for that half."
+
+- id: design-pattern-application-lighter-path
+  domain: orchestrator-routing
+  provenance: "No provenance was ever recorded for this principle at ratification — same pre-existing gap, backfilled here at retirement. Its rule concerned preferring a lighter surface-to-operator path over a full designer spawn when a task is pattern-application against an already-documented library rather than genuine visual judgment under uncertainty."
+  history:
+    - date: 2026-07-28
+      type: moved
+      reason: "orchestrator-routing retired. Whether a task needs a full spawn or a lighter path is exactly the overrouting-guard question — folded into praxis's kernel.md."
+
+- id: persist-role-by-workstream
+  domain: orchestrator-routing
+  provenance: "No provenance was ever recorded for this principle at ratification — same pre-existing gap, backfilled here at retirement. Its rule concerned resuming the spawn that owns an active workstream for follow-up work, and when to start a new workstream instead."
+  history:
+    - date: 2026-07-28
+      type: moved
+      reason: "orchestrator-routing retired. Workstream continuity (resume vs. replace) is process/timing judgment — folded into praxis's kernel.md, alongside its existing workstream/run-log and agent-continuity model."
 
 # domain: ratify-gate (split from orchestrator-routing 2026-07-18; see LINEAGE.md, "The ratify-gate split")
 - id: pre-scan-before-spawning
@@ -1233,12 +1351,12 @@ counters:
     principles-at-baseline: 35
     kills-at-baseline: 6
   - domain: coding-general
-    origin: seed
+    origin: project
     since: 2026-07-23
     ratified: 2
     killed: 0
-    gate-violations: 0
-    working-file-tokens: 5683
+    gate-violations: 1
+    working-file-tokens: 5691
     baseline-tokens: 5335
     principles-at-baseline: 18
     kills-at-baseline: 1
@@ -1263,7 +1381,7 @@ counters:
     principles-at-baseline: 13
     kills-at-baseline: 9
   - domain: coding-ts
-    origin: seed
+    origin: project
     since: 2026-07-23
     ratified: 0
     killed: 0
@@ -1333,12 +1451,12 @@ counters:
     principles-at-baseline: 7
     kills-at-baseline: 0
   - domain: interviewing
-    origin: project
+    origin: seed
     since: 2026-07-23
     ratified: 0
     killed: 0
     gate-violations: 0
-    working-file-tokens: 810
+    working-file-tokens: 812
     baseline-tokens: 810
     principles-at-baseline: 3
     kills-at-baseline: 0
@@ -1378,7 +1496,7 @@ counters:
     ratified: 0
     killed: 0
     gate-violations: 0
-    working-file-tokens: 2145
+    working-file-tokens: 2268
     baseline-tokens: 2145
     principles-at-baseline: 5
     kills-at-baseline: 1
@@ -1474,27 +1592,27 @@ counters:
     kills-at-baseline: 0
 efficacy:
   - id: task-is-actionable-without-planning
-    fired: 1
+    fired: 3
     violated: 0
-    idle: 0
+    idle: 1
   - id: sequence-by-output-dependency
-    fired: 1
+    fired: 5
     violated: 0
     idle: 0
   - id: open-questions-are-explicit
-    fired: 1
+    fired: 5
     violated: 0
     idle: 0
   - id: task-describes-output-not-implementation
-    fired: 1
+    fired: 5
     violated: 0
     idle: 0
   - id: concern-names-work-not-role
-    fired: 1
-    violated: 0
-    idle: 0
-  - id: structural-examination-at-working-checkpoint
     fired: 3
+    violated: 0
+    idle: 1
+  - id: structural-examination-at-working-checkpoint
+    fired: 4
     violated: 0
     idle: 0
   - id: no-single-char-names
@@ -1511,7 +1629,7 @@ efficacy:
     idle: 0
   - id: minimize-comments-prefer-self-documenting-code
     fired: 6
-    violated: 0
+    violated: 1
     idle: 0
   - id: named-exports-over-default
     fired: 1
@@ -1522,7 +1640,7 @@ efficacy:
     violated: 0
     idle: 0
   - id: single-callsite-helper-scoped
-    fired: 2
+    fired: 3
     violated: 0
     idle: 0
   - id: behavior-flags-in-refs
@@ -1530,7 +1648,7 @@ efficacy:
     violated: 0
     idle: 0
   - id: ceiling-comment-for-deliberate-shortcuts
-    fired: 2
+    fired: 3
     violated: 0
     idle: 0
   - id: custom-hook-owns-its-concern
@@ -1561,7 +1679,29 @@ efficacy:
     fired: 1
     violated: 0
     idle: 0
+  - id: name-clear-direction-dont-manufacture-choice
+    fired: 4
+    violated: 0
+    idle: 0
+  - id: frame-questions-for-cheap-answers
+    fired: 3
+    violated: 0
+    idle: 1
+  - id: ask-one-question-at-a-time
+    fired: 1
+    violated: 0
+    idle: 3
+  - id: tag-identity-dependencies-check-before-handoff
+    fired: 1
+    violated: 0
+    idle: 0
+  - id: undefined-check-by-source
+    fired: 1
+    violated: 0
+    idle: 0
 co-occurrence:
+  - domains: [interviewing, planning]
+    count: 8
 library-drift:
   since-last-sync: 0
 ```
