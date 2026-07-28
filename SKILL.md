@@ -28,12 +28,10 @@ does:
 
 Whatever is driving a session decides *when* to invoke 1, 2, or 3 — direct execution by default (an
 agent working a task with no special apparatus), or praxis's phase router when praxis is installed,
-per whichever phase's own `invocations` field names corpora. This is symmetric: corpora behaves
-identically whether or not praxis happens to be present, because it never had a competing
-initiative of its own to reconcile with praxis's process ownership in the first place.
-`orchestrator-routing` was corpora's former domain for exactly this kind of judgment — retired
-2026-07-28 once corpora stopped acting as an active orchestrator; see `LINEAGE.md`, "Corpora stops
-being an active orchestrator," for the full redistribution of that domain's content.
+per whichever phase's own `invocations` field names corpora. `orchestrator-routing` was corpora's
+former domain for exactly this kind of judgment — retired 2026-07-28 once corpora stopped acting as
+an active orchestrator; see `LINEAGE.md`, "Corpora stops being an active orchestrator," for the full
+redistribution of that domain's content.
 
 **One flat domain pool.** All seed domains — stack-agnostic (`coding-general`, `ratify-gate`,
 `principle-judgment`, `planning`, `interviewing`, `spawn-integrity`) and stack-specific
@@ -339,9 +337,7 @@ Corpora declares two standing domains of its own: **`ratify-gate`** (assembling 
 and processing what it returns) and **`principle-judgment`** (whether a proposed or already-ratified
 principle is genuine judgment and lives in the right domain) — `domains/ratify-gate.md` and
 `domains/principle-judgment.md`, plus each one's `corpora/domains/<name>.md` project counterpart
-when it exists. `orchestrator-routing` — corpora's former domain for process/timing judgment (which
-composition, when to spawn vs. surface vs. defer) — was retired 2026-07-28 once corpora stopped
-acting as an active orchestrator with any initiative of its own; that judgment now lives with
-whoever drives a session, principally praxis's kernel when it's installed. See `LINEAGE.md`,
-"Corpora stops being an active orchestrator." Audit detail loads only at ratify/retrospective time —
-see `kernel.md`, "Storage: working vs audit."
+when it exists. `orchestrator-routing` — corpora's former domain for that process/timing judgment —
+was retired 2026-07-28 for the same reason; that judgment now lives with whoever drives a session,
+praxis's kernel when it's installed. See `LINEAGE.md`, "Corpora stops being an active orchestrator."
+Audit detail loads only at ratify/retrospective time — see `kernel.md`, "Storage: working vs audit."
