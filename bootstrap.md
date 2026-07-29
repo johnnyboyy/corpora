@@ -139,7 +139,7 @@ directly or via a planner-produced queue.
 
 For a UI project, also create `corpora/deferred-decisions.md` from `kernel.md`, "Deferred UI/UX
 decisions," with an empty `decisions: []` list. This queue is project working state, not corpus.
-For every project, create `corpora/utility-candidates.md` from `kernel.md`, "Project utilities,"
+For every project, create `corpora/deterministic-shortcut-candidates.md` from `kernel.md`, "Project utilities,"
 with an empty `candidates: []` list.
 
 ---
@@ -420,12 +420,12 @@ decisions: []
 
 For `has-ui: no`, do not create a queue.
 
-### corpora/utility-candidates.md
+### corpora/deterministic-shortcut-candidates.md
 
 Create the persistent candidate ledger for every project:
 
 ````markdown
-# Utility candidates
+# Deterministic shortcut candidates
 
 ```yaml
 candidates: []

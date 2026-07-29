@@ -1,6 +1,6 @@
 # Domain: surfaces-elevation
 
-Surfaces, floating elements, and how depth is signaled. Declared by the **ui-design** composition. Audit
+Surfaces, floating elements, and how depth is signaled. Declared by the **divergent visual-identity** composition. Audit
 metadata lives in `domains/audit.md`, loaded only at ratify/retrospective time.
 
 ```yaml

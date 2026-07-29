@@ -98,8 +98,8 @@ because the audit load is *broad* (the orchestrator pulls the whole layer at onc
   consumed only by the retrospective.
 
   The script (in the skill repo: `record-gate`, `measure`, `triggers`, `lint-handoff`,
-  `lint-deferred`, `deferred`, `lint-utility-candidates`, `utility-candidates`,
-  `record-utility-candidate`, `set-utility-status`, `retro-done`, `sync-done`) does all counting,
+  `lint-deferred`, `deferred`, `lint-deterministic-shortcut-candidates`, `deterministic-shortcut-candidates`,
+  `record-deterministic-shortcut-candidate`, `set-deterministic-shortcut-status`, `retro-done`, `sync-done`) does all counting,
   measuring, validation, and threshold math. The model supplies
   judgments as arguments — fired/violated/idle classification, ratify counts — and never does the
   arithmetic or the YAML writing. Bookkeeping done by attention is bookkeeping that silently
@@ -452,7 +452,7 @@ proposals:                   # principle proposals, provenance attached at propo
     reason: "..."
     kind: judgment           # judgment | knowledge | direction
     provenance: "date, task, context"
-utility-candidates: []       # plausible deterministic shortcuts observed during work
+deterministic-shortcut-candidates: []       # plausible deterministic shortcuts observed during work
 violations-noted: []         # existing principles this work knowingly deviated from, with why
 ui-drift:                    # both invalidation signals — a spawn names only what it touched
   screens: []                 #   screen ids directly worked on, if any
@@ -490,7 +490,7 @@ Field notes:
   `knowledge` = derivable from documentation or training; `direction` = a project design-direction
   choice — an identity decision, not a weighable rule. The stance model predicts `direction`: a
   divergent spawn's output is a choice, so most UI-identity proposals are direction, not principle.
-- **`utility-candidates`** is deliberately liberal. Each entry names an observed inference burden
+- **`deterministic-shortcut-candidates`** is deliberately liberal. Each entry names an observed inference burden
   and concrete deterministic operation shape; it need not prove recurrence or specify a finished
   CLI. The orchestrator transfers it to the persistent project ledger before closing the handoff
   (`corpus.py handoff-done`).
@@ -575,11 +575,11 @@ may need them. They are project-owned deterministic tools that replace recurring
 or disproportionately token-expensive inference. Environment-owned tools are discovered from the
 current runtime instead.
 
-Candidates live separately in `corpora/utility-candidates.md` so cheap denials and recurrence
+Candidates live separately in `corpora/deterministic-shortcut-candidates.md` so cheap denials and recurrence
 evidence survive handoff deletion without taxing every spawn's load:
 
 ````markdown
-# Utility candidates
+# Deterministic shortcut candidates
 
 ```yaml
 candidates:
@@ -597,9 +597,9 @@ candidates:
 
 Surface a plausible candidate whenever denial is cheap. Before recording it, check the standard
 library, installed dependencies, current runtime tools, and active project utilities. The operator
-accepts, denies, or defers it. Record evidence with `corpus.py record-utility-candidate`; the script
+accepts, denies, or defers it. Record evidence with `corpus.py record-deterministic-shortcut-candidate`; the script
 derives sighting count and first/last dates and resurfaces recurrence or a prior denial. Record the
-operator's disposition with `corpus.py set-utility-status`. Only an accepted utility that is
+operator's disposition with `corpus.py set-deterministic-shortcut-status`. Only an accepted utility that is
 implemented and tested enters config. Denied candidates remain historical memory; retrospectives
 may consolidate duplicates or obsolete entries. Candidate status is `open`, `deferred`, `denied`,
 `accepted`, or `implemented`.

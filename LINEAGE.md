@@ -1042,7 +1042,7 @@ Config now records stable project facts and project-owned deterministic utilitie
 that replace recurring precision-sensitive or disproportionately expensive inference. The color
 utility was the motivating case, not a privileged category. Utility proposals deliberately have a
 low surfacing threshold and a higher build threshold; accepted, denied, and deferred candidates
-persist in `corpora/utility-candidates.md`, so a deleted handoff does not make recurrence depend on
+persist in `corpora/deterministic-shortcut-candidates.md`, so a deleted handoff does not make recurrence depend on
 operator memory. Non-blocking UI/UX questions gained the parallel
 `corpora/deferred-decisions.md` queue: provisional treatments must be explicit and reversible,
 while blockers still surface immediately. Both ledgers are validated by the deterministic script,
@@ -1057,7 +1057,7 @@ runtime capability discovery; accumulated judgment stays singular.
 ledger schema stored `sightings`, `first-seen`, and `last-seen` beside its evidence, recreating the
 bookkeeping defect this pass claimed to avoid: a missed increment looked like no recurrence. Those
 fields were removed. The model still judges candidate identity and operator disposition;
-`record-utility-candidate` appends evidence, while the script derives counts and dates and signals
+`record-deterministic-shortcut-candidate` appends evidence, while the script derives counts and dates and signals
 when prior denial or recurrence should be resurfaced.
 
 ---

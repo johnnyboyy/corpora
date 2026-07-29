@@ -68,7 +68,7 @@ provenance:
   history:
     - date: 2026-07-18
       type: generalized
-      reason: "Renamed from color-utility-over-guesswork and widened from color specifically to any deterministic, precision-sensitive, or repeatedly-recurring computation. Operator noticed this was the only coder-facing principle that ever told the coder to recognize and propose a utility candidate — every other domain's equivalent work (date math, geometric layout, hashing) had no trigger at all, since orchestrator-routing's surface-utility-candidates-liberally is the orchestrator's counterpart and the coder never loads that domain. Color kept as the canonical named instance, including its React Native-specific carve-out."
+      reason: "Renamed from color-utility-over-guesswork and widened from color specifically to any deterministic, precision-sensitive, or repeatedly-recurring computation. Operator noticed this was the only coder-facing principle that ever told the coder to recognize and propose a deterministic shortcut candidate — every other domain's equivalent work (date math, geometric layout, hashing) had no trigger at all, since orchestrator-routing's surface-deterministic-shortcut-candidates-liberally is the orchestrator's counterpart and the coder never loads that domain. Color kept as the canonical named instance, including its React Native-specific carve-out."
 
 - id: no-single-char-names
   domain: coding-general
@@ -239,7 +239,7 @@ provenance:
 
 - id: narrated-computation-is-sufficient-utility-evidence
   domain: ratify-gate
-  provenance: "2026-07-25, backlog-triage/praxis-design discussion. Generalized from the color-utility precedent (a coder guessing warmer/cooler colors by narrated trial and error, resolved by building a deterministic color utility instead) once the operator named the underlying tell directly: narrated step-by-step simulation of an exact procedure is itself sufficient single-instance evidence, distinguishable from the fuzzier candidates surface-utility-candidates-liberally's repeated-evidence requirement is actually meant for."
+  provenance: "2026-07-25, backlog-triage/praxis-design discussion. Generalized from the color-utility precedent (a coder guessing warmer/cooler colors by narrated trial and error, resolved by building a deterministic color utility instead) once the operator named the underlying tell directly: narrated step-by-step simulation of an exact procedure is itself sufficient single-instance evidence, distinguishable from the fuzzier candidates surface-deterministic-shortcut-candidates-liberally's repeated-evidence requirement is actually meant for."
 
 # domain: interviewing (new domain, seeded 2026-07-22)
 # scope note: widened 2026-07-22 from "any convergent composition" to composition-agnostic once

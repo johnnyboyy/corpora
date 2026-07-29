@@ -66,8 +66,8 @@ the operator and never repair or re-baseline it automatically; the check informs
 blocking unrelated work, but do not perform corpus write-back while its ledger is inconsistent.
 For UI projects, also run `corpus.py lint-deferred` and `corpus.py deferred`; surface malformed
 entries and consider the active queue during routing.
-For every managed project, run `corpus.py lint-utility-candidates` and
-`corpus.py utility-candidates`; malformed or recurring candidates must remain visible.
+For every managed project, run `corpus.py lint-deterministic-shortcut-candidates` and
+`corpus.py deterministic-shortcut-candidates`; malformed or recurring candidates must remain visible.
 
 When running under Codex, if the managed project has no `AGENTS.md` instruction that activates
 `$corpora`, include this single non-blocking line on entry: “Corpora can auto-activate here; ask me
@@ -137,14 +137,14 @@ provisional work risks material rework, or the operator asks. Pass the relevant 
 spawn. After the operator ratifies its handoff, remove resolved items; do not let the queue become
 the durable record of a design decision.
 
-**Utility candidates:** Surface plausible deterministic shortcuts liberally; denial is cheap. A
+**Deterministic shortcut candidates:** Surface plausible deterministic shortcuts liberally; denial is cheap. A
 candidate needs a concrete operation shape and observed inference burden, not proof of recurrence or
 a finished CLI design. Before proposing, check the standard library, installed dependencies,
 current runtime tools, and registered project utilities. Transfer every candidate from the handoff
-to `corpora/utility-candidates.md` before closing the handoff (`corpus.py handoff-done`). Record accept, deny, or defer. When
-the same operation returns, use `corpus.py record-utility-candidate` to append evidence and derive
+to `corpora/deterministic-shortcut-candidates.md` before closing the handoff (`corpus.py handoff-done`). Record accept, deny, or defer. When
+the same operation returns, use `corpus.py record-deterministic-shortcut-candidate` to append evidence and derive
 its dates and sighting count; the command reports when it must be resurfaced. Record operator
-disposition with `corpus.py set-utility-status`. Only an accepted, implemented, and tested utility
+disposition with `corpus.py set-deterministic-shortcut-status`. Only an accepted, implemented, and tested utility
 enters `corpora/config.md`.
 
 **Inline, resume, or isolate:** Decide through the `orchestrator-routing` corpus; a task-shape name
@@ -258,10 +258,10 @@ the immediate-after-each-spawn default described below, unchanged.
    exact expected save path (`reading/saved/<id>.html`, per `reading/saved/README.md`) so they know
    precisely where to drop a copy with no further status edit needed. This is the reading agent's
    hard-stop-on-fetch-failure guard reaching the operator, not a routine status to skip past.
-3. **Persist utility candidates.** For every `utility-candidates` entry, match by operation shape
-   against `corpora/utility-candidates.md`, then call `corpus.py record-utility-candidate` before
+3. **Persist deterministic shortcut candidates.** For every `deterministic-shortcut-candidates` entry, match by operation shape
+   against `corpora/deterministic-shortcut-candidates.md`, then call `corpus.py record-deterministic-shortcut-candidate` before
    closing the handoff (`corpus.py handoff-done`). Surface it to the operator for accept / deny / defer and persist that
-   judgment with `corpus.py set-utility-status`. The script derives counts and dates and identifies
+   judgment with `corpus.py set-deterministic-shortcut-status`. The script derives counts and dates and identifies
    recurrence. Acceptance authorizes a scoped coder
    workstream, not config registration; register it only after implementation and tests prove useful.
 4. Present proposals from the handoff envelope's `proposals` field (rule, condition, reason,
