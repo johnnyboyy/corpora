@@ -1557,7 +1557,9 @@ of its own, in any configuration:
    framed as a procedure/service invoked by whoever is driving, not as something corpora
    autonomously decides to run after every spawn on its own initiative.
 3. Whatever drives a session — direct execution by default, or praxis's phase router when praxis is
-   installed — decides when to query corpora and when to invoke its ratify-gate procedure.
+   installed — decides when to query corpora and when to invoke its ratify-gate procedure. This is
+   symmetric: corpora behaves identically whether or not praxis happens to be present, because it
+   never had a competing initiative to reconcile in the first place.
 
 Praxis becomes the process driver unconditionally, not "the process owner when both are active,
 otherwise defer to corpora" — see praxis's own `LINEAGE.md` for the mirror entry, and its
