@@ -36,8 +36,7 @@ rules and principles from my time as a software engineer.
   that principles loaded will get less notice, and not be followed. So there's a principle that watches
   for these symptoms, suggest the agent find a good place to stop work, and ask for a fresh spawn to
   continue where it left off.
-- **Making a script is a good option.** Codified in the `deterministic-shortcut-candidates.md`
-  mechanism. Anything
+- **Making a script is a good option.** Codified in the `utility-candidates.md` mechanism. Anything
   you can move out of Inference into something Deterministic is a good thing. For one, you're saving
   tokens. But also, you're saving time and getting better results. This came from asking Claude Code
   to give me three colors from one - a warmer and cooler variant. It was spinning like crazy on that
@@ -66,7 +65,7 @@ this can go at least a small way towards that.
 
 Judgment lives in **domains** — corpora scoped to one subject matter or decision class. A
 **spawn** is a *stance* (convergent or divergent — `kernel.md`, "Generative stance") plus whatever
-domain subset is composed fresh for the task at hand, stated directly in a spawn
+domain subset the orchestrator composes fresh for the task at hand, stated directly in a spawn
 brief every time. The shared mechanism — schema, ratify gate, retrospective — is the **kernel**.
 Seed domains carry general principles earned from real work; a project adds its own same-named
 domains. Principles ratified in a project can promote upward to the seed domain when they
@@ -82,40 +81,25 @@ from accumulated tension — the fork signal in the retrospective.
 
 ### Architecture
 
-**One flat domain pool, no process layer.** Corpora is a queryable service, not an active
-orchestrator — it has no initiative of its own to decide when to query itself, whether a task
-warrants a spawn, or how to sequence a session. That process/timing judgment belongs to whoever is
-driving: direct execution by default, or the companion `praxis` skill's phase router when it's
-installed (see below, "Corpora and praxis").
+**One flat domain pool, one fixed process layer:**
 
-- **Corpora itself** (`SKILL.md`, declares `ratify-gate` and `principle-judgment`) answers a
-  composition query — given a task, which stance and domain subset apply — and runs the ratify-gate
-  procedure and bookkeeping ledgers on request. A convergent planning/decomposition spawn composes
-  `planning` + `interviewing` like any other spawn, decided fresh each time by whoever is querying.
-  Every working spawn composes from `coding-general` at minimum.
-- **Domains** — stack-agnostic (`coding-general`, `ratify-gate`, `principle-judgment`,
-  `spawn-integrity`, ...) and stack-specific (`coding-react`, `css`, `color`, ...) domains live
-  together in one flat `domains/`. Each stack-specific domain states its own load condition
-  directly against `corpora/config.md`'s shape fields (`language`, `framework`, `styling`,
-  `has-ui`) in its own preamble.
+- **The orchestrator** (`SKILL.md`, declares `orchestrator-routing`, `ratify-gate`, and
+  `principle-judgment`) is the one fixed thing: a process layer that composes and routes spawns
+  without taking on a spawn's stance itself, so something occupies that position before any
+  composition can happen. The **planner** composes `planning` + `interviewing` like any other
+  spawn, decided fresh by routing judgment. Every working spawn composes from `coding-general` at
+  minimum.
+- **Domains** — stack-agnostic (`coding-general`, `orchestrator-routing`, `spawn-integrity`, ...)
+  and stack-specific (`coding-react`, `css`, `color`, ...) domains live together in one flat
+  `domains/`. Each stack-specific domain states its own load condition directly against
+  `corpora/config.md`'s shape fields (`language`, `framework`, `styling`, `has-ui`) in its own
+  preamble.
 
-A stance and domain subset is stated directly in the spawn brief for every task, described directly
-in those terms rather than through a named label (see `LINEAGE.md` for the history of the
-composition-label shorthand this system used to use). One composed spawn per recurring task shape
-runs at a time per project; a domain splits into scoped instances when the retrospective surfaces a
-fork signal — conditions that partition the space and give opposing advice.
-
-### Corpora and praxis
-
-A companion skill, `praxis`, composes **time** (which phases a task's execution moves through) the
-way corpora composes **judgment** (which domains apply). Corpora used to carry its own
-`orchestrator-routing` domain for process/timing judgment — when to spawn vs. surface vs. defer,
-session sequencing — retired 2026-07-28 once that judgment was recognized as belonging
-entirely to whoever drives a session, not to corpora. If praxis is installed, it's the process
-driver, unconditionally; corpora is a judgment/ratify-gate service any of its phases can invoke. If
-praxis is not installed, direct execution alone drives the session, with no corpora orchestrator
-standing in for it. Corpora behaves identically either way — see `LINEAGE.md`, "Corpora stops being
-an active orchestrator."
+The orchestrator states a stance and domain subset directly in the spawn brief for every task.
+`coder`, `ux-design`, `ui-design`, and `planner` name recurring task shapes in prose (see
+`LINEAGE.md` for history). One composed spawn per recurring task shape runs at a time per project;
+a domain splits into scoped instances when the retrospective surfaces a fork signal — conditions
+that partition the space and give opposing advice.
 
 **Domains (where judgment lives):**
 
@@ -131,23 +115,23 @@ same-named project domain. A project may also have domains with no seed counterp
 
 - **Working load** — a spawn's composed domains, *working files only* (`domains/<domain>.md`).
   Selective and inspectable; this is every new isolated spawn and inline segment.
-- **Audit load** — whoever runs the ratify gate reads domains broadly *including*
-  `domains/audit.md` (provenance, kills) at ratify and retrospective time.
+- **Audit load** — the orchestrator reads domains broadly *including* `domains/audit.md`
+  (provenance, kills) at ratify and retrospective time.
 
-**Spawn contexts.** Each spawn receives its stance frame plus every composed domain. Whoever is
-driving the session decides whether to run inline, resume the agent owning the workstream, or start
-an isolated agent. Handoffs are checkpoints; operator testing and revisions return to the owning
+**Spawn contexts.** Each spawn receives its stance frame plus every composed domain. The
+orchestrator decides whether to run inline, resume the agent owning the workstream, or start an
+isolated agent. Handoffs are checkpoints; operator testing and revisions return to the owning
 agent. See `SKILL.md`, "Inline, resume, or isolate," and `LINEAGE.md`, "Role isolation."
 
 ### Files
 
-- `SKILL.md` — the shared entrypoint for Claude Code (`/corpora`) and Codex (`$corpora`): a
-  queryable service description — how to compose a spawn load, run the ratify-gate procedure, and
-  maintain the bookkeeping ledgers, all on request from whoever is driving.
+- `SKILL.md` — the shared orchestrator entrypoint for Claude Code (`/corpora`) and Codex
+  (`$corpora`): routes workstreams, assembles complete spawn loads, relays handoffs, and drives the
+  ratify gate.
 - `kernel.md` — the schema, stance+composition model, ratify gate, write-back format, two load
   modes, retrospective signals, and domain lifecycle. Reference document.
 - `domains/` — every seed domain, flat: stack-agnostic (`coding-general.md`,
-  `ratify-gate.md`, `principle-judgment.md`, `planning.md`,
+  `orchestrator-routing.md`, `ratify-gate.md`, `principle-judgment.md`, `planning.md`,
   `interviewing.md`, `spawn-integrity.md`) and stack-specific (`coding-ts.md`, `coding-react.md`,
   `coding-nextjs.md`, `css.md`, and the design domains `color.md`/`motion.md`/`recoverability.md`/
   etc.) alike, each stating its own load condition in its own preamble. Plus `audit.md`
@@ -180,19 +164,18 @@ concatenation, live — there's no per-domain opt-out (`kernel.md`, "Project cor
 
 ### Using in a project
 
-1. Invoke corpora on an unbootstrapped project. It detects that `corpora/config.md`
+1. Invoke corpora on an unbootstrapped project. The orchestrator detects that `corpora/config.md`
    is absent and runs bootstrap: Phase 1 writes stable project shape, commands, and registered
-   utilities; UI projects then compose divergent- and convergent-composed bootstrap workstreams for
-   their libraries, whenever whoever is driving routes them.
-2. On subsequent invocations, whoever is driving decides whether to work inline, resume an existing
-   workstream agent, or start a new isolated spawn — corpora composes whichever stance and domains
-   that decision calls for. A plan starts a new convergent implementation workstream; testing
-   feedback and revisions return to its owning agent.
-3. Handoffs surface proposals, violations, deterministic-shortcut candidates, and other material for
-   the ratify-gate procedure. The operator ratifies corpus and direction changes.
-4. `corpora/domains/<domain>.md` holds project-specific principles. The ratify-gate procedure
-   creates a domain file on first ratification into it and assigns every ratified proposal a domain
-   at the gate.
+   utilities; UI projects then route divergent- and convergent-composed bootstrap workstreams for
+   their libraries.
+2. On subsequent invocations, the orchestrator routes work inline, to an existing workstream agent,
+   or to a new isolated spawn. A plan starts a new coder-composed workstream; testing feedback and
+   revisions return to its owning agent.
+3. Handoffs surface proposals, violations, utility candidates, and other routing material. The
+   operator ratifies corpus and direction changes.
+4. `corpora/domains/<domain>.md` holds project-specific principles. The orchestrator creates a
+   domain file on first ratification into it and assigns every ratified proposal a domain at the
+   gate.
 
 **Project files** (all under `corpora/` in the target project):
 
@@ -201,8 +184,7 @@ concatenation, live — there's no per-domain opt-out (`kernel.md`, "Project cor
 - `ui-library.md` — design system documentation (generated by bootstrap, updated by designers)
 - `ux-library.md` — experience patterns and flow documentation for UI projects
 - `deferred-decisions.md` — non-blocking UI/UX questions waiting for a coherent designer workstream
-- `deterministic-shortcut-candidates.md` — persistent accepted, denied, and deferred
-  deterministic-shortcut observations
+- `utility-candidates.md` — persistent accepted, denied, and deferred utility observations
 - `handoffs/` — unratified spawn checkpoints and their pending gate material
 - `domains/<domain>.md` — per-domain accumulated judgment (working fields only)
 - `domains/audit.md` — provenance and per-kill detail for the project layer
@@ -229,8 +211,8 @@ exact process for that promotion is not yet spelled out.
 
 ### New stacks and domain splitting
 
-**New stack:** the kernel applies unchanged — every new project inherits the ratify-gate procedure,
-convergent planning/decomposition judgment, and `coding-general` for free. Add stack-specific seed domains (with their own load
+**New stack:** the kernel applies unchanged — every new project inherits the orchestrator, the
+planner, and `coding-general` for free. Add stack-specific seed domains (with their own load
 conditions against `language`/`framework`/`styling`) once a body of stack-specific conventions has
 accumulated and is worth shipping across projects of that stack. Until then, project-earned
 specifics live in `corpora/domains/coding-general.md` (and project-specific domains). Do not

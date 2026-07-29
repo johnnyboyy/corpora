@@ -24,10 +24,10 @@ Commands:
                                    corpora/handoffs/archive/ when corpora/config.md sets debug: yes
   lint-deferred                    validate the non-blocking UI/UX decision queue
   deferred                         list queued decisions grouped by owning composition
-  lint-deterministic-shortcut-candidates          validate the persistent deterministic-shortcut-candidate ledger
-  deterministic-shortcut-candidates               list candidates with status and sighting count
-  record-deterministic-shortcut-candidate [...]   append dated evidence to a candidate
-  set-deterministic-shortcut-status [...]         record the operator's candidate disposition
+  lint-utility-candidates          validate the persistent utility-candidate ledger
+  utility-candidates               list candidates with status and sighting count
+  record-utility-candidate [...]   append dated evidence to a candidate
+  set-utility-status [...]         record the operator's candidate disposition
   retro-done --domain D            reset counters after a retrospective
   sync-done                        reset library-drift after a UI-library sync
   compose-spawn-prompt [...]       mechanically assemble a spawn-ready prompt: stance frame +
@@ -64,8 +64,8 @@ STATUS_ENUM = {"complete", "tradeoffs-pending", "questions-pending", "blocked"}
 KIND_ENUM = {"judgment", "knowledge", "direction"}
 DEFERRED_STANCE_ENUM = {"convergent", "divergent"}
 DEFERRED_STATUS_ENUM = {"queued", "resolved"}
-SHORTCUT_STATUS_ENUM = {"open", "deferred", "denied", "accepted", "implemented"}
-SHORTCUT_STATUS_REQUIRES_REASON = {"deferred", "denied"}
+UTILITY_STATUS_ENUM = {"open", "deferred", "denied", "accepted", "implemented"}
+UTILITY_STATUS_REQUIRES_REASON = {"deferred", "denied"}
 SCREENSHOT_STATUS_ENUM = {"current", "stale"}
 
 
@@ -102,7 +102,7 @@ class Project:
         self.handoffs_archive_dir = os.path.join(self.handoffs_dir, "archive")
         self.config_path = os.path.join(root, "corpora", "config.md")
         self.deferred_path = os.path.join(root, "corpora", "deferred-decisions.md")
-        self.deterministic_shortcut_candidates_path = os.path.join(root, "corpora", "deterministic-shortcut-candidates.md")
+        self.utility_candidates_path = os.path.join(root, "corpora", "utility-candidates.md")
         self.screenshots_dir = os.path.join(root, "corpora", "screenshots")
         self.screenshot_manifest_path = os.path.join(self.screenshots_dir, "manifest.md")
         if not os.path.isdir(self.domains_dir):
@@ -604,7 +604,7 @@ def cmd_deferred(project: Project, _args) -> None:
             print(f"      {entry['question']}")
 
 
-def parse_deterministic_shortcut_candidates(path: str) -> list:
+def parse_utility_candidates(path: str) -> list:
     entries = []
     item = None
     evidence = None
@@ -662,7 +662,7 @@ def parse_deterministic_shortcut_candidates(path: str) -> list:
     return entries
 
 
-def deterministic_shortcut_candidate_problems(entries: list) -> list:
+def utility_candidate_problems(entries: list) -> list:
     required = ("id", "operation-shape", "status")
     problems = []
     seen = set()
@@ -674,8 +674,8 @@ def deterministic_shortcut_candidate_problems(entries: list) -> list:
         if entry.get("id") in seen:
             problems.append(f"{label}: duplicate id")
         seen.add(entry.get("id"))
-        if entry.get("status") not in SHORTCUT_STATUS_ENUM:
-            problems.append(f"{label}: status must be one of {sorted(SHORTCUT_STATUS_ENUM)}")
+        if entry.get("status") not in UTILITY_STATUS_ENUM:
+            problems.append(f"{label}: status must be one of {sorted(UTILITY_STATUS_ENUM)}")
         evidence_seen = set()
         if not entry.get("evidence"):
             problems.append(f"{label}: requires at least one evidence record")
@@ -693,7 +693,7 @@ def deterministic_shortcut_candidate_problems(entries: list) -> list:
             if signature in evidence_seen:
                 problems.append(f"{label}: duplicate evidence record {evidence_index}")
             evidence_seen.add(signature)
-        if entry.get("status") in SHORTCUT_STATUS_REQUIRES_REASON and not entry.get("disposition-reason"):
+        if entry.get("status") in UTILITY_STATUS_REQUIRES_REASON and not entry.get("disposition-reason"):
             problems.append(f"{label}: {entry.get('status')} status requires disposition reason")
     return problems
 
@@ -702,8 +702,8 @@ def yaml_quote(value: str) -> str:
     return '"' + value.replace("\\", "\\\\").replace('"', '\\"') + '"'
 
 
-def save_deterministic_shortcut_candidates(path: str, entries: list) -> None:
-    lines = ["# Deterministic shortcut candidates", "", "```yaml"]
+def save_utility_candidates(path: str, entries: list) -> None:
+    lines = ["# Utility candidates", "", "```yaml"]
     if not entries:
         lines.append("candidates: []")
     else:
@@ -728,12 +728,12 @@ def save_deterministic_shortcut_candidates(path: str, entries: list) -> None:
     open(path, "w").write("\n".join(lines))
 
 
-def cmd_lint_deterministic_shortcut_candidates(project: Project, _args) -> None:
-    path = project.deterministic_shortcut_candidates_path
+def cmd_lint_utility_candidates(project: Project, _args) -> None:
+    path = project.utility_candidates_path
     if not os.path.exists(path):
-        fail("no corpora/deterministic-shortcut-candidates.md — create it from the kernel schema")
-    entries = parse_deterministic_shortcut_candidates(path)
-    problems = deterministic_shortcut_candidate_problems(entries)
+        fail("no corpora/utility-candidates.md — create it from the kernel schema")
+    entries = parse_utility_candidates(path)
+    problems = utility_candidate_problems(entries)
     if problems:
         print(f"FAIL {path}")
         for problem in problems:
@@ -742,19 +742,19 @@ def cmd_lint_deterministic_shortcut_candidates(project: Project, _args) -> None:
     print(f"PASS {path} ({len(entries)} entries)")
 
 
-def cmd_deterministic_shortcut_candidates(project: Project, _args) -> None:
-    path = project.deterministic_shortcut_candidates_path
+def cmd_utility_candidates(project: Project, _args) -> None:
+    path = project.utility_candidates_path
     if not os.path.exists(path):
-        print("deterministic shortcut candidate ledger: absent")
+        print("utility candidate ledger: absent")
         return
-    entries = parse_deterministic_shortcut_candidates(path)
-    if deterministic_shortcut_candidate_problems(entries):
-        print("deterministic shortcut candidate ledger is invalid; run `lint-deterministic-shortcut-candidates`")
+    entries = parse_utility_candidates(path)
+    if utility_candidate_problems(entries):
+        print("utility candidate ledger is invalid; run `lint-utility-candidates`")
         sys.exit(1)
     if not entries:
-        print("deterministic shortcut candidate ledger: empty")
+        print("utility candidate ledger: empty")
         return
-    print("deterministic shortcut candidates:")
+    print("utility candidates:")
     for entry in entries:
         dates = [evidence["date"] for evidence in entry["evidence"]]
         print(f"  - {entry['id']}  status={entry['status']}  sightings={len(dates)}  "
@@ -762,14 +762,14 @@ def cmd_deterministic_shortcut_candidates(project: Project, _args) -> None:
         print(f"    {entry['operation-shape']}")
 
 
-def cmd_record_deterministic_shortcut_candidate(project: Project, args) -> None:
-    path = project.deterministic_shortcut_candidates_path
+def cmd_record_utility_candidate(project: Project, args) -> None:
+    path = project.utility_candidates_path
     if not os.path.exists(path):
-        fail("no corpora/deterministic-shortcut-candidates.md — create it from the kernel schema")
-    entries = parse_deterministic_shortcut_candidates(path)
-    problems = deterministic_shortcut_candidate_problems(entries)
+        fail("no corpora/utility-candidates.md — create it from the kernel schema")
+    entries = parse_utility_candidates(path)
+    problems = utility_candidate_problems(entries)
     if problems:
-        fail("deterministic shortcut candidate ledger is invalid — run `lint-deterministic-shortcut-candidates`")
+        fail("utility candidate ledger is invalid — run `lint-utility-candidates`")
     entry = next((candidate for candidate in entries if candidate["id"] == args.id), None)
     if entry is None:
         entry = {"id": args.id, "operation-shape": args.operation_shape, "status": "open",
@@ -784,39 +784,39 @@ def cmd_record_deterministic_shortcut_candidate(project: Project, args) -> None:
         fail("--date must be a valid YYYY-MM-DD date")
     evidence = {"date": evidence_date, "workstream": args.workstream, "burden": args.burden}
     if evidence in entry["evidence"]:
-        print(f"deterministic shortcut candidate {args.id}: identical evidence already recorded")
+        print(f"utility candidate {args.id}: identical evidence already recorded")
         return
     entry["evidence"].append(evidence)
-    save_deterministic_shortcut_candidates(path, entries)
+    save_utility_candidates(path, entries)
     sightings = len(entry["evidence"])
-    print(f"deterministic shortcut candidate {args.id}: recorded sighting {sightings}")
+    print(f"utility candidate {args.id}: recorded sighting {sightings}")
     if sightings > 1 or entry["status"] in {"deferred", "denied"}:
         print(f"RESURFACE {args.id}: status={entry['status']} with {sightings} sightings")
 
 
-def cmd_set_deterministic_shortcut_status(project: Project, args) -> None:
-    path = project.deterministic_shortcut_candidates_path
+def cmd_set_utility_status(project: Project, args) -> None:
+    path = project.utility_candidates_path
     if not os.path.exists(path):
-        fail("no corpora/deterministic-shortcut-candidates.md — create it from the kernel schema")
-    entries = parse_deterministic_shortcut_candidates(path)
-    problems = deterministic_shortcut_candidate_problems(entries)
+        fail("no corpora/utility-candidates.md — create it from the kernel schema")
+    entries = parse_utility_candidates(path)
+    problems = utility_candidate_problems(entries)
     if problems:
-        fail("deterministic shortcut candidate ledger is invalid — run `lint-deterministic-shortcut-candidates`")
+        fail("utility candidate ledger is invalid — run `lint-utility-candidates`")
     entry = next((candidate for candidate in entries if candidate["id"] == args.id), None)
     if entry is None:
-        fail(f"unknown deterministic shortcut candidate '{args.id}'")
-    if args.status in SHORTCUT_STATUS_REQUIRES_REASON and not args.reason:
+        fail(f"unknown utility candidate '{args.id}'")
+    if args.status in UTILITY_STATUS_REQUIRES_REASON and not args.reason:
         fail(f"status '{args.status}' requires --reason")
     entry["status"] = args.status
     entry["disposition-reason"] = args.reason or ""
-    save_deterministic_shortcut_candidates(path, entries)
-    print(f"deterministic shortcut candidate {args.id}: status={args.status}")
+    save_utility_candidates(path, entries)
+    print(f"utility candidate {args.id}: status={args.status}")
 
 
 # ── screenshot cache: manifest parse / render / commands ────────────────────
 # `screens: [{..., variants: [{...}]}]` is two levels of nested lists — same depth as
 # `candidates: [{..., evidence: [{...}]}]`, so the parser is modeled on
-# `parse_deterministic_shortcut_candidates`, not the flat `parse_state`, which cannot represent it.
+# `parse_utility_candidates`, not the flat `parse_state`, which cannot represent it.
 
 def parse_screenshot_manifest(path: str) -> list:
     entries = []
@@ -1360,17 +1360,17 @@ def main() -> None:
     hd.add_argument("file")
     sub.add_parser("lint-deferred")
     sub.add_parser("deferred")
-    sub.add_parser("lint-deterministic-shortcut-candidates")
-    sub.add_parser("deterministic-shortcut-candidates")
-    uc = sub.add_parser("record-deterministic-shortcut-candidate")
+    sub.add_parser("lint-utility-candidates")
+    sub.add_parser("utility-candidates")
+    uc = sub.add_parser("record-utility-candidate")
     uc.add_argument("--id", required=True)
     uc.add_argument("--operation-shape", required=True)
     uc.add_argument("--workstream", required=True)
     uc.add_argument("--burden", required=True)
     uc.add_argument("--date", default="", help="YYYY-MM-DD; defaults to today")
-    us = sub.add_parser("set-deterministic-shortcut-status")
+    us = sub.add_parser("set-utility-status")
     us.add_argument("--id", required=True)
-    us.add_argument("--status", required=True, choices=sorted(SHORTCUT_STATUS_ENUM))
+    us.add_argument("--status", required=True, choices=sorted(UTILITY_STATUS_ENUM))
     us.add_argument("--reason", default="")
     r = sub.add_parser("retro-done")
     r.add_argument("--domain", required=True)
@@ -1417,10 +1417,10 @@ def main() -> None:
     {"measure": cmd_measure, "verify": cmd_verify, "record-gate": cmd_record_gate, "triggers": cmd_triggers,
      "lint-handoff": cmd_lint_handoff, "handoffs": cmd_handoffs, "handoff-done": cmd_handoff_done,
      "lint-deferred": cmd_lint_deferred, "deferred": cmd_deferred,
-     "lint-deterministic-shortcut-candidates": cmd_lint_deterministic_shortcut_candidates,
-     "deterministic-shortcut-candidates": cmd_deterministic_shortcut_candidates,
-     "record-deterministic-shortcut-candidate": cmd_record_deterministic_shortcut_candidate,
-     "set-deterministic-shortcut-status": cmd_set_deterministic_shortcut_status,
+     "lint-utility-candidates": cmd_lint_utility_candidates,
+     "utility-candidates": cmd_utility_candidates,
+     "record-utility-candidate": cmd_record_utility_candidate,
+     "set-utility-status": cmd_set_utility_status,
      "retro-done": cmd_retro_done, "sync-done": cmd_sync_done,
      "compose-spawn-prompt": cmd_compose_spawn_prompt,
      "screenshot-record": cmd_screenshot_record,

@@ -1,6 +1,6 @@
 # Domain: css
 
-CSS / Tailwind authoring and specificity. Declared by the convergent implementation composition when `styling` is not `none`
+CSS / Tailwind authoring and specificity. Declared by the coder composition when `styling` is not `none`
 (tailwind, css-modules, vanilla-css, etc.). Audit metadata lives in `domains/audit.md`, loaded only
 at ratify/retrospective time.
 
@@ -36,12 +36,12 @@ killed:
 - id: mobile-fixed-bar-bottom-gap
   rule: "Set `bottom: -1px` on a mobile fixed bottom bar to prevent a subpixel gap at the bottom of the viewport on some devices."
   kill_type: knowledge
-  reason_killed: "CSS browser rendering behavior — a lookup fact, not a judgment call. An implementer hits this once via testing, searches it, finds the fix. No project-specific context encoded."
+  reason_killed: "CSS browser rendering behavior — a lookup fact, not a judgment call. A coder hits this once via testing, searches it, finds the fix. No project-specific context encoded."
 
 - id: imports-before-tailwind-directives
   rule: "When splitting a Tailwind CSS entry file into multiple files imported via @import, put the @import statements before the @tailwind directives."
   kill_type: knowledge
-  reason_killed: "A postcss-import build-warning fact (import-before-directive ordering), not a judgment call — same class as mobile-fixed-bar-bottom-gap and table-row-color-override below. An implementer hits the warning once, fixes the ordering, done."
+  reason_killed: "A postcss-import build-warning fact (import-before-directive ordering), not a judgment call — same class as mobile-fixed-bar-bottom-gap and table-row-color-override below. A coder hits the warning once, fixes the ordering, done."
 
 - id: grid-for-layout-flexbox-for-flow
   rule: "Use CSS Grid when elements must align on two axes simultaneously or when their visual order must differ from source order. Use Flexbox when item count is dynamic or when items should size from their own content with the container distributing remaining space."

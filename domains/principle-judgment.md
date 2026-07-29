@@ -2,17 +2,15 @@
 
 Judgment about whether a principle — proposed or already ratified — actually encodes earned
 judgment, and whether it lives in the domain its real consumer needs it in. Distinct from
-`ratify-gate`'s judgment about assembling and processing a spawn: this is about the corpus's own
-content, at the moment a proposal is judged and again, periodically, after ratification, since
-gate-time discipline can lapse under session-context pressure and a principle ratified in error
-otherwise sits unexamined indefinitely. One of corpora's two standing domains, alongside
-`ratify-gate` — corpora's process/timing judgment (which composition to invoke, when to spawn vs.
-surface vs. defer) is not a domain here at all; it lived in `orchestrator-routing` until that
-domain was retired 2026-07-28 and its judgment moved to praxis, the process driver whenever it's
-installed (`LINEAGE.md`, "Corpora stops being an active orchestrator"). Seeded 2026-07-22 from the
-criteria used in a full-corpus domain-and-principle audit this session — see `LINEAGE.md` for the
-audit's own findings; this domain generalizes the method, not the specific findings. Audit metadata
-lives in `domains/audit.md`, loaded only at ratify/retrospective time.
+`ratify-gate`'s judgment about assembling and processing a spawn, and from `orchestrator-routing`'s
+judgment about which composition to invoke: this is about the corpus's own content, at the moment a
+proposal is judged and again, periodically, after ratification, since gate-time discipline can
+lapse under session-context pressure and a principle ratified in error otherwise sits unexamined
+indefinitely. Declared by the **orchestrator** composition, alongside `orchestrator-routing` and
+`ratify-gate`. Seeded 2026-07-22 from the criteria used in a full-corpus domain-and-principle audit
+this session — see `LINEAGE.md` for the audit's own findings; this domain generalizes the method,
+not the specific findings. Audit metadata lives in `domains/audit.md`, loaded only at
+ratify/retrospective time.
 
 ```yaml
 last-retrospective: none
@@ -30,7 +28,7 @@ principles:
   reason: "A reading-pipeline source is selected and written to explain or persuade, not to record a mistake actually made — so its claims arrive pre-packaged as generally-applicable doctrine regardless of whether they encode a real decision under uncertainty. That framing is easy to mistake for earned judgment precisely because it reads as confident and well-argued; the correlation between source type and knowledge-not-judgment risk is worth checking explicitly rather than assuming the `kind` tag alone settles it."
 
 - id: check-principle-against-consuming-lens-not-just-domain-topic
-  rule: "When auditing a domain's principles, check each one against which composition actually needs and applies it — not only whether it plausibly fits the domain's stated topic. A principle can read as on-topic for its domain while actually encoding a different composition's job entirely (e.g., framework-specific implementation mechanics sitting in a design domain no convergent implementation composition ever loads)."
+  rule: "When auditing a domain's principles, check each one against which composition actually needs and applies it — not only whether it plausibly fits the domain's stated topic. A principle can read as on-topic for its domain while actually encoding a different composition's job entirely (e.g., framework-specific implementation mechanics sitting in a design domain no coder composition ever loads)."
   condition: "During a principle audit or retrospective, for any domain loaded by more than one composition, or whose principles reference an implementation-specific mechanism (a named library, hook, framework API, or file format)."
   reason: "`kernel.md`'s domain-tension retrospective signal only catches principles that give *opposing* advice under partitioned conditions — it structurally cannot see a principle that is simply misplaced without contradicting anything else in its domain. A principle can read as topically on-theme while actually encoding a different composition's job entirely, and no amount of re-reading it against its own domain's stated subject will surface that, because the mismatch isn't a contradiction — it's a mismatch between what the content is and who would ever load it."
 
