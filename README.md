@@ -67,12 +67,13 @@ Judgment lives in **domains** — corpora scoped to one subject matter or decisi
 **spawn** is a *stance* (convergent or divergent — `kernel.md`, "Generative stance") plus whatever
 domain subset the orchestrator composes fresh for the task at hand, stated directly in a spawn
 brief every time. The shared mechanism — schema, ratify gate, retrospective — is the **kernel**.
-Seed domains carry general principles earned from real work; a project adds its own same-named
-domains. Principles ratified in a project can promote upward to the seed domain when they
-generalize across projects, or fold into a domain's own preamble once they've stabilized into
-scene-setting that no longer needs per-task condition-checking. Rejected principles are kept with
-their reason and a `kill_type`. Kernel and seed domains travel in this repo; project domains stay
-in the project.
+Seed domains carry general principles earned from real work, in this repo's own `domains/`; a
+project imports what it needs into its own `corpora/domains/`, which is then the whole domain set
+that project's spawns compose from — no live merge with this repo. Principles ratified in a
+project can be exported back into the seed pool when they generalize across projects, or graduate
+into a domain's own `conventions:` list once they've stabilized into unconditioned guidance that
+no longer needs per-task condition-checking. Rejected principles are kept with their reason and a
+`kill_type`. Kernel and seed domains travel in this repo; project domains stay in the project.
 
 Domains own corpora, so shared judgment lives once and is available to any spawn whose stance and
 subject match (a divergent UI-composed spawn and a convergent UX-composed spawn both load
@@ -104,13 +105,16 @@ that partition the space and give opposing advice.
 
 **Domains (where judgment lives):**
 
-- **Seed domain** — general principles, in the skill's flat `domains/`.
+- **Seed domain** — general principles, in the skill's flat `domains/`. The default import
+  source for a new project — not a live-merged layer.
 - **Project domain** — project-specific accumulated judgment at `corpora/domains/<domain>.md` in
-  the target project. Merges back here once it generalizes beyond the project's specifics.
+  the target project. Exported back into the seed pool once a principle generalizes beyond the
+  project's specifics.
 
-For each domain a spawn's composition includes, both apply when it runs — seed first, then the
-same-named project domain. A project may also have domains with no seed counterpart
-(project-specific subjects, e.g. `spatial-metaphor`).
+A project's own `corpora/domains/` is the whole domain set its spawns compose from — no automatic
+seed inclusion. A project may have domains with no seed counterpart at all (project-specific
+subjects, e.g. `spatial-metaphor`), imported principles from another project's corpora, or
+principles it wrote itself.
 
 **Two load modes** (file granularity matches load granularity):
 
@@ -182,11 +186,12 @@ Claude Code invokes it as `/corpora`. Codex invokes it as `$corpora` and may als
 implicitly. A managed project's `AGENTS.md` can opt into automatic Codex activation with the
 one-line instruction offered by the skill.
 
-**Diverging from the shared skill.** A project that wants its own frozen copy of the seed domains,
-deliberately not tracking future changes to this repo, copies it instead of symlinking. That's a
-whole-skill decision made once, at install time; re-copy later to pick up upstream changes on your
-own schedule. A project's own `corpora/domains/<domain>.md` always merges with the seed by
-concatenation, live — there's no per-domain opt-out (`kernel.md`, "Project corpora").
+**Diverging from the shared skill.** A project's own `corpora/domains/` never automatically tracks
+this repo's `domains/` — it only holds what was explicitly imported (`kernel.md`, "Project
+corpora"). A project that wants to track the skill's evolving default pool re-runs that import
+periodically; one that wants a frozen snapshot simply doesn't. Symlinking vs. copying this repo
+into `~/.claude/skills/corpora` only affects whether the *mechanism itself* (kernel, process files)
+updates — not domain content, which every project already controls per-import.
 
 ### Using in a project
 

@@ -1562,3 +1562,63 @@ judgment never share a domain" was already gesturing at, restated as the general
 another subject family," since stance was never actually the composition-level boundary; subject
 always was. This is a decision made once and worth stating precisely because it decides the
 frontmatter vocabulary for machine-readable domain selection (`subject:`, `posture:`) that follows.
+
+`proposals/domain-repo-import.md` §1–§5 implemented 2026-07-30. Three changes, in dependency order.
+
+**§1, the `conventions:` schema.** `kernel.md`'s "folded into scene-setting" mechanic — a
+principle whose `condition` had become friction-without-benefit, moved into unstructured preamble
+prose and removed from `principles:` — lost its `id`: not killable, not graduatable, not
+selectively importable by anyone, once it dissolved into prose. `conventions:` is the same
+graduation, minus the dissolution: `id`/`rule`/`reason` survive, only `condition` is dropped, since
+a convention is unconditioned by definition. `coding-ts.md`'s two folded examples
+(`arrow-block-body`, `no-early-returns`) were the first real migration, each carrying a fresh
+`history: type: graduated-to-convention` entry alongside its original `folded-to-preamble` one so
+the trail stays legible. `corpus.py` gained a third counter bucket (`conventions-at-baseline`,
+`--graduated`) so `verify` reconciles a graduation the same way it already reconciled a ratification
+or a kill — this was the one place the schema change touched live bookkeeping, not just documentation.
+
+**§2, dissolving the live seed/project merge.** `project_domain_sources()` used to concatenate this
+skill's own `domains/` with a project's `corpora/domains/` on every `select`/`manifest`/
+`compose-spawn-prompt` call — automatic, unconditional, no per-domain opt-out. That merge is gone;
+those commands now read only a project's own `corpora/domains/` (or an explicit `--domains-dir`).
+This skill's own `domains/` is no longer structurally privileged — it's the default *import*
+source, not a live-concatenated layer. The break was real and immediate: over twenty of this repo's
+own tests asserted the old merge behavior (e.g. `select` returning seed domains against an empty
+project directory) and had to be rewritten to either point `--domains-dir` at the seed explicitly
+or copy real seed content into a test project's `corpora/domains/` first — the same shape a real
+migration or import leaves behind. Decided over dogfooding-first caution specifically because a
+downstream project (Blog, FAMOUS) can't be migrated from inside this repo; the operator chose to
+cut over now and carry the obligation forward rather than leave the mechanism half-built.
+
+**§3, import as a candidate producer.** `corpus.py import-list`/`import-candidate`/
+`import-default-pool` never write a domain working file directly — an import is structurally the
+same relationship `reading/discovery-agent.md` already has to a candidates file and the ratify
+gate, just producing an *already-ratified* principle from another corpus instead of a freshly-mined
+claim. `import-candidate` lets the operator retarget an imported entry to a different destination
+domain than the one it came from (`--as-domain`), the same domain-assignment judgment already
+exercised at the ordinary gate. `import-default-pool` is the same mechanism with the operator's
+per-entry answer defaulted to "yes to all," scoped to whatever already matches the project's
+`corpora/config.md` shape — the bootstrap fast path, now offered explicitly in
+`processes/bootstrap.md`'s Phase 1 rather than happening for free via the old live merge.
+
+**§5, migration, deliberately not routed through §3's gate.** `corpus.py migrate-domains` writes
+directly, the one exception to "propose → ratify → promote" besides operator-direct authorship
+(§4) — because it isn't proposing new judgment, it's materializing judgment a project was already
+running under before the merge dissolved. Re-gating it would ask the operator to re-ratify content
+their own project had already been operating on. Scoped to `conventions:`/`principles:` only —
+`killed:` entries don't share the schema and migrating them was judged not worth the risk of a
+subtly-wrong shape; a re-proposed already-killed idea is a low-cost, self-correcting failure the
+ordinary gate already catches. `processes/domain-repo-migration.md` documents the one-time trigger,
+the procedure, and the rollback story (git, since migration only ever writes a project's own files).
+
+§4 (operator-direct authorship) needed no new mechanism — `record-gate --ratified 1` run standalone
+already worked. The gap was that `kernel.md`'s "propose → ratify → promote, never write-directly"
+read as forbidding it, when what it actually forbids is a *spawn* writing directly. Fixed with an
+explicit provenance convention (`"Operator-authored, <date>, based on observed <behavior>, root-
+caused and refined."`) rather than new code.
+
+The two related proposals in the same file — principle elicitation through operator dialogue, and
+monorepo support — remain draft. Neither blocked on the other three; both are independent extensions
+of the same underlying mechanism (a new *source* of candidates in the elicitation case, a new
+*resolution* rule for which `corpora/config.md` governs a task in the monorepo case) left for when a
+real project actually needs them.

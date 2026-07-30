@@ -38,8 +38,8 @@ never by importing an org chart up front.
 You always enter as the orchestrator — there is no bare-spawn entry. A named arg (`coder`,
 `ux-design`, `ui-design`, `planner`) is a routing hint, not a bypass or a lookup key: the
 orchestrator still frames the task and assembles the spawn from stance + whichever domains that
-task shape needs (seed + same-named project domains), through the same `orchestrator-routing`
-judgment it applies to any task. Inline, resumed, or isolated execution is decided at route time —
+task shape needs, from this project's own `corpora/domains/`, through the same
+`orchestrator-routing` judgment it applies to any task. Inline, resumed, or isolated execution is decided at route time —
 see "Inline, resume, or isolate."
 
 Read `processes/general-operation.md` (in this skill's `processes/` directory) at the start of

@@ -884,6 +884,9 @@ provenance:
     - date: 2026-07-21
       type: folded-to-preamble
       reason: "promoted: retired per v3-redesign-proposal.md; substance moved into coding-ts's own preamble."
+    - date: 2026-07-30
+      type: graduated-to-convention
+      reason: "proposals/domain-repo-import.md §1: unstructured preamble prose replaced by an id-addressable conventions: entry — same id, same unconditioned status, now killable/graduatable/importable instead of dissolved into prose."
 
 - id: no-early-returns
   domain: coding-ts
@@ -892,6 +895,9 @@ provenance:
     - date: 2026-07-21
       type: folded-to-preamble
       reason: "promoted: retired per v3-redesign-proposal.md; substance moved into coding-ts's own preamble."
+    - date: 2026-07-30
+      type: graduated-to-convention
+      reason: "proposals/domain-repo-import.md §1: unstructured preamble prose replaced by an id-addressable conventions: entry — same id, same unconditioned status, now killable/graduatable/importable instead of dissolved into prose."
 
 - id: no-shell-for-structural-absence
   domain: coding-ts
@@ -1235,251 +1241,301 @@ counters:
     since: 2026-07-23
     ratified: 0
     killed: 0
+    graduated: 0
     gate-violations: 0
     working-file-tokens: 9663
     baseline-tokens: 9663
     principles-at-baseline: 35
     kills-at-baseline: 6
+    conventions-at-baseline: 0
   - domain: coding-general
     origin: seed
     since: 2026-07-23
     ratified: 2
     killed: 0
+    graduated: 0
     gate-violations: 0
     working-file-tokens: 5691
     baseline-tokens: 5335
     principles-at-baseline: 18
     kills-at-baseline: 1
+    conventions-at-baseline: 0
   - domain: coding-nextjs
     origin: project
     since: 2026-07-23
     ratified: 0
     killed: 0
+    graduated: 0
     gate-violations: 0
     working-file-tokens: 1124
     baseline-tokens: 1119
     principles-at-baseline: 5
     kills-at-baseline: 0
+    conventions-at-baseline: 0
   - domain: coding-react
     origin: seed
     since: 2026-07-28
     ratified: 0
     killed: 0
+    graduated: 0
     gate-violations: 0
     working-file-tokens: 4616
     baseline-tokens: 4465
     principles-at-baseline: 12
     kills-at-baseline: 10
+    conventions-at-baseline: 0
   - domain: coding-ts
-    origin: seed
-    since: 2026-07-23
+    origin: project
+    since: 2026-07-30
     ratified: 0
     killed: 0
+    graduated: 0
     gate-violations: 0
-    working-file-tokens: 1560
-    baseline-tokens: 1560
+    working-file-tokens: 1547
+    baseline-tokens: 1547
     principles-at-baseline: 5
     kills-at-baseline: 2
+    conventions-at-baseline: 2
   - domain: color
     origin: project
     since: 2026-07-23
     ratified: 0
     killed: 0
+    graduated: 0
     gate-violations: 0
     working-file-tokens: 779
     baseline-tokens: 775
     principles-at-baseline: 2
     kills-at-baseline: 2
+    conventions-at-baseline: 0
   - domain: css
     origin: project
     since: 2026-07-23
     ratified: 0
     killed: 0
+    graduated: 0
     gate-violations: 0
     working-file-tokens: 1483
     baseline-tokens: 1474
     principles-at-baseline: 4
     kills-at-baseline: 4
+    conventions-at-baseline: 0
   - domain: dependency-management-expo
     origin: project
     since: 2026-07-23
     ratified: 0
     killed: 0
+    graduated: 0
     gate-violations: 0
     working-file-tokens: 2035
     baseline-tokens: 2035
     principles-at-baseline: 7
     kills-at-baseline: 0
+    conventions-at-baseline: 0
   - domain: dependency-management
     origin: project
     since: 2026-07-23
     ratified: 0
     killed: 0
+    graduated: 0
     gate-violations: 0
     working-file-tokens: 799
     baseline-tokens: 891
     principles-at-baseline: 2
     kills-at-baseline: 0
+    conventions-at-baseline: 0
   - domain: design-method
     origin: project
     since: 2026-07-23
     ratified: 0
     killed: 0
+    graduated: 0
     gate-violations: 0
     working-file-tokens: 1331
     baseline-tokens: 1330
     principles-at-baseline: 4
     kills-at-baseline: 0
+    conventions-at-baseline: 0
   - domain: forms-inputs
     origin: project
     since: 2026-07-23
     ratified: 0
     killed: 0
+    graduated: 0
     gate-violations: 0
     working-file-tokens: 1511
     baseline-tokens: 1526
     principles-at-baseline: 7
     kills-at-baseline: 0
+    conventions-at-baseline: 0
   - domain: interviewing
     origin: project
     since: 2026-07-23
     ratified: 0
     killed: 0
+    graduated: 0
     gate-violations: 0
     working-file-tokens: 812
     baseline-tokens: 810
     principles-at-baseline: 3
     kills-at-baseline: 0
+    conventions-at-baseline: 0
   - domain: lists-selection
     origin: project
     since: 2026-07-23
     ratified: 0
     killed: 0
+    graduated: 0
     gate-violations: 0
     working-file-tokens: 1010
     baseline-tokens: 1027
     principles-at-baseline: 3
     kills-at-baseline: 1
+    conventions-at-baseline: 0
   - domain: motion
     origin: project
     since: 2026-07-23
     ratified: 0
     killed: 0
+    graduated: 0
     gate-violations: 0
     working-file-tokens: 789
     baseline-tokens: 798
     principles-at-baseline: 4
     kills-at-baseline: 0
+    conventions-at-baseline: 0
   - domain: orchestrator-routing
     origin: project
     since: 2026-07-23
     ratified: -1
     killed: 2
+    graduated: 0
     gate-violations: 0
     working-file-tokens: 3715
     baseline-tokens: 3460
     principles-at-baseline: 16
     kills-at-baseline: 1
+    conventions-at-baseline: 0
   - domain: planning
     origin: seed
     since: 2026-07-23
     ratified: 0
     killed: 0
+    graduated: 0
     gate-violations: 0
     working-file-tokens: 2264
     baseline-tokens: 2145
     principles-at-baseline: 5
     kills-at-baseline: 1
+    conventions-at-baseline: 0
   - domain: principle-judgment
     origin: seed
     since: 2026-07-23
     ratified: 2
     killed: 0
+    graduated: 0
     gate-violations: 0
     working-file-tokens: 2724
     baseline-tokens: 2016
     principles-at-baseline: 6
     kills-at-baseline: 0
+    conventions-at-baseline: 0
   - domain: ranking-evaluation
     origin: project
     since: 2026-07-23
     ratified: 0
     killed: 0
+    graduated: 0
     gate-violations: 0
     working-file-tokens: 856
     baseline-tokens: 853
     principles-at-baseline: 5
     kills-at-baseline: 0
+    conventions-at-baseline: 0
   - domain: ratify-gate
     origin: seed
     since: 2026-07-28
     ratified: 0
     killed: 0
+    graduated: 0
     gate-violations: 0
     working-file-tokens: 2408
     baseline-tokens: 3610
     principles-at-baseline: 12
     kills-at-baseline: 3
+    conventions-at-baseline: 0
   - domain: recoverability
     origin: seed
     since: 2026-07-23
     ratified: 0
     killed: 0
+    graduated: 0
     gate-violations: 0
     working-file-tokens: 577
     baseline-tokens: 595
     principles-at-baseline: 2
     kills-at-baseline: 1
+    conventions-at-baseline: 0
   - domain: spawn-integrity
     origin: project
     since: 2026-07-28
     ratified: 0
     killed: 0
+    graduated: 0
     gate-violations: 0
     working-file-tokens: 1592
     baseline-tokens: 1592
     principles-at-baseline: 3
     kills-at-baseline: 3
+    conventions-at-baseline: 0
   - domain: surfaces-elevation
     origin: project
     since: 2026-07-23
     ratified: 0
     killed: 0
+    graduated: 0
     gate-violations: 0
     working-file-tokens: 483
     baseline-tokens: 479
     principles-at-baseline: 3
     kills-at-baseline: 0
+    conventions-at-baseline: 0
   - domain: validation-feedback
     origin: project
     since: 2026-07-23
     ratified: 0
     killed: 0
+    graduated: 0
     gate-violations: 0
     working-file-tokens: 376
     baseline-tokens: 390
     principles-at-baseline: 3
     kills-at-baseline: 0
+    conventions-at-baseline: 0
   - domain: visual-hierarchy
     origin: project
     since: 2026-07-23
     ratified: 0
     killed: 0
+    graduated: 0
     gate-violations: 0
     working-file-tokens: 766
     baseline-tokens: 762
     principles-at-baseline: 4
     kills-at-baseline: 0
+    conventions-at-baseline: 0
   - domain: wizards-flows
     origin: project
     since: 2026-07-23
     ratified: 0
     killed: 0
+    graduated: 0
     gate-violations: 0
     working-file-tokens: 470
     baseline-tokens: 499
     principles-at-baseline: 3
     kills-at-baseline: 0
+    conventions-at-baseline: 0
 efficacy:
   - id: task-is-actionable-without-planning
     fired: 1

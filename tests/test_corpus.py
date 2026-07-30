@@ -8,6 +8,7 @@ from pathlib import Path
 
 
 SCRIPT = Path(__file__).parents[1] / "scripts" / "corpus.py"
+SEED_DOMAINS_DIR = Path(__file__).parents[1] / "domains"
 
 
 class CorpusCommandTestCase(unittest.TestCase):
@@ -735,6 +736,117 @@ class RecordGateCoOccurrenceAndOriginTest(CorpusCommandTestCase):
         self.assertIn("origin: seed", audit_text)
 
 
+class ConventionsTest(CorpusCommandTestCase):
+    """proposals/domain-repo-import.md §1: `conventions:` is a structured home for a graduated
+    principle — id/rule/reason, no condition — that still keys into audit.md and the ledger like
+    a principle does."""
+
+    def write_domain_text(self, name, body):
+        frontmatter = ("---\nsubject: coding\nposture: guardrail\n"
+                       "units-of-work: [implement-feature]\nuniversal: false\n---\n\n")
+        (self.root / "corpora" / "domains" / f"{name}.md").write_text(
+            frontmatter + f"# Domain: {name}\n\n```yaml\n{body}```\n"
+        )
+
+    def domain_with_convention(self, extra_condition=""):
+        return (
+            "conventions:\n\n"
+            "- id: block-arrow-bodies\n"
+            '  rule: "Always use block arrow bodies."\n'
+            '  reason: "The concise form has a silent failure mode."\n'
+            + extra_condition +
+            "\nprinciples:\n\n"
+            '- id: p1\n  rule: "R"\n  condition: "C"\n  reason: "Why."\n'
+            "\nkilled:\n\n"
+        )
+
+    def test_lint_domains_passes_valid_convention(self):
+        self.write_domain_text("conventions-test-domain", self.domain_with_convention())
+
+        result = subprocess.run(
+            [sys.executable, str(SCRIPT), "lint-domains", "--domains-dir",
+             str(self.root / "corpora" / "domains")],
+            text=True, capture_output=True, check=False,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_lint_domains_flags_convention_missing_reason(self):
+        self.write_domain_text(
+            "conventions-test-domain",
+            "conventions:\n\n- id: no-reason\n  rule: \"R\"\n\nprinciples:\n\nkilled:\n\n",
+        )
+
+        result = subprocess.run(
+            [sys.executable, str(SCRIPT), "lint-domains", "--domains-dir",
+             str(self.root / "corpora" / "domains")],
+            text=True, capture_output=True, check=False,
+        )
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("missing reason", result.stderr)
+
+    def test_lint_domains_flags_convention_with_condition(self):
+        self.write_domain_text(
+            "conventions-test-domain",
+            self.domain_with_convention(extra_condition='  condition: "Should not be here."\n'),
+        )
+
+        result = subprocess.run(
+            [sys.executable, str(SCRIPT), "lint-domains", "--domains-dir",
+             str(self.root / "corpora" / "domains")],
+            text=True, capture_output=True, check=False,
+        )
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("unconditioned by definition", result.stderr)
+
+    def test_manifest_lists_convention_ids(self):
+        self.write_domain_text("conventions-test-domain", self.domain_with_convention())
+
+        result = self.run_command(["manifest", "--json"])
+
+        import json
+        data = json.loads(result.stdout)
+        domain = next(d for d in data["domains"] if d["name"] == "conventions-test-domain")
+        self.assertEqual(domain["conventions"], ["block-arrow-bodies"])
+
+    def test_verify_reconciles_after_graduation(self):
+        # Simulate: a principle already ratified, then graduated to a convention this gate.
+        self.write_domain_text(
+            "conventions-test-domain",
+            "conventions:\n\n"
+            '- id: block-arrow-bodies\n  rule: "R"\n  reason: "Why."\n'
+            "\nprinciples:\n\nkilled:\n\n",
+        )
+        gate = self.run_command([
+            "record-gate", "--domain", "conventions-test-domain", "--graduated", "1",
+        ])
+        self.assertEqual(gate.returncode, 0, gate.stderr)
+
+        result = self.run_command(["verify"])
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("reconciled", result.stdout)
+
+    def test_verify_flags_unrecorded_graduation(self):
+        self.write_domain_text("conventions-test-domain", "principles:\n\nkilled:\n\n")
+        measure = self.run_command(["measure"])
+        self.assertEqual(measure.returncode, 0, measure.stderr)
+        # A convention appears in the working file with no matching --graduated recorded.
+        self.write_domain_text(
+            "conventions-test-domain",
+            "conventions:\n\n"
+            '- id: block-arrow-bodies\n  rule: "R"\n  reason: "Why."\n'
+            "\nprinciples:\n\nkilled:\n\n",
+        )
+
+        result = self.run_command(["verify"])
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("UNRECORDED graduation", result.stdout)
+
+
 class ArbitraryLayerOverrideTest(unittest.TestCase):
     """measure/verify/record-gate must work on any domains-dir + audit.md pair — e.g. the
     kernel-seed layer, not only a project's own corpora/domains — the same treatment
@@ -823,7 +935,7 @@ class ComposeSpawnPromptTest(CorpusCommandTestCase):
 
         result = self.run_command([
             "compose-spawn-prompt", "--stance", "convergent", "--domains", "coding-general",
-            "--task-file", str(task), "--output", str(out),
+            "--task-file", str(task), "--output", str(out), "--domains-dir", str(SEED_DOMAINS_DIR),
         ])
 
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
@@ -837,9 +949,11 @@ class ComposeSpawnPromptTest(CorpusCommandTestCase):
         first_id_line = next(line for line in seed_text.splitlines() if line.strip().startswith("- id:"))
         self.assertIn(first_id_line.strip(), text)
 
-    def test_project_domain_always_merges_with_seed(self):
-        # No fork mechanism — a project's own domain file merges with the seed by concatenation,
-        # always, regardless of what the project file's content looks like.
+    def test_project_domain_is_the_sole_source_no_seed_merge(self):
+        # proposals/domain-repo-import.md §2: no more live seed/project merge — a project's own
+        # corpora/domains/ is the whole domain set. A same-named seed domain (this skill's own
+        # domains/coding-general.md, which has an "ask-before-architecture" principle) never
+        # leaks in just because the project also has a domain of the same name.
         task = self.write_task()
         out = self.root / "out.md"
         (self.root / "corpora" / "domains" / "coding-general.md").write_text(
@@ -854,10 +968,8 @@ class ComposeSpawnPromptTest(CorpusCommandTestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
         text = out.read_text()
-        self.assertIn("<!-- seed:", text)
-        self.assertIn("<!-- project:", text)
         self.assertIn("project-only-rule", text)
-        self.assertIn("ask-before-architecture", text)
+        self.assertNotIn("ask-before-architecture", text)
 
     def test_project_only_domain_with_no_seed_counterpart(self):
         task = self.write_task()
@@ -890,7 +1002,7 @@ class ComposeSpawnPromptTest(CorpusCommandTestCase):
 
         result = self.run_command([
             "compose-spawn-prompt", "--stance", "convergent", "--domains", "coding-general",
-            "--task-file", str(task), "--composition", "coder",
+            "--task-file", str(task), "--composition", "coder", "--domains-dir", str(SEED_DOMAINS_DIR),
         ])
 
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
@@ -908,7 +1020,7 @@ class ComposeSpawnPromptTest(CorpusCommandTestCase):
 
         result = self.run_command([
             "compose-spawn-prompt", "--stance", "convergent", "--domains", "coding-general",
-            "--task-file", str(task), "--composition", "coder",
+            "--task-file", str(task), "--composition", "coder", "--domains-dir", str(SEED_DOMAINS_DIR),
         ])
 
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
@@ -923,11 +1035,256 @@ class ComposeSpawnPromptTest(CorpusCommandTestCase):
 
         result = self.run_command([
             "compose-spawn-prompt", "--stance", "convergent", "--domains", "coding-general",
-            "--task-file", str(task), "--output", str(out),
+            "--task-file", str(task), "--output", str(out), "--domains-dir", str(SEED_DOMAINS_DIR),
         ])
 
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
         self.assertTrue(out.exists())
+
+
+class ImportTest(CorpusCommandTestCase):
+    """proposals/domain-repo-import.md §3: import is a candidate producer, not a direct write —
+    it never touches a domain working file, only appends to corpora/import-candidates.md."""
+
+    def setUp(self):
+        super().setUp()
+        self.source_dir = self.root / "source-domains"
+        self.source_dir.mkdir()
+        (self.source_dir / "widgets.md").write_text(
+            "---\nsubject: coding\nposture: guardrail\nunits-of-work: [implement-feature]\n"
+            "universal: false\n---\n\n# Domain: widgets\n\n```yaml\n"
+            "conventions:\n\n"
+            '- id: a-convention\n  rule: "Do X."\n  reason: "Because Y."\n\n'
+            "principles:\n\n"
+            '- id: a-principle\n  rule: "Do Z."\n  condition: "When W."\n  reason: "Because V."\n\n'
+            "killed:\n```\n"
+        )
+        (self.source_dir / "audit.md").write_text(
+            "# Audit\n\n```yaml\nprovenance:\n"
+            "- id: a-principle\n  domain: widgets\n  provenance: \"2026-01-01, some task.\"\n```\n"
+        )
+
+    def test_import_list_flags_already_present(self):
+        (self.root / "corpora" / "domains" / "widgets.md").write_text(
+            "---\nsubject: coding\nposture: guardrail\nunits-of-work: [implement-feature]\n"
+            "universal: false\n---\n\n# Domain: widgets\n\n```yaml\n"
+            'principles:\n\n- id: a-principle\n  rule: "R"\n  condition: "C"\n  reason: "Why."\n\nkilled:\n```\n'
+        )
+
+        result = self.run_command(["import-list", "--source", str(self.source_dir)])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("widgets/a-convention (convention): Do X.", result.stdout)
+        self.assertIn("widgets/a-principle (principle) [already present]: Do Z.", result.stdout)
+
+    def test_import_candidate_proposes_principle_with_provenance(self):
+        result = self.run_command([
+            "import-candidate", "--source", str(self.source_dir),
+            "--domain", "widgets", "--id", "a-principle",
+        ])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        candidates = (self.root / "corpora" / "import-candidates.md").read_text()
+        self.assertIn("id: a-principle", candidates)
+        self.assertIn('condition: "When W."', candidates)
+        self.assertIn("imported-from:", candidates)
+        self.assertIn(f'source: "{self.source_dir}"', candidates)
+        self.assertIn("domain: widgets", candidates)
+        self.assertIn('originally-ratified: "2026-01-01, some task."', candidates)
+        # never writes into a domain working file directly
+        self.assertFalse((self.root / "corpora" / "domains" / "widgets.md").exists())
+
+    def test_import_candidate_convention_has_no_condition_field(self):
+        result = self.run_command([
+            "import-candidate", "--source", str(self.source_dir),
+            "--domain", "widgets", "--id", "a-convention",
+        ])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        candidates = (self.root / "corpora" / "import-candidates.md").read_text()
+        block = candidates.split("id: a-convention", 1)[1]
+        self.assertNotIn("condition:", block.split("provenance:")[0])
+
+    def test_import_candidate_can_rename_and_retarget_domain(self):
+        result = self.run_command([
+            "import-candidate", "--source", str(self.source_dir),
+            "--domain", "widgets", "--id", "a-principle",
+            "--as-domain", "other-domain", "--as-id", "renamed-principle",
+        ])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        candidates = (self.root / "corpora" / "import-candidates.md").read_text()
+        self.assertIn("id: renamed-principle", candidates)
+        self.assertIn("domains: [other-domain]", candidates)
+        self.assertIn("id: a-principle", candidates)  # source id preserved in imported-from
+
+    def test_import_candidate_refuses_id_collision(self):
+        (self.root / "corpora" / "domains" / "widgets.md").write_text(
+            "---\nsubject: coding\nposture: guardrail\nunits-of-work: [implement-feature]\n"
+            "universal: false\n---\n\n# Domain: widgets\n\n```yaml\n"
+            'principles:\n\n- id: a-principle\n  rule: "R"\n  condition: "C"\n  reason: "Why."\n\nkilled:\n```\n'
+        )
+
+        result = self.run_command([
+            "import-candidate", "--source", str(self.source_dir),
+            "--domain", "widgets", "--id", "a-principle",
+        ])
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("already exists", result.stderr)
+
+    def test_import_candidate_unknown_id_fails(self):
+        result = self.run_command([
+            "import-candidate", "--source", str(self.source_dir),
+            "--domain", "widgets", "--id", "nonexistent",
+        ])
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("no principle or convention", result.stderr)
+
+    def test_import_candidate_appends_multiple_entries(self):
+        self.run_command([
+            "import-candidate", "--source", str(self.source_dir),
+            "--domain", "widgets", "--id", "a-principle",
+        ])
+
+        result = self.run_command([
+            "import-candidate", "--source", str(self.source_dir),
+            "--domain", "widgets", "--id", "a-convention",
+        ])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        candidates = (self.root / "corpora" / "import-candidates.md").read_text()
+        self.assertIn("id: a-principle", candidates)
+        self.assertIn("id: a-convention", candidates)
+        self.assertEqual(candidates.count("extracted:"), 2)
+
+    def test_import_default_pool_matches_project_shape(self):
+        self.write_shape = None  # not used; write config directly
+        (self.root / "corpora" / "config.md").write_text(
+            "# Config\n\n## project-shape\nlanguage: typescript\nhas-ui: no\n"
+        )
+
+        result = self.run_command(["import-default-pool", "--source", str(self.source_dir)])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("proposed 2 candidate(s)", result.stdout)
+        candidates = (self.root / "corpora" / "import-candidates.md").read_text()
+        self.assertIn("id: a-principle", candidates)
+        self.assertIn("id: a-convention", candidates)
+
+
+class MigrateDomainsTest(CorpusCommandTestCase):
+    """processes/domain-repo-migration.md: a one-time materialization of a pre-dissolution
+    project's live seed/project merge into its own corpora/domains/ — writes directly (no
+    candidate/gate review), since it isn't proposing new judgment, only making already-active
+    judgment explicit."""
+
+    def setUp(self):
+        super().setUp()
+        self.source_dir = self.root / "source-domains"
+        self.source_dir.mkdir()
+        (self.source_dir / "widgets.md").write_text(
+            "---\nsubject: coding\nposture: guardrail\nunits-of-work: [implement-feature]\n"
+            "universal: false\n---\n\n# Domain: widgets\n\n```yaml\nlast-retrospective: 2026-01-01\n\n"
+            "conventions:\n\n"
+            '- id: seed-convention\n  rule: "Do X."\n  reason: "Because Y."\n\n'
+            "principles:\n\n"
+            '- id: seed-principle\n  rule: "Do Z."\n  condition: "When W."\n  reason: "Because V."\n\n'
+            "killed:\n```\n"
+        )
+        (self.root / "corpora" / "config.md").write_text(
+            "# Config\n\n## project-shape\nlanguage: typescript\nhas-ui: no\n"
+        )
+
+    def test_migrates_seed_content_into_project_domain_file(self):
+        result = self.run_command(["migrate-domains", "--source", str(self.source_dir),
+                                    "--domains", "widgets"])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        text = (self.root / "corpora" / "domains" / "widgets.md").read_text()
+        self.assertIn("id: seed-principle", text)
+        self.assertIn("id: seed-convention", text)
+        self.assertIn("subject: coding", text)  # frontmatter carried over
+
+    def test_preserves_existing_project_content_and_ids(self):
+        (self.root / "corpora" / "domains" / "widgets.md").write_text(
+            "---\nsubject: coding\nposture: guardrail\nunits-of-work: [implement-feature]\n"
+            "universal: false\n---\n\n# Domain: widgets\n\n```yaml\nlast-retrospective: none\n\n"
+            "conventions:\n\nprinciples:\n\n"
+            '- id: project-principle\n  rule: "Project rule."\n  condition: "Project condition."\n  reason: "Project reason."\n\n'
+            "killed:\n```\n"
+        )
+
+        result = self.run_command(["migrate-domains", "--source", str(self.source_dir),
+                                    "--domains", "widgets"])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        text = (self.root / "corpora" / "domains" / "widgets.md").read_text()
+        self.assertIn("id: project-principle", text)
+        self.assertIn("id: seed-principle", text)
+
+    def test_does_not_duplicate_an_id_already_present_in_project(self):
+        (self.root / "corpora" / "domains" / "widgets.md").write_text(
+            "---\nsubject: coding\nposture: guardrail\nunits-of-work: [implement-feature]\n"
+            "universal: false\n---\n\n# Domain: widgets\n\n```yaml\nlast-retrospective: none\n\n"
+            "conventions:\n\nprinciples:\n\n"
+            '- id: seed-principle\n  rule: "Overridden rule."\n  condition: "Overridden condition."\n  reason: "Overridden reason."\n\n'
+            "killed:\n```\n"
+        )
+
+        result = self.run_command(["migrate-domains", "--source", str(self.source_dir),
+                                    "--domains", "widgets"])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        text = (self.root / "corpora" / "domains" / "widgets.md").read_text()
+        self.assertEqual(text.count("id: seed-principle"), 1)
+        self.assertIn("Overridden rule.", text)  # project's own version wins, not seed's
+
+    def test_records_migration_provenance_in_project_audit(self):
+        result = self.run_command(["migrate-domains", "--source", str(self.source_dir),
+                                    "--domains", "widgets"])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        audit = (self.root / "corpora" / "domains" / "audit.md").read_text()
+        self.assertIn("id: seed-principle", audit)
+        self.assertIn("type: migrated-from-seed", audit)
+
+    def test_measure_and_verify_are_clean_immediately_after_migration(self):
+        self.run_command(["migrate-domains", "--source", str(self.source_dir), "--domains", "widgets"])
+        self.run_command(["measure"])
+
+        result = self.run_command(["verify"])
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("reconciled", result.stdout)
+
+    def test_lint_domains_passes_on_migrated_output(self):
+        self.run_command(["migrate-domains", "--source", str(self.source_dir), "--domains", "widgets"])
+
+        result = subprocess.run(
+            [sys.executable, str(SCRIPT), "lint-domains", "--domains-dir",
+             str(self.root / "corpora" / "domains")],
+            text=True, capture_output=True, check=False,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_default_domains_selects_by_project_shape(self):
+        (self.source_dir / "coding-nextjs-like.md").write_text(
+            "---\nsubject: coding\nposture: guardrail\nunits-of-work: [implement-feature]\n"
+            "applies-when:\n  - framework: nextjs\nuniversal: false\n---\n\n"
+            "# Domain: coding-nextjs-like\n\n```yaml\nlast-retrospective: none\n\n"
+            "conventions:\n\nprinciples:\n\n"
+            '- id: nextjs-only\n  rule: "R"\n  condition: "C"\n  reason: "Why."\n\nkilled:\n```\n'
+        )
+        # project shape has no framework: nextjs, so coding-nextjs-like should not be pulled in,
+        # while widgets (no applies-when) always matches
+        result = self.run_command(["migrate-domains", "--source", str(self.source_dir)])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue((self.root / "corpora" / "domains" / "widgets.md").exists())
+        self.assertFalse((self.root / "corpora" / "domains" / "coding-nextjs-like.md").exists())
 
 
 class HandoffDoneTest(CorpusCommandTestCase):
@@ -1211,7 +1568,8 @@ class SelectionTest(CorpusCommandTestCase):
     def test_select_implement_feature_for_nextjs_typescript_project(self):
         self.write_shape(language="typescript", framework="next.js", **{"has-ui": "yes"}, styling="tailwind")
 
-        result = self.run_command(["select", "--unit-of-work", "implement-feature", "--json"])
+        result = self.run_command(["select", "--unit-of-work", "implement-feature", "--json",
+                                    "--domains-dir", str(SEED_DOMAINS_DIR)])
 
         self.assertEqual(result.returncode, 0, result.stderr)
         import json
@@ -1229,7 +1587,8 @@ class SelectionTest(CorpusCommandTestCase):
     def test_select_migrate_dependencies_excludes_coding_general(self):
         self.write_shape(language="typescript", framework="next.js", **{"has-ui": "yes"}, styling="tailwind")
 
-        result = self.run_command(["select", "--unit-of-work", "migrate-dependencies", "--json"])
+        result = self.run_command(["select", "--unit-of-work", "migrate-dependencies", "--json",
+                                    "--domains-dir", str(SEED_DOMAINS_DIR)])
 
         self.assertEqual(result.returncode, 0, result.stderr)
         import json
@@ -1240,7 +1599,8 @@ class SelectionTest(CorpusCommandTestCase):
     def test_select_design_ui_surface_for_has_ui_project(self):
         self.write_shape(language="typescript", framework="next.js", **{"has-ui": "yes"}, styling="tailwind")
 
-        result = self.run_command(["select", "--unit-of-work", "design-ui-surface", "--json"])
+        result = self.run_command(["select", "--unit-of-work", "design-ui-surface", "--json",
+                                    "--domains-dir", str(SEED_DOMAINS_DIR)])
 
         self.assertEqual(result.returncode, 0, result.stderr)
         import json
@@ -1252,7 +1612,8 @@ class SelectionTest(CorpusCommandTestCase):
     def test_select_returns_empty_set_for_unmatched_unit_of_work(self):
         self.write_shape(**{"has-ui": "no"})
 
-        result = self.run_command(["select", "--unit-of-work", "design-ui-surface", "--json"])
+        result = self.run_command(["select", "--unit-of-work", "design-ui-surface", "--json",
+                                    "--domains-dir", str(SEED_DOMAINS_DIR)])
 
         self.assertEqual(result.returncode, 0, result.stderr)
         import json
@@ -1264,7 +1625,8 @@ class SelectionTest(CorpusCommandTestCase):
     def test_select_bootstrap_ui_surface_is_narrower_than_ongoing_ui_design(self):
         self.write_shape(language="typescript", framework="next.js", **{"has-ui": "yes"}, styling="tailwind")
 
-        result = self.run_command(["select", "--unit-of-work", "bootstrap-ui-surface", "--json"])
+        result = self.run_command(["select", "--unit-of-work", "bootstrap-ui-surface", "--json",
+                                    "--domains-dir", str(SEED_DOMAINS_DIR)])
 
         self.assertEqual(result.returncode, 0, result.stderr)
         import json
@@ -1278,7 +1640,8 @@ class SelectionTest(CorpusCommandTestCase):
     def test_select_bootstrap_ux_surface_is_narrower_than_ongoing_ux_design(self):
         self.write_shape(language="typescript", framework="next.js", **{"has-ui": "yes"}, styling="tailwind")
 
-        result = self.run_command(["select", "--unit-of-work", "bootstrap-ux-surface", "--json"])
+        result = self.run_command(["select", "--unit-of-work", "bootstrap-ux-surface", "--json",
+                                    "--domains-dir", str(SEED_DOMAINS_DIR)])
 
         self.assertEqual(result.returncode, 0, result.stderr)
         import json
@@ -1317,7 +1680,8 @@ class MissingDomainsDirTest(unittest.TestCase):
     def test_select_does_not_require_domains_dir_to_exist(self):
         self.assertFalse((self.root / "corpora" / "domains").exists())
 
-        result = self.run_command(["select", "--unit-of-work", "plan-work"])
+        result = self.run_command(["select", "--unit-of-work", "plan-work",
+                                    "--domains-dir", str(SEED_DOMAINS_DIR)])
 
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("planning", result.stdout)
@@ -1349,13 +1713,15 @@ class MissingDomainsDirTest(unittest.TestCase):
 
 class CheckCompositionTest(CorpusCommandTestCase):
     def test_mixed_subjects_fail(self):
-        result = self.run_command(["check-composition", "--domains", "coding-general,color"])
+        result = self.run_command(["check-composition", "--domains", "coding-general,color",
+                                    "--domains-dir", str(SEED_DOMAINS_DIR)])
 
         self.assertEqual(result.returncode, 2)
         self.assertIn("mixed subjects", result.stderr)
 
     def test_universal_domain_alongside_coding_passes(self):
-        result = self.run_command(["check-composition", "--domains", "coding-general,interviewing"])
+        result = self.run_command(["check-composition", "--domains", "coding-general,interviewing",
+                                    "--domains-dir", str(SEED_DOMAINS_DIR)])
 
         self.assertEqual(result.returncode, 0, result.stderr)
 
@@ -1365,7 +1731,7 @@ class CheckCompositionTest(CorpusCommandTestCase):
 
         result = self.run_command([
             "compose-spawn-prompt", "--stance", "convergent", "--domains", "coding-general,color",
-            "--task-file", str(task),
+            "--task-file", str(task), "--domains-dir", str(SEED_DOMAINS_DIR),
         ])
 
         self.assertEqual(result.returncode, 2)
@@ -1374,7 +1740,7 @@ class CheckCompositionTest(CorpusCommandTestCase):
 
 class ManifestTest(CorpusCommandTestCase):
     def test_manifest_never_leaks_rule_or_reason(self):
-        result = self.run_command(["manifest", "--json"])
+        result = self.run_command(["manifest", "--json", "--domains-dir", str(SEED_DOMAINS_DIR)])
 
         self.assertEqual(result.returncode, 0, result.stderr)
         import json
@@ -1387,7 +1753,7 @@ class ManifestTest(CorpusCommandTestCase):
                 self.assertEqual(set(condition), {"id", "condition"})
 
     def test_manifest_includes_recoverability_conditions(self):
-        result = self.run_command(["manifest", "--json"])
+        result = self.run_command(["manifest", "--json", "--domains-dir", str(SEED_DOMAINS_DIR)])
 
         self.assertEqual(result.returncode, 0, result.stderr)
         import json
@@ -1408,6 +1774,17 @@ class ChunkLedgerTest(CorpusCommandTestCase):
     DESIGN_UX_FLOW_DOMAINS = ("design-method, forms-inputs, interviewing, lists-selection, "
                                "ranking-evaluation, recoverability, spawn-integrity, validation-feedback, "
                                "wizards-flows")
+
+    def setUp(self):
+        super().setUp()
+        # No more live seed/project merge (proposals/domain-repo-import.md §2) — chunk-start/
+        # chunk-done/verify-chunks all read only this project's own corpora/domains/, so the real
+        # seed domains design-ux-flow's composition depends on are copied in once, the same shape
+        # an import would leave behind.
+        for name in self.DESIGN_UX_FLOW_DOMAINS.split(", "):
+            (self.root / "corpora" / "domains" / f"{name}.md").write_text(
+                (SEED_DOMAINS_DIR / f"{name}.md").read_text()
+            )
 
     def write_handoff_with_workstream(self, workstream, name="handoff.md", domains_loaded=None):
         path = self.root / name

@@ -1,9 +1,13 @@
 # Proposal: domain schema, seed/project dissolution, and cross-repo import
 
-**Status: draft, not implemented.** Nothing in `corpus.py`, `kernel.md`, `general-operation.md`, or
-any domain file has changed for this proposal. Several projects run on the current seed/project
-model today; this is not built until there's a concrete migration path those projects can actually
-run, not just a plan that assumes a clean slate.
+**Status: implemented 2026-07-30 (§1–§5).** `corpus.py`, `kernel.md`, `general-operation.md`,
+`bootstrap.md`, `SKILL.md`, `README.md`, `domains/principle-judgment.md`, `domains/coding-ts.md`,
+and `domains/audit.md` all changed for this proposal; `processes/domain-repo-migration.md` is new.
+The two related proposals below (principle elicitation through operator dialogue; monorepo support)
+remain draft, not implemented — out of scope for this pass. Downstream projects (Blog, FAMOUS, etc.)
+still need to actually run `migrate-domains` against their own repos before their next corpora
+session under this model — that migration could not be run from this repo, since those projects
+live elsewhere.
 
 ---
 

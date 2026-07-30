@@ -18,6 +18,12 @@ this session — see `LINEAGE.md` for the audit's own findings; this domain gene
 not the specific findings. Audit metadata lives in `domains/audit.md`, loaded only at
 ratify/retrospective time.
 
+The judgment below applies the same way regardless of who proposed the candidate — a spawn's
+output, a mined transcript, an import, or the operator stating a rule they already hold directly.
+Operator-direct authorship is a sanctioned entry point, not a bypass of this domain's tests
+(`kernel.md`, "The ratify gate") — the fork test and knowledge-vs-judgment distinction below still
+apply to an operator-authored candidate the same as any other.
+
 ```yaml
 last-retrospective: none
 

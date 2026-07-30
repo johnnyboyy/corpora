@@ -121,6 +121,14 @@ decisions," with an empty `decisions: []` list. This queue is project working st
 For every project, create `corpora/deterministic-shortcut-candidates.md` from `kernel.md`, "Project utilities,"
 with an empty `candidates: []` list.
 
+**Offer the default-pool import.** A freshly-bootstrapped project's `corpora/domains/` starts
+empty — there is no automatic seed inclusion (`kernel.md`, "Project corpora"). Ask the operator
+whether to bulk-import this skill's default pool now (`corpus.py import-default-pool`), which
+proposes every principle and convention whose `applies-when` already matches the shape just
+recorded, as one batch of candidates in `corpora/import-candidates.md`, ready to ratify. This is
+the normal path for a new project; declining just means starting from an emptier corpus and
+importing individual principles later as they turn out to matter (`kernel.md`, "Import").
+
 ---
 
 ## The config file (`corpora/config.md`)

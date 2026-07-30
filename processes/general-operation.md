@@ -82,15 +82,16 @@ ask one clarifying question first.
    Phase 2's routing decision, then `domains:` — run `scripts/corpus.py select --unit-of-work <u>`
    rather than asserting the subset freehand; it evaluates every domain's frontmatter against the
    project's `corpora/config.md` and returns the composed set, plus `expected-output:`. For each
-   domain in the composition, load the seed working file (`domains/<domain>.md`) then the project
-   working file (`corpora/domains/<domain>.md`) if it exists — apply seed + project principles
-   together. Starting without the full composition is a bug — the spawn starts with missing
-   judgment. The spawn reads `corpora/config.md` itself; if absent, surface that the project needs
-   `corpora:bootstrap` rather than starting into a vacuum. Hold on to this `unit-of-work:` value and
-   the workstream id — Phase 6's chunk-close step needs both, and neither is recoverable from the
-   handoff alone (the handoff carries `stance:` and `workstream:`, not `unit-of-work:`).
+   domain in the composition, load its working file (`corpora/domains/<domain>.md`) — a project's
+   own `corpora/domains/` is the whole domain set; there is no separate seed layer to also load
+   (`kernel.md`, "Project corpora"). Starting without the full composition is a bug — the spawn
+   starts with missing judgment. The spawn reads `corpora/config.md` itself; if absent, surface
+   that the project needs `corpora:bootstrap` rather than starting into a vacuum. Hold on to this
+   `unit-of-work:` value and the workstream id — Phase 6's chunk-close step needs both, and neither
+   is recoverable from the handoff alone (the handoff carries `stance:` and `workstream:`, not
+   `unit-of-work:`).
 2. Prompt structure: [`kernel.md`'s "Generative stance" section for the composed stance] +
-   `## Domains` + [each composed domain's seed + project working content] + [kernel.md's "The
+   `## Domains` + [each composed domain's full working content] + [kernel.md's "The
    handoff artifact" section, inlined] + `## Task` + task description + relevant context. Build
    this with `scripts/corpus.py compose-spawn-prompt --stance <s> --domains <d1,d2,...>
    --task-file <path>` rather than hand-assembling it: the command

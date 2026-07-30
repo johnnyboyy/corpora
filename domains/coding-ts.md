@@ -15,25 +15,18 @@ domain's default language, even where a given principle's underlying fact would 
 JS. Loaded by any convergent coding spawn when `language` is `typescript` or `javascript`. Audit
 metadata lives in `domains/audit.md`, loaded only at ratify/retrospective time.
 
-Settled JS/TS style, held here in the preamble rather than in `principles:` — both are JS
-instances of the base `coding-general` meta-rules, near-unconditional enough that per-case
-condition-weighing is friction without benefit (provenance: `domains/audit.md`):
-
-- **Block arrow bodies always** (`() => { return value; }`) — `{}` after an arrow is a function
-  body, not a value; the concise form has a silent failure mode and forces a per-function judgment
-  call.
-- **No early returns or guard clauses** — use if/else block bodies. Indentation should encode the
-  conditions under which each line runs: an early return lets a line that needs two conditions to
-  be true sit at the function's base indentation as if it needs nothing, while if/else puts it
-  where it belongs. A flat row of guards whose order doesn't matter is not a case for keeping
-  them; it is a signal to extract and name the combined condition
-  (`const error = validateRequest(req)`), after which if/else costs nothing. Scoped to this pack
-  because some ecosystems (e.g. Go) idiomatically prefer guard clauses — the reasoning itself is
-  general. See also: `no-shell-for-structural-absence`, below — the narrower case of a branch with
-  no true opposite side, which this reasoning was never meant to force into a populated shell.
-
 ```yaml
 last-retrospective: 2026-07-18
+
+conventions:
+
+- id: arrow-block-body
+  rule: "Use block arrow bodies always (`() => { return value; }`)."
+  reason: "`{}` after an arrow is a function body, not a value; the concise form has a silent failure mode and forces a per-function judgment call."
+
+- id: no-early-returns
+  rule: "Use if/else block bodies, not early returns or guard clauses."
+  reason: "Indentation should encode the conditions under which each line runs: an early return lets a line that needs two conditions to be true sit at the function's base indentation as if it needs nothing, while if/else puts it where it belongs. A flat row of guards whose order doesn't matter is not a case for keeping them; it is a signal to extract and name the combined condition (`const error = validateRequest(req)`), after which if/else costs nothing. Scoped to this pack because some ecosystems (e.g. Go) idiomatically prefer guard clauses — the reasoning itself is general. See also: `no-shell-for-structural-absence`, below — the narrower case of a branch with no true opposite side, which this reasoning was never meant to force into a populated shell."
 
 principles:
 
@@ -61,7 +54,7 @@ principles:
 - id: no-shell-for-structural-absence
   rule: "If one side of a conditional is a true structural absence — not skipped logic, just nothing to do by definition — don't wrap it in an if/else. Reach for a construct that has no empty branch to begin with, e.g. filter."
   condition: "A branch where one outcome does nothing at all — typically filtering a collection or checking a predicate."
-  reason: "An empty branch beside a real one gives 'nothing happens' the same weight as the real case, though it's incidental, not meaningful. Making it explicit then forces a stray empty block or a comment that just restates the condition. A branchless construct has nothing to fill or comment. Narrower than this domain's 'no early returns' preamble convention, above — that convention was never meant to force a true structural absence into a populated if/else shell."
+  reason: "An empty branch beside a real one gives 'nothing happens' the same weight as the real case, though it's incidental, not meaningful. Making it explicit then forces a stray empty block or a comment that just restates the condition. A branchless construct has nothing to fill or comment. Narrower than this domain's `no-early-returns` convention, above — that convention was never meant to force a true structural absence into a populated if/else shell."
 
 killed:
 

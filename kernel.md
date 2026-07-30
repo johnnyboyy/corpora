@@ -52,8 +52,8 @@ the working load is *selective* (only composed domains); audit metadata is one f
 because the audit load is *broad* (the orchestrator pulls the whole layer at once).
 
 - **Working file** (`domains/<domain>.md`) — one per domain. The active `principles:` with their
-  `id / rule / condition / reason / see-also`, plus the `killed:` log. This is the only
-  part loaded when a spawn works, inline or spawned.
+  `id / rule / condition / reason / see-also`, the `conventions:` list (below), plus the `killed:`
+  log. This is the only part loaded when a spawn works, inline or spawned.
 - **Audit file** (`domains/audit.md`, one per layer — kernel-seed and each project) —
   per-principle `provenance` keyed by `id` (each entry noting its `domain`) and per-kill audit
   metadata. Loaded only at ratify and retrospective time, by the orchestrator —
@@ -271,6 +271,13 @@ Every cross-boundary change is **propose → ratify → promote**, never write-d
 
 - A spawn proposes a principle as part of its output. It cannot write a corpus.
 - The operator (or a ratifying spawn acting under standing rules) reviews and ratifies or rejects.
+- **Operator-direct authorship is sanctioned**, not a bypass of this rule: the operator already
+  knows a rule they hold — no spawn had to produce it as a proposal first. `corpus.py record-gate
+  --ratified 1` runs standalone (no handoff required) with a hand-written provenance entry using
+  the convention `"Operator-authored, <date>, based on observed <behavior>, root-caused and
+  refined."` What "never write-directly" actually forbids is a *spawn* writing a corpus directly,
+  skipping the gate's review — it was never a prohibition on the operator's own hand, which the
+  gate exists to serve, not to route around.
 - **Rejections are kept** with their reason. The kill log is the highest-signal training data.
 - Structural changes (split a domain, add an explorer, change a route) go through the
   same gate.
@@ -358,14 +365,27 @@ carries `date`, `type` (generalized / consolidated / split / moved), and `reason
       reason: "Re-homed from ui-designer corpus to the recoverability domain — it is shared with UX."
 ```
 
-Retired principle — folded into scene-setting: when a principle has been ratified long enough that
-checking its `condition` and `reason` before every task is friction without benefit, move its
-substance into the domain's own **preamble** — the scene-setting prose read before the working
-file's `principles:` list — and remove the entry from `principles:`. This is not a separate
-authority tier: a preamble doesn't read as more authoritative than a principle, it's just the
-frame read first. Add a `history:` entry (`type: folded-to-preamble`) to the principle's
-audit-layer `provenance` record so the trail stays legible — a principle that reappears as a
-corpus proposal after being folded is a signal of regression, not new insight.
+Retired principle — graduated to a convention: when a principle has been ratified long enough that
+checking its `condition` before every task is friction without benefit, move it from `principles:`
+to the working file's `conventions:` list, dropping `condition` and keeping its `id`, `rule`, and
+`reason`:
+
+```yaml
+- id: convention-id
+  rule: "The guidance."
+  reason: "Why — the justification, unchanged from the principle it graduated from."
+  # no condition — unconditioned by definition, applies whenever this domain loads
+```
+
+This is not a separate authority tier: a convention doesn't read as more authoritative than a
+principle, it is simply unconditioned — checked whenever the domain loads, with no per-case
+condition-weighing left to do. Unlike the old fold-to-preamble mechanic, a convention keeps its
+`id`: it stays addressable, killable (a convention can still move to `killed:` if it turns out
+wrong), and graduatable in the other direction (see "Promotion restraint," below) — dissolving a
+principle into unstructured preamble prose loses all three. Add a `history:` entry (`type:
+graduated-to-convention`) to the principle's audit-layer `provenance` record so the trail stays
+legible — a principle that reappears as a corpus proposal after graduating is a signal of
+regression, not new insight.
 
 A principle that has outgrown its narrow domain — belongs somewhere more general, or warrants a
 new domain of its own — is handled by the same mechanism as any other domain reassignment: the
@@ -374,12 +394,12 @@ domain-reassignment judgment. No parallel "laws vs. rules" split exists here —
 from condition-checking is *more* dangerous, not more trustworthy, and a separate authority tier
 would carry an ossification risk not worth taking on.
 
-**Promotion restraint** applies to the fold-to-preamble case: before folding, ask whether the
-spawn would still need to reconsider this when the project context changes. Fold only if the
-judgment is stable *across the kinds of projects the domain serves* — or is so foundational that
-contestability has genuinely become noise — not merely because it has repeated inside one project
-family. When in doubt, leave it in `principles:` where its `condition` and `reason` can still be
-checked against an unfamiliar case.
+**Promotion restraint** applies to graduation into `conventions:`: before graduating, ask whether
+the spawn would still need to reconsider this when the project context changes. Graduate only if
+the judgment is stable *across the kinds of projects the domain serves* — or is so foundational
+that contestability has genuinely become noise — not merely because it has repeated inside one
+project family. When in doubt, leave it in `principles:` where its `condition` and `reason` can
+still be checked against an unfamiliar case.
 
 ### Killed entries
 
@@ -706,25 +726,80 @@ may consolidate duplicates or obsolete entries. Candidate status is `open`, `def
 
 In any project using this system, project-specific accumulated judgment lives under
 `<project-root>/corpora/domains/`, one working file per domain (`<domain>.md`) plus a single
-`corpora/domains/audit.md` for the project layer, same schema as the seed domains. The kernel is the mechanism (schema, ratify gate, retrospective,
-lifecycle) and is indifferent to how many domains exist.
+`corpora/domains/audit.md` for the project layer, same schema as any other layer. The kernel is the
+mechanism (schema, ratify gate, retrospective, lifecycle) and is indifferent to how many domains
+exist or which repository holds them.
 
-Seed domain = general judgment that travels across projects (lives in the skill's `domains/`, one
-flat pool — stack-agnostic and stack-specific domains alike; see "One flat seed layer," below).
-Project domain = judgment earned in this specific project.
-Both always apply when a spawn runs: for each domain the spawn's composition includes, load the
-seed domain (if any), then the project domain (if any) of the same name, concatenated in full — no
-exceptions, no per-domain opt-out. A project may also have domains with no seed counterpart
-(project-specific subjects, e.g. `spatial-metaphor`).
+A project's own `corpora/domains/` is the whole domain set that project's spawns compose from —
+`select`, `compose-spawn-prompt`, and `manifest` all read only it (or an explicit `--domains-dir`
+override). There is no live, automatic merge with this skill's own `domains/` or with any other
+project's corpora: every corpora-managed location is symmetric — a `domains/` + `audit.md` pair,
+readable and importable the same way regardless of which repository holds it. This skill's own
+`domains/` is not structurally privileged; it is the **default import source**, the pool bootstrap
+offers to pull from on day one (see "Import," below), and nothing more.
 
-A project that wants to genuinely diverge from the shared skill — not just accumulate its own
-principles alongside the seed, which needs no special mechanism at all, but stop tracking the
-seed's future changes — does that at install time, not per-domain: copy the skill instead of
-symlinking it (`README.md`, "Installation"). That's a whole-skill decision, made once, easy to redo
-by copying again later if wanted. A per-domain fork mechanism existed here previously
-(`corpus.py adopt`); retired 2026-07-22 for never having been exercised by a real project and for
-solving a problem — merge-time conflict — that concatenation never actually created; see
-`LINEAGE.md`.
+A freshly-bootstrapped project therefore starts with an empty `corpora/domains/` and imports what
+it needs — either the default-pool bulk import bootstrap offers, or picking individual principles
+and conventions from any domains-dir later (`corpus.py import-list` / `import-candidate`). A
+project bootstrapped under the older, live-merge model migrates once via
+`processes/domain-repo-migration.md` before its first session under this model — that process
+materializes its previously-live seed content into its own `corpora/domains/` so nothing it already
+relied on silently disappears.
+
+A project that wants to track this skill's own domain content as it evolves, rather than
+snapshotting it once at import time, re-runs the default-pool import periodically (or per updated
+principle) — the same mechanism, not a separate sync feature. This replaces the older per-domain
+fork mechanism (`corpus.py adopt`), retired 2026-07-22 for never having been exercised by a real
+project and for solving a problem — merge-time conflict — that live concatenation never actually
+created; see `LINEAGE.md`.
+
+### Import
+
+An import never writes a domain working file directly — it is a new *producer* of candidates,
+structurally the same relationship `reading/discovery-agent.md`/`reading/session-harvest-agent.md`
+already have to a candidates file and the ratify gate. The difference is what's being proposed: not
+a freshly-mined judgment call, but an *already-ratified* principle or convention from another
+corpus, re-proposed here with provenance recording where it actually came from. It goes through the
+same gate as any other candidate — the operator (or the gate-running orchestrator) still browses,
+picks a destination domain per entry (not necessarily the source's own domain name — the same
+domain-assignment judgment as "Domain assignment at the gate," above, applied to an imported entry
+instead of a freshly-proposed one), and ratifies or rejects it individually.
+
+- `corpus.py import-list --source <domains-dir>` — read-only. Lists every principle and convention
+  under `<domains-dir>`, flagging which ids already exist anywhere in the target project's own
+  `corpora/domains/`. Proposes nothing; for browsing before picking.
+- `corpus.py import-candidate --source <domains-dir> --domain <d> --id <id> [--as-domain <d2>]
+  [--as-id <id2>]` — proposes one entry as a candidate, appended to
+  `corpora/import-candidates.md` (created on first use), with an `imported-from` provenance block:
+
+  ```yaml
+  - id: [kebab-case-slug]                 # may be renamed at import time if it collides
+    rule: [...]
+    condition: [...]                      # omitted for a convention import
+    reason: [...]
+    domains: [proposed destination domain — operator's choice, not necessarily the source's]
+    kind: judgment
+    provenance:
+      imported-from:
+        source: [path to the source domains-dir]
+        domain: [source domain name]
+        id: [source id, if renamed on import]
+        originally-ratified: [source's own provenance date, if available]
+      extracted: [YYYY-MM-DD]
+  ```
+
+  `kind: judgment` by default — the entry already cleared the fork test once, in its source corpus;
+  the fork test (`domains/principle-judgment.md`) is still available if the operator wants to
+  re-examine it rather than rubber-stamp it.
+- `corpus.py import-default-pool [--source <domains-dir>]` — the bootstrap fast path: proposes
+  every principle and convention from every domain in the source (this skill's own `domains/` by
+  default) whose `applies-when` already matches the project's `corpora/config.md` shape, or is
+  `universal`, skipping anything the project already has by id. One batch, still individually
+  ratifiable — not a bypass of the gate, just the operator's answer defaulted to "yes to all"
+  instead of asked one at a time.
+
+Write-back from `corpora/import-candidates.md` follows the ordinary write-back format, above — the
+`imported-from` block is additional provenance, not a different write path.
 
 ### One flat seed layer
 

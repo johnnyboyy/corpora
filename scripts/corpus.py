@@ -33,9 +33,10 @@ Commands:
   sync-done [...]                  reset library-drift after a UI-library sync (same
                                    --domains-dir/--audit override)
   compose-spawn-prompt [...]       mechanically assemble a spawn-ready prompt: stance frame +
-                                   full seed/project domain files + handoff schema + task, no
-                                   summarization step; saves a copy under corpora/session-prompts/
-                                   only with --output or when corpora/config.md sets debug: yes
+                                   full domain files (this project's own corpora/domains/, or
+                                   --domains-dir) + handoff schema + task, no summarization step;
+                                   saves a copy under corpora/session-prompts/ only with --output
+                                   or when corpora/config.md sets debug: yes
   screenshot-record [...]          register/update a captured screen variant in the manifest
   screenshot-mark-stale [...]      invalidate screens by direct id or shared-component ripple
   screenshot-status                list current/stale screens in the manifest
@@ -43,11 +44,20 @@ Commands:
   lint-screenshots                 validate the screenshot manifest structurally
   lint-domains --domains-dir D     validate domain frontmatter (subject/posture/applies-when/
                                    units-of-work) — works on any domains-dir, same as kill-report
-  manifest [--json]                emit the machine-readable domain index (seed + project): every
-                                   domain's subject/posture/applies-when/units-of-work plus its
-                                   principles' id+condition only — never rule/reason
+  manifest [--json]                emit the machine-readable domain index for this project's own
+                                   corpora/domains/ (or --domains-dir): every domain's subject/
+                                   posture/applies-when/units-of-work plus its principles' id+
+                                   condition and conventions' ids — never rule/reason
   select --unit-of-work U [...]    deterministic domain selection for a unit-of-work, evaluated
                                    against corpora/config.md's project-shape — no model in the loop
+  import-list --source D           browse a source domains-dir's principles+conventions, flagging
+                                   ids already present in the target; read-only, proposes nothing
+  import-candidate --source D [...] propose one principle/convention from a source domains-dir as
+                                   a candidate (corpora/import-candidates.md), imported-from
+                                   provenance, optional --as-domain/--as-id retargeting/rename
+  import-default-pool [...]        propose every principle+convention whose applies-when already
+                                   matches this project's shape, from every domain in the source
+                                   (defaults to this skill's own domains/) — the bootstrap fast path
   check-composition --domains [...] fail (exit 2) if a domain list mixes subjects (coding/design)
                                    or includes a posture: generative domain
   chunk-start --workstream --unit-of-work   print the deterministic composition; writes nothing
@@ -130,6 +140,7 @@ class Project:
         self.screenshot_manifest_path = os.path.join(self.screenshots_dir, "manifest.md")
         self.chunks_dir = os.path.join(root, "corpora", "chunks")
         self.queue_path = os.path.join(root, "corpora", "queue.md")
+        self.import_candidates_path = os.path.join(root, "corpora", "import-candidates.md")
         # No existence check here: `corpora/domains/` only ever holds *ratified* project
         # principles, so a freshly-bootstrapped project with nothing ratified yet legitimately
         # has no such directory. A command that only reads (select, manifest, chunk-start/-done,
@@ -200,33 +211,37 @@ def parse_state(text: str) -> dict:
     return state
 
 
-COUNTER_FIELDS = ["domain", "origin", "since", "ratified", "killed", "gate-violations",
+COUNTER_FIELDS = ["domain", "origin", "since", "ratified", "killed", "graduated", "gate-violations",
                   "working-file-tokens", "baseline-tokens",
-                  "principles-at-baseline", "kills-at-baseline"]
+                  "principles-at-baseline", "kills-at-baseline", "conventions-at-baseline"]
 COOCCURRENCE_FIELDS = ["domains", "count"]
 
 
 def count_entries(path: str) -> tuple:
-    """Count principle and kill entries in a domain working file.
+    """Count convention, principle, and kill entries in a domain working file.
 
-    Ground truth for `verify`: entries are appended under `principles:` and
+    Ground truth for `verify`: entries are appended under `conventions:`, `principles:`, and
     `killed:` keys; each entry opens with `- id:`. Tolerant of indentation and
     of the keys appearing inside a yaml fence.
     """
-    principles = kills = 0
+    conventions = principles = kills = 0
     section = None
     for raw in open(path):
         line = raw.strip()
-        if re.fullmatch(r"principles:\s*", line):
+        if re.fullmatch(r"conventions:\s*", line):
+            section = "c"
+        elif re.fullmatch(r"principles:\s*", line):
             section = "p"
         elif re.fullmatch(r"killed:\s*", line):
             section = "k"
         elif re.match(r"-\s*id:", line):
-            if section == "p":
+            if section == "c":
+                conventions += 1
+            elif section == "p":
                 principles += 1
             elif section == "k":
                 kills += 1
-    return principles, kills
+    return principles, kills, conventions
 
 
 EFFICACY_FIELDS = ["id", "fired", "violated", "idle"]
@@ -290,11 +305,13 @@ def save(project: Project, state: dict) -> None:
 def counter_for(state: dict, domain: str, tokens: int, path: str = "", origin: str = "project") -> dict:
     for c in state["counters"]:
         if c.get("domain") == domain:
+            c.setdefault("graduated", 0)
+            c.setdefault("conventions-at-baseline", 0)
             return c
-    p, k = count_entries(path) if path else (0, 0)
+    p, k, conv = count_entries(path) if path else (0, 0, 0)
     c = {"domain": domain, "origin": origin, "since": today(), "ratified": 0, "killed": 0,
-         "gate-violations": 0, "working-file-tokens": tokens, "baseline-tokens": tokens,
-         "principles-at-baseline": p, "kills-at-baseline": k}
+         "graduated": 0, "gate-violations": 0, "working-file-tokens": tokens, "baseline-tokens": tokens,
+         "principles-at-baseline": p, "kills-at-baseline": k, "conventions-at-baseline": conv}
     state["counters"].append(c)
     return c
 
@@ -346,9 +363,10 @@ def cmd_verify(project: Project, _args) -> None:
         if c is None:
             problems.append(f"{domain}: not in ledger — run `measure` to register it")
             continue
-        actual_p, actual_k = count_entries(path)
-        expect_p = c.get("principles-at-baseline", 0) + c.get("ratified", 0)
+        actual_p, actual_k, actual_conv = count_entries(path)
+        expect_p = c.get("principles-at-baseline", 0) + c.get("ratified", 0) - c.get("graduated", 0)
         expect_k = c.get("kills-at-baseline", 0) + c.get("killed", 0)
+        expect_conv = c.get("conventions-at-baseline", 0) + c.get("graduated", 0)
         if actual_p != expect_p:
             what = "UNRECORDED ratification(s)" if actual_p > expect_p else "entries REMOVED outside a retrospective"
             problems.append(f"{domain}: {abs(actual_p - expect_p)} {what} "
@@ -357,6 +375,10 @@ def cmd_verify(project: Project, _args) -> None:
             what = "UNRECORDED kill(s)" if actual_k > expect_k else "kill entries REMOVED outside a retrospective"
             problems.append(f"{domain}: {abs(actual_k - expect_k)} {what} "
                             f"(file has {actual_k} kills; ledger accounts for {expect_k})")
+        if actual_conv != expect_conv:
+            what = "UNRECORDED graduation(s) to convention" if actual_conv > expect_conv else "convention entries REMOVED outside a retrospective"
+            problems.append(f"{domain}: {abs(actual_conv - expect_conv)} {what} "
+                            f"(file has {actual_conv} conventions; ledger accounts for {expect_conv})")
     if problems:
         print("LEDGER RECONCILIATION FAILED — corpus changed off the books:")
         for p in problems:
@@ -382,13 +404,15 @@ def cmd_record_gate(project: Project, args) -> None:
         c["origin"] = args.origin
     if not existed:
         # First registration during a gate: the file already contains the entries
-        # this gate ratified/killed (write-back precedes record-gate), so exclude
+        # this gate ratified/killed/graduated (write-back precedes record-gate), so exclude
         # them from the baseline or verify would double-count them.
-        c["principles-at-baseline"] = max(0, c["principles-at-baseline"] - args.ratified)
+        c["principles-at-baseline"] = max(0, c["principles-at-baseline"] - args.ratified + args.graduated)
         c["kills-at-baseline"] = max(0, c["kills-at-baseline"] - args.killed)
+        c["conventions-at-baseline"] = max(0, c["conventions-at-baseline"] - args.graduated)
     c["working-file-tokens"] = tokens
     c["ratified"] += args.ratified
     c["killed"] += args.killed
+    c["graduated"] += args.graduated
     c["gate-violations"] += args.violations
     for pid in _ids(args.fired):
         efficacy_for(state, pid)["fired"] += 1
@@ -1086,12 +1110,14 @@ def cmd_retro_done(project: Project, args) -> None:
             files = project.domain_files()
             if args.domain in files:
                 tokens = est_tokens(files[args.domain])
-                p, k = count_entries(files[args.domain])
+                p, k, conv = count_entries(files[args.domain])
             else:
-                tokens, p, k = c["working-file-tokens"], c.get("principles-at-baseline", 0), c.get("kills-at-baseline", 0)
-            c.update({"since": today(), "ratified": 0, "killed": 0, "gate-violations": 0,
+                tokens = c["working-file-tokens"]
+                p, k, conv = (c.get("principles-at-baseline", 0), c.get("kills-at-baseline", 0),
+                               c.get("conventions-at-baseline", 0))
+            c.update({"since": today(), "ratified": 0, "killed": 0, "graduated": 0, "gate-violations": 0,
                       "working-file-tokens": tokens, "baseline-tokens": tokens,
-                      "principles-at-baseline": p, "kills-at-baseline": k})
+                      "principles-at-baseline": p, "kills-at-baseline": k, "conventions-at-baseline": conv})
             save(project, state)
             print(f"reset counters for {args.domain}; baseline-tokens={tokens}, principles={p}, kills={k}")
             return
@@ -1107,13 +1133,6 @@ def cmd_sync_done(project: Project, _args) -> None:
 
 def skill_root() -> str:
     return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-
-def seed_domain_path(domain: str) -> str:
-    if domain == "audit":
-        return ""
-    kernel_path = os.path.join(skill_root(), "domains", f"{domain}.md")
-    return kernel_path if os.path.exists(kernel_path) else ""
 
 
 # ── domain selection API: frontmatter, manifest, select, check-composition ──────────────────
@@ -1176,6 +1195,9 @@ def parse_domain_conditions(path: str) -> list:
     conditions = []
     for raw in body.split("\n"):
         stripped = raw.strip()
+        if re.fullmatch(r"conventions:", stripped):
+            section = "c"
+            continue
         if re.fullmatch(r"principles:", stripped):
             section = "p"
             continue
@@ -1193,6 +1215,46 @@ def parse_domain_conditions(path: str) -> list:
             conditions.append({"id": current_id, "condition": m_cond.group(1)})
             current_id = None
     return conditions
+
+
+def parse_domain_conventions(path: str) -> list:
+    """Extract every `conventions:` entry's `id` plus which of `rule`/`reason`/`condition` are
+    present, for `lint-domains`'s shape check and `manifest`'s id listing. A convention is
+    unconditioned by definition (kernel.md, 'Retired principle — graduated to a convention') — a
+    `condition` field here is a shape error, not a valid variant of the schema."""
+    text = open(path).read()
+    m = FRONTMATTER_RE.match(text)
+    body = text[m.end():] if m else text
+    section = None
+    current = None
+    entries = []
+    for raw in body.split("\n"):
+        stripped = raw.strip()
+        if re.fullmatch(r"conventions:", stripped):
+            section = "c"
+            current = None
+            continue
+        if re.fullmatch(r"principles:", stripped):
+            section = "p"
+            current = None
+            continue
+        if re.fullmatch(r"killed:", stripped):
+            section = "k"
+            current = None
+            continue
+        if section != "c":
+            continue
+        m_id = re.match(r"-\s*id:\s*(\S+)", stripped)
+        if m_id:
+            current = {"id": m_id.group(1), "rule": False, "reason": False, "condition": False}
+            entries.append(current)
+            continue
+        if current is None:
+            continue
+        for field in ("rule", "reason", "condition"):
+            if re.match(rf"{field}:\s*\S", stripped):
+                current[field] = True
+    return entries
 
 
 def domain_lint_problems(domains_dir: str) -> list:
@@ -1214,6 +1276,15 @@ def domain_lint_problems(domains_dir: str) -> list:
         for key, _ in fm["applies-when"]:
             if key not in CONFIG_SHAPE_FIELDS:
                 problems.append(f"{domain}: applies-when references unknown config field '{key}'")
+        for conv in parse_domain_conventions(os.path.join(domains_dir, name)):
+            label = conv["id"] or "(no id)"
+            if not conv["rule"]:
+                problems.append(f"{domain}: convention '{label}' missing rule")
+            if not conv["reason"]:
+                problems.append(f"{domain}: convention '{label}' missing reason")
+            if conv["condition"]:
+                problems.append(f"{domain}: convention '{label}' has a condition — "
+                                 "conventions are unconditioned by definition")
     return problems
 
 
@@ -1224,26 +1295,6 @@ def cmd_lint_domains(args) -> None:
             print(f"error: {p}", file=sys.stderr)
         sys.exit(2)
     print(f"lint-domains: ok ({args.domains_dir})")
-
-
-def project_domain_sources(project: "Project") -> dict:
-    """Merge the kernel-seed domain layer (this skill's own `domains/`) with the project's own
-    `corpora/domains/` into one {name: {"seed": path, "project": path}} map — the same dual-source
-    model `compose-spawn-prompt` already assembles from."""
-    sources: dict = {}
-    seed_dir = os.path.join(skill_root(), "domains")
-    if os.path.isdir(seed_dir):
-        for name in sorted(os.listdir(seed_dir)):
-            if name.endswith(".md") and name != "audit.md":
-                sources.setdefault(name[:-3], {})["seed"] = os.path.join(seed_dir, name)
-    for name, path in project.domain_files().items():
-        sources.setdefault(name, {})["project"] = path
-    return sources
-
-
-def resolve_domain_frontmatter(paths: dict):
-    path = paths.get("seed") or paths.get("project")
-    return parse_domain_frontmatter(path) if path else None
 
 
 def parse_config_shape(config_path: str) -> dict:
@@ -1283,8 +1334,8 @@ def applies_when_matches(applies_when: list, shape: dict) -> bool:
 
 def select_domains(sources: dict, shape: dict, unit_of_work: str) -> list:
     selected = []
-    for name, paths in sources.items():
-        fm = resolve_domain_frontmatter(paths)
+    for name, path in sources.items():
+        fm = parse_domain_frontmatter(path)
         if fm is None:
             continue
         if fm["universal"]:
@@ -1301,7 +1352,7 @@ def select_domains(sources: dict, shape: dict, unit_of_work: str) -> list:
 def cmd_select(project: "Project", args) -> None:
     config_path = args.config or project.config_path
     shape = parse_config_shape(config_path)
-    sources = project_domain_sources(project)
+    sources = project.domain_files()
     selected = select_domains(sources, shape, args.unit_of_work)
     if args.json:
         import json
@@ -1311,12 +1362,11 @@ def cmd_select(project: "Project", args) -> None:
 
 
 def cmd_manifest(project: "Project", args) -> None:
-    sources = project_domain_sources(project)
+    sources = project.domain_files()
     entries = []
     for name in sorted(sources):
-        paths = sources[name]
-        path = paths.get("seed") or paths.get("project")
-        fm = resolve_domain_frontmatter(paths)
+        path = sources[name]
+        fm = parse_domain_frontmatter(path)
         if fm is None:
             continue
         entries.append({
@@ -1326,9 +1376,8 @@ def cmd_manifest(project: "Project", args) -> None:
             "applies_when": [{k: v} for k, v in fm["applies-when"]],
             "units_of_work": fm["units-of-work"],
             "universal": fm["universal"],
-            "seed": "seed" in paths,
-            "project": "project" in paths,
             "conditions": parse_domain_conditions(path),
+            "conventions": [c["id"] for c in parse_domain_conventions(path)],
         })
     if args.json:
         import json
@@ -1365,14 +1414,356 @@ def cmd_check_composition(project: "Project", args) -> None:
     domains = _ids(args.domains)
     if not domains:
         fail("--domains requires at least one comma-separated domain name")
-    sources = project_domain_sources(project)
-    named = [(d, resolve_domain_frontmatter(sources.get(d, {}))) for d in domains]
+    sources = project.domain_files()
+    named = [(d, parse_domain_frontmatter(sources[d]) if d in sources else None) for d in domains]
     problems = check_composition_problems(named)
     if problems:
         for p in problems:
             print(f"error: {p}", file=sys.stderr)
         sys.exit(2)
     print(f"check-composition: ok ({', '.join(domains)})")
+
+
+# ── import: propose principles/conventions from another domains-dir as candidates ────────────
+#
+# kernel.md, "Project corpora"/proposals/domain-repo-import.md §3: an import is a new *producer*
+# of candidates, structurally the same relationship discovery-agent.md/session-harvest-agent.md
+# already have to a candidates file and the gate — the operator still browses and picks, per
+# principle, and the gate still ratifies. This never writes into a domain working file directly.
+
+def collect_domain_ids(path: str) -> set:
+    """Every id already present in a domain working file — conventions, principles, and killed
+    entries alike — so import-candidate can refuse a collision regardless of which section an id
+    already occupies."""
+    ids = set()
+    for raw in open(path):
+        m = re.match(r"\s*-\s*id:\s*(\S+)", raw)
+        if m:
+            ids.add(m.group(1))
+    return ids
+
+
+def parse_domain_section_full(path: str, section_name: str) -> dict:
+    """Extract every entry's full `rule`/`condition`/`reason` (whichever are present) from one
+    section (`principles` or `conventions`) of a domain working file, keyed by `id` — the same
+    tolerant flat-scan style as `parse_domain_conditions`/`parse_domain_conventions`, extended to
+    capture `rule`/`reason` too since import-candidate needs the whole entry, not just its id."""
+    text = open(path).read()
+    m = FRONTMATTER_RE.match(text)
+    body = text[m.end():] if m else text
+    section = None
+    current = None
+    entries = {}
+    for raw in body.split("\n"):
+        stripped = raw.strip()
+        if re.fullmatch(r"conventions:", stripped):
+            section, current = "conventions", None
+            continue
+        if re.fullmatch(r"principles:", stripped):
+            section, current = "principles", None
+            continue
+        if re.fullmatch(r"killed:", stripped):
+            section, current = "killed", None
+            continue
+        if section != section_name:
+            continue
+        m_id = re.match(r"-\s*id:\s*(\S+)", stripped)
+        if m_id:
+            current = m_id.group(1)
+            entries[current] = {}
+            continue
+        if current is None:
+            continue
+        for field in ("rule", "condition", "reason"):
+            fm_field = re.match(rf'{field}:\s*"(.*)"\s*$', stripped)
+            if fm_field:
+                entries[current][field] = fm_field.group(1)
+        m_see_also = re.match(r"see-also:\s*(\S.*)$", stripped)
+        if m_see_also:
+            entries[current]["see-also"] = m_see_also.group(1).strip()
+    return entries
+
+
+def find_import_entry(source_dir: str, domain: str, entry_id: str) -> tuple:
+    """Locate `entry_id` in `source_dir/<domain>.md`, principles first then conventions. Returns
+    (kind, fields) where kind is "principle" or "convention", or fails if not found in either."""
+    path = os.path.join(source_dir, f"{domain}.md")
+    if not os.path.exists(path):
+        fail(f"no domain '{domain}' under {source_dir}")
+    principles = parse_domain_section_full(path, "principles")
+    if entry_id in principles:
+        return "principle", principles[entry_id]
+    conventions = parse_domain_section_full(path, "conventions")
+    if entry_id in conventions:
+        return "convention", conventions[entry_id]
+    fail(f"no principle or convention '{entry_id}' in {path}")
+
+
+def source_originally_ratified(source_dir: str, entry_id: str) -> str:
+    """Best-effort: the source's own audit.md provenance date for this id, if the source layer has
+    one. Returns "" when unavailable — never fabricated."""
+    audit_path = os.path.join(source_dir, "audit.md")
+    if not os.path.exists(audit_path):
+        return ""
+    entries = parse_audit_entries(audit_path)
+    entry = entries.get(entry_id)
+    return entry.get("provenance", "").strip('"') if entry else ""
+
+
+def append_import_candidate(target_path: str, fields: dict) -> None:
+    lines = []
+    lines.append(f"- id: {fields['id']}")
+    lines.append(f"  rule: {yaml_quote(fields['rule'])}")
+    if "condition" in fields:
+        lines.append(f"  condition: {yaml_quote(fields['condition'])}")
+    lines.append(f"  reason: {yaml_quote(fields['reason'])}")
+    lines.append(f"  domains: [{fields['domain']}]")
+    lines.append("  kind: judgment")
+    lines.append("  provenance:")
+    lines.append("    imported-from:")
+    lines.append(f"      source: {yaml_quote(fields['source'])}")
+    lines.append(f"      domain: {fields['source-domain']}")
+    if fields.get("source-id") and fields["source-id"] != fields["id"]:
+        lines.append(f"      id: {fields['source-id']}")
+    if fields.get("originally-ratified"):
+        lines.append(f"      originally-ratified: {yaml_quote(fields['originally-ratified'])}")
+    lines.append(f"    extracted: {today()}")
+    block = "\n".join(lines) + "\n"
+
+    if os.path.exists(target_path):
+        text = open(target_path).read()
+    else:
+        os.makedirs(os.path.dirname(target_path), exist_ok=True)
+        text = "# Import candidates\n\nProposed at the ratify gate like any other candidate " \
+               "(kernel.md, \"Domain assignment at the gate\") — the operator still browses and " \
+               "picks the destination domain per entry.\n\n```yaml\ncandidates:\n```\n"
+    if "```yaml" not in text or "candidates:" not in text:
+        fail(f"{target_path} does not have a recognizable 'candidates:' block — fix by hand")
+    before, _, rest = text.partition("```yaml")
+    fence_body, _, after = rest.partition("\n```")
+    if fence_body.rstrip().endswith("candidates: []"):
+        fence_body = fence_body.rstrip()[: -len("candidates: []")] + "candidates:\n" + block.rstrip("\n")
+    else:
+        fence_body = fence_body.rstrip("\n") + "\n" + block.rstrip("\n")
+    text = before + "```yaml" + fence_body + "\n```" + after
+    open(target_path, "w").write(text)
+
+
+def cmd_import_list(project: "Project", args) -> None:
+    target_domains_dir = args.target_domains_dir or project.domains_dir
+    target_ids = set()
+    if os.path.isdir(target_domains_dir):
+        for name in os.listdir(target_domains_dir):
+            if name.endswith(".md") and name != "audit.md":
+                target_ids |= collect_domain_ids(os.path.join(target_domains_dir, name))
+    printed = 0
+    for name in sorted(os.listdir(args.source)):
+        if not name.endswith(".md") or name == "audit.md":
+            continue
+        domain = name[:-3]
+        path = os.path.join(args.source, name)
+        for kind, section in (("principle", "principles"), ("convention", "conventions")):
+            for entry_id, fields in sorted(parse_domain_section_full(path, section).items()):
+                already = entry_id in target_ids
+                rule = fields.get("rule", "")
+                flag = " [already present]" if already else ""
+                print(f"{domain}/{entry_id} ({kind}){flag}: {rule}")
+                printed += 1
+    if not printed:
+        print(f"no principles or conventions found under {args.source}")
+
+
+def cmd_import_candidate(project: "Project", args) -> None:
+    kind, fields = find_import_entry(args.source, args.domain, args.id)
+    dest_domain = args.as_domain or args.domain
+    dest_id = args.as_id or args.id
+    target_domains_dir = args.target_domains_dir or project.domains_dir
+    existing = set()
+    dest_path = os.path.join(target_domains_dir, f"{dest_domain}.md")
+    if os.path.exists(dest_path):
+        existing = collect_domain_ids(dest_path)
+    if dest_id in existing:
+        fail(f"'{dest_id}' already exists in {dest_path} — pass --as-id to import under a "
+             "different id")
+    entry = {
+        "id": dest_id, "rule": fields.get("rule", ""), "reason": fields.get("reason", ""),
+        "domain": dest_domain, "source": args.source, "source-domain": args.domain,
+        "source-id": args.id if args.id != dest_id else "",
+        "originally-ratified": source_originally_ratified(args.source, args.id),
+    }
+    if kind == "principle" and "condition" in fields:
+        entry["condition"] = fields["condition"]
+    target = args.output or project.import_candidates_path
+    append_import_candidate(target, entry)
+    print(f"proposed {kind} '{args.id}' from {args.source}/{args.domain} as candidate "
+          f"'{dest_id}' -> {dest_domain} in {target}")
+
+
+def default_pool_domains(source_dir: str, shape: dict) -> list:
+    """Every domain in `source_dir` whose `applies-when` already matches this project's shape (or
+    is universal) — the day-one bulk-import pool, independent of any one unit-of-work (kernel.md,
+    'Project corpora')."""
+    selected = []
+    for name in sorted(os.listdir(source_dir)):
+        if not name.endswith(".md") or name == "audit.md":
+            continue
+        fm = parse_domain_frontmatter(os.path.join(source_dir, name))
+        if fm is None:
+            continue
+        if fm["universal"] or applies_when_matches(fm["applies-when"], shape):
+            selected.append(name[:-3])
+    return selected
+
+
+def cmd_import_default_pool(project: "Project", args) -> None:
+    source_dir = args.source or os.path.join(skill_root(), "domains")
+    config_path = args.config or project.config_path
+    shape = parse_config_shape(config_path)
+    target_domains_dir = args.target_domains_dir or project.domains_dir
+    target = args.output or project.import_candidates_path
+    proposed = 0
+    for domain in default_pool_domains(source_dir, shape):
+        existing = set()
+        dest_path = os.path.join(target_domains_dir, f"{domain}.md")
+        if os.path.exists(dest_path):
+            existing = collect_domain_ids(dest_path)
+        source_path = os.path.join(source_dir, f"{domain}.md")
+        for kind, section in (("principle", "principles"), ("convention", "conventions")):
+            for entry_id, fields in sorted(parse_domain_section_full(source_path, section).items()):
+                if entry_id in existing:
+                    continue
+                entry = {
+                    "id": entry_id, "rule": fields.get("rule", ""), "reason": fields.get("reason", ""),
+                    "domain": domain, "source": source_dir, "source-domain": domain, "source-id": "",
+                    "originally-ratified": source_originally_ratified(source_dir, entry_id),
+                }
+                if kind == "principle" and "condition" in fields:
+                    entry["condition"] = fields["condition"]
+                append_import_candidate(target, entry)
+                proposed += 1
+    print(f"proposed {proposed} candidate(s) from {source_dir}'s default pool -> {target}")
+
+
+# ── migration: materialize a pre-dissolution project's live-merged view once ─────────────────
+#
+# processes/domain-repo-migration.md: a project bootstrapped under the old live seed/project merge
+# writes what was previously computed live into its own corpora/domains/, once, so nothing it
+# already relied on silently disappears when the merge stops. This bypasses the candidate/gate
+# pipeline deliberately — it isn't proposing new judgment, it's making already-active judgment
+# explicit; write-back's ordinary review would ask the operator to re-approve content the project
+# was already running on. Scoped to `principles:`/`conventions:` only — the active guidance a spawn
+# actually loads; a domain's `killed:` log is not migrated (documented gap, `processes/
+# domain-repo-migration.md`; a re-proposed already-killed idea is a low-cost, self-correcting
+# failure mode, not silent content loss).
+
+def render_migrated_domain(domain: str, frontmatter: str, last_retrospective: str,
+                            conventions: dict, principles: dict) -> str:
+    lines = ["```yaml", f"last-retrospective: {last_retrospective}", "", "conventions:", ""]
+    for entry_id, fields in conventions.items():
+        lines.append(f"- id: {entry_id}")
+        lines.append(f"  rule: {yaml_quote(fields.get('rule', ''))}")
+        lines.append(f"  reason: {yaml_quote(fields.get('reason', ''))}")
+        if fields.get("see-also"):
+            lines.append(f"  see-also: {fields['see-also']}")
+        lines.append("")
+    lines += ["principles:", ""]
+    for entry_id, fields in principles.items():
+        lines.append(f"- id: {entry_id}")
+        lines.append(f"  rule: {yaml_quote(fields.get('rule', ''))}")
+        lines.append(f"  condition: {yaml_quote(fields.get('condition', ''))}")
+        lines.append(f"  reason: {yaml_quote(fields.get('reason', ''))}")
+        if fields.get("see-also"):
+            lines.append(f"  see-also: {fields['see-also']}")
+        lines.append("")
+    lines += ["killed:", "```"]
+    body = "\n".join(lines) + "\n"
+    header = frontmatter if frontmatter else ""
+    return f"{header}\n# Domain: {domain}\n\n{body}"
+
+
+def append_migration_provenance(audit_path: str, domain: str, ids: list) -> None:
+    if not ids:
+        return
+    lines = []
+    for entry_id in ids:
+        lines.append(f"- id: {entry_id}")
+        lines.append(f"  domain: {domain}")
+        lines.append(f"  provenance: \"Migrated from seed, {today()}.\"")
+        lines.append("  history:")
+        lines.append(f"    - date: {today()}")
+        lines.append("      type: migrated-from-seed")
+        lines.append(f"      reason: \"processes/domain-repo-migration.md: materialized from what "
+                     f"the pre-dissolution live seed/project merge was already applying.\"")
+        lines.append("")
+    block = "\n".join(lines)
+    if os.path.exists(audit_path):
+        text = open(audit_path).read()
+    else:
+        os.makedirs(os.path.dirname(audit_path), exist_ok=True)
+        text = "# Audit — project layer\n\n```yaml\nprovenance:\n```\n"
+    if "```yaml" not in text or "provenance:" not in text:
+        fail(f"{audit_path} does not have a recognizable 'provenance:' block — fix by hand")
+    before, _, rest = text.partition("```yaml")
+    fence_body, _, after = rest.partition("\n```")
+    fence_body = fence_body.rstrip("\n") + "\n" + block.rstrip("\n")
+    text = before + "```yaml" + fence_body + "\n```" + after
+    open(audit_path, "w").write(text)
+
+
+def cmd_migrate_domains(project: "Project", args) -> None:
+    source_dir = args.source or os.path.join(skill_root(), "domains")
+    config_path = args.config or project.config_path
+    shape = parse_config_shape(config_path)
+    domains = sorted(set(_ids(args.domains) or default_pool_domains(source_dir, shape))
+                      | set(project.domain_files().keys()))
+    os.makedirs(project.domains_dir, exist_ok=True)
+    migrated = []
+    for domain in domains:
+        seed_path = os.path.join(source_dir, f"{domain}.md")
+        project_path = os.path.join(project.domains_dir, f"{domain}.md")
+        has_seed = os.path.exists(seed_path)
+        has_project = os.path.exists(project_path)
+        if not has_seed and not has_project:
+            continue
+        frontmatter = ""
+        for candidate_path in (project_path if has_project else None, seed_path if has_seed else None):
+            if candidate_path:
+                m = FRONTMATTER_RE.match(open(candidate_path).read())
+                if m:
+                    frontmatter = m.group(0)
+                    break
+        last_retrospective = "none"
+        for candidate_path in (project_path if has_project else None, seed_path if has_seed else None):
+            if candidate_path:
+                m = re.search(r"^last-retrospective:\s*(\S+)", open(candidate_path).read(), re.MULTILINE)
+                if m:
+                    last_retrospective = m.group(1)
+                    break
+        newly_migrated_ids = []
+        merged = {}
+        for section in ("conventions", "principles"):
+            entries = parse_domain_section_full(project_path, section) if has_project else {}
+            if has_seed:
+                for entry_id, fields in parse_domain_section_full(seed_path, section).items():
+                    if entry_id not in entries:
+                        entries[entry_id] = fields
+                        newly_migrated_ids.append(entry_id)
+            merged[section] = entries
+        if not merged["conventions"] and not merged["principles"]:
+            continue
+        open(project_path, "w").write(render_migrated_domain(
+            domain, frontmatter, last_retrospective, merged["conventions"], merged["principles"]))
+        if newly_migrated_ids:
+            append_migration_provenance(project.audit_path, domain, newly_migrated_ids)
+            migrated.append(f"{domain}: +{len(newly_migrated_ids)} entries from seed")
+    if migrated:
+        print("migrated:")
+        for line in migrated:
+            print(f"  - {line}")
+    else:
+        print("nothing to migrate — every matching domain already fully materialized")
+    print("Next: run `corpus.py measure` then `corpus.py verify` to register the new baseline "
+          "(processes/domain-repo-migration.md, step 4).")
 
 
 # ── chunk chaining: ground-truth ledger for a workstream's units of work ────────────────────
@@ -1448,7 +1839,7 @@ def cmd_chunk_start(project: "Project", args) -> None:
     composition is known before the spawn starts. Writes nothing — the ledger is append-only and
     is only ever written once a real handoff exists to point at."""
     shape = parse_config_shape(project.config_path)
-    sources = project_domain_sources(project)
+    sources = project.domain_files()
     selected = select_domains(sources, shape, args.unit_of_work)
     print(f"workstream={args.workstream} unit-of-work={args.unit_of_work} "
           f"domains-composed=[{', '.join(selected)}]")
@@ -1462,7 +1853,7 @@ def cmd_chunk_done(project: "Project", args) -> None:
         fail(f"handoff's workstream '{handoff_workstream}' does not match --workstream '{args.workstream}' — "
              "a chunk can only be closed by the handoff it actually produced")
     shape = parse_config_shape(project.config_path)
-    sources = project_domain_sources(project)
+    sources = project.domain_files()
     domains_composed = select_domains(sources, shape, args.unit_of_work)
     # Ground-truth check, not self-report: domains-composed comes from select(), never from the
     # handoff — but that only proves select() is self-consistent unless it's also reconciled
@@ -1565,7 +1956,7 @@ def cmd_verify_chunks(project: "Project", _args) -> None:
         print("no corpora/chunks/ directory — nothing to verify")
         return
     shape = parse_config_shape(project.config_path)
-    sources = project_domain_sources(project)
+    sources = project.domain_files()
     problems = []
     for name in sorted(os.listdir(project.chunks_dir)):
         if not name.endswith(".md"):
@@ -1844,8 +2235,8 @@ def cmd_compose_spawn_prompt(project: Project, args) -> None:
     if not os.path.exists(args.task_file):
         fail(f"no such file: {args.task_file}")
 
-    sources = project_domain_sources(project)
-    named = [(d, resolve_domain_frontmatter(sources.get(d, {}))) for d in domains]
+    sources = project.domain_files()
+    named = [(d, parse_domain_frontmatter(sources[d]) if d in sources else None) for d in domains]
     composition_problems = check_composition_problems(named)
     if composition_problems:
         for p in composition_problems:
@@ -1860,18 +2251,10 @@ def cmd_compose_spawn_prompt(project: Project, args) -> None:
 
     parts = [f"stance: {args.stance}", "", stance_frame, "", "## Domains"]
     for domain in domains:
-        seed_path = seed_domain_path(domain)
-        project_path = os.path.join(project.domains_dir, f"{domain}.md")
-        project_exists = os.path.exists(project_path)
-        if not seed_path and not project_exists:
-            fail(f"domain '{domain}' has no seed or project file — nothing to compose")
+        if domain not in sources:
+            fail(f"domain '{domain}' not found in {project.domains_dir} — nothing to compose")
         parts.append(f"\n### Domain: {domain}\n")
-        if seed_path:
-            parts.append(f"<!-- seed: {os.path.relpath(seed_path, skill_root())} -->\n")
-            parts.append(open(seed_path).read().rstrip("\n"))
-        if project_exists:
-            parts.append(f"\n<!-- project: corpora/domains/{domain}.md -->\n")
-            parts.append(open(project_path).read().rstrip("\n"))
+        parts.append(open(sources[domain]).read().rstrip("\n"))
     parts.append("\n" + handoff_schema)
     parts.append("\n## Task\n")
     parts.append(open(args.task_file).read().rstrip("\n"))
@@ -2073,6 +2456,8 @@ def main() -> None:
     g.add_argument("--domain", required=True)
     g.add_argument("--ratified", type=int, default=0)
     g.add_argument("--killed", type=int, default=0)
+    g.add_argument("--graduated", type=int, default=0,
+                   help="principles moved from principles: to conventions: this gate")
     g.add_argument("--violations", type=int, default=0)
     g.add_argument("--ui-drift", action="store_true")
     g.add_argument("--fired", default="", help="comma-separated principle ids")
@@ -2119,6 +2504,7 @@ def main() -> None:
     cp.add_argument("--task-file", required=True, help="path to a file containing the task description")
     cp.add_argument("--composition", default="", help="descriptive label, for the output filename only")
     cp.add_argument("--output", default="", help="output path; defaults under corpora/session-prompts/")
+    cp.add_argument("--domains-dir", default="", help=layer_help)
     sr = sub.add_parser("screenshot-record")
     sr.add_argument("--screen", required=True)
     sr.add_argument("--variant", required=True)
@@ -2143,20 +2529,53 @@ def main() -> None:
     ld = sub.add_parser("lint-domains", help="works on any domains-dir, not only a project's corpora/domains — "
                                               "validates frontmatter (subject/posture/applies-when/units-of-work)")
     ld.add_argument("--domains-dir", required=True)
-    sub.add_parser("manifest", help="emit the machine-readable domain index (seed + project), for a "
-                                     "process layer to select against without reading prose").add_argument(
-        "--json", action="store_true")
+    mf = sub.add_parser("manifest", help="emit the machine-readable domain index for this project's own "
+                                          "corpora/domains/ (or --domains-dir), for a process layer to "
+                                          "select against without reading prose")
+    mf.add_argument("--json", action="store_true")
+    mf.add_argument("--domains-dir", default="", help=layer_help)
     sel = sub.add_parser("select", help="deterministic domain selection for a unit-of-work, evaluated "
                                          "against corpora/config.md — no model in the loop")
     sel.add_argument("--unit-of-work", required=True)
     sel.add_argument("--config", default="", help="defaults to corpora/config.md under --root")
     sel.add_argument("--json", action="store_true")
+    sel.add_argument("--domains-dir", default="", help=layer_help)
     cc = sub.add_parser("check-composition", help="fail if a domain list mixes subjects or includes "
                                                     "a posture: generative domain (kernel.md, 'The hard line')")
     cc.add_argument("--domains", required=True, help="comma-separated domain names")
+    cc.add_argument("--domains-dir", default="", help=layer_help)
+    il = sub.add_parser("import-list", help="browse a source domains-dir's principles+conventions, "
+                                              "flagging which ids already exist in the target — "
+                                              "read-only, proposes nothing")
+    il.add_argument("--source", required=True, help="path to the source domains-dir")
+    il.add_argument("--target-domains-dir", default="", help="defaults to this project's own corpora/domains")
+    ic = sub.add_parser("import-candidate", help="propose one principle or convention from a source "
+                                                   "domains-dir as a candidate, with imported-from provenance")
+    ic.add_argument("--source", required=True, help="path to the source domains-dir")
+    ic.add_argument("--domain", required=True, help="the entry's domain in the source")
+    ic.add_argument("--id", required=True, help="the entry's id in the source")
+    ic.add_argument("--as-domain", default="", help="propose into a different destination domain")
+    ic.add_argument("--as-id", default="", help="propose under a different id (e.g. on collision)")
+    ic.add_argument("--target-domains-dir", default="", help="defaults to this project's own corpora/domains")
+    ic.add_argument("--output", default="", help="candidates file; defaults to corpora/import-candidates.md")
+    idp = sub.add_parser("import-default-pool", help="propose every principle+convention from every "
+                                                       "domain in the source whose applies-when already "
+                                                       "matches this project's shape — the bootstrap fast path")
+    idp.add_argument("--source", default="", help="defaults to this skill's own domains/")
+    idp.add_argument("--config", default="", help="defaults to corpora/config.md under --root")
+    idp.add_argument("--target-domains-dir", default="", help="defaults to this project's own corpora/domains")
+    idp.add_argument("--output", default="", help="candidates file; defaults to corpora/import-candidates.md")
+    md = sub.add_parser("migrate-domains", help="one-time: materialize a pre-dissolution project's "
+                                                  "live seed/project merge into its own corpora/domains/ "
+                                                  "(processes/domain-repo-migration.md)")
+    md.add_argument("--source", default="", help="defaults to this skill's own domains/")
+    md.add_argument("--config", default="", help="defaults to corpora/config.md under --root")
+    md.add_argument("--domains", default="", help="comma-separated domain names; defaults to the "
+                                                    "default-pool match plus every domain the project already has")
     cs = sub.add_parser("chunk-start", help="print the deterministic composition for a unit-of-work; writes nothing")
     cs.add_argument("--workstream", required=True)
     cs.add_argument("--unit-of-work", required=True)
+    cs.add_argument("--domains-dir", default="", help=layer_help)
     cd = sub.add_parser("chunk-done", help="close a chunk in corpora/chunks/<workstream>.md — requires "
                                             "the handoff that unit-of-work actually produced")
     cd.add_argument("--workstream", required=True)
@@ -2164,6 +2583,7 @@ def main() -> None:
     cd.add_argument("--stance", required=True, choices=sorted(DEFERRED_STANCE_ENUM))
     cd.add_argument("--handoff", required=True)
     cd.add_argument("--next", default="")
+    cd.add_argument("--domains-dir", default="", help=layer_help)
     sub.add_parser("lint-chunks")
     clw = sub.add_parser("close-workstream", help="read-only summary of a workstream's completed chunks")
     clw.add_argument("--workstream", required=True)
@@ -2207,6 +2627,8 @@ def main() -> None:
      "lint-screenshots": cmd_lint_screenshots,
      "manifest": cmd_manifest, "select": cmd_select,
      "check-composition": cmd_check_composition,
+     "import-list": cmd_import_list, "import-candidate": cmd_import_candidate,
+     "import-default-pool": cmd_import_default_pool, "migrate-domains": cmd_migrate_domains,
      "chunk-start": cmd_chunk_start, "chunk-done": cmd_chunk_done,
      "lint-chunks": cmd_lint_chunks, "close-workstream": cmd_close_workstream,
      "verify-chunks": cmd_verify_chunks,
