@@ -2369,13 +2369,22 @@ def list_killed_ids(domain_path: str) -> list:
 def parse_audit_entries(audit_path: str) -> dict:
     """Tolerant parser for the hand-maintained `provenance:` list in a layer's audit.md.
 
-    Extracts only top-level (2-space-indented) scalar fields per entry — id, domain, killed,
-    graduated. Nested `history:` sub-blocks (4-space indented) are deliberately not parsed; this
-    reads just enough structure for kill-age accounting, not a general YAML parser. The
-    `provenance:` list runs to end of file — there is no `promoted:` section to bound it against
-    (retired per v3-redesign-proposal.md; formerly-promoted principles now live as preamble prose
-    in their domain's working file instead of a separate audit-file tier).
+    Extracts an entry's own top-level scalar fields — id, domain, killed, graduated — accepting
+    either indentation convention actually seen in the wild: a flat 2-space style (id and its
+    fields all siblings at 2 spaces, kernel.md's own documented example) or the more common nested
+    style (id at 2 spaces, its fields at 4). Both read as "this entry's own field," since neither
+    depth ever collides with `history:`'s own sub-list items (6+ spaces) or their fields (8+) —
+    those are deliberately not parsed; this reads just enough structure for kill-age accounting,
+    not a general YAML parser. The `provenance:` list runs until the next top-level (no
+    indentation) *section* key — `counters:`, `efficacy:`, `co-occurrence:`, `library-drift:` —
+    which also use `- id:` for their own, unrelated entries; without that boundary, a later
+    same-named field silently overwrites the real provenance entry for any id those sections also
+    track. A bare `killed:` line at zero indentation is not one of these — it is a purely visual
+    divider inside the provenance list itself (ratified entries above, killed-entry provenance
+    below), still carrying the same id/domain/killed/reason_killed schema, so it must not end the
+    scan.
     """
+    section_boundaries = {"counters:", "efficacy:", "co-occurrence:", "library-drift:"}
     entries = {}
     current = None
     in_provenance = False
@@ -2384,6 +2393,9 @@ def parse_audit_entries(audit_path: str) -> dict:
         stripped = line.strip()
         if re.fullmatch(r"provenance:", stripped):
             in_provenance = True
+            continue
+        if in_provenance and stripped in section_boundaries and not line.startswith(" "):
+            in_provenance = False
             continue
         if not in_provenance:
             continue
@@ -2394,10 +2406,12 @@ def parse_audit_entries(audit_path: str) -> dict:
             continue
         if current is None or not stripped:
             continue
-        if line.startswith("  ") and not line.startswith("    "):
+        indent = len(line) - len(line.lstrip(" "))
+        if 2 <= indent <= 5:
             m_field = re.match(r"([\w-]+):\s*(.*)$", stripped)
             if m_field:
-                entries[current][m_field.group(1)] = m_field.group(2).strip()
+                value = m_field.group(2).strip().strip('"').strip("'")
+                entries[current][m_field.group(1)] = value
     return entries
 
 
