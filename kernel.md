@@ -807,15 +807,30 @@ A monorepo may have more than one `corpora/config.md` — an app-scoped one (`ad
 root-level one, or several sibling apps each with their own. `scripts/corpus.py` resolves which
 root governs a given file by nearest-ancestor walk from the file up toward the filesystem root,
 stopping at the first `corpora/config.md` found — the same model `tsconfig.json`/`package.json`
-resolution already use. `corpus.py resolve-root --file <path>` reports it directly; `corpus.py
-check-root-boundary --files <f1,f2,...>` is the mechanical check — it fails (exit 2) if a task's
-touched files resolve to more than one root, naming each root's files, since a spawn's composition
-can only ever be one root's domains (`select`/`compose-spawn-prompt` take one `--root`). This is
-the same shape as subject separation (`check-composition` — a spawn never mixes coding and design
-domains), just on a different axis: a task spanning two corpora roots is two units of work, one per
-root, sequenced by whichever the planner judges dependent — not a single spawn straddling both.
-This resolves automatically; there is no manual `sibling-corpora:` declaration to keep in sync,
-deliberately, so the check can't go stale the way a hand-maintained list would.
+resolution already use. This resolves automatically; there is no manual `sibling-corpora:`
+declaration to keep in sync, deliberately, so the check can't go stale the way a hand-maintained
+list would.
+
+**`--for-file <path>` is the standard way to invoke `corpus.py`** for any real task, in place of
+computing and passing `--root` by hand: pass any file the task touches (a target file, or the
+first one named in the task description) and every command resolves the right root itself before
+doing anything else — no session, orchestrator, or project needs to work out which root governs a
+task as a separate step. `--root` still exists for the cases `--for-file` can't cover: bootstrapping
+a brand-new nested root (nothing to resolve to yet, since its `corpora/config.md` doesn't exist
+until that bootstrap writes it), or operating on a `--domains-dir`/`--audit` override that isn't
+tied to any one file (`kill-report`, `graduate-kill`, working the kernel-seed layer directly).
+
+`corpus.py resolve-root --file <path>` and `corpus.py check-root-boundary --files <f1,f2,...>`
+remain available directly for the narrower cases `--for-file` doesn't cover on its own: inspecting
+which root a file would resolve to without running a command against it, and — the one still-manual
+step — checking whether a task's *several* touched files all resolve to the *same* root before
+composing a single spawn. `--for-file` only resolves one path; a task spanning multiple files still
+needs `check-root-boundary` to catch the case those files disagree about which root governs them,
+since a spawn's composition can only ever be one root's domains (`select`/`compose-spawn-prompt`
+take one `--root`). This is the same shape as subject separation (`check-composition` — a spawn
+never mixes coding and design domains), just on a different axis: a task spanning two corpora roots
+is two units of work, one per root, sequenced by whichever the planner judges dependent — not a
+single spawn straddling both.
 
 ### One flat seed layer
 

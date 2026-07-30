@@ -2504,6 +2504,11 @@ def cmd_graduate_kill(args) -> None:
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--root", default=".", help="project root (contains corpora/)")
+    ap.add_argument("--for-file", default="",
+                     help="resolve --root automatically from this file's nearest-ancestor "
+                          "corpora/config.md (kernel.md, 'Monorepo root resolution') instead of "
+                          "passing --root explicitly — the standard way to invoke corpus.py for "
+                          "an actual task, so no session has to work out which root governs it")
     sub = ap.add_subparsers(dest="cmd", required=True)
     layer_help = "override to work on any domains-dir + audit.md pair — a project's own " \
                  "corpora/domains or the kernel-seed domains/ — not only a project's own corpora"
@@ -2679,7 +2684,15 @@ def main() -> None:
         no_project[args.cmd](args)
         return
 
-    project = Project(os.path.abspath(args.root),
+    root = args.root
+    if args.for_file:
+        resolved = find_root_config(args.for_file)
+        if not resolved:
+            fail(f"no corpora root found above {args.for_file} — pass --root explicitly if this "
+                 "is a brand-new root not yet bootstrapped")
+        root = resolved
+
+    project = Project(os.path.abspath(root),
                       domains_dir=getattr(args, "domains_dir", "") or "",
                       audit_path=getattr(args, "audit", "") or "")
     {"measure": cmd_measure, "verify": cmd_verify, "record-gate": cmd_record_gate, "triggers": cmd_triggers,

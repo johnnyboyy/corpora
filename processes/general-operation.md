@@ -19,15 +19,20 @@ Every session, before bootstrap checks or routing: load the orchestrator's own d
 any other; it does not get to skip the load-before-work rule it applies to everyone else.
 
 A monorepo may have more than one `corpora/config.md` (an app-scoped root, or a shared root-level
-one). Resolve which root governs the task's actual working files with `corpus.py resolve-root
---file <path>` before assuming the session's default `--root` — nearest-ancestor walk, same model
-`tsconfig.json`/`package.json` resolution already use (`kernel.md`, "Monorepo root resolution"). If
-a task's touched files span more than one root, `corpus.py check-root-boundary --files <f1,f2,...>`
-fails with the split; route it as two units of work, one per root, rather than one spawn straddling
-both.
+one). Every `corpus.py` invocation below should pass `--for-file <a file the task touches>` instead
+of a hand-picked `--root` — it resolves the governing root itself, nearest-ancestor walk, same
+model `tsconfig.json`/`package.json` resolution already use (`kernel.md`, "Monorepo root
+resolution"). This is not an extra step to remember: it's just how `corpus.py` gets invoked. The one
+case that still needs an explicit check: if a task touches files under more than one root, run
+`corpus.py check-root-boundary --files <f1,f2,...>` before composing — `--for-file` only resolves
+one path, so a multi-file task can silently pick whichever file happened to be passed first unless
+this runs. A spanning task fails there and routes as two units of work, one per root, rather than
+one spawn straddling both. `--root` stays available for the one thing `--for-file` structurally
+can't do: bootstrapping a brand-new nested root, whose `corpora/config.md` doesn't exist yet to
+resolve to.
 
 If `corpora/config.md` exists, run the bundled ledger check before routing spawn work:
-`python3 <skill-directory>/scripts/corpus.py --root <project-root> verify`. Resolve the skill
+`python3 <skill-directory>/scripts/corpus.py --for-file <touched-file> verify`. Resolve the skill
 directory from `SKILL.md`, not from the project working directory. Surface any discrepancy to the
 operator and never repair or re-baseline it automatically; the check informs rather than blocking
 unrelated work, but do not perform corpus write-back while its ledger is inconsistent.

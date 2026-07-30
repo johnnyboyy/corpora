@@ -1543,6 +1543,60 @@ class RootBoundaryTest(unittest.TestCase):
         self.assertIn(str(self.root / "admin"), result.stderr)
 
 
+class ForFileRootResolutionTest(unittest.TestCase):
+    """--for-file resolves --root automatically (kernel.md, 'Monorepo root resolution') so no
+    session has to work out which corpora root governs a task before invoking corpus.py."""
+
+    def setUp(self):
+        self.tempdir = tempfile.TemporaryDirectory()
+        self.root = Path(self.tempdir.name)
+        (self.root / "corpora" / "domains").mkdir(parents=True)
+        (self.root / "corpora" / "config.md").write_text("# Config\n\n## project-shape\nhas-ui: no\n")
+        (self.root / "admin" / "corpora" / "domains").mkdir(parents=True)
+        (self.root / "admin" / "corpora" / "config.md").write_text(
+            "# Config\n\n## project-shape\nhas-ui: yes\n"
+        )
+        (self.root / "admin" / "corpora" / "domains" / "widgets.md").write_text(
+            "---\nsubject: coding\nposture: guardrail\nunits-of-work: [implement-feature]\n"
+            "universal: false\n---\n\n# Domain: widgets\n\n```yaml\nlast-retrospective: none\n\n"
+            "conventions:\n\nprinciples:\n\nkilled:\n```\n"
+        )
+        (self.root / "admin" / "src").mkdir(parents=True)
+        (self.root / "admin" / "src" / "foo.ts").write_text("")
+
+    def tearDown(self):
+        self.tempdir.cleanup()
+
+    def run_command(self, command):
+        return subprocess.run(
+            [sys.executable, str(SCRIPT), *command],
+            text=True, capture_output=True, check=False,
+        )
+
+    def test_for_file_resolves_to_nested_root(self):
+        result = self.run_command([
+            "--for-file", str(self.root / "admin" / "src" / "foo.ts"), "manifest",
+        ])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("widgets", result.stdout)
+
+    def test_plain_root_does_not_see_nested_root_domains(self):
+        result = self.run_command(["--root", str(self.root), "manifest"])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertNotIn("widgets", result.stdout)
+
+    def test_for_file_outside_any_root_fails_cleanly(self):
+        with tempfile.TemporaryDirectory() as outside:
+            result = self.run_command([
+                "--for-file", str(Path(outside) / "f.ts"), "verify",
+            ])
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("no corpora root found above", result.stderr)
+
+
 class DomainFrontmatterTest(unittest.TestCase):
     """kernel.md, 'Spawns: stance + composition' — lint-domains works on any --domains-dir, same
     as kill-report, so a process layer's data source is validated independent of any one project."""
