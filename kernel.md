@@ -801,6 +801,22 @@ instead of a freshly-proposed one), and ratifies or rejects it individually.
 Write-back from `corpora/import-candidates.md` follows the ordinary write-back format, above — the
 `imported-from` block is additional provenance, not a different write path.
 
+### Monorepo root resolution
+
+A monorepo may have more than one `corpora/config.md` — an app-scoped one (`admin/corpora/`) and a
+root-level one, or several sibling apps each with their own. `scripts/corpus.py` resolves which
+root governs a given file by nearest-ancestor walk from the file up toward the filesystem root,
+stopping at the first `corpora/config.md` found — the same model `tsconfig.json`/`package.json`
+resolution already use. `corpus.py resolve-root --file <path>` reports it directly; `corpus.py
+check-root-boundary --files <f1,f2,...>` is the mechanical check — it fails (exit 2) if a task's
+touched files resolve to more than one root, naming each root's files, since a spawn's composition
+can only ever be one root's domains (`select`/`compose-spawn-prompt` take one `--root`). This is
+the same shape as subject separation (`check-composition` — a spawn never mixes coding and design
+domains), just on a different axis: a task spanning two corpora roots is two units of work, one per
+root, sequenced by whichever the planner judges dependent — not a single spawn straddling both.
+This resolves automatically; there is no manual `sibling-corpora:` declaration to keep in sync,
+deliberately, so the check can't go stale the way a hand-maintained list would.
+
 ### One flat seed layer
 
 The skill's `domains/` is one flat pool — no separate "role pack" layer selected by a project-config

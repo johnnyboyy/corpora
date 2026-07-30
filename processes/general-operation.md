@@ -18,6 +18,14 @@ Every session, before bootstrap checks or routing: load the orchestrator's own d
 (`SKILL.md`, "## domains"), plus project counterparts if present. The orchestrator is a spawn like
 any other; it does not get to skip the load-before-work rule it applies to everyone else.
 
+A monorepo may have more than one `corpora/config.md` (an app-scoped root, or a shared root-level
+one). Resolve which root governs the task's actual working files with `corpus.py resolve-root
+--file <path>` before assuming the session's default `--root` — nearest-ancestor walk, same model
+`tsconfig.json`/`package.json` resolution already use (`kernel.md`, "Monorepo root resolution"). If
+a task's touched files span more than one root, `corpus.py check-root-boundary --files <f1,f2,...>`
+fails with the split; route it as two units of work, one per root, rather than one spawn straddling
+both.
+
 If `corpora/config.md` exists, run the bundled ledger check before routing spawn work:
 `python3 <skill-directory>/scripts/corpus.py --root <project-root> verify`. Resolve the skill
 directory from `SKILL.md`, not from the project working directory. Surface any discrepancy to the

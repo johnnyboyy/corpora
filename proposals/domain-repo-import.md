@@ -244,7 +244,11 @@ pile of unrelated ones. Worth naming explicitly rather than assuming it'll be no
 
 # Related proposal: monorepo — multiple corpora directories scoped to individual apps
 
-**Status: draft, not implemented.**
+**Status: partially implemented 2026-07-30.** Directory resolution (the first bullet below) shipped
+as `corpus.py resolve-root`/`check-root-boundary` (`kernel.md`, "Monorepo root resolution") once a
+real second root (FAMOUS's `admin/`) existed to build and test it against. The other two bullets —
+bootstrapping a new sibling app's import-source ordering, and explicitly sanctioning a root-level
+app-less `corpora/` — remain draft.
 
 Today corpora assumes one `corpora/` at a project root. A monorepo (`apps/web/corpora/`,
 `apps/mobile/corpora/`, `packages/shared/corpora/`, or a shared root-level `corpora/` with no app of
@@ -257,14 +261,14 @@ shared root) a way to share judgment without a live seed-style merge. What's act
 orchestrator-level routing judgment, not new mechanism.
 
 **What needs deciding at implementation time:**
-- **Directory resolution.** `general-operation.md`'s Phase 1 currently doesn't say how to *find*
-  `corpora/config.md` when more than one could exist — it should resolve by nearest-ancestor walk
-  from the task's actual working files up toward the repo root, stopping at the first
-  `corpora/config.md` found (the same resolution model `tsconfig.json`/`package.json` already use
-  in the stacks corpora's own domains are heaviest in today). A task that genuinely spans two apps'
-  corpora roots (a shared package change touching two apps' consumers) is an edge case to name, not
-  solve now — likely two units of work, one per affected root, sequenced by whichever the planner
-  judges dependent.
+- **Directory resolution — IMPLEMENTED.** `corpus.py resolve-root --file <path>` resolves by
+  nearest-ancestor walk from a file up toward the filesystem root, stopping at the first
+  `corpora/config.md` found (the same resolution model `tsconfig.json`/`package.json` already use).
+  `corpus.py check-root-boundary --files <f1,f2,...>` is the mechanical split signal for a task
+  spanning two apps' corpora roots — fails (exit 2), naming each root's files, rather than letting a
+  single spawn straddle both; the operator/planner splits it into one unit of work per root from
+  there. Automatic resolution only (no manual `sibling-corpora:` declaration) — decided over a
+  declaration-based alternative specifically so the check can't go stale.
 - **Bootstrapping a new sibling app.** Same `bootstrap.md` flow, but should offer to import from a
   sibling or shared-root `corpora/domains/` (via the mechanism in the main proposal above) as the
   first import source considered, ahead of this skill's own default pool — a monorepo's own

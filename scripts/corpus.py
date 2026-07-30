@@ -44,6 +44,10 @@ Commands:
   lint-screenshots                 validate the screenshot manifest structurally
   lint-domains --domains-dir D     validate domain frontmatter (subject/posture/applies-when/
                                    units-of-work) — works on any domains-dir, same as kill-report
+  resolve-root --file F             nearest-ancestor walk from a file to the corpora root
+                                   (dir containing corpora/config.md) that governs it
+  check-root-boundary --files [...] fail (exit 2) if a task's touched files resolve to more than
+                                   one corpora root — the monorepo split signal
   manifest [--json]                emit the machine-readable domain index for this project's own
                                    corpora/domains/ (or --domains-dir): every domain's subject/
                                    posture/applies-when/units-of-work plus its principles' id+
@@ -1133,6 +1137,65 @@ def cmd_sync_done(project: Project, _args) -> None:
 
 def skill_root() -> str:
     return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+# ── monorepo root resolution: which corpora root governs a given file ────────────────────────
+#
+# proposals/domain-repo-import.md, "monorepo" section: a monorepo may have more than one
+# `corpora/config.md` (an app-scoped one, or a shared app-less root). Resolution is nearest-
+# ancestor walk from a task's actual touched files up toward the filesystem root, stopping at the
+# first `corpora/config.md` found — the same model `tsconfig.json`/`package.json` already use. A
+# task whose touched files resolve to more than one root is the mechanical split signal: one unit
+# of work per root, not a single spawn straddling both.
+
+def find_root_config(start_path: str) -> str:
+    """Nearest-ancestor walk from `start_path` up toward the filesystem root. Returns the
+    directory containing the first `corpora/config.md` found, or "" if none exists above it."""
+    current = os.path.abspath(start_path)
+    if not os.path.isdir(current):
+        current = os.path.dirname(current)
+    while True:
+        if os.path.exists(os.path.join(current, "corpora", "config.md")):
+            return current
+        parent = os.path.dirname(current)
+        if parent == current:
+            return ""
+        current = parent
+
+
+def cmd_resolve_root(args) -> None:
+    root = find_root_config(args.file)
+    if not root:
+        print(f"no corpora root found above {args.file}")
+        return
+    print(root)
+
+
+def cmd_check_root_boundary(args) -> None:
+    files = _ids(args.files)
+    if not files:
+        fail("--files requires at least one comma-separated file path")
+    by_root: dict = {}
+    unresolved = []
+    for f in files:
+        root = find_root_config(f)
+        if root:
+            by_root.setdefault(root, []).append(f)
+        else:
+            unresolved.append(f)
+    if unresolved:
+        print("no corpora root found for: " + ", ".join(unresolved))
+    if len(by_root) > 1:
+        print("error: task spans multiple corpora roots — split into one unit of work per root:",
+              file=sys.stderr)
+        for root, root_files in sorted(by_root.items()):
+            print(f"  {root}: {', '.join(root_files)}", file=sys.stderr)
+        sys.exit(2)
+    if by_root:
+        (root,) = by_root.keys()
+        print(f"check-root-boundary: ok — single root {root}")
+    else:
+        print("check-root-boundary: ok — no touched file resolves to a corpora root")
 
 
 # ── domain selection API: frontmatter, manifest, select, check-composition ──────────────────
@@ -2529,6 +2592,13 @@ def main() -> None:
     ld = sub.add_parser("lint-domains", help="works on any domains-dir, not only a project's corpora/domains — "
                                               "validates frontmatter (subject/posture/applies-when/units-of-work)")
     ld.add_argument("--domains-dir", required=True)
+    rr = sub.add_parser("resolve-root", help="nearest-ancestor walk from a file to the corpora root "
+                                              "(directory containing corpora/config.md) that governs it")
+    rr.add_argument("--file", required=True)
+    crb = sub.add_parser("check-root-boundary", help="fail (exit 2) if a task's touched files resolve "
+                                                       "to more than one corpora root — the monorepo "
+                                                       "split signal (proposals/domain-repo-import.md)")
+    crb.add_argument("--files", required=True, help="comma-separated file paths")
     mf = sub.add_parser("manifest", help="emit the machine-readable domain index for this project's own "
                                           "corpora/domains/ (or --domains-dir), for a process layer to "
                                           "select against without reading prose")
@@ -2603,7 +2673,8 @@ def main() -> None:
     args = ap.parse_args()
 
     no_project = {"kill-report": cmd_kill_report, "graduate-kill": cmd_graduate_kill,
-                  "lint-domains": cmd_lint_domains}
+                  "lint-domains": cmd_lint_domains, "resolve-root": cmd_resolve_root,
+                  "check-root-boundary": cmd_check_root_boundary}
     if args.cmd in no_project:
         no_project[args.cmd](args)
         return

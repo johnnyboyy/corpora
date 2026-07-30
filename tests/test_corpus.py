@@ -1482,6 +1482,67 @@ class KillGraduationTest(unittest.TestCase):
         self.assertIn("'last-kill' killed", result.stdout)
 
 
+class RootBoundaryTest(unittest.TestCase):
+    """proposals/domain-repo-import.md, monorepo section: nearest-ancestor resolution finds which
+    corpora/config.md governs a file, the same model tsconfig.json/package.json resolution uses;
+    check-root-boundary is the mechanical split signal for a task spanning two roots."""
+
+    def setUp(self):
+        self.tempdir = tempfile.TemporaryDirectory()
+        self.root = Path(self.tempdir.name)
+        (self.root / "corpora").mkdir(parents=True)
+        (self.root / "corpora" / "config.md").write_text("# Config\n")
+        (self.root / "admin" / "corpora").mkdir(parents=True)
+        (self.root / "admin" / "corpora" / "config.md").write_text("# Config\n")
+        (self.root / "src").mkdir()
+        (self.root / "admin" / "pages").mkdir(parents=True)
+        (self.root / "src" / "foo.ts").write_text("")
+        (self.root / "admin" / "pages" / "bar.tsx").write_text("")
+
+    def tearDown(self):
+        self.tempdir.cleanup()
+
+    def run_command(self, command):
+        return subprocess.run(
+            [sys.executable, str(SCRIPT), *command],
+            text=True, capture_output=True, check=False,
+        )
+
+    def test_resolve_root_finds_outer_root(self):
+        result = self.run_command(["resolve-root", "--file", str(self.root / "src" / "foo.ts")])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout.strip(), str(self.root))
+
+    def test_resolve_root_prefers_nearest_ancestor_over_outer_root(self):
+        result = self.run_command(["resolve-root", "--file", str(self.root / "admin" / "pages" / "bar.tsx")])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout.strip(), str(self.root / "admin"))
+
+    def test_resolve_root_reports_none_above_a_file_with_no_corpora_root(self):
+        with tempfile.TemporaryDirectory() as outside:
+            result = self.run_command(["resolve-root", "--file", str(Path(outside) / "f.ts")])
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn("no corpora root found", result.stdout)
+
+    def test_check_root_boundary_passes_for_single_root(self):
+        result = self.run_command(["check-root-boundary", "--files",
+                                    f"{self.root / 'src' / 'foo.ts'}"])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("ok", result.stdout)
+
+    def test_check_root_boundary_fails_when_files_span_two_roots(self):
+        result = self.run_command(["check-root-boundary", "--files",
+                                    f"{self.root / 'src' / 'foo.ts'},{self.root / 'admin' / 'pages' / 'bar.tsx'}"])
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("spans multiple corpora roots", result.stderr)
+        self.assertIn(str(self.root), result.stderr)
+        self.assertIn(str(self.root / "admin"), result.stderr)
+
+
 class DomainFrontmatterTest(unittest.TestCase):
     """kernel.md, 'Spawns: stance + composition' — lint-domains works on any --domains-dir, same
     as kill-report, so a process layer's data source is validated independent of any one project."""
