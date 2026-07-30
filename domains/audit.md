@@ -435,6 +435,10 @@ provenance:
   domain: coding-react
   kind: judgment
   provenance: "2026-07-15, FAMOUS PlayerBarContent review (operator flagged a coder principle possibly too web-specific for an unrelated hook-encapsulation question; while fixing the hook extraction, a separate useEffect surfaced that only reset scrubberOpen on track-id change via a ref comparison — moved to render body). Operator asked whether the sibling knowledge-tier kill no-read-after-set-in-same-scope was wrongly killed given this miss; on inspection the two patterns are unrelated (that kill concerns reading state synchronously after its own setter, this concerns an effect used purely for derivable state with no external interaction) but the miss itself prompted an audit of FAMOUS and Blog for recurrence. FAMOUS had only the one instance; Blog's ResultBar.tsx useResultFlash showed the identical shape independently (throttled setFlashKey bump keyed off prop-derived label/delta, no external interaction). Two independent hits across two different project shapes (Expo/RN, Next.js) in one pass — satisfies the cross-project-shape bar for promotion straight to seed rather than starting provisional in one project's working file."
+  history:
+    - date: 2026-07-28
+      type: corrected
+      reason: "motors-and-controls SchematicNode.tsx review: the rule's ref-holding-previous-value parenthetical failed the project's react-hooks/refs lint (React Compiler-safe, forbids ref access/mutation during render). Same failure mode that killed the sibling behavior-flags-in-refs, but here the core claim (derivable state belongs in render, not an effect) still holds and is not knowledge-tier — corrected the rule to hold the previous value in useState instead of a ref, which is safe under both classic and Compiler-safe React with no condition split needed, rather than killing the principle."
 
 - id: hook-returns-own-handlers
   domain: coding-react
@@ -470,6 +474,7 @@ provenance:
 - id: behavior-flags-in-refs
   domain: coding-react
   provenance: "2026-07-01, cross-project Blog→FAMOUS deep review. Surfaced from load calculator useAutosave (isMountRef, pendingRef) and hiragana useSpellQueue (errorInRoundRef). All are boolean flags that gate logic without affecting rendered output. Written to seed domain."
+  killed: 2026-07-28
   history:
     - date: 2026-07-06
       type: generalized
@@ -477,6 +482,9 @@ provenance:
     - date: 2026-07-18
       type: generalized
       reason: "Structural-kinship retrospective signal: absorbed stable-ref-for-document-listeners. Both were instances of the same ref-vs-state test — mirroring current state for an external listener is a specific case of 'does this value drive rendered output.' Rule and reason extended to name the document-listener case explicitly."
+    - date: 2026-07-28
+      type: killed
+      reason: "kill_type: knowledge — see coding-react.md's killed: log for the full reason. Standard React-documentation content plus a concrete Compiler-safe-lint failure surfaced in motors-and-controls."
 
 - id: stable-ref-for-document-listeners
   domain: coding-react
@@ -1238,7 +1246,7 @@ counters:
     ratified: 2
     killed: 0
     gate-violations: 0
-    working-file-tokens: 5683
+    working-file-tokens: 5691
     baseline-tokens: 5335
     principles-at-baseline: 18
     kills-at-baseline: 1
@@ -1248,20 +1256,20 @@ counters:
     ratified: 0
     killed: 0
     gate-violations: 0
-    working-file-tokens: 1119
+    working-file-tokens: 1124
     baseline-tokens: 1119
     principles-at-baseline: 5
     kills-at-baseline: 0
   - domain: coding-react
     origin: seed
-    since: 2026-07-23
+    since: 2026-07-28
     ratified: 0
     killed: 0
     gate-violations: 0
-    working-file-tokens: 4514
-    baseline-tokens: 4514
-    principles-at-baseline: 13
-    kills-at-baseline: 9
+    working-file-tokens: 4616
+    baseline-tokens: 4465
+    principles-at-baseline: 12
+    kills-at-baseline: 10
   - domain: coding-ts
     origin: seed
     since: 2026-07-23
@@ -1278,7 +1286,7 @@ counters:
     ratified: 0
     killed: 0
     gate-violations: 0
-    working-file-tokens: 775
+    working-file-tokens: 779
     baseline-tokens: 775
     principles-at-baseline: 2
     kills-at-baseline: 2
@@ -1288,7 +1296,7 @@ counters:
     ratified: 0
     killed: 0
     gate-violations: 0
-    working-file-tokens: 1474
+    working-file-tokens: 1483
     baseline-tokens: 1474
     principles-at-baseline: 4
     kills-at-baseline: 4
@@ -1308,7 +1316,7 @@ counters:
     ratified: 0
     killed: 0
     gate-violations: 0
-    working-file-tokens: 891
+    working-file-tokens: 799
     baseline-tokens: 891
     principles-at-baseline: 2
     kills-at-baseline: 0
@@ -1338,7 +1346,7 @@ counters:
     ratified: 0
     killed: 0
     gate-violations: 0
-    working-file-tokens: 810
+    working-file-tokens: 812
     baseline-tokens: 810
     principles-at-baseline: 3
     kills-at-baseline: 0
@@ -1378,7 +1386,7 @@ counters:
     ratified: 0
     killed: 0
     gate-violations: 0
-    working-file-tokens: 2145
+    working-file-tokens: 2264
     baseline-tokens: 2145
     principles-at-baseline: 5
     kills-at-baseline: 1
@@ -1388,7 +1396,7 @@ counters:
     ratified: 2
     killed: 0
     gate-violations: 0
-    working-file-tokens: 2575
+    working-file-tokens: 2724
     baseline-tokens: 2016
     principles-at-baseline: 6
     kills-at-baseline: 0
@@ -1398,20 +1406,20 @@ counters:
     ratified: 0
     killed: 0
     gate-violations: 0
-    working-file-tokens: 853
+    working-file-tokens: 856
     baseline-tokens: 853
     principles-at-baseline: 5
     kills-at-baseline: 0
   - domain: ratify-gate
     origin: seed
-    since: 2026-07-23
-    ratified: 1
+    since: 2026-07-28
+    ratified: 0
     killed: 0
     gate-violations: 0
-    working-file-tokens: 2373
-    baseline-tokens: 2030
-    principles-at-baseline: 9
-    kills-at-baseline: 1
+    working-file-tokens: 2408
+    baseline-tokens: 3610
+    principles-at-baseline: 12
+    kills-at-baseline: 3
   - domain: recoverability
     origin: seed
     since: 2026-07-23
@@ -1424,21 +1432,21 @@ counters:
     kills-at-baseline: 1
   - domain: spawn-integrity
     origin: project
-    since: 2026-07-23
+    since: 2026-07-28
     ratified: 0
     killed: 0
     gate-violations: 0
-    working-file-tokens: 1780
-    baseline-tokens: 1856
-    principles-at-baseline: 6
-    kills-at-baseline: 0
+    working-file-tokens: 1592
+    baseline-tokens: 1592
+    principles-at-baseline: 3
+    kills-at-baseline: 3
   - domain: surfaces-elevation
     origin: project
     since: 2026-07-23
     ratified: 0
     killed: 0
     gate-violations: 0
-    working-file-tokens: 479
+    working-file-tokens: 483
     baseline-tokens: 479
     principles-at-baseline: 3
     kills-at-baseline: 0
@@ -1458,7 +1466,7 @@ counters:
     ratified: 0
     killed: 0
     gate-violations: 0
-    working-file-tokens: 762
+    working-file-tokens: 766
     baseline-tokens: 762
     principles-at-baseline: 4
     kills-at-baseline: 0
@@ -1468,7 +1476,7 @@ counters:
     ratified: 0
     killed: 0
     gate-violations: 0
-    working-file-tokens: 468
+    working-file-tokens: 470
     baseline-tokens: 499
     principles-at-baseline: 3
     kills-at-baseline: 0

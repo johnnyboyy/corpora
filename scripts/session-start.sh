@@ -13,8 +13,7 @@
 
 [ -f corpora/config.md ] || exit 0
 
-ROLE_PACK=$(sed -n 's/^role-pack:[[:space:]]*//p' corpora/config.md | head -1)
-echo "This is a corpora-managed project (role-pack: ${ROLE_PACK:-none})."
+echo "This is a corpora-managed project."
 echo "Role work (coding, design, planning, review) goes through the corpora skill:"
 echo "load the role's lens + declared domains before starting — see ~/.claude/skills/corpora/SKILL.md."
 
@@ -22,7 +21,7 @@ SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 python3 "$SCRIPT_DIR/corpus.py" --root . verify 2>&1
 python3 "$SCRIPT_DIR/corpus.py" --root . lint-deferred 2>&1
 python3 "$SCRIPT_DIR/corpus.py" --root . deferred 2>&1
-python3 "$SCRIPT_DIR/corpus.py" --root . lint-utility-candidates 2>&1
-python3 "$SCRIPT_DIR/corpus.py" --root . utility-candidates 2>&1
+python3 "$SCRIPT_DIR/corpus.py" --root . lint-deterministic-shortcut-candidates 2>&1
+python3 "$SCRIPT_DIR/corpus.py" --root . deterministic-shortcut-candidates 2>&1
 
 exit 0

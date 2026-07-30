@@ -28,8 +28,10 @@ Commands:
   deterministic-shortcut-candidates               list candidates with status and sighting count
   record-deterministic-shortcut-candidate [...]   append dated evidence to a candidate
   set-deterministic-shortcut-status [...]         record the operator's candidate disposition
-  retro-done --domain D            reset counters after a retrospective
-  sync-done                        reset library-drift after a UI-library sync
+  retro-done --domain D [...]       reset counters after a retrospective (same --domains-dir/--audit
+                                   override)
+  sync-done [...]                  reset library-drift after a UI-library sync (same
+                                   --domains-dir/--audit override)
   compose-spawn-prompt [...]       mechanically assemble a spawn-ready prompt: stance frame +
                                    full seed/project domain files + handoff schema + task, no
                                    summarization step; saves a copy under corpora/session-prompts/
@@ -1374,7 +1376,11 @@ def main() -> None:
     us.add_argument("--reason", default="")
     r = sub.add_parser("retro-done")
     r.add_argument("--domain", required=True)
-    sub.add_parser("sync-done")
+    r.add_argument("--domains-dir", default="", help=layer_help)
+    r.add_argument("--audit", default="", help=layer_help)
+    sd = sub.add_parser("sync-done")
+    sd.add_argument("--domains-dir", default="", help=layer_help)
+    sd.add_argument("--audit", default="", help=layer_help)
     cp = sub.add_parser("compose-spawn-prompt",
                         help="mechanically concatenate a composition's full domain files, the "
                              "stance frame, and the handoff schema into one spawn-ready prompt file")
