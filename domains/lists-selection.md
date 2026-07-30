@@ -1,3 +1,12 @@
+---
+subject: design
+posture: guardrail
+applies-when:
+  - has-ui: yes
+units-of-work: [design-ux-flow, design-ui-surface, bootstrap-ux-surface]
+universal: false
+---
+
 # Domain: lists-selection
 
 Lists, rows, and active/selected item treatment. Cross-composition domain. Audit metadata lives in

@@ -1,3 +1,9 @@
+---
+subject: process
+posture: guardrail
+universal: true
+---
+
 # Domain: interviewing
 
 Judgment about conducting a clarifying dialogue and framing a question so it's cheap to answer —

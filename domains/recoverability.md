@@ -1,3 +1,12 @@
+---
+subject: design
+posture: guardrail
+applies-when:
+  - has-ui: yes
+units-of-work: [design-ux-flow, design-ui-surface, bootstrap-ux-surface]
+universal: false
+---
+
 # Domain: recoverability
 
 Destructive actions, confirmation, undo, and recovery. The canonical cross-composition domain — the flow

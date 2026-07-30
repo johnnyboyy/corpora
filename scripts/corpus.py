@@ -41,6 +41,24 @@ Commands:
   screenshot-status                list current/stale screens in the manifest
   screenshot-lookup --component C  which screens already show component C, and where
   lint-screenshots                 validate the screenshot manifest structurally
+  lint-domains --domains-dir D     validate domain frontmatter (subject/posture/applies-when/
+                                   units-of-work) — works on any domains-dir, same as kill-report
+  manifest [--json]                emit the machine-readable domain index (seed + project): every
+                                   domain's subject/posture/applies-when/units-of-work plus its
+                                   principles' id+condition only — never rule/reason
+  select --unit-of-work U [...]    deterministic domain selection for a unit-of-work, evaluated
+                                   against corpora/config.md's project-shape — no model in the loop
+  check-composition --domains [...] fail (exit 2) if a domain list mixes subjects (coding/design)
+                                   or includes a posture: generative domain
+  chunk-start --workstream --unit-of-work   print the deterministic composition; writes nothing
+  chunk-done --workstream --unit-of-work --stance --handoff [--next]
+                                   close a chunk in corpora/chunks/<workstream>.md; fails unless
+                                   --handoff names a real handoff for the same workstream — a
+                                   chunk record never substitutes for the handoff it points at
+  lint-chunks                     validate every corpora/chunks/*.md ledger structurally
+  close-workstream --workstream   read-only summary of a workstream's completed chunks
+  verify-chunks                    Stop-hook check: recompute select() for every recorded chunk
+                                   and compare against its stored domains-composed
 
 Thresholds (kernel.md, "The retrospective"): retrospective when ratified >= 6,
 or tokens grew >= 50% over baseline, or gate-violations >= 3; library sync when
@@ -69,6 +87,9 @@ DEFERRED_STATUS_ENUM = {"queued", "resolved"}
 SHORTCUT_STATUS_ENUM = {"open", "deferred", "denied", "accepted", "implemented"}
 SHORTCUT_STATUS_REQUIRES_REASON = {"deferred", "denied"}
 SCREENSHOT_STATUS_ENUM = {"current", "stale"}
+DOMAIN_SUBJECT_ENUM = {"coding", "design", "process"}
+DOMAIN_POSTURE_ENUM = {"guardrail", "generative"}
+CONFIG_SHAPE_FIELDS = {"language", "framework", "styling", "has-ui", "package-manager"}
 
 
 def today() -> str:
@@ -107,11 +128,22 @@ class Project:
         self.deterministic_shortcut_candidates_path = os.path.join(root, "corpora", "deterministic-shortcut-candidates.md")
         self.screenshots_dir = os.path.join(root, "corpora", "screenshots")
         self.screenshot_manifest_path = os.path.join(self.screenshots_dir, "manifest.md")
-        if not os.path.isdir(self.domains_dir):
-            fail(f"no domains dir at {self.domains_dir} — run from a bootstrapped project root, or pass --root/--domains-dir")
+        self.chunks_dir = os.path.join(root, "corpora", "chunks")
+        self.queue_path = os.path.join(root, "corpora", "queue.md")
+        # No existence check here: `corpora/domains/` only ever holds *ratified* project
+        # principles, so a freshly-bootstrapped project with nothing ratified yet legitimately
+        # has no such directory. A command that only reads (select, manifest, chunk-start/-done,
+        # compose-spawn-prompt) must work against a project with zero project-level domains —
+        # domain_files() below returns {} rather than raising. A command that writes into this
+        # layer (record-gate, retro-done, sync-done, via save()) creates the directory lazily on
+        # first write instead. A command whose result is meaningless without it (e.g. record-gate
+        # for a specific domain) still fails, but with a message naming what's actually missing,
+        # not a blanket precondition every command pays for.
 
     def domain_files(self) -> dict:
         out = {}
+        if not os.path.isdir(self.domains_dir):
+            return out
         audit_name = os.path.basename(self.audit_path)
         for name in sorted(os.listdir(self.domains_dir)):
             if name.endswith(".md") and name != audit_name:
@@ -241,6 +273,7 @@ def load(project: Project) -> dict:
 
 def save(project: Project, state: dict) -> None:
     block = f"{MARK_BEGIN}\n\n## counters (script-maintained)\n\n{render_state(state)}\n\n{MARK_END}"
+    os.makedirs(os.path.dirname(project.audit_path), exist_ok=True)
     if os.path.exists(project.audit_path):
         text = open(project.audit_path).read()
     else:
@@ -1083,6 +1116,694 @@ def seed_domain_path(domain: str) -> str:
     return kernel_path if os.path.exists(kernel_path) else ""
 
 
+# ── domain selection API: frontmatter, manifest, select, check-composition ──────────────────
+#
+# An external process layer selects domains by querying data instead of reading
+# preambles — see `kernel.md`, "Spawns: stance + composition." Every load condition previously
+# stated in prose is machine-evaluable already; this section is the seam.
+
+FRONTMATTER_RE = re.compile(r"\A---\n(.*?)\n---\n", re.DOTALL)
+
+
+def _parse_inline_list(value: str):
+    value = value.strip()
+    if value.startswith("[") and value.endswith("]"):
+        inner = value[1:-1].strip()
+        return [x.strip() for x in inner.split(",")] if inner else []
+    return [value] if value else []
+
+
+def parse_domain_frontmatter(path: str):
+    """Parse a domain file's frontmatter block. Returns None if the file has none (not yet
+    migrated to the schema in `kernel.md`, "Spawns: stance + composition")."""
+    text = open(path).read()
+    m = FRONTMATTER_RE.match(text)
+    if not m:
+        return None
+    data = {"subject": None, "posture": None, "applies-when": [], "units-of-work": [], "universal": False}
+    lines = m.group(1).split("\n")
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        if line.startswith("subject:"):
+            data["subject"] = line.split(":", 1)[1].strip()
+        elif line.startswith("posture:"):
+            data["posture"] = line.split(":", 1)[1].strip()
+        elif line.startswith("universal:"):
+            data["universal"] = line.split(":", 1)[1].strip().lower() == "true"
+        elif line.startswith("units-of-work:"):
+            data["units-of-work"] = _parse_inline_list(line.split(":", 1)[1])
+        elif re.fullmatch(r"applies-when:\s*", line):
+            i += 1
+            while i < len(lines) and lines[i].startswith("  - "):
+                key, _, val = lines[i][4:].partition(":")
+                data["applies-when"].append((key.strip(), _parse_inline_list(val)
+                                              if val.strip().startswith("[") else val.strip()))
+                i += 1
+            continue
+        i += 1
+    return data
+
+
+def parse_domain_conditions(path: str) -> list:
+    """Extract `id` + `condition` (only — never `rule`/`reason`) for every active principle, so a
+    routing layer can see when a principle applies without seeing what it says."""
+    text = open(path).read()
+    m = FRONTMATTER_RE.match(text)
+    body = text[m.end():] if m else text
+    section = None
+    current_id = None
+    conditions = []
+    for raw in body.split("\n"):
+        stripped = raw.strip()
+        if re.fullmatch(r"principles:", stripped):
+            section = "p"
+            continue
+        if re.fullmatch(r"killed:", stripped):
+            section = "k"
+            continue
+        if section != "p":
+            continue
+        m_id = re.match(r"-\s*id:\s*(\S+)", stripped)
+        if m_id:
+            current_id = m_id.group(1)
+            continue
+        m_cond = re.match(r'condition:\s*"(.*)"\s*$', stripped)
+        if m_cond and current_id:
+            conditions.append({"id": current_id, "condition": m_cond.group(1)})
+            current_id = None
+    return conditions
+
+
+def domain_lint_problems(domains_dir: str) -> list:
+    problems = []
+    for name in sorted(os.listdir(domains_dir)):
+        if not name.endswith(".md") or name == "audit.md":
+            continue
+        domain = name[:-3]
+        fm = parse_domain_frontmatter(os.path.join(domains_dir, name))
+        if fm is None:
+            problems.append(f"{domain}: no frontmatter block")
+            continue
+        if fm["subject"] not in DOMAIN_SUBJECT_ENUM:
+            problems.append(f"{domain}: subject '{fm['subject']}' not in {sorted(DOMAIN_SUBJECT_ENUM)}")
+        if fm["posture"] not in DOMAIN_POSTURE_ENUM:
+            problems.append(f"{domain}: posture '{fm['posture']}' not in {sorted(DOMAIN_POSTURE_ENUM)}")
+        if not fm["universal"] and not fm["units-of-work"]:
+            problems.append(f"{domain}: units-of-work is empty and universal is not true")
+        for key, _ in fm["applies-when"]:
+            if key not in CONFIG_SHAPE_FIELDS:
+                problems.append(f"{domain}: applies-when references unknown config field '{key}'")
+    return problems
+
+
+def cmd_lint_domains(args) -> None:
+    problems = domain_lint_problems(args.domains_dir)
+    if problems:
+        for p in problems:
+            print(f"error: {p}", file=sys.stderr)
+        sys.exit(2)
+    print(f"lint-domains: ok ({args.domains_dir})")
+
+
+def project_domain_sources(project: "Project") -> dict:
+    """Merge the kernel-seed domain layer (this skill's own `domains/`) with the project's own
+    `corpora/domains/` into one {name: {"seed": path, "project": path}} map — the same dual-source
+    model `compose-spawn-prompt` already assembles from."""
+    sources: dict = {}
+    seed_dir = os.path.join(skill_root(), "domains")
+    if os.path.isdir(seed_dir):
+        for name in sorted(os.listdir(seed_dir)):
+            if name.endswith(".md") and name != "audit.md":
+                sources.setdefault(name[:-3], {})["seed"] = os.path.join(seed_dir, name)
+    for name, path in project.domain_files().items():
+        sources.setdefault(name, {})["project"] = path
+    return sources
+
+
+def resolve_domain_frontmatter(paths: dict):
+    path = paths.get("seed") or paths.get("project")
+    return parse_domain_frontmatter(path) if path else None
+
+
+def parse_config_shape(config_path: str) -> dict:
+    if not os.path.exists(config_path):
+        return {}
+    text = open(config_path).read()
+    m = re.search(r"^## project-shape\s*\n(.*?)(?=\n## |\Z)", text, re.DOTALL | re.MULTILINE)
+    if not m:
+        return {}
+    shape = {}
+    for line in m.group(1).split("\n"):
+        line = line.strip()
+        if not line or line.startswith("<!--") or line.startswith("see:"):
+            continue
+        mm = re.match(r"([\w-]+):\s*(.*)$", line)
+        if mm:
+            shape[mm.group(1)] = mm.group(2).strip()
+    return shape
+
+
+def _normalize_shape_value(v: str) -> str:
+    return re.sub(r"[^a-z0-9]", "", v.lower())
+
+
+def applies_when_matches(applies_when: list, shape: dict) -> bool:
+    for key, val in applies_when:
+        actual = _normalize_shape_value(shape.get(key, ""))
+        if val == "not-none":
+            if actual in ("", "none"):
+                return False
+            continue
+        options = val if isinstance(val, list) else [val]
+        if actual not in {_normalize_shape_value(o) for o in options}:
+            return False
+    return True
+
+
+def select_domains(sources: dict, shape: dict, unit_of_work: str) -> list:
+    selected = []
+    for name, paths in sources.items():
+        fm = resolve_domain_frontmatter(paths)
+        if fm is None:
+            continue
+        if fm["universal"]:
+            selected.append(name)
+            continue
+        if unit_of_work not in fm["units-of-work"]:
+            continue
+        if not applies_when_matches(fm["applies-when"], shape):
+            continue
+        selected.append(name)
+    return sorted(selected)
+
+
+def cmd_select(project: "Project", args) -> None:
+    config_path = args.config or project.config_path
+    shape = parse_config_shape(config_path)
+    sources = project_domain_sources(project)
+    selected = select_domains(sources, shape, args.unit_of_work)
+    if args.json:
+        import json
+        print(json.dumps({"unit-of-work": args.unit_of_work, "domains": selected}))
+    else:
+        print(", ".join(selected) if selected else "(no domains selected)")
+
+
+def cmd_manifest(project: "Project", args) -> None:
+    sources = project_domain_sources(project)
+    entries = []
+    for name in sorted(sources):
+        paths = sources[name]
+        path = paths.get("seed") or paths.get("project")
+        fm = resolve_domain_frontmatter(paths)
+        if fm is None:
+            continue
+        entries.append({
+            "name": name,
+            "subject": fm["subject"],
+            "posture": fm["posture"],
+            "applies_when": [{k: v} for k, v in fm["applies-when"]],
+            "units_of_work": fm["units-of-work"],
+            "universal": fm["universal"],
+            "seed": "seed" in paths,
+            "project": "project" in paths,
+            "conditions": parse_domain_conditions(path),
+        })
+    if args.json:
+        import json
+        print(json.dumps({"domains": entries}, indent=2))
+    else:
+        for e in entries:
+            print(f"{e['name']}: subject={e['subject']} posture={e['posture']} "
+                  f"units-of-work={e['units_of_work']} universal={e['universal']}")
+
+
+def check_composition_problems(named_frontmatter: list) -> list:
+    """named_frontmatter: list of (name, frontmatter-or-None). Fails on any `posture: generative`
+    domain (kernel.md, 'The hard line' — no legitimate instance exists today) and on mixed
+    coding/design subjects in one composition (subject separation), ignoring universal domains. A
+    domain with no frontmatter (e.g. a project-only domain born fresh at the ratify gate, not yet
+    carrying the schema) is not itself an error here — it contributes no subject and is skipped;
+    `lint-domains` is the place that flags missing frontmatter as a structural problem."""
+    problems = []
+    subjects = set()
+    for name, fm in named_frontmatter:
+        if fm is None:
+            continue
+        if fm["posture"] == "generative":
+            problems.append(f"{name}: posture 'generative' is a ratify-gate rejection, not a "
+                             "valid domain to compose (kernel.md, 'The hard line')")
+        if not fm["universal"]:
+            subjects.add(fm["subject"])
+    if len(subjects - {None}) > 1:
+        problems.append(f"mixed subjects in one composition: {sorted(subjects - {None})}")
+    return problems
+
+
+def cmd_check_composition(project: "Project", args) -> None:
+    domains = _ids(args.domains)
+    if not domains:
+        fail("--domains requires at least one comma-separated domain name")
+    sources = project_domain_sources(project)
+    named = [(d, resolve_domain_frontmatter(sources.get(d, {}))) for d in domains]
+    problems = check_composition_problems(named)
+    if problems:
+        for p in problems:
+            print(f"error: {p}", file=sys.stderr)
+        sys.exit(2)
+    print(f"check-composition: ok ({', '.join(domains)})")
+
+
+# ── chunk chaining: ground-truth ledger for a workstream's units of work ────────────────────
+#
+# kernel.md, "Chunk chaining": this ledger records what already happened — it never replaces the
+# per-unit-of-work spawn+handoff rule (kernel.md, "The handoff artifact"). `chunk-done` requires a
+# real handoff to exist for the unit-of-work it closes, the same way `record-gate` requires a real
+# gate to have run; `domains-composed` comes from the same `select` call that composed the spawn,
+# never self-reported.
+
+def chunks_path(project: "Project", workstream: str) -> str:
+    return os.path.join(project.chunks_dir, f"{workstream}.md")
+
+
+def parse_chunks(path: str) -> tuple:
+    """Deliberately flat parser, same style as `parse_deferred`. Returns (workstream, entries)."""
+    workstream = ""
+    entries = []
+    item = None
+    in_chunks = False
+    for raw in open(path):
+        line = raw.rstrip()
+        stripped = line.strip()
+        if in_chunks and stripped == "```":
+            break
+        if not in_chunks and stripped.startswith("workstream:"):
+            workstream = stripped.split(":", 1)[1].strip()
+            continue
+        if stripped in ("chunks:", "chunks: []"):
+            in_chunks = True
+            continue
+        if not in_chunks or not stripped or stripped.startswith(("#", "```")):
+            continue
+        if re.match(r"^\s*-\s+unit-of-work:\s*", line):
+            item = {}
+            entries.append(item)
+            stripped = re.sub(r"^-\s+", "", stripped)
+        if item is not None and ":" in stripped:
+            key, _, value = stripped.partition(":")
+            item[key.strip()] = value.strip()
+    for item in entries:
+        if "domains-composed" in item:
+            item["domains-composed"] = _parse_inline_list(item["domains-composed"])
+    return workstream, entries
+
+
+def render_chunks(workstream: str, entries: list) -> str:
+    lines = ["# Chunks", "", f"workstream: {workstream}", "", "```yaml", "chunks:", ""]
+    for e in entries:
+        lines.append(f"  - unit-of-work: {e['unit-of-work']}")
+        lines.append(f"    domains-composed: [{', '.join(e['domains-composed'])}]")
+        lines.append(f"    stance: {e['stance']}")
+        lines.append(f"    handoff: {e['handoff']}")
+        lines.append(f"    completed: {e['completed']}")
+        if e.get("next"):
+            lines.append(f"    next: {e['next']}")
+        lines.append("")
+    lines.append("```")
+    return "\n".join(lines) + "\n"
+
+
+def handoff_field(path: str, name: str) -> str:
+    text = open(path).read()
+    m = re.match(r"\A---\n(.*?)\n---\n", text, re.DOTALL)
+    if not m:
+        return ""
+    fm = re.search(rf"^{name}:[ \t]*(.*)$", m.group(1), re.MULTILINE)
+    return fm.group(1).strip() if fm else ""
+
+
+def cmd_chunk_start(project: "Project", args) -> None:
+    """Informational: runs the same deterministic `select` a `chunk-done` call will use, so the
+    composition is known before the spawn starts. Writes nothing — the ledger is append-only and
+    is only ever written once a real handoff exists to point at."""
+    shape = parse_config_shape(project.config_path)
+    sources = project_domain_sources(project)
+    selected = select_domains(sources, shape, args.unit_of_work)
+    print(f"workstream={args.workstream} unit-of-work={args.unit_of_work} "
+          f"domains-composed=[{', '.join(selected)}]")
+
+
+def cmd_chunk_done(project: "Project", args) -> None:
+    if not os.path.exists(args.handoff):
+        fail(f"no such handoff file: {args.handoff}")
+    handoff_workstream = handoff_field(args.handoff, "workstream")
+    if handoff_workstream and handoff_workstream != args.workstream:
+        fail(f"handoff's workstream '{handoff_workstream}' does not match --workstream '{args.workstream}' — "
+             "a chunk can only be closed by the handoff it actually produced")
+    shape = parse_config_shape(project.config_path)
+    sources = project_domain_sources(project)
+    domains_composed = select_domains(sources, shape, args.unit_of_work)
+    # Ground-truth check, not self-report: domains-composed comes from select(), never from the
+    # handoff — but that only proves select() is self-consistent unless it's also reconciled
+    # against what the spawn's own handoff says it actually loaded. A mismatch means either the
+    # composing process (e.g. a phase file's own hard-coded domain list) diverged from select()'s
+    # frontmatter-driven answer, or the spawn didn't load what its composition specified — either
+    # way, closing the chunk over it would record a false "reconciled" claim (see LINEAGE.md-worthy
+    # finding from running this exercise literally: verify-chunks reported clean while the ledger
+    # and the handoff disagreed about what actually loaded).
+    domains_loaded_raw = handoff_field(args.handoff, "domains-loaded")
+    if domains_loaded_raw:
+        domains_loaded = sorted(_parse_inline_list(domains_loaded_raw))
+        expected = sorted(domains_composed)
+        if domains_loaded != expected:
+            only_composed = sorted(set(expected) - set(domains_loaded))
+            only_loaded = sorted(set(domains_loaded) - set(expected))
+            fail(
+                "handoff's domains-loaded does not match select()'s domains-composed for "
+                f"unit-of-work '{args.unit_of_work}' — refusing to close the chunk.\n"
+                f"  select() only: {only_composed or '(none)'}\n"
+                f"  handoff only: {only_loaded or '(none)'}\n"
+                "Either the composing process diverged from select() (fix the composition to use "
+                "select(), per general-operation.md's spawn-brief step), or the spawn didn't load "
+                "what its composition specified (fix the spawn). Do not paper over this by editing "
+                "the ledger by hand."
+            )
+    path = chunks_path(project, args.workstream)
+    if os.path.exists(path):
+        _, entries = parse_chunks(path)
+    else:
+        entries = []
+    entries.append({
+        "unit-of-work": args.unit_of_work,
+        "domains-composed": domains_composed,
+        "stance": args.stance,
+        "handoff": args.handoff,
+        "completed": today(),
+        "next": args.next,
+    })
+    os.makedirs(project.chunks_dir, exist_ok=True)
+    open(path, "w").write(render_chunks(args.workstream, entries))
+    print(f"chunk closed: {args.workstream}/{args.unit_of_work} -> {path}")
+
+
+def chunk_lint_problems(path: str) -> list:
+    problems = []
+    workstream, entries = parse_chunks(path)
+    if not workstream:
+        problems.append(f"{path}: missing top-level workstream:")
+    for i, e in enumerate(entries, 1):
+        label = f"{path} chunk {i}"
+        for field in ("unit-of-work", "stance", "handoff", "completed"):
+            if not e.get(field):
+                problems.append(f"{label}: missing {field}")
+        if e.get("stance") not in DEFERRED_STANCE_ENUM:
+            problems.append(f"{label}: stance must be one of {sorted(DEFERRED_STANCE_ENUM)}")
+        if not e.get("domains-composed"):
+            problems.append(f"{label}: domains-composed is empty")
+    return problems
+
+
+def cmd_lint_chunks(project: "Project", _args) -> None:
+    if not os.path.isdir(project.chunks_dir):
+        print("no corpora/chunks/ directory — nothing to lint")
+        return
+    problems = []
+    for name in sorted(os.listdir(project.chunks_dir)):
+        if name.endswith(".md"):
+            problems += chunk_lint_problems(os.path.join(project.chunks_dir, name))
+    if problems:
+        for p in problems:
+            print(f"error: {p}", file=sys.stderr)
+        sys.exit(2)
+    print("lint-chunks: ok")
+
+
+def cmd_close_workstream(project: "Project", args) -> None:
+    """Read-only summary once every chunk in a workstream is done — aggregates the ledger for the
+    retrospective. Never folds multiple chunks' handoffs into one; each chunk's own handoff already
+    went through the normal ratify gate."""
+    path = chunks_path(project, args.workstream)
+    if not os.path.exists(path):
+        fail(f"no chunk ledger for workstream '{args.workstream}' at {path}")
+    workstream, entries = parse_chunks(path)
+    print(f"workstream: {workstream}")
+    print(f"chunks: {len(entries)}")
+    for e in entries:
+        print(f"  - {e['unit-of-work']} ({e['stance']}, completed {e['completed']}): "
+              f"{', '.join(e['domains-composed'])}")
+
+
+def cmd_verify_chunks(project: "Project", _args) -> None:
+    """Best-effort `Stop`-hook check (`scripts/stop-check.sh`): recompute `select` for every
+    recorded chunk and compare against its stored `domains-composed`. This cannot see whether a
+    spawn actually re-read its composed domains before writing (kernel.md, 'The handoff artifact'
+    — that is an instruction, not something Stop-hook input exposes); it catches the narrower,
+    mechanically-checkable case of composition drift — config.md or a domain's frontmatter changed
+    after the chunk closed, or the ledger was hand-edited."""
+    if not os.path.isdir(project.chunks_dir):
+        print("no corpora/chunks/ directory — nothing to verify")
+        return
+    shape = parse_config_shape(project.config_path)
+    sources = project_domain_sources(project)
+    problems = []
+    for name in sorted(os.listdir(project.chunks_dir)):
+        if not name.endswith(".md"):
+            continue
+        workstream, entries = parse_chunks(os.path.join(project.chunks_dir, name))
+        for e in entries:
+            expected = select_domains(sources, shape, e["unit-of-work"])
+            recorded = sorted(e.get("domains-composed", []))
+            if expected != recorded:
+                problems.append(f"{workstream}/{e['unit-of-work']}: recorded domains-composed "
+                                 f"{recorded} no longer matches current select() result {expected}")
+    if problems:
+        print("CHUNK COMPOSITION DRIFT:")
+        for p in problems:
+            print(f"  - {p}")
+        sys.exit(1)
+    print("chunk composition reconciled: every recorded domains-composed matches current select()")
+
+
+# ── queue: mechanical status transitions for corpora/queue.md ────────────────────────────────
+# Same reasoning as the chunk ledger (kernel.md, "bookkeeping done by attention is bookkeeping
+# that silently stops"): `planning.md`'s queue schema states the orchestrator updates `status` on
+# tasks and `resolved`/`answer` on questions "in-place," but nothing scripted ever did that
+# in-place update — it was hand-edited, the same failure class the chunk ledger was built to
+# close for domains-composed. This closes it for corpora/queue.md.
+
+TASK_STATUS_ENUM = {"pending", "in-progress", "complete", "blocked"}
+QUEUE_LIST_FIELDS = {"blocked-by", "blocks"}
+QUEUE_TASK_FIELDS = ("id", "title", "description", "context", "status", "blocked-by",
+                     "parallel-ok", "concern", "judgment", "notes")
+QUEUE_QUESTION_FIELDS = ("id", "question", "blocks", "resolved", "answer")
+QUEUE_HEADER_FIELDS = ("capability", "area", "status", "created", "updated")
+
+
+def parse_queue(path: str) -> tuple:
+    """Deliberately flat parser, same style as parse_deferred/parse_chunks. Returns
+    (header, tasks, questions) — header is the top-level scalar fields; tasks/questions are lists
+    of dicts, with blocked-by/blocks parsed into real lists via _parse_inline_list."""
+    header = {}
+    tasks = []
+    questions = []
+    section = None
+    item = None
+    for raw in open(path):
+        line = raw.rstrip()
+        stripped = line.strip()
+        if stripped == "```":
+            if section is not None:
+                break
+            continue
+        if stripped in ("tasks:", "tasks: []"):
+            section, item = "tasks", None
+            continue
+        if stripped in ("open-questions:", "open-questions: []"):
+            section, item = "open-questions", None
+            continue
+        if not stripped or stripped.startswith(("#", "```yaml")):
+            continue
+        if section is None:
+            if ":" in stripped:
+                key, _, value = stripped.partition(":")
+                header[key.strip()] = value.strip()
+            continue
+        if re.match(r"^\s*-\s+id:\s*", line):
+            item = {}
+            (tasks if section == "tasks" else questions).append(item)
+            stripped = re.sub(r"^-\s+", "", stripped)
+        if item is not None and ":" in stripped:
+            key, _, value = stripped.partition(":")
+            key = key.strip()
+            value = value.strip()
+            item[key] = _parse_inline_list(value) if key in QUEUE_LIST_FIELDS else value
+    return header, tasks, questions
+
+
+def render_queue(header: dict, tasks: list, questions: list) -> str:
+    lines = ["```yaml"]
+    for key in QUEUE_HEADER_FIELDS:
+        lines.append(f"{key}: {header.get(key, '')}")
+    lines += ["", "tasks:"]
+    for t in tasks:
+        lines.append(f"  - id: {t.get('id', '')}")
+        for key in QUEUE_TASK_FIELDS[1:]:
+            value = t.get(key, "")
+            if key in QUEUE_LIST_FIELDS:
+                value = f"[{', '.join(value)}]" if isinstance(value, list) else (value or "[]")
+            lines.append(f"    {key}: {value}")
+        lines.append("")
+    lines.append("open-questions:")
+    for q in questions:
+        lines.append(f"  - id: {q.get('id', '')}")
+        for key in QUEUE_QUESTION_FIELDS[1:]:
+            value = q.get(key, "")
+            if key in QUEUE_LIST_FIELDS:
+                value = f"[{', '.join(value)}]" if isinstance(value, list) else (value or "[]")
+            lines.append(f"    {key}: {value}")
+        lines.append("")
+    lines.append("```")
+    return "\n".join(lines) + "\n"
+
+
+def queue_lint_problems(path: str) -> list:
+    problems = []
+    header, tasks, questions = parse_queue(path)
+    for field in ("capability", "area", "status"):
+        if not header.get(field):
+            problems.append(f"{path}: missing header field {field}")
+    task_ids = set()
+    for t in tasks:
+        label = f"{path} task {t.get('id') or '(no id)'}"
+        if not t.get("id"):
+            problems.append(f"{label}: missing id")
+        elif t["id"] in task_ids:
+            problems.append(f"{label}: duplicate task id")
+        task_ids.add(t.get("id"))
+        if t.get("status") not in TASK_STATUS_ENUM:
+            problems.append(f"{label}: status must be one of {sorted(TASK_STATUS_ENUM)}")
+        for dep in t.get("blocked-by", []):
+            if dep and dep not in {t2.get("id") for t2 in tasks}:
+                problems.append(f"{label}: blocked-by references unknown task id '{dep}'")
+    question_ids = set()
+    for q in questions:
+        label = f"{path} question {q.get('id') or '(no id)'}"
+        if not q.get("id"):
+            problems.append(f"{label}: missing id")
+        elif q["id"] in question_ids:
+            problems.append(f"{label}: duplicate question id")
+        question_ids.add(q.get("id"))
+        if q.get("resolved") not in ("true", "false"):
+            problems.append(f"{label}: resolved must be true or false")
+        for blocked in q.get("blocks", []):
+            if blocked and blocked not in task_ids:
+                problems.append(f"{label}: blocks references unknown task id '{blocked}'")
+    return problems
+
+
+def cmd_lint_queue(project: "Project", _args) -> None:
+    if not os.path.exists(project.queue_path):
+        print("no corpora/queue.md — nothing to lint")
+        return
+    problems = queue_lint_problems(project.queue_path)
+    if problems:
+        for p in problems:
+            print(f"error: {p}", file=sys.stderr)
+        sys.exit(2)
+    print("lint-queue: ok")
+
+
+def _task_startable(task: dict, tasks_by_id: dict, questions_by_id: dict) -> tuple:
+    """Returns (startable, blockers) — blockers names every unresolved question and
+    incomplete task still standing between this task and being routable."""
+    blockers = []
+    for dep_id in task.get("blocked-by", []):
+        dep = tasks_by_id.get(dep_id)
+        if dep and dep.get("status") != "complete":
+            blockers.append(f"task {dep_id} ({dep.get('status')})")
+    for q in questions_by_id.values():
+        if task.get("id") in q.get("blocks", []) and q.get("resolved") != "true":
+            blockers.append(f"question {q.get('id')} (unresolved)")
+    return (not blockers, blockers)
+
+
+def cmd_queue_status(project: "Project", _args) -> None:
+    if not os.path.exists(project.queue_path):
+        print("no corpora/queue.md")
+        return
+    header, tasks, questions = parse_queue(project.queue_path)
+    tasks_by_id = {t.get("id"): t for t in tasks}
+    questions_by_id = {q.get("id"): q for q in questions}
+    print(f"capability: {header.get('capability', '')}")
+    print(f"status: {header.get('status', '')}")
+    for t in tasks:
+        startable, blockers = _task_startable(t, tasks_by_id, questions_by_id)
+        note = "" if t.get("status") == "complete" else (
+            " — startable now" if startable else f" — blocked by: {', '.join(blockers)}")
+        print(f"  {t.get('id')}: {t.get('status')}{note}")
+    for q in questions:
+        if q.get("resolved") != "true":
+            print(f"  {q.get('id')}: unresolved — blocks {', '.join(q.get('blocks', [])) or '(nothing)'}")
+
+
+def _save_queue(project: "Project", header: dict, tasks: list, questions: list) -> None:
+    header["updated"] = today()
+    if tasks and questions is not None:
+        all_tasks_complete = all(t.get("status") == "complete" for t in tasks)
+        all_questions_resolved = all(q.get("resolved") == "true" for q in questions)
+        if all_tasks_complete and all_questions_resolved:
+            header["status"] = "complete"
+    text = open(project.queue_path).read()
+    block = render_queue(header, tasks, questions)
+    if "```yaml" in text and "```" in text:
+        before = text.split("```yaml", 1)[0]
+        after = text.split("```yaml", 1)[1].split("```", 1)[1] if "```" in text.split("```yaml", 1)[1] else ""
+        open(project.queue_path, "w").write(before + block + after)
+    else:
+        open(project.queue_path, "w").write(block)
+
+
+def cmd_queue_set_status(project: "Project", args) -> None:
+    if not os.path.exists(project.queue_path):
+        fail(f"no queue at {project.queue_path}")
+    if args.status not in TASK_STATUS_ENUM:
+        fail(f"status must be one of {sorted(TASK_STATUS_ENUM)}")
+    header, tasks, questions = parse_queue(project.queue_path)
+    task = next((t for t in tasks if t.get("id") == args.id), None)
+    if task is None:
+        fail(f"unknown task id '{args.id}' — have: {', '.join(t.get('id', '') for t in tasks) or 'none'}")
+    task["status"] = args.status
+    _save_queue(project, header, tasks, questions)
+    tasks_by_id = {t.get("id"): t for t in tasks}
+    unblocked = [t.get("id") for t in tasks
+                 if t.get("id") != args.id and t.get("status") == "pending"
+                 and args.id in t.get("blocked-by", [])
+                 and _task_startable(t, tasks_by_id, {q.get("id"): q for q in questions})[0]]
+    print(f"{args.id}: status -> {args.status}")
+    if unblocked:
+        print(f"now startable: {', '.join(unblocked)}")
+
+
+def cmd_queue_resolve_question(project: "Project", args) -> None:
+    if not os.path.exists(project.queue_path):
+        fail(f"no queue at {project.queue_path}")
+    header, tasks, questions = parse_queue(project.queue_path)
+    question = next((q for q in questions if q.get("id") == args.id), None)
+    if question is None:
+        fail(f"unknown question id '{args.id}' — have: {', '.join(q.get('id', '') for q in questions) or 'none'}")
+    question["resolved"] = "true"
+    question["answer"] = args.answer
+    _save_queue(project, header, tasks, questions)
+    tasks_by_id = {t.get("id"): t for t in tasks}
+    unblocked = [t.get("id") for t in tasks
+                 if t.get("id") in question.get("blocks", []) and t.get("status") == "pending"
+                 and _task_startable(t, tasks_by_id, {q.get("id"): q for q in questions})[0]]
+    print(f"{args.id}: resolved")
+    if unblocked:
+        print(f"now startable: {', '.join(unblocked)}")
+
+
 # ── compose-spawn-prompt: mechanical, no-summarization spawn-prompt assembly ─────────────────
 #
 # Fix for the exercise's most serious finding: hand-assembled spawn prompts drifted toward
@@ -1122,6 +1843,15 @@ def cmd_compose_spawn_prompt(project: Project, args) -> None:
         fail("--domains requires at least one comma-separated domain name")
     if not os.path.exists(args.task_file):
         fail(f"no such file: {args.task_file}")
+
+    sources = project_domain_sources(project)
+    named = [(d, resolve_domain_frontmatter(sources.get(d, {}))) for d in domains]
+    composition_problems = check_composition_problems(named)
+    if composition_problems:
+        for p in composition_problems:
+            print(f"error: {p}", file=sys.stderr)
+        fail("composition check failed — a spawn never mixes domains from different subject "
+             "families or composes a posture: generative domain (kernel.md, 'The hard line')")
 
     kernel_path = os.path.join(skill_root(), "kernel.md")
     kernel_text = open(kernel_path).read()
@@ -1410,9 +2140,50 @@ def main() -> None:
     gk.add_argument("--audit", required=True)
     gk.add_argument("--domain", required=True)
     gk.add_argument("--id", required=True)
+    ld = sub.add_parser("lint-domains", help="works on any domains-dir, not only a project's corpora/domains — "
+                                              "validates frontmatter (subject/posture/applies-when/units-of-work)")
+    ld.add_argument("--domains-dir", required=True)
+    sub.add_parser("manifest", help="emit the machine-readable domain index (seed + project), for a "
+                                     "process layer to select against without reading prose").add_argument(
+        "--json", action="store_true")
+    sel = sub.add_parser("select", help="deterministic domain selection for a unit-of-work, evaluated "
+                                         "against corpora/config.md — no model in the loop")
+    sel.add_argument("--unit-of-work", required=True)
+    sel.add_argument("--config", default="", help="defaults to corpora/config.md under --root")
+    sel.add_argument("--json", action="store_true")
+    cc = sub.add_parser("check-composition", help="fail if a domain list mixes subjects or includes "
+                                                    "a posture: generative domain (kernel.md, 'The hard line')")
+    cc.add_argument("--domains", required=True, help="comma-separated domain names")
+    cs = sub.add_parser("chunk-start", help="print the deterministic composition for a unit-of-work; writes nothing")
+    cs.add_argument("--workstream", required=True)
+    cs.add_argument("--unit-of-work", required=True)
+    cd = sub.add_parser("chunk-done", help="close a chunk in corpora/chunks/<workstream>.md — requires "
+                                            "the handoff that unit-of-work actually produced")
+    cd.add_argument("--workstream", required=True)
+    cd.add_argument("--unit-of-work", required=True)
+    cd.add_argument("--stance", required=True, choices=sorted(DEFERRED_STANCE_ENUM))
+    cd.add_argument("--handoff", required=True)
+    cd.add_argument("--next", default="")
+    sub.add_parser("lint-chunks")
+    clw = sub.add_parser("close-workstream", help="read-only summary of a workstream's completed chunks")
+    clw.add_argument("--workstream", required=True)
+    sub.add_parser("verify-chunks", help="Stop-hook check: recompute select() for every recorded "
+                                          "chunk and compare against its stored domains-composed")
+    sub.add_parser("lint-queue", help="validate corpora/queue.md structurally")
+    sub.add_parser("queue-status", help="read-only: each task's status and startability, each "
+                                         "question's resolution state")
+    qss = sub.add_parser("queue-set-status", help="set a task's status in-place — the mechanical "
+                                                   "half of planning.md's 'orchestrator updates "
+                                                   "status in-place' rule")
+    qss.add_argument("--id", required=True)
+    qss.add_argument("--status", required=True, choices=sorted(TASK_STATUS_ENUM))
+    qrq = sub.add_parser("queue-resolve-question", help="resolve an open question in-place")
+    qrq.add_argument("--id", required=True)
+    qrq.add_argument("--answer", required=True)
     args = ap.parse_args()
 
-    no_project = {"kill-report": cmd_kill_report, "graduate-kill": cmd_graduate_kill}
+    no_project = {"kill-report": cmd_kill_report, "graduate-kill": cmd_graduate_kill,
+                  "lint-domains": cmd_lint_domains}
     if args.cmd in no_project:
         no_project[args.cmd](args)
         return
@@ -1433,7 +2204,15 @@ def main() -> None:
      "screenshot-mark-stale": cmd_screenshot_mark_stale,
      "screenshot-status": cmd_screenshot_status,
      "screenshot-lookup": cmd_screenshot_lookup,
-     "lint-screenshots": cmd_lint_screenshots}[args.cmd](project, args)
+     "lint-screenshots": cmd_lint_screenshots,
+     "manifest": cmd_manifest, "select": cmd_select,
+     "check-composition": cmd_check_composition,
+     "chunk-start": cmd_chunk_start, "chunk-done": cmd_chunk_done,
+     "lint-chunks": cmd_lint_chunks, "close-workstream": cmd_close_workstream,
+     "verify-chunks": cmd_verify_chunks,
+     "lint-queue": cmd_lint_queue, "queue-status": cmd_queue_status,
+     "queue-set-status": cmd_queue_set_status,
+     "queue-resolve-question": cmd_queue_resolve_question}[args.cmd](project, args)
 
 
 if __name__ == "__main__":

@@ -1,7 +1,15 @@
+---
+subject: coding
+posture: guardrail
+applies-when:
+  - styling: not-none
+units-of-work: [implement-feature]
+universal: false
+---
+
 # Domain: css
 
-CSS / Tailwind authoring and specificity. Declared by the convergent implementation composition when `styling` is not `none`
-(tailwind, css-modules, vanilla-css, etc.). Audit metadata lives in `domains/audit.md`, loaded only
+CSS / Tailwind authoring and specificity — tailwind, css-modules, vanilla-css, etc. Audit metadata lives in `domains/audit.md`, loaded only
 at ratify/retrospective time.
 
 ```yaml

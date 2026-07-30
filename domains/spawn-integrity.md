@@ -1,3 +1,9 @@
+---
+subject: process
+posture: guardrail
+universal: true
+---
+
 # Domain: spawn-integrity
 
 Judgment about a spawn's own procedural discipline — the integrity of what it treats as

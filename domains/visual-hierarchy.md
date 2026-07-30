@@ -1,6 +1,15 @@
+---
+subject: design
+posture: guardrail
+applies-when:
+  - has-ui: yes
+units-of-work: [design-ui-surface, bootstrap-ui-surface]
+universal: false
+---
+
 # Domain: visual-hierarchy
 
-Emphasis, grouping, and legibility weight. Declared by the **divergent visual-identity** composition. Audit metadata
+Emphasis, grouping, and legibility weight. Audit metadata
 lives in `domains/audit.md`, loaded only at ratify/retrospective time.
 
 ```yaml

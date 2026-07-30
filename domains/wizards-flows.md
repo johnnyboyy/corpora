@@ -1,6 +1,15 @@
+---
+subject: design
+posture: guardrail
+applies-when:
+  - has-ui: yes
+units-of-work: [design-ux-flow]
+universal: false
+---
+
 # Domain: wizards-flows
 
-Multi-step wizards, navigation, and step state. Declared by the **convergent UX-flow** composition. Audit
+Multi-step wizards, navigation, and step state. Audit
 metadata lives in `domains/audit.md`, loaded only at ratify/retrospective time.
 
 ```yaml

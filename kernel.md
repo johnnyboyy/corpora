@@ -134,10 +134,14 @@ carrying its own persona prompt and a fixed domain list; two fixed, universal st
 convergent and divergent (below) — and everything else about "what this spawn is" comes from the
 composed domains themselves, stated fresh in the brief.
 
-A composition's domain subset is same-stance domains only — a spawn never mixes domains whose
-principles demand opposite generative stances (see "The hard line," below). A domain is available
-to any composition whose stance and subject match; domains are not "declared by" a composition the
-way principles used to be "declared by" a role.
+A composition's domain subset is subject-separated — a spawn never mixes domains from different
+subject families (coding and design never co-compose; see "The hard line," below). Stance is a
+property of the spawn, not of a domain: a domain carries `posture: guardrail` (every domain in the
+corpus today does — see "The hard line") and is available to any composition whose subject matches,
+regardless of which stance the spawn runs under. `design-method`, for instance, is a convergent body
+of correctness guardrails that loads into both convergent and divergent design spawns; a convergent
+domain loading into a divergent spawn is the design working as intended, not a violation. Domains are
+not "declared by" a composition the way principles used to be "declared by" a role.
 
 **Recognizing that a task needs a *different* domain subset, not just one more domain, is itself
 routing judgment.** A founding-a-library task (standing up a UI or UX library from nothing) needs a
@@ -213,10 +217,19 @@ fires at the generative moment.
 
 **The hard line:** a single domain must not bundle principles that demand *opposite* generative
 stances to apply — a "resist the standard" instruction sitting beside "match the standard" rules is
-incoherent, since the agent cannot hold both stances at once. The sharpest case is that coding
-judgment and visual-aesthetic judgment never share a domain. At the ratify gate, a proposal that
-wants a home in a domain whose principles pull the opposite way is a signal the domain or the
-proposal is wrong — surface it (a fork candidate), do not force the fit.
+incoherent, since the agent cannot hold both stances at once. In practice this means a domain
+declares `posture: guardrail` (a convergent body of correctness rules, consumable by either stance)
+or, hypothetically, `posture: generative` (a body that itself demands the anti-mean anchor). No
+domain in this corpus is `posture: generative` today — the anti-mean anchor lives on the divergent
+stance frame itself, not on any domain — so a proposal arriving with `posture: generative` is a
+ratify-gate rejection on sight; it belongs on the stance frame, not a domain. This is a narrower
+claim than stance-matching at the composition level: the hard line is about what a single domain is
+allowed to bundle, not about which domains a given spawn may load together (that is subject
+separation, above). The sharpest composition-level case is that coding judgment and
+visual-aesthetic judgment never share a domain — coding-subject and design-subject domains never
+co-compose. At the ratify gate, a proposal that wants a home in a domain whose principles pull the
+opposite way is a signal the domain or the proposal is wrong — surface it (a fork candidate), do not
+force the fit.
 
 ---
 
@@ -229,6 +242,7 @@ accumulates the normal way, through `domains/orchestrator-routing.md`'s own prin
 
 ```yaml
 stance: divergent
+unit-of-work: design-ui-surface
 domains: [color, visual-hierarchy, motion]
 expected-output: "Design spec for the settings-panel color treatment."
 ```
@@ -240,6 +254,14 @@ corpus content, never for the working composition itself. A genuinely novel subj
 existing domain simply runs guardrail-light; the new-domain need surfaces through the spawn's own
 proposal at the ratify gate as already designed, with no separate ephemeral-domain
 pre-declaration step required.
+
+`unit-of-work` and `domains` are no longer independent assertions the orchestrator makes side by
+side: the orchestrator states `stance` and `unit-of-work` from the task at hand — that part stays
+judgment, same as ever — and `domains` is what `scripts/corpus.py select --unit-of-work
+<unit-of-work>` returns for the project's current `corpora/config.md`, not a second freestanding
+guess. The brief keeps all three fields because all three are worth seeing before the spawn runs,
+but the third is now derived and inspectable (re-run `select` and compare) rather than merely
+asserted.
 
 ---
 
@@ -416,6 +438,18 @@ instead of parsing prose. The schema structures the *envelope* (what the gate an
 mechanically consume), not the *thinking*: the artifact body stays freeform in the spawn's own
 form.
 
+**One unit-of-work is one spawn is one handoff — a corpora-owned rule, unconditional, never
+inferred.** A queue of several units of work is several spawns, each producing its own handoff, even
+when nothing goes wrong and no domain-tension gap ever surfaces. This is stated as a hard rule and
+not left to a process layer's own gap-detection because gap-triggered routing has already been
+observed to silently drop it: when corpora ceded per-task routing to a gap-triggered process layer,
+a five-task queue with nothing going wrong never re-fired a spawn, and all five tasks executed
+inline in one continuous context with only the outermost planner's handoff surviving — see
+LINEAGE.md, "Orchestrator-removal reverted," for the evidence. A queue-task boundary, or a chunk boundary (see
+"Chunk chaining," below), is *itself* a mandatory new-spawn trigger — not a fact that must first be
+inferred from a surfaced gap. Lighter-weight bookkeeping between chunks (below) is for ground-truth
+ledger data, never a substitute for this per-unit-of-work isolation.
+
 **Before writing it, re-read the output against the composed domains.** Re-read the deliverable
 against the ratified principles in every domain the composition included and revise any violation
 found — this is part of what producing a valid handoff requires, not a domain judgment call, so it
@@ -424,6 +458,15 @@ not evidence this happened: tooling only catches what produces a hard error and 
 blind to soft principles (comment discipline, naming, structural conventions) that have no
 mechanical enforcement — green tooling means "no hard errors," not "checked." Catching a violation
 here is cheaper than the external ratify gate finding it after the fact.
+
+An instruction is a thing that sometimes doesn't happen — the reason this is stated as a rule here
+rather than trusted as a norm. `scripts/stop-check.sh` (a `Stop` hook) checks the one part of this
+mechanically verifiable from outside the spawn: that every chunk recorded in `corpora/chunks/*.md`
+(see "Chunk chaining," below) still matches what `corpus.py select` would compose today, blocking
+termination on a mismatch. It cannot see whether the re-read itself happened — `Stop`-hook input
+does not carry the originating spawn prompt, and it is unverified whether `SubagentStart`'s does
+either — so it is a narrower, honest check (composition drift), not a substitute for the instruction
+above.
 
 **The spawn's own final conversational turn is not a second copy of the artifact.** Once the
 handoff file is written, the spawn's actual return to the orchestrator (its last message) states
@@ -527,6 +570,59 @@ directory of lingering handoffs is a visible backlog; the archive directory is n
 backlog and is never read for it, since it holds only already-ratified handoffs. Inline sessions
 producing zero proposals, zero tradeoffs, and no drift may skip the file; the session-harvest
 pipeline is the backstop for what that exemption misses.
+
+---
+
+## Chunk chaining
+
+A **chunk** is one unit-of-work's worth of a workstream: the composition it drew (see `scripts/
+corpus.py select`), the stance it ran under, and the handoff it produced. `corpora/chunks/
+<workstream>.md` is an append-only ledger, one entry per chunk, keyed by `workstream` (stable across
+checkpoints and revisions the same way the handoff's `workstream` field already is):
+
+```yaml
+workstream: <stable-workstream-id>
+chunks:
+  - unit-of-work: design-ux-flow
+    domains-composed: [wizards-flows, recoverability, design-method, interviewing]
+    stance: convergent
+    handoff: corpora/handoffs/2026-07-29-uxdesign-settings-flow.md
+    completed: 2026-07-29
+    next: design-ui-surface        # or omitted
+```
+
+**This ledger records what already happened; it does not replace it.** "One unit-of-work is one
+spawn is one handoff" (above) still holds for every chunk — `chunk-done` requires a real handoff
+file to exist for the unit-of-work it closes, the same way `record-gate` requires a real gate to
+have run. `domains-composed` is written by `corpus.py`, from the same `select` call that composed
+the spawn, not self-reported by the spawn — `domains-loaded:` in a handoff has always been
+self-report, and self-report done by attention is exactly what LINEAGE.md's "Orchestrator-removal
+reverted" entry shows silently stops happening under no-news-is-good-news conditions. Making it a
+script byproduct instead gives the co-occurrence and composition-drift signals (`corpus.py
+record-gate --co-occurs-with`) ground truth to reconcile against, without asking the ledger to carry
+any of the weight of deciding whether to spawn.
+
+`corpus.py chunk-start --workstream W --unit-of-work U` runs the same `select` call the spawn brief
+already made and prints the composition — a preview, writing nothing; the ledger is append-only and
+only ever written once a real handoff exists to point at, so there is no in-progress entry to
+record before the spawn starts. `chunk-done --workstream W --unit-of-work U --stance S --handoff
+<path> [--next U]` is the operative half — it re-runs `select` itself (so `domains-composed` is
+never self-reported) and appends the entry, failing if the handoff file does not exist or does not
+name the same `workstream`. That existence check makes ordering load-bearing: `chunk-done` must run
+*before* `handoff-done` closes (deletes or archives) the handoff file it points at, never after —
+see `general-operation.md`, Phase 6's chunk-close step. `close-workstream W` is a
+read-only summary once every chunk in a workstream is done — it aggregates the ledger for the
+retrospective, it does not fold multiple chunks' handoffs into one.
+
+`chunk-done` also reconciles against the handoff's own `domains-loaded:` field, when present, and
+refuses to close the chunk if the two disagree. Recomputing `select()` proves it's self-consistent,
+not that it matches what actually happened — a composing process that hard-lists a domain set in
+prose instead of calling `select()` (the exact shape of drift `bootstrap.md`'s Phase 2/3 composition
+had before it was fixed) can silently diverge from `select()`'s answer, and `verify-chunks` alone
+cannot see that: it only recomputes the same function it's checking against itself. The
+`domains-loaded:` cross-check is the actual fidelity check; a handoff written before this schema
+field existed (or by a process that doesn't yet self-report it) skips the check rather than failing
+retroactively.
 
 ---
 
@@ -635,14 +731,26 @@ solving a problem — merge-time conflict — that concatenation never actually 
 The skill's `domains/` is one flat pool — no separate "role pack" layer selected by a project-config
 field. A stack-agnostic domain (`coding-general`, `orchestrator-routing`, `spawn-integrity`, ...)
 and a stack-specific one (`coding-react`, `css`, `color`, ...) live side by side; each states its own
-load condition directly against `corpora/config.md`'s existing project-shape fields (`language`,
-`framework`, `styling`, `has-ui`) in its own preamble — `coding-nextjs` loads when `framework:
-nextjs`, `css` loads when `styling` is not `none`, and so on. Retired 2026-07-22: an earlier
-`role-pack:` field bundled a stack's domains behind one coarse flag, gating them all-or-nothing;
-since every domain already carried its own precise condition in prose, the field added an
-indirection without adding information, and it couldn't express a project needing some but not all
-of a stack's domains. A project with no UI simply never composes divergent visual-identity domains
-into a spawn — nothing gates that on a config field at all, since nothing routes work into them.
+load condition as `applies-when` frontmatter against `corpora/config.md`'s existing project-shape
+fields (`language`, `framework`, `styling`, `has-ui`) — `coding-nextjs` loads when `framework:
+nextjs`, `css` loads when `styling` is not `none`, and so on; `scripts/corpus.py select` evaluates
+these mechanically rather than a reader checking prose (see "Spawns: stance + composition," and
+`scripts/corpus.py`'s `select`/`manifest` commands). Retired 2026-07-22: an earlier `role-pack:`
+field bundled a stack's domains behind one coarse flag, gating them all-or-nothing; since every
+domain already carried its own precise condition, the field added an indirection without adding
+information, and it couldn't express a project needing some but not all of a stack's domains. A
+project with no UI simply never composes divergent visual-identity domains into a spawn — nothing
+gates that on a config field at all, since nothing routes work into them.
+
+That original reasoning was specific to who was consuming the condition: true while the only
+consumer was a reader checking prose before a spawn, since a coarse `role-pack:` flag genuinely
+added nothing over precise per-domain prose read the same way either form. It stopped being the
+whole story once a process layer needs to select domains without reading prose at all (2026-07-29,
+"Promote load conditions to frontmatter") — at that point the condition has to exist in a
+machine-evaluable form regardless, and `applies-when` frontmatter is that form. This isn't a
+reversal of the `role-pack:` retirement — a coarse all-or-nothing flag would still be strictly worse
+information than per-domain `applies-when` predicates — it's the same conclusion holding for a new
+reason once the requirement changed. See `LINEAGE.md` for both entries.
 
 ---
 
@@ -653,72 +761,13 @@ Run at two cadences. Same faculty, different direction.
 **Forward (per-task):** Route the task to the right stance and compose the right domains. Guard
 against contamination — is the working context holding domains from another mode?
 
-**Backward (periodic):** Surface signals as proposals for the operator:
-
-1. **Contamination detected** — attention was spent on a domain outside the task's mode. Fix the
-   routing or the composition.
-2. **Domain tension → split** — two ratified principles in one domain have conditions that
-   partition the same space and give *opposing* advice. Proposal: split the domain. Advisory only —
-   the operator judges whether the partition is real. *What counts:* one cluster of principles
-   clearly governs one decision class and another governs a different one, and they repeatedly give
-   opposing advice under their conditions. *What doesn't:* two principles on different topics are
-   simply different subjects, not a partition. The seam is discovered here, from tension — never
-   assumed up front.
-3. **Convergence → explorer** — a domain has stopped changing, corrections rare. Proposal: pair the
-   compositions that use it with an explorer to prevent calcification.
-4. **Composition drift** — a spawn's composed domain-subset consistently excludes a domain the work
-   actually needed, or includes one it never draws from. Proposal: fix the composition going
-   forward. Maps directly onto the co-occurrence tally `corpus.py record-gate` maintains (see
-   "Storage: working vs audit") and the handoff's `Surfaced` field.
-5. **Seed promotion candidate** — a project domain principle whose condition makes no reference to
-   this project's stack, domain, or specifics, and has held across enough tasks to read as general.
-   Surface it as a candidate for promotion to the seed domain of the same name in the skill repo.
-6. **Structural kinship → condensation candidate** — active principles that state the same
-   underlying test in different words, evidenced by existing `see-also` links or found by reading a
-   domain's principles side by side rather than sequentially. Proposal: state the shared test once
-   as an umbrella, with the specific cases named as instances — the shape `coding-general.md`'s
-   preamble already uses for its own meta-conventions. Complementary to co-firing, below: kinship
-   is visible from the text alone and doesn't need firing history to accumulate first, so it can
-   surface a candidate before co-firing ever would.
-7. **Kill graduation** — a killed entry old enough with no sign of recurrence is paying reader-tax
-   for a risk that has stopped materializing. Mechanically surfaced by `corpus.py kill-report`
-   (see "Killed entries," above); the retrospective judges whether it is actually safe to demote,
-   then `corpus.py graduate-kill` does the removal and audit annotation.
-8. **Misplaced principle → move, not split** — an active principle reads as on-topic for its
-   domain but is actually consumed by a different composition than the one(s) that load this
-   domain, or by no composition's stated concern at all. Distinct from domain tension (#2): no opposing advice, no
-   partition to find — just a principle that ended up in a container adjacent to its real subject.
-   See `principle-judgment` domain.
-9. **Retrospective re-audit for genuine judgment** — an active principle's own audit provenance
-   already records `kind: knowledge`, or cites a reading-pipeline/secondary source rather than an
-   earned incident, without ever having been re-examined since ratification. Gate-time discipline
-   can lapse under session-context pressure; the retrospective is the backstop, not a formality.
-   See `principle-judgment` domain.
-
-**Anti-overfitting (any domain whose principles were earned in a single project shape):** surface
-which ratified principles should stay provisional — weighable, not promoted — until tested against
-another shape. A principle pressure-tested in only one climate is a promotion risk, not a default.
-Sharpened by efficacy counts: a provisional principle with real `fired` counts under a *second*
-project shape has earned its promotion case; one that has only ever fired in its birth project
-stays provisional.
-
-**Triggers (mechanical, checked by the orchestrator at every ratify gate; always a suggestion,
-never automatic):** suggest `retrospective <domain>` when, since the last one, `ratified ≥ 6`, or
-`working-file-tokens` grew by ≥ 50%, or `gate-violations ≥ 3`. Suggest a **UI-library sync** when
-`library-drift.since-last-sync ≥ 3`, or immediately when a drifting change *retired* something the
-library still teaches — a stale-but-wrong library is worse than an incomplete one. Thresholds are
-operator-tunable and deliberately coarse: the trigger replaces "am I watching carefully enough,"
-not the retrospective's judgment. These are *triggers, not caps* — accumulation is the point; the
-bet is that meta-principles condense out of accumulated specific ones, and a fired trigger means
-"there is enough new material that condensation is worth attempting."
-
-**Efficacy readings (inputs to the signals above):** `idle` dominant across many gates →
-retirement candidate, or the condition is scoped to situations the project never produces.
-`violated` recurring → the principle is load-bearing (it keeps catching real drift) *or* badly
-conditioned — the counts cannot distinguish these; the retrospective can, which is why counts feed
-the retrospective instead of acting alone. A cluster that always `fired` together → meta-principle
-candidate: co-firing is the empirical trace of a shared root justification — see structural kinship,
-above, for the same candidate found from the text alone rather than firing counts.
+**Backward (periodic):** surfaces signals as proposals for the operator — contamination, domain
+tension, convergence, composition drift, seed-promotion candidates, structural kinship, kill
+graduation, anti-overfitting, and efficacy interpretation. See `retrospective.md` for the trigger
+and procedure, and `domains/retrospective.md` for the judgment behind each signal — what counts,
+what doesn't, and why. Two adjacent signals (a misplaced principle, and a ratified principle whose
+gate-time discipline may have lapsed) are judged by `principle-judgment` instead, since they're
+about one principle's own fitness rather than a pattern read across a domain's history.
 
 Each domain working file carries `last-retrospective: <date>` at the top to make convergence measurable.
 

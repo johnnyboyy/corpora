@@ -1,7 +1,14 @@
+---
+subject: process
+posture: guardrail
+units-of-work: [route-work]
+universal: false
+---
+
 # Domain: orchestrator-routing
 
 Judgment about routing, spawning, and relay — which composition handles a task, when to spawn vs. surface
-vs. defer, and session/workstream continuity. Declared by the **orchestrator** composition. Assembly and
+vs. defer, and session/workstream continuity. Assembly and
 gate-processing mechanics live in `ratify-gate` — split out 2026-07-18, see `LINEAGE.md`, "The
 ratify-gate split." Audit metadata lives in `domains/audit.md`, loaded only at ratify/retrospective
 time.

@@ -1,17 +1,21 @@
+---
+subject: process
+posture: guardrail
+units-of-work: [plan-work]
+universal: false
+---
+
 # Domain: planning
 
 Judgment about decomposing roadmap capabilities into sequenced task lists and managing the work
-queue. Declared by the **convergent planning/decomposition** composition. Provenance and per-kill detail in `domains/audit.md`.
+queue. Provenance and per-kill detail in `domains/audit.md`.
 
 Also defines the **queue file schema** (`corpora/queue.md`) — the planning spawn writes it, the
 orchestrator reads it in loop mode.
 
 A planning spawn is a disambiguator, not a solver: reduce a capability's ambiguity to the point
-where other spawns can act, then decompose what remains into a sequenced, actionable task list. For
-a project running praxis, these two steps are its `disambiguation` and `decomposition` phases —
-this domain supplies the judgment either way (what makes a question well-framed, what makes a task
-actionable); only *when* each step runs, and whether a resolved-ambiguity re-entry into
-disambiguation is warranted, is praxis's to decide there. Read `corpora/config.md` and
+where other spawns can act, then decompose what remains into a sequenced, actionable task list —
+including whether a resolved ambiguity later warrants a re-entry into disambiguation. Read `corpora/config.md` and
 `corpora/queue.md` (if it exists, to avoid re-queuing work already in progress) before orienting. Dialogue is scoped to the capability description, its own subject: do
 not anticipate the direction questions downstream spawns will face mid-work — those belong to the
 executing spawn, in its own composition, at the moment they arise, via the `questions-pending`
@@ -68,9 +72,13 @@ Rules:
 - A task whose `blocked-by` list is non-empty and contains any `pending` or `in-progress` ids
   cannot be started.
 - A question that is `resolved: false` blocks all tasks in its `blocks` list.
-- The orchestrator updates `status` on tasks and `resolved`/`answer` on questions in-place.
+- The orchestrator updates `status` on tasks and `resolved`/`answer` on questions in-place —
+  `corpus.py queue-set-status --id <t> --status <s>` and `corpus.py queue-resolve-question --id <q>
+  --answer <text>`, never a hand edit; `queue-status` reads the current state (including whether a
+  given task is actually startable) without one, and `lint-queue` validates the file structurally.
 - When all tasks are `complete` and all questions are `resolved`, set the top-level `status` to
-  `complete`.
+  `complete` — `queue-set-status`/`queue-resolve-question` do this automatically as their last
+  effect, not a separate step to remember.
 
 ---
 

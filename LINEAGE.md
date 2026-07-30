@@ -1497,3 +1497,68 @@ as one-off narrative here — see that domain for the reusable form.
 this conversation rather than the queued reading-pipeline surfacing step. `domains/audit.md`
 provenance for every ratified and killed entry cites the specific FAMOUS skill-doc file path as its
 source rather than a URL.
+
+---
+
+## 2026-07-29 — Orchestrator-removal reverted: gap-triggered routing silently drops per-task spawning
+
+`f304ee1` (2026-07-28) split corpora into a pure queryable service with no initiative of its own
+about when to spawn, inline vs. isolate, or how to sequence a session — routing judgment ceded
+entirely to an external process layer (praxis). FAMOUS's own handoff archive (a real consuming
+project, running this change live) showed the actual effect the same day: pre-split, every queued
+task got its own handoff file, one spawn per task, each with its own `domains-loaded`, stance, and
+verification discipline. Post-split, a five-task queue (an admin-dashboard capability's tasks)
+completed with full notes but **no individual handoff files existed for any of them** — only the
+outermost planner's own handoff was present. All five tasks ran inline, in one continuous context,
+instead of as separate stance-scoped spawns.
+
+The `SessionStart` hook was not the failure — both corpora's and praxis's hooks fired every session
+throughout, confirmed by checking installation and log dates directly rather than assuming a missing
+wire-up. The actual mechanism: praxis's routing is gap-triggered, not queue-triggered — a phase
+fires only when the current phase's own `surfaced`/`lacking` report names a gap matching another
+phase's entry condition. There is no rule in that model that a queue-task boundary is, by itself,
+such a gap. A fully-capable agent working a multi-task queue with nothing going wrong never surfaces
+a gap, so no phase ever re-fires, so no per-task spawn ever happens — even with every hook correctly
+reminding it that praxis exists. The old (restored) `orchestrator-routing` domain encoded a stronger,
+unconditional "one queued task = one spawn" rule as corpora's own judgment; gap-triggered routing
+has no equivalent, so ceding routing to it silently dropped that discipline.
+
+Reverted via `a9b416a`/`e2ddf7e` (restoring corpora as active orchestrator); the terminology rename
+from the same original commit (`utility-candidate` → `deterministic-shortcut-candidate`, role-label
+sweep) was kept — `64a7ad9` reapplies it without the orchestrator-passivity architecture. A real bug
+introduced during the revert-and-reapply pass was also found and fixed: `scripts/session-start.sh`
+still called the pre-rename `lint-utility-candidates`/`utility-candidates` subcommands after
+`corpus.py`'s own subcommands were renamed, and still read a `role-pack:` config field retired
+2026-07-22 — both silently broken since the revert.
+
+**Before ever re-attempting a corpora/process-layer split**, whatever routes per-unit-of-work
+spawning needs an explicit "queue/chunk boundary is itself a gap" rule (or equivalent) in its own
+model — gap-triggering alone does not reproduce corpora's per-task-spawn discipline, regardless of
+whether the relevant hooks are installed and firing. See `kernel.md`, "The handoff artifact," for
+where this became a stated, corpora-owned rule rather than routing judgment left to inference.
+
+Preparing to expose domain selection to an external process layer (a query-driven successor to the
+orchestrator doing composition by hand) surfaced a standing contradiction in `kernel.md`: "Spawns:
+stance + composition" said a composition's domain subset is "same-stance domains only," while
+"Generative stance" said stance is a property of the spawn, not of a domain, and that domains are
+"mostly convergent guardrails, consumed by spawns of either stance." The corpus itself settles which
+is true: `design-method.md` declares itself a convergent body of correctness guardrails and states
+it loads into both the UX composition (convergent) and UI composition (divergent) — a convergent
+domain loading into a divergent spawn there is the design working as intended, not a bug. No domain
+in the corpus carries a divergent posture; the anti-mean anchor was deliberately extracted from
+`design-method` onto the stance frame itself so no domain would need to.
+
+"Same-stance domains only" is retired as dead language. The rule that was actually load-bearing —
+and the one "the hard line" was reaching for — is narrower: a single domain must not bundle content
+demanding a generative (anti-mean) posture together with content demanding conformance. Domains
+declare `posture: guardrail`; a `posture: generative` domain has no legitimate instance today and is
+a ratify-gate rejection on sight. The composition-level rule that actually holds is subject
+separation: a spawn never mixes domains from different subject families (coding-subject and
+design-subject domains never co-compose) — this is what "coding judgment and visual-aesthetic
+judgment never share a domain" was already gesturing at, restated as the general case.
+
+`kernel.md`'s "Spawns: stance + composition" and "The hard line" rewritten accordingly. `SKILL.md`'s
+"Spawn loads and context boundaries" — "nothing from another stance" — corrected to "nothing from
+another subject family," since stance was never actually the composition-level boundary; subject
+always was. This is a decision made once and worth stating precisely because it decides the
+frontmatter vocabulary for machine-readable domain selection (`subject:`, `posture:`) that follows.

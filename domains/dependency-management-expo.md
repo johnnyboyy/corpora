@@ -1,3 +1,12 @@
+---
+subject: coding
+posture: guardrail
+applies-when:
+  - framework: [expo, react-native]
+units-of-work: [migrate-dependencies]
+universal: false
+---
+
 # Domain: dependency-management-expo
 
 Expo/React Native-specific dependency, upgrade, and migration judgment — loaded by any convergent

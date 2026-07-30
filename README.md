@@ -91,9 +91,10 @@ from accumulated tension — the fork signal in the retrospective.
   minimum.
 - **Domains** — stack-agnostic (`coding-general`, `orchestrator-routing`, `spawn-integrity`, ...)
   and stack-specific (`coding-react`, `css`, `color`, ...) domains live together in one flat
-  `domains/`. Each stack-specific domain states its own load condition directly against
-  `corpora/config.md`'s shape fields (`language`, `framework`, `styling`, `has-ui`) in its own
-  preamble.
+  `domains/`. Each stack-specific domain states its own load condition as `applies-when`
+  frontmatter against `corpora/config.md`'s shape fields (`language`, `framework`, `styling`,
+  `has-ui`); `scripts/corpus.py select --unit-of-work <u>` evaluates every domain's condition
+  mechanically and returns the composed subset.
 
 The orchestrator states a stance and domain subset directly in the spawn brief for every task.
 `coder`, `ux-design`, `ui-design`, and `planner` name recurring task shapes in prose (see
@@ -126,19 +127,44 @@ agent. See `SKILL.md`, "Inline, resume, or isolate," and `LINEAGE.md`, "Role iso
 ### Files
 
 - `SKILL.md` — the shared orchestrator entrypoint for Claude Code (`/corpora`) and Codex
-  (`$corpora`): routes workstreams, assembles complete spawn loads, relays handoffs, and drives the
-  ratify gate.
+  (`$corpora`): orchestrator identity, judgment ("what you do"/"what you don't do"), and the
+  config-file schema. Points to `general-operation.md` for the procedure itself.
+- `general-operation.md` — the orchestrator's session and per-spawn procedure, in phases: session
+  entry, routing, spawn composition, execution, relay, the ratify gate, post-gate maintenance, and
+  the retrospective.
 - `kernel.md` — the schema, stance+composition model, ratify gate, write-back format, two load
-  modes, retrospective signals, and domain lifecycle. Reference document.
+  modes, and domain lifecycle. Reference document.
+- `retrospective.md` — the periodic, backward-looking counterpart to per-task routing: trigger,
+  composition, and procedure for reading a domain's accumulated corpus and gate history.
 - `domains/` — every seed domain, flat: stack-agnostic (`coding-general.md`,
-  `orchestrator-routing.md`, `ratify-gate.md`, `principle-judgment.md`, `planning.md`,
-  `interviewing.md`, `spawn-integrity.md`) and stack-specific (`coding-ts.md`, `coding-react.md`,
-  `coding-nextjs.md`, `css.md`, and the design domains `color.md`/`motion.md`/`recoverability.md`/
-  etc.) alike, each stating its own load condition in its own preamble. Plus `audit.md`
+  `orchestrator-routing.md`, `ratify-gate.md`, `principle-judgment.md`, `retrospective.md`,
+  `testing.md`, `planning.md`, `interviewing.md`, `spawn-integrity.md`) and stack-specific
+  (`coding-ts.md`, `coding-react.md`, `coding-nextjs.md`, `css.md`, and the design domains
+  `color.md`/`motion.md`/`recoverability.md`/ etc.) alike, each stating its own
+  `subject`/`posture`/`applies-when`/`units-of-work` frontmatter. Plus `audit.md`
   (provenance/kill detail for the layer, loaded only at ratify/retrospective time).
-- `bootstrap.md` — one-time project setup. Phase 1 detects project shape and writes
-  `corpora/config.md`. Phases 2 and 3 (UI projects only) generate `corpora/ui-library.md`
-  (divergent) then `corpora/ux-library.md` (convergent) and propose seed design principles.
+- `runtime-verification.md`, `test-writing-at-implementation.md`,
+  `integration-test-implementation.md`, `test-coverage-audit.md` — the processes that apply
+  `testing.md`'s judgment: driving a real surface before a runtime-observable change can be
+  reported complete (required, not optional, at every coder checkpoint), and when/what to write or
+  audit for test coverage. Adapted from `motors-and-controls/praxis/phases/`'s testing-phase family
+  into corpora's own process/judgment split.
+- `bootstrap.md` — one-time project setup, orchestration only. Phase 1 detects project shape and
+  writes `corpora/config.md`. For `has-ui: yes` projects, sequences three further phases into their
+  own files: `ui-library-init.md` (divergent, `corpora/ui-library.md`),
+  `screenshot-library-init.md` (mechanical, seeds the screenshot cache), and `ux-library-init.md`
+  (convergent, `corpora/ux-library.md`) — all propose seed design principles.
+- `ui-library-sync.md`, `ux-library-sync.md`, `screenshot-library-sync.md` — the ongoing
+  counterparts to the three init files above: bring each library or the screenshot cache back in
+  line with the project's actual state after drift accumulates. Triggered from
+  `general-operation.md`'s ratify gate.
+- `reading/` — the reading pipeline, self-contained and independently scheduled, not part of the
+  orchestrator's own per-spawn loop: `discovery-agent.md` (finds sources), `reading-agent.md`
+  (extracts candidates from queued sources), `session-harvest-agent.md` (mines past session
+  transcripts for judgment exercised but never proposed). All three feed `reading/candidates.md`,
+  which `general-operation.md`'s ratify gate checks like any other proposal source. The
+  quality-filter and mining judgment behind the first and third live in
+  `domains/principle-judgment.md`, not in the agent files themselves.
 - `LINEAGE.md` — intellectual history: why conventions became law, key kills, design decisions.
 - `reader-tax-and-the-model.md` — a living, multi-model assessment of whether Explicit by Default
   helps the model itself, not only the human reviewer.

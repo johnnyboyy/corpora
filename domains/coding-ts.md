@@ -1,3 +1,12 @@
+---
+subject: coding
+posture: guardrail
+applies-when:
+  - language: [typescript, javascript]
+units-of-work: [implement-feature]
+universal: false
+---
+
 # Domain: coding-ts
 
 Framework-agnostic JS/TS code patterns — language and module-system judgment that holds regardless

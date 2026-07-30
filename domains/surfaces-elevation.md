@@ -1,6 +1,15 @@
+---
+subject: design
+posture: guardrail
+applies-when:
+  - has-ui: yes
+units-of-work: [design-ui-surface, bootstrap-ui-surface]
+universal: false
+---
+
 # Domain: surfaces-elevation
 
-Surfaces, floating elements, and how depth is signaled. Declared by the **divergent visual-identity** composition. Audit
+Surfaces, floating elements, and how depth is signaled. Audit
 metadata lives in `domains/audit.md`, loaded only at ratify/retrospective time.
 
 ```yaml

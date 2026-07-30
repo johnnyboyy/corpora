@@ -1,9 +1,15 @@
+---
+subject: process
+posture: guardrail
+units-of-work: [ratify]
+universal: false
+---
+
 # Domain: ratify-gate
 
 Judgment about assembling a complete spawn and processing what it returns — as opposed to
 `orchestrator-routing`'s judgment about which composition to invoke and when. Split from
-`orchestrator-routing` 2026-07-18; see `LINEAGE.md`, "The ratify-gate split." Declared by the
-**orchestrator** composition. Audit metadata lives in `domains/audit.md`, loaded only at
+`orchestrator-routing` 2026-07-18; see `LINEAGE.md`, "The ratify-gate split." Audit metadata lives in `domains/audit.md`, loaded only at
 ratify/retrospective time.
 
 ```yaml

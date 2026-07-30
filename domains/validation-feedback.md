@@ -1,3 +1,12 @@
+---
+subject: design
+posture: guardrail
+applies-when:
+  - has-ui: yes
+units-of-work: [design-ux-flow, design-ui-surface, bootstrap-ux-surface]
+universal: false
+---
+
 # Domain: validation-feedback
 
 Warnings, validation, and surfacing side effects. Cross-composition domain — one side locates the fix,

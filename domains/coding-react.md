@@ -1,7 +1,15 @@
+---
+subject: coding
+posture: guardrail
+applies-when:
+  - framework: [react, nextjs, react-native, expo]
+units-of-work: [implement-feature]
+universal: false
+---
+
 # Domain: coding-react
 
-React-specific code patterns — JSX, hooks, refs, and component prop-typing. Declared by the coder
-composition when `framework` is React-based (react, next.js, react native, expo, etc.). Split from
+React-specific code patterns — JSX, hooks, refs, and component prop-typing. Split from
 `coding-js-react` 2026-07-18 once the domain's
 framework-agnostic JS/TS principles were carved into their own `coding-ts` domain — see
 `domains/audit.md` for the migration note. Audit metadata lives in

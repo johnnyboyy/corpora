@@ -1,3 +1,12 @@
+---
+subject: design
+posture: guardrail
+applies-when:
+  - has-ui: yes
+units-of-work: [design-ui-surface, bootstrap-ui-surface]
+universal: false
+---
+
 # Domain: motion
 
 Animation and motion as signal. Cross-composition domain. Audit metadata lives in `domains/audit.md`,
@@ -22,7 +31,6 @@ principles:
   rule: "Back navigation transitions run at 60–70% of the forward duration, with --ease-out replacing --ease-in-out on the shared element."
   condition: "Any shared-element view transition with a defined forward direction."
   reason: "Returning to a known context should feel like release, not a reversal of the forward arrival's intentional weight. The easing asymmetry — no front-weighted acceleration on back — signals return rather than deliberate arrival."
-  status: ratified
 
 - id: reduced-motion-instant-not-absent
   rule: "When `prefers-reduced-motion` is active, make state-communicating animations instant (duration → 0) rather than absent. Remove only decorative or continuous motion (auto-playing loops, parallax, background animations) entirely."

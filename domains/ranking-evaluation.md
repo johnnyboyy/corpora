@@ -1,6 +1,15 @@
+---
+subject: design
+posture: guardrail
+applies-when:
+  - has-ui: yes
+units-of-work: [design-ux-flow]
+universal: false
+---
+
 # Domain: ranking-evaluation
 
-Ranking, scoring, triage, and reference-building tools. Declared by the **convergent UX-flow** composition. Several
+Ranking, scoring, triage, and reference-building tools. Several
 principles here are flagged provisional in the audit (earned in a single tool) — weigh that before
 promoting. Audit metadata lives in `domains/audit.md`, loaded only at
 ratify/retrospective time.

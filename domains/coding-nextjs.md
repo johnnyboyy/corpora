@@ -1,8 +1,16 @@
+---
+subject: coding
+posture: guardrail
+applies-when:
+  - framework: [nextjs]
+units-of-work: [implement-feature]
+universal: false
+---
+
 # Domain: coding-nextjs
 
 Next.js-specific code patterns — App Router behavior, server/client component boundaries,
-routing conventions. Declared by the convergent implementation composition when `framework: nextjs`. Projects on other
-frameworks (Expo Router, Vite, etc.) do not load this domain. Audit metadata lives in
+routing conventions. Projects on other frameworks (Expo Router, Vite, etc.) do not load this domain. Audit metadata lives in
 `domains/audit.md`, loaded only at ratify/retrospective time.
 
 ```yaml

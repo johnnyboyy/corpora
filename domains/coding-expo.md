@@ -1,3 +1,12 @@
+---
+subject: coding
+posture: guardrail
+applies-when:
+  - framework: [expo, react-native]
+units-of-work: [implement-feature]
+universal: false
+---
+
 # Domain: coding-expo
 
 Expo/React Native judgment — loaded by any convergent coding spawn when the project's stack is

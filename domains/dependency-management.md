@@ -1,3 +1,10 @@
+---
+subject: coding
+posture: guardrail
+units-of-work: [migrate-dependencies]
+universal: false
+---
+
 # Domain: dependency-management
 
 Judgment for tasks whose actual subject is upgrading, migrating, or auditing dependencies — not

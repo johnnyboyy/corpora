@@ -1,3 +1,12 @@
+---
+subject: design
+posture: guardrail
+applies-when:
+  - has-ui: yes
+units-of-work: [design-ux-flow, design-ui-surface, bootstrap-ui-surface, bootstrap-ux-surface]
+universal: false
+---
+
 # Domain: design-method
 
 Design *process and discipline* — the clarity/polish priority and documentation rules. A

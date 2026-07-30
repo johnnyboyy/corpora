@@ -1,3 +1,10 @@
+---
+subject: coding
+posture: guardrail
+units-of-work: [implement-feature]
+universal: false
+---
+
 # Domain: coding-general
 
 Stack-agnostic coding judgment — applies in any language or framework, loaded by any

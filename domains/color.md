@@ -1,6 +1,15 @@
+---
+subject: design
+posture: guardrail
+applies-when:
+  - has-ui: yes
+units-of-work: [design-ui-surface, bootstrap-ui-surface]
+universal: false
+---
+
 # Domain: color
 
-Palette and hue judgment. Declared by the **divergent visual-identity** composition. Audit metadata lives in
+Palette and hue judgment. Audit metadata lives in
 `domains/audit.md`, loaded only at ratify/retrospective time.
 
 ```yaml

@@ -1125,5 +1125,645 @@ class KillGraduationTest(unittest.TestCase):
         self.assertIn("'last-kill' killed", result.stdout)
 
 
+class DomainFrontmatterTest(unittest.TestCase):
+    """kernel.md, 'Spawns: stance + composition' — lint-domains works on any --domains-dir, same
+    as kill-report, so a process layer's data source is validated independent of any one project."""
+
+    def setUp(self):
+        self.tempdir = tempfile.TemporaryDirectory()
+        self.domains_dir = Path(self.tempdir.name) / "domains"
+        self.domains_dir.mkdir()
+
+    def tearDown(self):
+        self.tempdir.cleanup()
+
+    def write_domain(self, name, frontmatter, body='principles:\n\n- id: r\n  rule: "R"\n  condition: "C"\n  reason: "Why."\n'):
+        (self.domains_dir / f"{name}.md").write_text(
+            frontmatter + f"\n# Domain: {name}\n\n```yaml\n{body}```\n"
+        )
+
+    def run_lint(self):
+        return subprocess.run(
+            [sys.executable, str(SCRIPT), "lint-domains", "--domains-dir", str(self.domains_dir)],
+            text=True, capture_output=True, check=False,
+        )
+
+    def test_valid_frontmatter_passes(self):
+        self.write_domain("coding-general", "---\nsubject: coding\nposture: guardrail\n"
+                           "units-of-work: [implement-feature]\nuniversal: false\n---\n\n")
+
+        result = self.run_lint()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_missing_frontmatter_fails(self):
+        (self.domains_dir / "no-frontmatter.md").write_text("# Domain: no-frontmatter\n\n```yaml\nprinciples:\n```\n")
+
+        result = self.run_lint()
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("no frontmatter", result.stderr)
+
+    def test_invalid_subject_fails(self):
+        self.write_domain("bad-subject", "---\nsubject: backend\nposture: guardrail\n"
+                           "units-of-work: [implement-feature]\nuniversal: false\n---\n\n")
+
+        result = self.run_lint()
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("subject", result.stderr)
+
+    def test_empty_units_of_work_without_universal_fails(self):
+        self.write_domain("empty-uow", "---\nsubject: coding\nposture: guardrail\nuniversal: false\n---\n\n")
+
+        result = self.run_lint()
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("units-of-work", result.stderr)
+
+    def test_universal_domain_without_units_of_work_passes(self):
+        self.write_domain("interviewing", "---\nsubject: process\nposture: guardrail\nuniversal: true\n---\n\n")
+
+        result = self.run_lint()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_unknown_applies_when_field_fails(self):
+        self.write_domain("bad-condition", "---\nsubject: coding\nposture: guardrail\n"
+                           "applies-when:\n  - editor: [vim]\nunits-of-work: [implement-feature]\nuniversal: false\n---\n\n")
+
+        result = self.run_lint()
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("applies-when", result.stderr)
+
+
+class SelectionTest(CorpusCommandTestCase):
+    """`select` evaluates real seed-domain frontmatter (scripts/corpus.py's skill_root() resolves
+    to this repo) against a project's corpora/config.md — the deterministic call a process layer
+    makes instead of reading domain preambles."""
+
+    def write_shape(self, **fields):
+        lines = ["# Config", "", "## project-shape"]
+        lines += [f"{k}: {v}" for k, v in fields.items()]
+        (self.root / "corpora" / "config.md").write_text("\n".join(lines) + "\n")
+
+    def test_select_implement_feature_for_nextjs_typescript_project(self):
+        self.write_shape(language="typescript", framework="next.js", **{"has-ui": "yes"}, styling="tailwind")
+
+        result = self.run_command(["select", "--unit-of-work", "implement-feature", "--json"])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        import json
+        domains = json.loads(result.stdout)["domains"]
+        for expected in ("coding-general", "coding-ts", "coding-nextjs", "coding-react", "css"):
+            self.assertIn(expected, domains)
+        # task-shape separation (kernel.md): implement-feature never pulls in dependency-management
+        self.assertNotIn("dependency-management", domains)
+        # subject separation: a coding unit-of-work never pulls in a design domain
+        self.assertNotIn("color", domains)
+        # universal domains always ride along
+        self.assertIn("interviewing", domains)
+        self.assertIn("spawn-integrity", domains)
+
+    def test_select_migrate_dependencies_excludes_coding_general(self):
+        self.write_shape(language="typescript", framework="next.js", **{"has-ui": "yes"}, styling="tailwind")
+
+        result = self.run_command(["select", "--unit-of-work", "migrate-dependencies", "--json"])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        import json
+        domains = json.loads(result.stdout)["domains"]
+        self.assertIn("dependency-management", domains)
+        self.assertNotIn("coding-general", domains)
+
+    def test_select_design_ui_surface_for_has_ui_project(self):
+        self.write_shape(language="typescript", framework="next.js", **{"has-ui": "yes"}, styling="tailwind")
+
+        result = self.run_command(["select", "--unit-of-work", "design-ui-surface", "--json"])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        import json
+        domains = json.loads(result.stdout)["domains"]
+        self.assertIn("color", domains)
+        self.assertIn("design-method", domains)
+        self.assertNotIn("coding-general", domains)
+
+    def test_select_returns_empty_set_for_unmatched_unit_of_work(self):
+        self.write_shape(**{"has-ui": "no"})
+
+        result = self.run_command(["select", "--unit-of-work", "design-ui-surface", "--json"])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        import json
+        domains = json.loads(result.stdout)["domains"]
+        self.assertNotIn("color", domains)
+        # universal domains still ride along even when nothing else matches
+        self.assertIn("interviewing", domains)
+
+    def test_select_bootstrap_ui_surface_is_narrower_than_ongoing_ui_design(self):
+        self.write_shape(language="typescript", framework="next.js", **{"has-ui": "yes"}, styling="tailwind")
+
+        result = self.run_command(["select", "--unit-of-work", "bootstrap-ui-surface", "--json"])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        import json
+        domains = json.loads(result.stdout)["domains"]
+        for expected in ("color", "surfaces-elevation", "visual-hierarchy", "motion", "design-method"):
+            self.assertIn(expected, domains)
+        # ui-library-init.md's stated composition excludes these — only ongoing design-ui-surface pulls them in
+        for excluded in ("forms-inputs", "lists-selection", "recoverability", "validation-feedback"):
+            self.assertNotIn(excluded, domains)
+
+    def test_select_bootstrap_ux_surface_is_narrower_than_ongoing_ux_design(self):
+        self.write_shape(language="typescript", framework="next.js", **{"has-ui": "yes"}, styling="tailwind")
+
+        result = self.run_command(["select", "--unit-of-work", "bootstrap-ux-surface", "--json"])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        import json
+        domains = json.loads(result.stdout)["domains"]
+        for expected in ("recoverability", "validation-feedback", "lists-selection", "forms-inputs", "design-method"):
+            self.assertIn(expected, domains)
+        # ux-library-init.md's stated composition excludes these — only ongoing design-ux-flow pulls them in
+        for excluded in ("ranking-evaluation", "wizards-flows", "color"):
+            self.assertNotIn(excluded, domains)
+
+
+class MissingDomainsDirTest(unittest.TestCase):
+    """A freshly-bootstrapped project has no corpora/domains/ yet — only ratified project
+    principles ever live there. Read commands must tolerate that; write commands must create it
+    lazily instead of requiring an operator workaround (found by literally running the
+    bootstrap-then-first-spawn path against a real fresh project, twice)."""
+
+    def setUp(self):
+        self.tempdir = tempfile.TemporaryDirectory()
+        self.root = Path(self.tempdir.name)
+        (self.root / "corpora").mkdir(parents=True)
+        (self.root / "corpora" / "config.md").write_text(
+            "# Config\n\n## project-shape\nlanguage: typescript\nframework: next.js\n"
+            "has-ui: yes\nstyling: tailwind\n"
+        )
+
+    def tearDown(self):
+        self.tempdir.cleanup()
+
+    def run_command(self, command):
+        return subprocess.run(
+            [sys.executable, str(SCRIPT), "--root", str(self.root), *command],
+            text=True, capture_output=True, check=False,
+        )
+
+    def test_select_does_not_require_domains_dir_to_exist(self):
+        self.assertFalse((self.root / "corpora" / "domains").exists())
+
+        result = self.run_command(["select", "--unit-of-work", "plan-work"])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("planning", result.stdout)
+        # read-only: must not have created the directory as a side effect
+        self.assertFalse((self.root / "corpora" / "domains").exists())
+
+    def test_verify_does_not_require_domains_dir_to_exist(self):
+        result = self.run_command(["verify"])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("reconciled", result.stdout)
+
+    def test_record_gate_creates_domains_dir_lazily_when_the_domain_file_already_exists(self):
+        # Mimics real ordering: write-back creates the working file before record-gate runs.
+        domains_dir = self.root / "corpora" / "domains"
+        domains_dir.mkdir(parents=True)
+        (domains_dir / "example.md").write_text(
+            "last-retrospective: none\n\nprinciples:\n\n"
+            "- id: example\n  rule: x\n  condition: x\n  reason: x\n\nkilled:\n"
+        )
+
+        result = self.run_command(
+            ["record-gate", "--domain", "example", "--ratified", "1", "--killed", "0", "--violations", "0"]
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue((domains_dir / "audit.md").exists())
+
+
+class CheckCompositionTest(CorpusCommandTestCase):
+    def test_mixed_subjects_fail(self):
+        result = self.run_command(["check-composition", "--domains", "coding-general,color"])
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("mixed subjects", result.stderr)
+
+    def test_universal_domain_alongside_coding_passes(self):
+        result = self.run_command(["check-composition", "--domains", "coding-general,interviewing"])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_compose_spawn_prompt_rejects_mixed_subject_composition(self):
+        task = self.root / "task.md"
+        task.write_text("Do the thing.")
+
+        result = self.run_command([
+            "compose-spawn-prompt", "--stance", "convergent", "--domains", "coding-general,color",
+            "--task-file", str(task),
+        ])
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("composition check failed", result.stderr)
+
+
+class ManifestTest(CorpusCommandTestCase):
+    def test_manifest_never_leaks_rule_or_reason(self):
+        result = self.run_command(["manifest", "--json"])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        import json
+        payload = json.loads(result.stdout)
+        self.assertGreater(len(payload["domains"]), 0)
+        for domain in payload["domains"]:
+            self.assertNotIn("rule", domain)
+            self.assertNotIn("reason", domain)
+            for condition in domain["conditions"]:
+                self.assertEqual(set(condition), {"id", "condition"})
+
+    def test_manifest_includes_recoverability_conditions(self):
+        result = self.run_command(["manifest", "--json"])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        import json
+        payload = json.loads(result.stdout)
+        recoverability = next(d for d in payload["domains"] if d["name"] == "recoverability")
+        ids = {c["id"] for c in recoverability["conditions"]}
+        self.assertIn("recovery-path-replaces-confirmation", ids)
+
+
+class ChunkLedgerTest(CorpusCommandTestCase):
+    """kernel.md, 'Chunk chaining': the ledger records what happened; it never substitutes for the
+    per-unit-of-work spawn+handoff rule in 'The handoff artifact' — chunk-done requires a real
+    handoff naming the same workstream before it will close a chunk."""
+
+    # The real select() output for design-ux-flow against a has-ui:yes shape — used as the default
+    # so existing chunk-mechanics tests below aren't also exercising the domains-loaded
+    # reconciliation check (that gets its own dedicated tests further down).
+    DESIGN_UX_FLOW_DOMAINS = ("design-method, forms-inputs, interviewing, lists-selection, "
+                               "ranking-evaluation, recoverability, spawn-integrity, validation-feedback, "
+                               "wizards-flows")
+
+    def write_handoff_with_workstream(self, workstream, name="handoff.md", domains_loaded=None):
+        path = self.root / name
+        domains_loaded = self.DESIGN_UX_FLOW_DOMAINS if domains_loaded is None else domains_loaded
+        path.write_text(f"""---
+stance: convergent
+workstream: {workstream}
+status: complete
+domains-loaded: [{domains_loaded}]
+proposals: []
+deterministic-shortcut-candidates: []
+violations-noted: []
+ui-drift:
+  screens: []
+  components: []
+token-usage: "n/a"
+delegated-workers: []
+---
+
+## Artifact
+
+Done.
+
+## Surfaced
+
+""")
+        return path
+
+    def test_chunk_start_prints_selection_and_writes_nothing(self):
+        self.write_config(has_ui="yes")
+        (self.root / "corpora" / "config.md").write_text(
+            "# Config\n\n## project-shape\nhas-ui: yes\n"
+        )
+
+        result = self.run_command(["chunk-start", "--workstream", "w1", "--unit-of-work", "design-ux-flow"])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("wizards-flows", result.stdout)
+        self.assertFalse((self.root / "corpora" / "chunks").exists())
+
+    def test_chunk_done_requires_handoff_to_exist(self):
+        result = self.run_command([
+            "chunk-done", "--workstream", "w1", "--unit-of-work", "design-ux-flow",
+            "--stance", "convergent", "--handoff", str(self.root / "nope.md"),
+        ])
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("no such handoff file", result.stderr)
+
+    def test_chunk_done_rejects_mismatched_workstream(self):
+        handoff = self.write_handoff_with_workstream("w1")
+
+        result = self.run_command([
+            "chunk-done", "--workstream", "w2", "--unit-of-work", "design-ux-flow",
+            "--stance", "convergent", "--handoff", str(handoff),
+        ])
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("does not match", result.stderr)
+
+    def test_chunk_done_writes_ledger_entry_with_domains_composed(self):
+        self.write_config()
+        (self.root / "corpora" / "config.md").write_text("# Config\n\n## project-shape\nhas-ui: yes\n")
+        handoff = self.write_handoff_with_workstream("w1")
+
+        result = self.run_command([
+            "chunk-done", "--workstream", "w1", "--unit-of-work", "design-ux-flow",
+            "--stance", "convergent", "--handoff", str(handoff), "--next", "design-ui-surface",
+        ])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        ledger = (self.root / "corpora" / "chunks" / "w1.md").read_text()
+        self.assertIn("wizards-flows", ledger)
+        self.assertIn("next: design-ui-surface", ledger)
+
+    def test_close_workstream_is_read_only_summary(self):
+        self.write_config()
+        (self.root / "corpora" / "config.md").write_text("# Config\n\n## project-shape\nhas-ui: yes\n")
+        handoff = self.write_handoff_with_workstream("w1")
+        self.run_command([
+            "chunk-done", "--workstream", "w1", "--unit-of-work", "design-ux-flow",
+            "--stance", "convergent", "--handoff", str(handoff),
+        ])
+        before = (self.root / "corpora" / "chunks" / "w1.md").read_text()
+
+        result = self.run_command(["close-workstream", "--workstream", "w1"])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("chunks: 1", result.stdout)
+        after = (self.root / "corpora" / "chunks" / "w1.md").read_text()
+        self.assertEqual(before, after)
+
+    def test_close_workstream_missing_ledger_fails(self):
+        result = self.run_command(["close-workstream", "--workstream", "no-such-workstream"])
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("no chunk ledger", result.stderr)
+
+    def test_lint_chunks_passes_on_valid_ledger(self):
+        self.write_config()
+        (self.root / "corpora" / "config.md").write_text("# Config\n\n## project-shape\nhas-ui: yes\n")
+        handoff = self.write_handoff_with_workstream("w1")
+        self.run_command([
+            "chunk-done", "--workstream", "w1", "--unit-of-work", "design-ux-flow",
+            "--stance", "convergent", "--handoff", str(handoff),
+        ])
+
+        result = self.run_command(["lint-chunks"])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_lint_chunks_no_chunks_dir_is_a_pass(self):
+        result = self.run_command(["lint-chunks"])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_chunk_done_accepts_matching_domains_loaded(self):
+        self.write_config()
+        (self.root / "corpora" / "config.md").write_text("# Config\n\n## project-shape\nhas-ui: yes\n")
+        handoff = self.write_handoff_with_workstream("w1")  # default matches design-ux-flow exactly
+
+        result = self.run_command([
+            "chunk-done", "--workstream", "w1", "--unit-of-work", "design-ux-flow",
+            "--stance", "convergent", "--handoff", str(handoff),
+        ])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue((self.root / "corpora" / "chunks" / "w1.md").exists())
+
+    def test_chunk_done_refuses_to_close_on_domains_loaded_mismatch(self):
+        self.write_config()
+        (self.root / "corpora" / "config.md").write_text("# Config\n\n## project-shape\nhas-ui: yes\n")
+        # Only wizards-flows — real design-ux-flow select() returns 9 domains, not 1. This is
+        # exactly the shape of drift the exercise found: a hard-coded/short composition disagreeing
+        # with what select() actually computes.
+        handoff = self.write_handoff_with_workstream("w1", domains_loaded="wizards-flows")
+
+        result = self.run_command([
+            "chunk-done", "--workstream", "w1", "--unit-of-work", "design-ux-flow",
+            "--stance", "convergent", "--handoff", str(handoff),
+        ])
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("does not match select()", result.stderr)
+        self.assertIn("select() only:", result.stderr)
+        self.assertIn("handoff only:", result.stderr)
+        # refusing to close means no ledger entry gets written at all
+        self.assertFalse((self.root / "corpora" / "chunks" / "w1.md").exists())
+
+    def test_chunk_done_skips_reconciliation_when_handoff_omits_domains_loaded(self):
+        self.write_config()
+        (self.root / "corpora" / "config.md").write_text("# Config\n\n## project-shape\nhas-ui: yes\n")
+        path = self.root / "handoff.md"
+        path.write_text("""---
+stance: convergent
+workstream: w1
+status: complete
+proposals: []
+deterministic-shortcut-candidates: []
+violations-noted: []
+ui-drift:
+  screens: []
+  components: []
+token-usage: "n/a"
+delegated-workers: []
+---
+
+## Artifact
+
+Done.
+
+## Surfaced
+
+""")
+
+        result = self.run_command([
+            "chunk-done", "--workstream", "w1", "--unit-of-work", "design-ux-flow",
+            "--stance", "convergent", "--handoff", str(path),
+        ])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_verify_chunks_passes_when_composition_unchanged(self):
+        self.write_config()
+        (self.root / "corpora" / "config.md").write_text("# Config\n\n## project-shape\nhas-ui: yes\n")
+        handoff = self.write_handoff_with_workstream("w1")
+        self.run_command([
+            "chunk-done", "--workstream", "w1", "--unit-of-work", "design-ux-flow",
+            "--stance", "convergent", "--handoff", str(handoff),
+        ])
+
+        result = self.run_command(["verify-chunks"])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("reconciled", result.stdout)
+
+    def test_verify_chunks_flags_drift_after_config_changes(self):
+        self.write_config()
+        (self.root / "corpora" / "config.md").write_text("# Config\n\n## project-shape\nhas-ui: yes\n")
+        handoff = self.write_handoff_with_workstream("w1")
+        self.run_command([
+            "chunk-done", "--workstream", "w1", "--unit-of-work", "design-ux-flow",
+            "--stance", "convergent", "--handoff", str(handoff),
+        ])
+        # config.md changes after the chunk closed — has-ui flips to no, so design domains no
+        # longer select for this unit-of-work
+        (self.root / "corpora" / "config.md").write_text("# Config\n\n## project-shape\nhas-ui: no\n")
+
+        result = self.run_command(["verify-chunks"])
+
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("CHUNK COMPOSITION DRIFT", result.stdout)
+
+    def test_verify_chunks_no_chunks_dir_is_a_pass(self):
+        result = self.run_command(["verify-chunks"])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+
+class QueueCommandsTest(CorpusCommandTestCase):
+    """planning.md's queue schema states the orchestrator updates status/resolved in-place —
+    these commands are the mechanical half of that rule, the same class of fix as chunk-start/
+    chunk-done was for corpora/chunks/*.md."""
+
+    def write_queue(self, tasks="", questions=""):
+        (self.root / "corpora" / "queue.md").write_text(f"""```yaml
+capability: "Test capability"
+area: "test"
+status: active
+created: 2026-07-29
+updated: 2026-07-29
+
+tasks:
+{textwrap.dedent(tasks)}
+open-questions:
+{textwrap.dedent(questions)}
+```
+""")
+
+    def default_queue(self):
+        self.write_queue(
+            tasks="""
+              - id: t-01
+                title: "First"
+                description: "d"
+                context: ""
+                status: pending
+                blocked-by: []
+                parallel-ok: false
+                concern: implementation
+                judgment: settled
+                notes: ""
+
+              - id: t-02
+                title: "Second"
+                description: "d"
+                context: ""
+                status: pending
+                blocked-by: [t-01]
+                parallel-ok: false
+                concern: implementation
+                judgment: settled
+                notes: ""
+            """,
+            questions="""
+              - id: q-01
+                question: "q"
+                blocks: [t-02]
+                resolved: false
+                answer: ""
+            """,
+        )
+
+    def test_lint_queue_passes_on_valid_queue(self):
+        self.default_queue()
+
+        result = self.run_command(["lint-queue"])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_lint_queue_no_queue_is_a_pass(self):
+        result = self.run_command(["lint-queue"])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_lint_queue_catches_unknown_blocked_by_reference(self):
+        self.write_queue(
+            tasks="""
+              - id: t-01
+                title: "First"
+                description: "d"
+                context: ""
+                status: pending
+                blocked-by: [t-nonexistent]
+                parallel-ok: false
+                concern: implementation
+                judgment: settled
+                notes: ""
+            """,
+            questions="",
+        )
+
+        result = self.run_command(["lint-queue"])
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("unknown task id", result.stderr)
+
+    def test_queue_status_reports_blocked_and_startable(self):
+        self.default_queue()
+
+        result = self.run_command(["queue-status"])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("t-01: pending — startable now", result.stdout)
+        self.assertIn("t-02: pending — blocked by:", result.stdout)
+        self.assertIn("q-01: unresolved", result.stdout)
+
+    def test_queue_set_status_updates_in_place_and_reports_unblocked(self):
+        self.default_queue()
+        self.run_command(["queue-set-status", "--id", "t-01", "--status", "complete"])
+
+        result = self.run_command(["queue-resolve-question", "--id", "q-01", "--answer", "because x"])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("now startable: t-02", result.stdout)
+        text = (self.root / "corpora" / "queue.md").read_text()
+        self.assertIn("resolved: true", text)
+        self.assertIn("answer: because x", text)
+
+    def test_queue_set_status_rejects_unknown_task(self):
+        self.default_queue()
+
+        result = self.run_command(["queue-set-status", "--id", "t-nope", "--status", "complete"])
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("unknown task id", result.stderr)
+
+    def test_all_tasks_complete_and_questions_resolved_flips_top_level_status(self):
+        self.default_queue()
+        self.run_command(["queue-set-status", "--id", "t-01", "--status", "complete"])
+        self.run_command(["queue-resolve-question", "--id", "q-01", "--answer", "a"])
+
+        self.run_command(["queue-set-status", "--id", "t-02", "--status", "complete"])
+
+        text = (self.root / "corpora" / "queue.md").read_text()
+        self.assertIn("status: complete", text.split("tasks:")[0])
+
+    def test_top_level_status_stays_active_while_a_question_is_unresolved(self):
+        self.default_queue()
+        self.run_command(["queue-set-status", "--id", "t-01", "--status", "complete"])
+
+        self.run_command(["queue-set-status", "--id", "t-02", "--status", "complete"])
+
+        text = (self.root / "corpora" / "queue.md").read_text()
+        self.assertIn("status: active", text.split("tasks:")[0])
+
+
 if __name__ == "__main__":
     unittest.main()

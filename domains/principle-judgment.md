@@ -1,3 +1,10 @@
+---
+subject: process
+posture: guardrail
+units-of-work: [ratify]
+universal: false
+---
+
 # Domain: principle-judgment
 
 Judgment about whether a principle — proposed or already ratified — actually encodes earned
@@ -6,8 +13,7 @@ judgment, and whether it lives in the domain its real consumer needs it in. Dist
 judgment about which composition to invoke: this is about the corpus's own content, at the moment a
 proposal is judged and again, periodically, after ratification, since gate-time discipline can
 lapse under session-context pressure and a principle ratified in error otherwise sits unexamined
-indefinitely. Declared by the **orchestrator** composition, alongside `orchestrator-routing` and
-`ratify-gate`. Seeded 2026-07-22 from the criteria used in a full-corpus domain-and-principle audit
+indefinitely. Seeded 2026-07-22 from the criteria used in a full-corpus domain-and-principle audit
 this session — see `LINEAGE.md` for the audit's own findings; this domain generalizes the method,
 not the specific findings. Audit metadata lives in `domains/audit.md`, loaded only at
 ratify/retrospective time.
@@ -44,9 +50,9 @@ principles:
   see-also: check-principle-against-consuming-lens-not-just-domain-topic
 
 - id: mined-workflow-stays-a-workflow
-  rule: "When a source documents a coherent, ordered workflow rather than independent decision points, don't atomize each step into a standalone principle. Extract only the mechanism-level gotchas that fire independent of the workflow's sequencing and ratify those as ordinary principles. Route the sequencing itself to praxis, if the project runs it, as a phase or phase pool — never force it into disconnected `rule`/`condition`/`reason` atoms, and never discard it outright now that it has a home."
+  rule: "When a source documents a coherent, ordered workflow rather than independent decision points, don't atomize each step into a standalone principle. Extract only the mechanism-level gotchas that fire independent of the workflow's sequencing and ratify those as ordinary principles. Leave the sequencing itself unencoded — never force it into disconnected `rule`/`condition`/`reason` atoms."
   condition: "Mining a structured source (a skill file, tutorial, or runbook) for principle candidates, when several extracted candidates only make sense relative to each other in a fixed order."
-  reason: "The principle schema asks 'does this decision recur under this condition' — it presupposes the content is a judgment call. A workflow isn't a judgment call at all, recurring or otherwise; its value is procedural, and an individual step is not worth stating in isolation the way a decision point is. Steps may contain principles, but steps are not principles in their own right. Originally this meant leaving the sequencing unencoded — corpora had nowhere else to put it. Praxis now exists as the peer skill for exactly this content (`praxis/kernel.md`, \"What praxis is\"), so 'unencoded' is no longer the correct default: a real workflow found in a mined source is praxis's phase-discovery input, not corpora's to drop. A project not running praxis still drops it, since corpora alone has nowhere to route it."
+  reason: "The principle schema asks 'does this decision recur under this condition' — it presupposes the content is a judgment call. A workflow isn't a judgment call at all, recurring or otherwise; its value is procedural, and an individual step is not worth stating in isolation the way a decision point is. Steps may contain principles, but steps are not principles in their own right; corpora has nowhere else to put the sequencing itself, so it stays unencoded rather than forced into atoms that misrepresent it."
 
 - id: cost-of-discovery-is-not-judgment-evidence
   rule: "Do not treat how difficult, costly, or recent an insight was to acquire, or how many times its underlying problem has recurred, as evidence that the insight itself clears the judgment-call bar. A fact can be expensive to discover and still just be a fact."
@@ -58,6 +64,21 @@ principles:
   condition: "When judging a principle proposal whose provenance traces to a specific bug fix, debugging session, or incident, rather than a general project or design decision."
   reason: "The specific fact a fix resolves — which wire, which line, which config value — was never a judgment call; only how the fix was found might have been. Stripping the instance-level detail is the fastest way to separate the two: what remains is either nothing, meaning the case was pure knowledge dressed up by how hard it was to find, or a reusable method for the next unprecedented case in this domain, which is the actual judgment worth keeping."
   see-also: cost-of-discovery-is-not-judgment-evidence
+
+- id: argument-density-precedes-full-read
+  rule: "Before spending a full read on a candidate source, require it to make a specific, reasoned claim with a because — not merely be on-topic. A single sentence that argues a position with a reason qualifies; a listicle or a topic-matching summary with no argued claim does not."
+  condition: "When filtering candidate sources (articles, posts, documentation) before reading them in full for principle extraction — a precondition check, prior to the genuine-judgment test that applies once a claim is actually extracted from a source that passed."
+  reason: "Topic match alone screens for subject relevance, not for whether the source contains anything that could become a rule/condition/reason — reading a source in full is the expensive step, so the density check belongs before it, not after. A source can pass this and still fail the fork test once actually read; this filter only prevents spending the read on material that structurally cannot contain a claim worth extracting."
+
+- id: mining-signal-precision-ranking
+  rule: "When mining a session transcript for judgment that was exercised but never proposed, weight signals by precision, highest first: an operator correction (the operator overrides, redirects, or rewords a spawn's output) is the strongest evidence judgment was actually exercised; a retry chain (the same intent re-asked after an unsatisfying first pass, with the delta between attempts as the candidate's condition) is next; a revert (with why it was backed out as the candidate's reason) is next; an ungated inline tradeoff articulated but never brought to a ratify gate is the weakest and most inference-dependent signal. For any hit, reconstruct what was attempted, what marked it wrong, and what generalizes — emit nothing if nothing generalizes."
+  condition: "Mining a transcript (a session, a chat log, any recorded working session) for candidate judgment not captured through the normal handoff/ratify-gate path."
+  reason: "A transcript records what happened, not what should be extracted from it — signal precision matters because a correction is direct evidence the operator weighed and rejected something, while an ungated tradeoff is only the spawn's own account of its reasoning, with no external check that it was actually load-bearing. Ranking by precision keeps a mining pass from over-crediting weak signals just because they're more numerous — ungated tradeoffs are the most common shape in any transcript, and the least reliable."
+
+- id: container-kill-hit-is-a-rehoming-candidate-not-a-rejection
+  rule: "When a mined or newly-proposed candidate matches an existing killed entry, check the kill's kill_type before treating the match as settled. A quality kill means the match is already rejected — skip it, or surface it only if the transcript/new context shows the kill's reason_killed actually failing in practice. A container kill means the content was sound but filed wrong — surface the new candidate as a re-homing opportunity, not a duplicate to discard."
+  condition: "Deduping a candidate (from any source — reading pipeline, session harvest, a fresh proposal) against a domain's killed: log."
+  reason: "kill_type: container exists specifically to distinguish 'this was wrong' from 'this was right but misplaced' — collapsing both into a single dedupe check that always skips a match throws away the container case's whole point, which is that the same content deserves a second look at the right home, not permanent suppression."
 
 killed:
 ```
