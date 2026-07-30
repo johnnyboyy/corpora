@@ -1271,7 +1271,7 @@ class SelectionTest(CorpusCommandTestCase):
         domains = json.loads(result.stdout)["domains"]
         for expected in ("color", "surfaces-elevation", "visual-hierarchy", "motion", "design-method"):
             self.assertIn(expected, domains)
-        # ui-library-init.md's stated composition excludes these — only ongoing design-ui-surface pulls them in
+        # processes/ui-library-init.md's stated composition excludes these — only ongoing design-ui-surface pulls them in
         for excluded in ("forms-inputs", "lists-selection", "recoverability", "validation-feedback"):
             self.assertNotIn(excluded, domains)
 
@@ -1285,7 +1285,7 @@ class SelectionTest(CorpusCommandTestCase):
         domains = json.loads(result.stdout)["domains"]
         for expected in ("recoverability", "validation-feedback", "lists-selection", "forms-inputs", "design-method"):
             self.assertIn(expected, domains)
-        # ux-library-init.md's stated composition excludes these — only ongoing design-ux-flow pulls them in
+        # processes/ux-library-init.md's stated composition excludes these — only ongoing design-ux-flow pulls them in
         for excluded in ("ranking-evaluation", "wizards-flows", "color"):
             self.assertNotIn(excluded, domains)
 

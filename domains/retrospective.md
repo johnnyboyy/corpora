@@ -12,7 +12,7 @@ which signal is real, which is noise, and what to propose from it. Distinct from
 (whether one proposed or ratified principle is genuine, and lives in the right domain) and from
 `ratify-gate`/`orchestrator-routing` (assembling and routing a single spawn): this domain's
 principles apply at the retrospective's periodic, backward-looking pass across a domain's history,
-not at any single spawn's forward-looking gate. Loaded explicitly by `retrospective.md`'s own
+not at any single spawn's forward-looking gate. Loaded explicitly by `processes/retrospective.md`'s own
 procedure as part of the audit-mode bundle (the domains under review, plus `domains/audit.md`) —
 not selected via `scripts/corpus.py select` the way a composed spawn's working domains are, the
 same way `orchestrator-routing`/`ratify-gate`/`principle-judgment` are loaded unconditionally rather

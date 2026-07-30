@@ -10,7 +10,7 @@ Entry point for a portable spawn-composition system. A **spawn** is a *stance*
 directly from the task at hand, every time; judgment lives in domains, not fixed roles or a cached
 naming layer between task and domains. `kernel.md` is the canonical reference: schema, stance+
 composition model, generative stance, ratify gate, write-back, handoff artifact, retrospective.
-`general-operation.md` is the canonical reference for the session and per-spawn procedure — the
+`processes/general-operation.md` is the canonical reference for the session and per-spawn procedure — the
 order these pieces run in, from session entry through the ratify gate and the retrospective.
 
 **One flat domain pool.** All seed domains — stack-agnostic (`coding-general`,
@@ -42,9 +42,9 @@ task shape needs (seed + same-named project domains), through the same `orchestr
 judgment it applies to any task. Inline, resumed, or isolated execution is decided at route time —
 see "Inline, resume, or isolate."
 
-Read `general-operation.md` (adjacent to this file) at the start of every session and follow it
-exactly — it is the procedure for session entry, routing, spawn composition, execution, relay, the
-ratify gate, post-gate maintenance, and the retrospective.
+Read `processes/general-operation.md` (in this skill's `processes/` directory) at the start of
+every session and follow it exactly — it is the procedure for session entry, routing, spawn
+composition, execution, relay, the ratify gate, post-gate maintenance, and the retrospective.
 
 ## Spawn loads and context boundaries
 
@@ -73,9 +73,9 @@ Every spawn reads `corpora/config.md` at the start of its work. It carries:
 - **`debug`** — optional, operator-set, defaults to no. Gates two audit-trail writes that otherwise
   don't happen: `compose-spawn-prompt`'s default saved copy under `corpora/session-prompts/`, and
   retaining a ratified handoff under `corpora/handoffs/archive/` instead of deleting it (`corpus.py
-  handoff-done`). See `bootstrap.md`, "The config file," and `kernel.md`, "The handoff artifact."
+  handoff-done`). See `processes/bootstrap.md`, "The config file," and `kernel.md`, "The handoff artifact."
 
-If `corpora/config.md` does not exist, the project is not bootstrapped — see `general-operation.md`,
+If `corpora/config.md` does not exist, the project is not bootstrapped — see `processes/general-operation.md`,
 "Phase 1 — Session entry," for the bootstrap fallback. No domain or composition carries other "if
 missing" logic.
 
@@ -140,7 +140,7 @@ composition load; that mechanical exposure does not authorize it to apply that j
 relay the raw working transcript into another spawn. Relaying a structured artifact (spec, audit,
 tradeoff block) preserves the boundary.
 
-See `general-operation.md` for the full spawn-composition, execution, relay, ratify-gate, and
+See `processes/general-operation.md` for the full spawn-composition, execution, relay, ratify-gate, and
 post-gate-maintenance procedure.
 
 ## What you don't do
@@ -154,7 +154,7 @@ post-gate-maintenance procedure.
 
 stance: convergent
 
-The orchestrator declares three domains loaded unconditionally every session (`general-operation.md`,
+The orchestrator declares three domains loaded unconditionally every session (`processes/general-operation.md`,
 Phase 1): **`orchestrator-routing`** (which composition, when to spawn vs.
 surface vs. defer), **`ratify-gate`** (assembling a complete spawn and processing what
 it returns), and **`principle-judgment`** (whether a proposed or already-ratified principle is
@@ -165,5 +165,5 @@ ratify/retrospective time — see `kernel.md`, "Storage: working vs audit."
 
 A fourth, **`retrospective`** (reading a domain's accumulated corpus and gate history for which
 signal is real), loads on a different cadence — only when a retrospective actually runs
-(`retrospective.md`), never at Phase 1 alongside the other three, since its judgment has nothing to
+(`processes/retrospective.md`), never at Phase 1 alongside the other three, since its judgment has nothing to
 apply to outside that periodic pass.

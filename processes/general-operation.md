@@ -38,22 +38,22 @@ review work in this project.`
 If `corpora/config.md` does not exist, the project is not bootstrapped. Run bootstrap first — this
 is the only fallback; no domain or composition carries other "if missing" logic:
 
-- **Phase 1 (inline):** read the bundled `bootstrap.md` adjacent to `SKILL.md`, then follow its
+- **Phase 1 (inline):** read the bundled `processes/bootstrap.md`, then follow its
   own Phase 1 — detect the project's shape and commands from the applicable project agent
   instructions, package manifests, lockfiles, and codebase, and detect existing project utilities
   directly; write `corpora/config.md`. Do not proceed until it exists.
-- **Routing after Phase 1:** see `bootstrap.md`, "Routing after Phase 1," for the full branch —
+- **Routing after Phase 1:** see `processes/bootstrap.md`, "Routing after Phase 1," for the full branch —
   summarized here. If no concrete operator feature request accompanied the bootstrap, route
-  `bootstrap.md`'s Phase 2 (only if `has-ui: yes`: `ui-library-init.md`'s composition, divergent
+  `processes/bootstrap.md`'s Phase 2 (only if `has-ui: yes`: `processes/ui-library-init.md`'s composition, divergent
   stance) then Phase 3 and Phase 4 (only if `has-ui: yes`, after Phase 2, order-independent of
-  each other: `screenshot-library-init.md`, mechanical, and `ux-library-init.md`'s composition,
+  each other: `processes/screenshot-library-init.md`, mechanical, and `processes/ux-library-init.md`'s composition,
   convergent stance) directly, exactly as any other spawn workstream — ratify each as usual
   through Phase 6, below. If `has-ui: no` and no feature request, Phase 1 was the whole job. If a
   concrete feature request *did* accompany the bootstrap, skip the direct Phase 2–4 spawns and
   instead route a **planner** workstream with a capability description combining the bootstrap
   need and the feature request; execute the resulting queue (which may include
   `bootstrap-ui-library`/`bootstrap-screenshot-library`/`bootstrap-ux-library` tasks using
-  `ui-library-init.md`/`screenshot-library-init.md`/`ux-library-init.md` as their task content,
+  `processes/ui-library-init.md`/`processes/screenshot-library-init.md`/`processes/ux-library-init.md` as their task content,
   sequenced ahead of the feature's own tasks) per Phase 2 onward, task by task.
 
 ---
@@ -135,7 +135,7 @@ is not evidence this happened — tooling only catches hard errors, not soft pri
 mechanical enforcement.
 
 If the work includes a runtime-observable surface, this checkpoint also requires
-`runtime-verification.md` — driving the real surface and observing the actual result, not
+`processes/runtime-verification.md` — driving the real surface and observing the actual result, not
 re-running the same static checks. Passing tools is not evidence of runtime correctness either;
 `domains/testing.md` exists because that distinction shipped two real bugs in one session before it
 did.
@@ -259,22 +259,22 @@ Three sync processes trigger from within Phase 6 and may themselves open a new w
 edge back to Phase 2, not a continuation of the gate that produced them. Each is its own file;
 this phase is only the trigger point they share.
 
-**`ui-library-sync.md`** — direction filings already update `ui-library.md` directly at the gate
+**`processes/ui-library-sync.md`** — direction filings already update `ui-library.md` directly at the gate
 (Phase 6, step 5); this is for the coder-side drift a single filing doesn't close.
 `library-drift.since-last-sync ≥ 3`, or a drifting change that retired something the library still
 teaches, suggests running it.
 
-**`screenshot-library-sync.md`** — right after processing any handoff whose `ui-drift.screens` or
+**`processes/screenshot-library-sync.md`** — right after processing any handoff whose `ui-drift.screens` or
 `.components` is non-empty, not on a threshold. Mechanical; never spawns a design composition.
 
-**`ux-library-sync.md`** — has no mechanical trigger today; see that file for why, and for the
+**`processes/ux-library-sync.md`** — has no mechanical trigger today; see that file for why, and for the
 judgment-based trigger it runs on in the meantime.
 
 ---
 
 ## Phase 8 — Retrospective
 
-See `retrospective.md` for the full trigger, composition, and procedure. This phase runs on its
+See `processes/retrospective.md` for the full trigger, composition, and procedure. This phase runs on its
 own periodic trigger, not as part of the per-unit-of-work loop above — `retrospective <domain>` (or
 `retrospective <composition-name>`, covering every domain that composition loads) is an operator
 command, not something Phase 6 ever routes into automatically.

@@ -610,14 +610,14 @@ record before the spawn starts. `chunk-done --workstream W --unit-of-work U --st
 never self-reported) and appends the entry, failing if the handoff file does not exist or does not
 name the same `workstream`. That existence check makes ordering load-bearing: `chunk-done` must run
 *before* `handoff-done` closes (deletes or archives) the handoff file it points at, never after —
-see `general-operation.md`, Phase 6's chunk-close step. `close-workstream W` is a
+see `processes/general-operation.md`, Phase 6's chunk-close step. `close-workstream W` is a
 read-only summary once every chunk in a workstream is done — it aggregates the ledger for the
 retrospective, it does not fold multiple chunks' handoffs into one.
 
 `chunk-done` also reconciles against the handoff's own `domains-loaded:` field, when present, and
 refuses to close the chunk if the two disagree. Recomputing `select()` proves it's self-consistent,
 not that it matches what actually happened — a composing process that hard-lists a domain set in
-prose instead of calling `select()` (the exact shape of drift `bootstrap.md`'s Phase 2/3 composition
+prose instead of calling `select()` (the exact shape of drift `processes/bootstrap.md`'s Phase 2/3 composition
 had before it was fixed) can silently diverge from `select()`'s answer, and `verify-chunks` alone
 cannot see that: it only recomputes the same function it's checking against itself. The
 `domains-loaded:` cross-check is the actual fidelity check; a handoff written before this schema
@@ -763,7 +763,7 @@ against contamination — is the working context holding domains from another mo
 
 **Backward (periodic):** surfaces signals as proposals for the operator — contamination, domain
 tension, convergence, composition drift, seed-promotion candidates, structural kinship, kill
-graduation, anti-overfitting, and efficacy interpretation. See `retrospective.md` for the trigger
+graduation, anti-overfitting, and efficacy interpretation. See `processes/retrospective.md` for the trigger
 and procedure, and `domains/retrospective.md` for the judgment behind each signal — what counts,
 what doesn't, and why. Two adjacent signals (a misplaced principle, and a ratified principle whose
 gate-time discipline may have lapsed) are judged by `principle-judgment` instead, since they're

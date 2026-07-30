@@ -1485,7 +1485,7 @@ def cmd_chunk_done(project: "Project", args) -> None:
                 f"  select() only: {only_composed or '(none)'}\n"
                 f"  handoff only: {only_loaded or '(none)'}\n"
                 "Either the composing process diverged from select() (fix the composition to use "
-                "select(), per general-operation.md's spawn-brief step), or the spawn didn't load "
+                "select(), per processes/general-operation.md's spawn-brief step), or the spawn didn't load "
                 "what its composition specified (fix the spawn). Do not paper over this by editing "
                 "the ledger by hand."
             )

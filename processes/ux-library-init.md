@@ -1,24 +1,24 @@
 ---
 name: corpora:ux-library-init
-description: Found a project's UX library from nothing. Runs once, as bootstrap.md's Phase 4, only when has-ui yes, after ui-library-init.md has ratified. Produces corpora/ux-library.md and proposed experience principles/directions.
+description: Found a project's UX library from nothing. Runs once, as processes/bootstrap.md's Phase 4, only when has-ui yes, after processes/ui-library-init.md has ratified. Produces corpora/ux-library.md and proposed experience principles/directions.
 ---
 
 # UX library init
 
-**Trigger:** `has-ui: yes`, no `ux-library.md` exists yet, and `ui-library-init.md`'s handoff has
+**Trigger:** `has-ui: yes`, no `ux-library.md` exists yet, and `processes/ui-library-init.md`'s handoff has
 already been ratified — the UX library cites the UI library's tokens and components, a content
-dependency, not an arbitrary ordering choice. Runs once, as bootstrap.md's Phase 4 — see
-`bootstrap.md` for what precedes and follows this phase in the bootstrap sequence. Independent of
-`screenshot-library-init.md`: both phases depend only on `ui-library-init.md`, not on each other,
+dependency, not an arbitrary ordering choice. Runs once, as processes/bootstrap.md's Phase 4 — see
+`processes/bootstrap.md` for what precedes and follows this phase in the bootstrap sequence. Independent of
+`processes/screenshot-library-init.md`: both phases depend only on `processes/ui-library-init.md`, not on each other,
 and may run in either order.
 
 **Composition:** convergent stance, `unit-of-work: bootstrap-ux-surface` — run `scripts/corpus.py
 select --unit-of-work bootstrap-ux-surface` rather than asserting the set freehand. Narrower than
 ongoing `ux-design` work (`design-ux-flow`, which also composes `ranking-evaluation`/
-`wizards-flows`), same restraint `ui-library-init.md` applies — again expressed in each
+`wizards-flows`), same restraint `processes/ui-library-init.md` applies — again expressed in each
 contributing domain's own frontmatter, not hard-listed here.
 
-**Execution:** this is one spawn — after composing, follow `general-operation.md`'s Phase 3
+**Execution:** this is one spawn — after composing, follow `processes/general-operation.md`'s Phase 3
 onward (spawn brief, execution, relay, ratify gate) exactly as any other unit of work. Everything
 below is this spawn's task content.
 
@@ -26,7 +26,7 @@ below is this spawn's task content.
 
 ## Task
 
-Identity is already set by `ui-library-init.md`; this phase's job is convergent documentation of
+Identity is already set by `processes/ui-library-init.md`; this phase's job is convergent documentation of
 how the product *works* as an experience, so future UX sessions weigh established patterns instead
 of re-deriving them.
 
@@ -44,12 +44,12 @@ exist in the project:
 
 Document what exists or was decided — from the codebase, the UI library's behavioral notes, and
 any operator-provided product documentation. Do not invent aspirational patterns; a greenfield
-project gets a short library that grows with the work. The same restraint as `ui-library-init.md`
+project gets a short library that grows with the work. The same restraint as `processes/ui-library-init.md`
 applies to proposals: no target count, most foundational choices are `kind: direction`.
 
 When this task arrived via a planner-produced queue, it names a concrete feature to scope against —
 cover the sections above only to the depth that feature actually needs, same restraint
-`ui-library-init.md` applies.
+`processes/ui-library-init.md` applies.
 
 ---
 
@@ -75,7 +75,7 @@ convention re-teaches it to every future session.
 
 ### corpora/ux-library.md
 
-Structure the document with a section per topic above, in `bootstrap.md`'s library document format
+Structure the document with a section per topic above, in `processes/bootstrap.md`'s library document format
 (narrative prose, concrete named values, never the domain-corpus `principles:` shape).
 
 ### Proposed experience principles

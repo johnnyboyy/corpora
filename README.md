@@ -128,13 +128,13 @@ agent. See `SKILL.md`, "Inline, resume, or isolate," and `LINEAGE.md`, "Role iso
 
 - `SKILL.md` — the shared orchestrator entrypoint for Claude Code (`/corpora`) and Codex
   (`$corpora`): orchestrator identity, judgment ("what you do"/"what you don't do"), and the
-  config-file schema. Points to `general-operation.md` for the procedure itself.
-- `general-operation.md` — the orchestrator's session and per-spawn procedure, in phases: session
+  config-file schema. Points to `processes/general-operation.md` for the procedure itself.
+- `processes/general-operation.md` — the orchestrator's session and per-spawn procedure, in phases: session
   entry, routing, spawn composition, execution, relay, the ratify gate, post-gate maintenance, and
   the retrospective.
 - `kernel.md` — the schema, stance+composition model, ratify gate, write-back format, two load
   modes, and domain lifecycle. Reference document.
-- `retrospective.md` — the periodic, backward-looking counterpart to per-task routing: trigger,
+- `processes/retrospective.md` — the periodic, backward-looking counterpart to per-task routing: trigger,
   composition, and procedure for reading a domain's accumulated corpus and gate history.
 - `domains/` — every seed domain, flat: stack-agnostic (`coding-general.md`,
   `orchestrator-routing.md`, `ratify-gate.md`, `principle-judgment.md`, `retrospective.md`,
@@ -143,26 +143,26 @@ agent. See `SKILL.md`, "Inline, resume, or isolate," and `LINEAGE.md`, "Role iso
   `color.md`/`motion.md`/`recoverability.md`/ etc.) alike, each stating its own
   `subject`/`posture`/`applies-when`/`units-of-work` frontmatter. Plus `audit.md`
   (provenance/kill detail for the layer, loaded only at ratify/retrospective time).
-- `runtime-verification.md`, `test-writing-at-implementation.md`,
-  `integration-test-implementation.md`, `test-coverage-audit.md` — the processes that apply
+- `processes/runtime-verification.md`, `processes/test-writing-at-implementation.md`,
+  `processes/integration-test-implementation.md`, `processes/test-coverage-audit.md` — the processes that apply
   `testing.md`'s judgment: driving a real surface before a runtime-observable change can be
   reported complete (required, not optional, at every coder checkpoint), and when/what to write or
   audit for test coverage. Adapted from `motors-and-controls/praxis/phases/`'s testing-phase family
   into corpora's own process/judgment split.
-- `bootstrap.md` — one-time project setup, orchestration only. Phase 1 detects project shape and
+- `processes/bootstrap.md` — one-time project setup, orchestration only. Phase 1 detects project shape and
   writes `corpora/config.md`. For `has-ui: yes` projects, sequences three further phases into their
-  own files: `ui-library-init.md` (divergent, `corpora/ui-library.md`),
-  `screenshot-library-init.md` (mechanical, seeds the screenshot cache), and `ux-library-init.md`
+  own files: `processes/ui-library-init.md` (divergent, `corpora/ui-library.md`),
+  `processes/screenshot-library-init.md` (mechanical, seeds the screenshot cache), and `processes/ux-library-init.md`
   (convergent, `corpora/ux-library.md`) — all propose seed design principles.
-- `ui-library-sync.md`, `ux-library-sync.md`, `screenshot-library-sync.md` — the ongoing
+- `processes/ui-library-sync.md`, `processes/ux-library-sync.md`, `processes/screenshot-library-sync.md` — the ongoing
   counterparts to the three init files above: bring each library or the screenshot cache back in
   line with the project's actual state after drift accumulates. Triggered from
-  `general-operation.md`'s ratify gate.
+  `processes/general-operation.md`'s ratify gate.
 - `reading/` — the reading pipeline, self-contained and independently scheduled, not part of the
   orchestrator's own per-spawn loop: `discovery-agent.md` (finds sources), `reading-agent.md`
   (extracts candidates from queued sources), `session-harvest-agent.md` (mines past session
   transcripts for judgment exercised but never proposed). All three feed `reading/candidates.md`,
-  which `general-operation.md`'s ratify gate checks like any other proposal source. The
+  which `processes/general-operation.md`'s ratify gate checks like any other proposal source. The
   quality-filter and mining judgment behind the first and third live in
   `domains/principle-judgment.md`, not in the agent files themselves.
 - `LINEAGE.md` — intellectual history: why conventions became law, key kills, design decisions.

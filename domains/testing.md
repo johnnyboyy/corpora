@@ -14,8 +14,8 @@ that shipped two real runtime bugs — a stale RSC payload after a Server Action
 per-module-graph singleton split by Fast Refresh — with `tsc --noEmit` and `next build` passing
 cleanly through both, caught only by driving the actual feature in a browser. Adapted from
 `motors-and-controls/praxis/phases/`' testing-phase family into corpora's own process/judgment
-split: this file is the judgment; `runtime-verification.md`, `test-writing-at-implementation.md`,
-`integration-test-implementation.md`, and `test-coverage-audit.md` are the processes that apply it.
+split: this file is the judgment; `processes/runtime-verification.md`, `processes/test-writing-at-implementation.md`,
+`processes/integration-test-implementation.md`, and `processes/test-coverage-audit.md` are the processes that apply it.
 Audit metadata lives in `domains/audit.md`, loaded only at ratify/retrospective time.
 
 ```yaml

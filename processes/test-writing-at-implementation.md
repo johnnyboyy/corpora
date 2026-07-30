@@ -27,4 +27,4 @@ during ordinary coding work, not a new task shape.
 
 **Surfaced:** any behavior from this implementation pass that couldn't reasonably be tested at the
 feature/end-to-end level with current infrastructure — name it rather than silently skipping it, so
-it becomes a candidate for a future `test-coverage-audit.md` pass instead of disappearing.
+it becomes a candidate for a future `processes/test-coverage-audit.md` pass instead of disappearing.

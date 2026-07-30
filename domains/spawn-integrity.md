@@ -34,7 +34,7 @@ principles:
   see-also: minimize-comments-prefer-self-documenting-code
 
 - id: library-is-narrative-not-corpus-shape
-  rule: "The project's UI and UX libraries — at their registered paths (see bootstrap.md's \"The config file\" for how that path is resolved) — use bootstrap.md's narrative prose format — concrete named values in sections, never the domain-corpus `principles:` YAML shape (id/rule/condition/reason). Do not conflate the two when reading or writing either kind of file."
+  rule: "The project's UI and UX libraries — at their registered paths (see processes/bootstrap.md's \"The config file\" for how that path is resolved) — use processes/bootstrap.md's narrative prose format — concrete named values in sections, never the domain-corpus `principles:` YAML shape (id/rule/condition/reason). Do not conflate the two when reading or writing either kind of file."
   condition: "Any spawn reading or writing a project's UI or UX library."
   reason: "The two file kinds look superficially similar (both accumulated project knowledge) but serve different consumers — the library is read as prose reference, the domain corpus is read and gated as weighable principles. Treating one as the other either strips a library entry of the context it needs to be usable, or smuggles unweighed guidance past the ratify gate."
 

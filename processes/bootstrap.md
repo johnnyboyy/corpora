@@ -21,12 +21,12 @@ order, exactly as `planning.md`'s `sequence-by-output-dependency` principle woul
   resources — registered utilities, UI library location, verification commands) — this flips the
   project to "bootstrapped" and runs for every project type. Corpora detects the shape, commands,
   and existing project utilities that go into it directly, every time.
-- **Phase 2 — only when `has-ui: yes`.** Bootstrap the design system: see `ui-library-init.md` for
+- **Phase 2 — only when `has-ui: yes`.** Bootstrap the design system: see `processes/ui-library-init.md` for
   the full composition, task, and output format.
 - **Phase 3 — only when `has-ui: yes`, after Phase 2.** Seed the screenshot cache: see
-  `screenshot-library-init.md`. Mechanical — no composition, no stance, no handoff of its own.
+  `processes/screenshot-library-init.md`. Mechanical — no composition, no stance, no handoff of its own.
 - **Phase 4 — only when `has-ui: yes`, after Phase 2.** Bootstrap the experience reference: see
-  `ux-library-init.md` for the full composition, task, and output format.
+  `processes/ux-library-init.md` for the full composition, task, and output format.
 
 The library and corpus are text-only. See LINEAGE.md for why text outperforms design artifacts
 for this purpose.
@@ -60,18 +60,18 @@ itself is part of the scope being weighed.
   `bootstrap-ui-library` and `bootstrap-ux-library` (it needs their output), not by
   `bootstrap-screenshot-library`, which produces no output the feature consumes. Scoping each
   design-system task to what the feature actually needs — rather than a fully speculative library —
-  is exactly the outcome this routing is for: `ui-library-init.md` and `ux-library-init.md` both
+  is exactly the outcome this routing is for: `processes/ui-library-init.md` and `processes/ux-library-init.md` both
   already state this restraint for a planner-produced task.
 
   **One boundary to hold:** the planner's dialogue step must not ask the audience/aesthetic-direction
-  questions that open `ui-library-init.md` — those are that phase's own divergent
+  questions that open `processes/ui-library-init.md` — those are that phase's own divergent
   judgment call, asked when its task actually runs, not decomposition-shaping ambiguity the
   planner should resolve upfront. `domains/planning.md`'s own preamble
   already states this general rule ("do not anticipate the direction questions downstream
   spawns will face mid-work"); this is that rule's bootstrap instance, named here because it's easy
   to blur in practice.
 
-  Once the queue is written, the orchestrator executes it per `general-operation.md`'s normal
+  Once the queue is written, the orchestrator executes it per `processes/general-operation.md`'s normal
   routing and ratify-gate judgment, task by task.
 
 ---
@@ -256,8 +256,8 @@ candidates: []
 
 **Checkpoint — reapply the orchestrator, between every phase.** Each of Phase 2, Phase 3, and
 Phase 4 produces its own handoff (Phase 3 produces none — it is mechanical, see
-`screenshot-library-init.md`), and a handoff is not a finished write-back: it needs the ratify gate
-(`general-operation.md`, Phase 6) before the next phase can rely on its output. Drop that phase's
+`processes/screenshot-library-init.md`), and a handoff is not a finished write-back: it needs the ratify gate
+(`processes/general-operation.md`, Phase 6) before the next phase can rely on its output. Drop that phase's
 composition, run the gate, then route into whichever phase is next per the sequencing fork stated
 above. Bootstrap is complete once every applicable phase has run — resume as the orchestrator for
 everything from here forward, routing, further spawn work, all of it.

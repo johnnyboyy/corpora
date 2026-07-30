@@ -1,12 +1,12 @@
 ---
 name: corpora:ui-library-init
-description: Found a project's UI library from nothing. Runs once, as bootstrap.md's Phase 2, only when has-ui yes. Produces corpora/ui-library.md, proposed design principles/directions, and identifies the components and screens that screenshot-library-init.md will capture next.
+description: Found a project's UI library from nothing. Runs once, as processes/bootstrap.md's Phase 2, only when has-ui yes. Produces corpora/ui-library.md, proposed design principles/directions, and identifies the components and screens that processes/screenshot-library-init.md will capture next.
 ---
 
 # UI library init
 
-**Trigger:** `has-ui: yes`, no `ui-library.md` exists yet. Runs once, as bootstrap.md's Phase 2 —
-see `bootstrap.md` for what precedes and follows this phase in the bootstrap sequence.
+**Trigger:** `has-ui: yes`, no `ui-library.md` exists yet. Runs once, as processes/bootstrap.md's Phase 2 —
+see `processes/bootstrap.md` for what precedes and follows this phase in the bootstrap sequence.
 
 **Composition:** divergent stance, `unit-of-work: bootstrap-ui-surface` — run `scripts/corpus.py
 select --unit-of-work bootstrap-ui-surface` rather than asserting the set freehand, same as any
@@ -16,7 +16,7 @@ from nothing doesn't have concrete components/screens for every domain to attach
 narrowing lives in each contributing domain's own `units-of-work` frontmatter, not in this file's
 prose.
 
-**Execution:** this is one spawn — after composing, follow `general-operation.md`'s Phase 3
+**Execution:** this is one spawn — after composing, follow `processes/general-operation.md`'s Phase 3
 onward (spawn brief, execution, relay, ratify gate) exactly as any other unit of work. Everything
 below is this spawn's task content.
 
@@ -24,9 +24,9 @@ below is this spawn's task content.
 
 ## Task
 
-When this task arrived via a planner-produced queue (`bootstrap.md`, "Routing after Phase 1"), it
+When this task arrived via a planner-produced queue (`processes/bootstrap.md`, "Routing after Phase 1"), it
 names a concrete feature to scope against — cover the sections below only to the depth that
-feature actually needs, same restraint `ux-library-init.md` applies: do not invent aspirational
+feature actually needs, same restraint `processes/ux-library-init.md` applies: do not invent aspirational
 components, sub-systems, or states the feature doesn't touch. A greenfield project gets a short
 library that grows with the work, not a fully speculative one authored sight-unseen. When there is
 no feature to scope against (the direct, no-planner path), cover the sections at the depth needed
@@ -131,7 +131,7 @@ If the project already has components from an existing codebase, describe what t
 like and how they're used. If this is greenfield, establish sensible defaults and note
 they are provisional.
 
-This section is `screenshot-library-init.md`'s own input: every component and screen named here is
+This section is `processes/screenshot-library-init.md`'s own input: every component and screen named here is
 what that phase captures and registers next, after this handoff ratifies. Name them precisely
 enough to identify as a distinct screen or shared component — this phase does not run any capture
 itself.
@@ -208,7 +208,7 @@ convention re-teaches it to every future session.
 
 ### corpora/ui-library.md
 
-Structure the document with a section per topic above, in `bootstrap.md`'s library document format
+Structure the document with a section per topic above, in `processes/bootstrap.md`'s library document format
 (narrative prose, concrete named values, never the domain-corpus `principles:` shape). Every value
 that a designer or coder will need to use should be named — not "a dark background" but "the page
 background: `--background` (gray-950 in dark mode)."
@@ -238,6 +238,6 @@ End by writing the handoff artifact per `kernel.md`, "The handoff artifact": the
 the `Artifact` section; foundational design decisions go in `proposals` with `kind` set from the
 inside (a mix of `judgment` and `direction`, provenance `"Bootstrap session, [date], [project
 name]."`). Leave `ui-drift.screens`/`.components` empty — this phase names its screens and
-components in the library document itself, which `screenshot-library-init.md` reads directly; it
+components in the library document itself, which `processes/screenshot-library-init.md` reads directly; it
 does not use the drift-invalidation channel, which is reserved for a change to an *existing*
 capture, not an initial one.

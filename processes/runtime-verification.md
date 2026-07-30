@@ -7,7 +7,7 @@ description: Drive a real, running surface and observe the actual result before 
 
 **Trigger:** required, not suggested — a coder-composed spawn's work includes a
 runtime-observable surface (not docs-only, types-only, or test-only) and is about to reach its own
-terminal checkpoint (`general-operation.md`, Phase 4). This is part of what "the spawn's work is
+terminal checkpoint (`processes/general-operation.md`, Phase 4). This is part of what "the spawn's work is
 done" means, the same way `kernel.md`'s "before writing it, re-read the output against the
 composed domains" is — not a separate opt-in step.
 
@@ -35,5 +35,5 @@ judgment of its own — the judgment is in `domains/testing.md`
 **If no way to drive the real surface is available this session** (no browser automation, no
 reachable runtime), say so explicitly in the handoff's `Surfaced` section rather than silently
 reporting the work complete on tooling alone — this is the same disclosure discipline
-`screenshot-library-init.md`/`screenshot-library-sync.md` already use when no browser tool is
+`processes/screenshot-library-init.md`/`processes/screenshot-library-sync.md` already use when no browser tool is
 available for their own mechanical work.

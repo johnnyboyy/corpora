@@ -1,11 +1,11 @@
 ---
 name: corpora:integration-test-implementation
-description: Write and wire up the specific tests test-coverage-audit.md (or an explicit operator request) already identified. Composition is ordinary implement-feature — the judgment is domains/testing.md, already part of that composition.
+description: Write and wire up the specific tests processes/test-coverage-audit.md (or an explicit operator request) already identified. Composition is ordinary implement-feature — the judgment is domains/testing.md, already part of that composition.
 ---
 
 # Integration test implementation
 
-**Trigger:** `test-coverage-audit.md` (or an explicit operator request naming specific paths
+**Trigger:** `processes/test-coverage-audit.md` (or an explicit operator request naming specific paths
 directly) has identified concrete candidate paths to cover, and the task is now to write and wire
 up those tests — not to identify more gaps.
 
@@ -30,7 +30,7 @@ judgment once the target path is named.
    fails against the bug it's meant to guard, when that's feasible to reproduce.
 4. Do not backfill unit tests for every function touched along the way — this phase implements the
    specific paths the audit named; broader proactive unit coverage is
-   `test-writing-at-implementation.md`'s concern, scoped narrowly there.
+   `processes/test-writing-at-implementation.md`'s concern, scoped narrowly there.
 
 **Surfaced:** any candidate path from the audit that turned out infeasible to test at its intended
 layer (and why — flaky automation, no reliable way to reach the state, infrastructure out of scope
