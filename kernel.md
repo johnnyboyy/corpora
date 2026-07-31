@@ -488,6 +488,13 @@ does not carry the originating spawn prompt, and it is unverified whether `Subag
 either — so it is a narrower, honest check (composition drift), not a substitute for the instruction
 above.
 
+The same "an instruction sometimes doesn't happen" gap applies to a spawn noticing its own task has
+drifted from its original scope mid-work, not just at the terminal act — `scripts/scope-checkpoint.sh`
+(a `PostToolUse` hook) fires an external reminder every `INTERVAL` tool calls (default 20, per
+session, cheap: no interpreter startup on the common silent path) rather than relying on the spawn
+to spontaneously remember to check. It carries no judgment of its own — `spawn-integrity`'s
+`periodic-scope-and-integrity-checkpoint` is what the spawn does when it fires.
+
 **The spawn's own final conversational turn is not a second copy of the artifact.** Once the
 handoff file is written, the spawn's actual return to the orchestrator (its last message) states
 only that the file exists and where — a path and a one-line status, never a restatement of the
