@@ -38,6 +38,17 @@ principles:
   condition: "Any spawn reading or writing a project's UI or UX library."
   reason: "The two file kinds look superficially similar (both accumulated project knowledge) but serve different consumers — the library is read as prose reference, the domain corpus is read and gated as weighable principles. Treating one as the other either strips a library entry of the context it needs to be usable, or smuggles unweighed guidance past the ratify gate."
 
+- id: periodic-scope-and-integrity-checkpoint
+  rule: "When prompted by a periodic checkpoint reminder (or at a natural seam on your own initiative, even absent one), compare your current diff/output against the task's original stated scope. If it has grown to cover materially different or additional concerns — not just more effort than expected — treat that the same way as a context-pressure tell: stop at the next safe point, set status: blocked, name the divergence observed, and describe in Surfaced exactly what's done and what concern classes remain."
+  condition: "At each periodic checkpoint reminder during a spawn's session, and at any natural seam (a sub-task completing, a design decision landing) even absent a reminder."
+  reason: "checkpoint-on-context-pressure-tell covers a spawn noticing its own attention degrading under a large context, not a spawn noticing the task itself was mis-scoped from the start — a distinct failure mode a spawn under zero attention pressure can still miss, since nothing currently prompts a scope comparison mid-task rather than only at the end. A periodic external nudge, not reliant on the spawn spontaneously remembering to check, closes this the same way an external reminder is more reliable than self-initiated checking for the context-pressure case."
+  see-also: checkpoint-on-context-pressure-tell
+
+- id: proposal-self-cleanup-before-including
+  rule: "Before including a principle proposal in your handoff, restate it in the schema's own terms: rule as a crisp actionable statement with no condition-scoping preamble or trailing justification folded in; condition as pure scope; reason as the full justification and story. Watch specifically for a rule field that begins with 'When...' or ends on a because-clause — both are signs condition/reason content bled into rule."
+  condition: "Any spawn about to write a proposals: entry into its handoff."
+  reason: "motors-and-controls' sim-09 filed two proposals both shaped this way — a rule field doing the work of all three fields at once — and it took the operator personally rereading and rewriting both before ratifying either. The spawn that produced the proposal is best positioned to do this separation itself, at the moment the what/when/why distinction is freshest, rather than leaving it for the orchestrator or operator to reverse-engineer afterward."
+
 killed:
 
 - id: self-check-against-composed-domains-before-finalizing

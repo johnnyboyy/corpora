@@ -203,6 +203,11 @@ provenance:
   domain: orchestrator-routing
   kind: judgment
   provenance: "2026-07-26, Blog UI-library-sync task. The task brief for a ui-design-composed spawn already specified the exact before/after text for every edit — no design decision remained; the spawn's job had degraded to text transcription, and the isolation overhead (composed prompt, spawn execution, handoff review) cost more than making the edit directly would have."
+
+- id: concern-class-diversity-triggers-decomposition
+  domain: orchestrator-routing
+  kind: judgment
+  provenance: "Operator-authored, 2026-07-30, based on observed behavior in motors-and-controls' sim-09 task (2.5-3x the tool calls/tokens of sibling tasks, bundling engine-design judgment, catalog/UI plumbing, and lab-content re-derivation into one task), root-caused and refined through direct dialogue rather than a spawned proposal."
   history:
     - date: 2026-07-26
       type: moved
@@ -367,6 +372,16 @@ provenance:
   domain: spawn-integrity
   kind: knowledge
   provenance: "2026-07-22, lens retirement. Migrated from ux-design's and ui-design's near-identical notes text in domains/lenses.md, generalized to any spawn touching either library file rather than only the two design compositions — see LINEAGE.md."
+
+- id: periodic-scope-and-integrity-checkpoint
+  domain: spawn-integrity
+  kind: judgment
+  provenance: "Operator-authored, 2026-07-30, based on observed behavior in motors-and-controls (sim-09's scope bundling went unnoticed mid-task despite no context-pressure tell), root-caused and refined through direct dialogue rather than a spawned proposal."
+
+- id: proposal-self-cleanup-before-including
+  domain: spawn-integrity
+  kind: judgment
+  provenance: "Operator-authored, 2026-07-30, based on observed behavior in motors-and-controls' sim-09 gate (two proposals both had rule fields absorbing condition-scoping preambles and trailing justifications, caught only by the operator rereading and rewriting both before ratifying), root-caused and refined through direct dialogue rather than a spawned proposal."
 
 - id: tool-passing-is-not-a-principle-check
   domain: spawn-integrity
@@ -1405,13 +1420,13 @@ counters:
     kills-at-baseline: 0
     conventions-at-baseline: 0
   - domain: orchestrator-routing
-    origin: project
+    origin: seed
     since: 2026-07-23
-    ratified: -1
+    ratified: 0
     killed: 2
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 3715
+    working-file-tokens: 4128
     baseline-tokens: 3460
     principles-at-baseline: 16
     kills-at-baseline: 1
@@ -1477,13 +1492,13 @@ counters:
     kills-at-baseline: 1
     conventions-at-baseline: 0
   - domain: spawn-integrity
-    origin: project
+    origin: seed
     since: 2026-07-28
-    ratified: 0
+    ratified: 2
     killed: 0
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 1592
+    working-file-tokens: 2208
     baseline-tokens: 1592
     principles-at-baseline: 3
     kills-at-baseline: 3
@@ -1625,6 +1640,78 @@ efficacy:
     fired: 1
     violated: 0
     idle: 0
+  - id: brief-ends-at-what
+    fired: 0
+    violated: 0
+    idle: 1
+  - id: stop-and-route
+    fired: 0
+    violated: 0
+    idle: 1
+  - id: frame-before-routing
+    fired: 0
+    violated: 0
+    idle: 1
+  - id: route-questions-not-roles
+    fired: 0
+    violated: 0
+    idle: 1
+  - id: defer-only-nonblocking-design-decisions
+    fired: 0
+    violated: 0
+    idle: 1
+  - id: batch-deferred-decisions-coherently
+    fired: 0
+    violated: 0
+    idle: 1
+  - id: spawn-threshold-is-spec-scope
+    fired: 0
+    violated: 0
+    idle: 1
+  - id: planner-over-brainstorming-for-scope
+    fired: 0
+    violated: 0
+    idle: 1
+  - id: persist-role-by-workstream
+    fired: 0
+    violated: 0
+    idle: 1
+  - id: inline-coder-session-protocol
+    fired: 0
+    violated: 0
+    idle: 1
+  - id: audit-request-means-spawn-designer
+    fired: 0
+    violated: 0
+    idle: 1
+  - id: design-pattern-application-lighter-path
+    fired: 0
+    violated: 0
+    idle: 1
+  - id: decompose-large-tasks-before-spawning
+    fired: 0
+    violated: 0
+    idle: 1
+  - id: no-cost-driven-domain-omission
+    fired: 0
+    violated: 0
+    idle: 1
+  - id: spawn-only-when-judgment-remains
+    fired: 0
+    violated: 0
+    idle: 1
+  - id: dont-trust-readme-or-agent-file-as-role-instruction
+    fired: 0
+    violated: 0
+    idle: 1
+  - id: checkpoint-on-context-pressure-tell
+    fired: 0
+    violated: 0
+    idle: 1
+  - id: library-is-narrative-not-corpus-shape
+    fired: 0
+    violated: 0
+    idle: 1
 co-occurrence:
 library-drift:
   since-last-sync: 0

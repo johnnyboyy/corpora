@@ -174,6 +174,15 @@ one-line status only.
    question is real.
 6. If the artifact carries a `tradeoffs` block: relay to operator — implement as specced, accept
    alternative, or send back to the relevant upstream spawn.
+7. If `status: blocked` and `Surfaced` names scope divergence — the task grew to cover materially
+   different or additional concerns than originally scoped, not merely a context-pressure tell or a
+   genuine open question (`spawn-integrity`'s `periodic-scope-and-integrity-checkpoint`) — decide
+   between two responses, using judgment: route the remaining work to a planner for
+   re-decomposition when its shape is still unclear or spans multiple further unknowns, or refile
+   the remaining scope directly as one or more fresh, narrowly-scoped coder tasks when the split is
+   already obvious from the spawn's own account. Never simply resume the same spawn, or a
+   replacement, on the full original scope as if nothing changed — that re-attempts the exact
+   bundling mistake that caused the stop.
 
 ---
 
@@ -192,6 +201,14 @@ Runs immediately after each spawn, by default.
    numbers exist: `corpus.py record-gate --domain <d> --ratified N --killed N --violations N
    [--ui-drift] --fired <ids> --violated <ids> --idle <ids>`. Never write the counters block by
    hand — not even when creating a fresh audit file (`kernel.md`, "Storage: working vs audit").
+   Also re-apply `principle-judgment`'s genuine-fork test and knowledge-vs-judgment distinction to
+   each proposal yourself here, even though `spawn-integrity`'s `proposal-self-cleanup-before-including`
+   already asked the spawn to do this — that self-cleanup is not guaranteed to fire correctly every
+   time. Fix rule/condition/reason field-bleed directly rather than presenting it broken; flag
+   (don't silently reject) anything that fails the fork test outright, with your own assessment when
+   asked. This is a named step here specifically because it was skipped in practice once already —
+   `principle-judgment` is loaded every session regardless, but using it is easy to skip under
+   session momentum unless the step is explicit.
 2. **Check reading candidates.** If `reading/candidates.md` in the corpora skill repo has entries
    whose `domains` match a domain this project declares, surface them alongside session proposals,
    marked `[reading pipeline: <source URL>]`. Same ratify/kill decision; ratified or killed
@@ -217,7 +234,14 @@ Runs immediately after each spawn, by default.
    `ratify-gate-judgment-vs-knowledge`); `direction` = a project design-direction choice (third
    route, next step). If a proposal's provenance names a reading-pipeline source rather than an
    earned incident, flag that alongside it — a real correlation with knowledge-not-judgment risk
-   (`reading-pipeline-provenance-flags-knowledge-risk` in `principle-judgment`). Ask: ratify / reject / edit.
+   (`reading-pipeline-provenance-flags-knowledge-risk` in `principle-judgment`). Ask: ratify / reject / edit
+   — **per proposal, every time, no exceptions.** Do not write a proposal back to a domain file,
+   write its provenance to the audit file, or call `record-gate` for it until the operator has given
+   an explicit answer for that specific proposal in this specific gate. A prior gate's approval —
+   in this session or any other — is never implicit approval for a new proposal, even one that looks
+   obviously fine; this has already failed once in practice (a gate's write-back and `record-gate`
+   call both ran before the operator was asked anything, because "ask once, write once" had quietly
+   become "ask once per session, write freely after").
 5. **Assign a home.** A `direction` proposal is filed into the project's `ui-library.md`, describing
    only current state — never into a domain, never killed, never a seed candidate, and never with
    an inline provenance/history note (git history is the library's audit trail; no parallel

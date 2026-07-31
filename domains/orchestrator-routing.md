@@ -94,6 +94,12 @@ principles:
   reason: "Isolation cost — composing the full domain prompt, the spawn's own execution, and reviewing its handoff — buys nothing when no judgment, context-discovery, or independent evaluation is actually needed; the spawn's job degrades to pure text transcription. This is the inverse of stop-and-route: that principle guards against the orchestrator doing domain judgment itself, this one guards against over-resolving a brief until it reads like a diff and still paying for isolation as if judgment remained."
   see-also: stop-and-route, spawn-threshold-is-spec-scope
 
+- id: concern-class-diversity-triggers-decomposition
+  rule: "When filing or routing a coding task, check whether its scope bundles two or more of: core algorithmic/model-logic design, integration plumbing across many call sites (registering a new type/field with every consumer), and content or data correctness verification against external reference material. Decompose along those lines by default, even under one nominal feature, unless the pieces are a genuinely unavoidable single prerequisite for each other."
+  condition: "Filing or reviewing a task whose description names work spanning more than one of those judgment classes."
+  reason: "motors-and-controls' sim-09 task bundled a real engine-design judgment call (conduction-graph gating for a new component behavior), six files of mechanical catalog/UI-plumbing (designator, palette entry, glyphs, a property-panel field threaded through five files), and a from-scratch content re-derivation (re-reading a lab's actual wiring off its own reference photo, since the existing preset was a wrong simplification) into one task — it ran 2.5-3x the tool calls and tokens of every sibling task filed the same session, and required the reviewer to hold three unrelated judgment classes in mind at once to review it. File count alone (`decompose-large-tasks-before-spawning`'s existing trigger) missed this: a task can touch many files within one judgment class (plumbing) cheaply, or few files across three classes expensively — judgment-class diversity, not file count, is the actual cost driver."
+  see-also: decompose-large-tasks-before-spawning
+
 killed:
 
 - id: prefer-independent-evaluation
