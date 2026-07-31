@@ -19,7 +19,7 @@ split: this file is the judgment; `processes/runtime-verification.md`, `processe
 Audit metadata lives in `domains/audit.md`, loaded only at ratify/retrospective time.
 
 ```yaml
-last-retrospective: none
+last-retrospective: 2026-07-30
 
 principles:
 

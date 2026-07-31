@@ -25,7 +25,7 @@ Operator-direct authorship is a sanctioned entry point, not a bypass of this dom
 apply to an operator-authored candidate the same as any other.
 
 ```yaml
-last-retrospective: none
+last-retrospective: 2026-07-30
 
 principles:
 

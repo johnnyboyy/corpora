@@ -13,7 +13,7 @@ Judgment about assembling a complete spawn and processing what it returns — as
 ratify/retrospective time.
 
 ```yaml
-last-retrospective: 2026-07-18
+last-retrospective: 2026-07-30
 
 principles:
 

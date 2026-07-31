@@ -1258,7 +1258,7 @@ counters:
     killed: 0
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 9663
+    working-file-tokens: 9700
     baseline-tokens: 9663
     principles-at-baseline: 35
     kills-at-baseline: 6
@@ -1270,7 +1270,7 @@ counters:
     killed: 0
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 5691
+    working-file-tokens: 5715
     baseline-tokens: 5335
     principles-at-baseline: 18
     kills-at-baseline: 1
@@ -1282,7 +1282,7 @@ counters:
     killed: 0
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 1124
+    working-file-tokens: 1137
     baseline-tokens: 1119
     principles-at-baseline: 5
     kills-at-baseline: 0
@@ -1294,7 +1294,7 @@ counters:
     killed: 0
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 4616
+    working-file-tokens: 4629
     baseline-tokens: 4465
     principles-at-baseline: 12
     kills-at-baseline: 10
@@ -1318,7 +1318,7 @@ counters:
     killed: 0
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 779
+    working-file-tokens: 801
     baseline-tokens: 775
     principles-at-baseline: 2
     kills-at-baseline: 2
@@ -1330,7 +1330,7 @@ counters:
     killed: 0
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 1483
+    working-file-tokens: 1495
     baseline-tokens: 1474
     principles-at-baseline: 4
     kills-at-baseline: 4
@@ -1342,7 +1342,7 @@ counters:
     killed: 0
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 2035
+    working-file-tokens: 2073
     baseline-tokens: 2035
     principles-at-baseline: 7
     kills-at-baseline: 0
@@ -1354,7 +1354,7 @@ counters:
     killed: 0
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 799
+    working-file-tokens: 824
     baseline-tokens: 891
     principles-at-baseline: 2
     kills-at-baseline: 0
@@ -1366,7 +1366,7 @@ counters:
     killed: 0
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 1331
+    working-file-tokens: 1377
     baseline-tokens: 1330
     principles-at-baseline: 4
     kills-at-baseline: 0
@@ -1378,7 +1378,7 @@ counters:
     killed: 0
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 1511
+    working-file-tokens: 1552
     baseline-tokens: 1526
     principles-at-baseline: 7
     kills-at-baseline: 0
@@ -1390,7 +1390,7 @@ counters:
     killed: 0
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 812
+    working-file-tokens: 827
     baseline-tokens: 810
     principles-at-baseline: 3
     kills-at-baseline: 0
@@ -1402,7 +1402,7 @@ counters:
     killed: 0
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 1010
+    working-file-tokens: 1051
     baseline-tokens: 1027
     principles-at-baseline: 3
     kills-at-baseline: 1
@@ -1414,7 +1414,7 @@ counters:
     killed: 0
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 789
+    working-file-tokens: 822
     baseline-tokens: 798
     principles-at-baseline: 4
     kills-at-baseline: 0
@@ -1438,21 +1438,21 @@ counters:
     killed: 0
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 2264
+    working-file-tokens: 2312
     baseline-tokens: 2145
     principles-at-baseline: 5
     kills-at-baseline: 1
     conventions-at-baseline: 0
   - domain: principle-judgment
     origin: seed
-    since: 2026-07-23
-    ratified: 2
+    since: 2026-07-30
+    ratified: 0
     killed: 0
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 2724
-    baseline-tokens: 2016
-    principles-at-baseline: 6
+    working-file-tokens: 3620
+    baseline-tokens: 3620
+    principles-at-baseline: 11
     kills-at-baseline: 0
     conventions-at-baseline: 0
   - domain: ranking-evaluation
@@ -1462,22 +1462,22 @@ counters:
     killed: 0
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 856
+    working-file-tokens: 873
     baseline-tokens: 853
     principles-at-baseline: 5
     kills-at-baseline: 0
     conventions-at-baseline: 0
   - domain: ratify-gate
     origin: seed
-    since: 2026-07-28
+    since: 2026-07-30
     ratified: 0
     killed: 0
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 2408
-    baseline-tokens: 3610
-    principles-at-baseline: 12
-    kills-at-baseline: 3
+    working-file-tokens: 2418
+    baseline-tokens: 2418
+    principles-at-baseline: 9
+    kills-at-baseline: 2
     conventions-at-baseline: 0
   - domain: recoverability
     origin: seed
@@ -1486,7 +1486,7 @@ counters:
     killed: 0
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 577
+    working-file-tokens: 618
     baseline-tokens: 595
     principles-at-baseline: 2
     kills-at-baseline: 1
@@ -1510,7 +1510,7 @@ counters:
     killed: 0
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 483
+    working-file-tokens: 506
     baseline-tokens: 479
     principles-at-baseline: 3
     kills-at-baseline: 0
@@ -1522,7 +1522,7 @@ counters:
     killed: 0
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 376
+    working-file-tokens: 417
     baseline-tokens: 390
     principles-at-baseline: 3
     kills-at-baseline: 0
@@ -1534,7 +1534,7 @@ counters:
     killed: 0
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 766
+    working-file-tokens: 788
     baseline-tokens: 762
     principles-at-baseline: 4
     kills-at-baseline: 0
@@ -1546,9 +1546,33 @@ counters:
     killed: 0
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 470
+    working-file-tokens: 488
     baseline-tokens: 499
     principles-at-baseline: 3
+    kills-at-baseline: 0
+    conventions-at-baseline: 0
+  - domain: retrospective
+    origin: project
+    since: 2026-07-30
+    ratified: 0
+    killed: 0
+    graduated: 0
+    gate-violations: 0
+    working-file-tokens: 2545
+    baseline-tokens: 2545
+    principles-at-baseline: 10
+    kills-at-baseline: 0
+    conventions-at-baseline: 0
+  - domain: testing
+    origin: project
+    since: 2026-07-30
+    ratified: 0
+    killed: 0
+    graduated: 0
+    gate-violations: 0
+    working-file-tokens: 1816
+    baseline-tokens: 1816
+    principles-at-baseline: 6
     kills-at-baseline: 0
     conventions-at-baseline: 0
 efficacy:

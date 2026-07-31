@@ -23,7 +23,7 @@ ratified principle whose gate-time discipline may have lapsed — are already ho
 metadata lives in `domains/audit.md`, loaded only at ratify/retrospective time.
 
 ```yaml
-last-retrospective: none
+last-retrospective: 2026-07-30
 
 principles:
 
