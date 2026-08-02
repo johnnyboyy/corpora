@@ -17,6 +17,11 @@ Commands:
                                    unrecorded gates and gate-bypassing writes)
   record-gate --domain D [...]     record a ratify gate's outcomes (same --domains-dir/--audit
                                    override)
+  add-principle [...]              write a principle/convention + its audit.md provenance entry
+                                   and record the gate, atomically — no hand edits to either file
+  ratify-import-candidate --id I   write a queued import-candidate entry to its destination domain
+                                   + provenance, record the gate, and remove it from the source —
+                                   the scripted write-back kernel.md's "Write-back format" describes
   triggers                         evaluate thresholds; print what fires
   lint-handoff FILE                validate a handoff artifact's envelope
   handoffs                         list lingering handoff files with age
@@ -396,42 +401,58 @@ def _ids(arg: str) -> list:
     return [s.strip() for s in (arg or "").split(",") if s.strip()]
 
 
-def cmd_record_gate(project: Project, args) -> None:
+def record_gate_core(project: Project, domain: str, domain_path: str, *, ratified: int = 0,
+                      killed: int = 0, graduated: int = 0, violations: int = 0,
+                      fired=(), violated=(), idle=(), ui_drift: bool = False,
+                      co_occurs_with=(), origin: str = "project") -> None:
+    """The bookkeeping core shared by `record-gate` and any other write path that ratifies,
+    kills, or graduates a domain entry — `add-principle`/`ratify-import-candidate` call this
+    directly instead of separately invoking `record-gate` as a second manual step, so a scripted
+    write and its ledger entry can never drift apart the way a hand-edit-then-remember-to-run-
+    record-gate sequence can."""
     state = load(project)
+    tokens = est_tokens(domain_path)
+    existed = any(c.get("domain") == domain for c in state["counters"])
+    c = counter_for(state, domain, tokens, domain_path, origin=origin)
+    if origin != c.get("origin", "project"):
+        c["origin"] = origin
+    if not existed:
+        # First registration during a gate: the file already contains the entries this gate
+        # ratified/killed/graduated (write-back precedes record-gate), so exclude them from the
+        # baseline or verify would double-count them.
+        c["principles-at-baseline"] = max(0, c["principles-at-baseline"] - ratified + graduated)
+        c["kills-at-baseline"] = max(0, c["kills-at-baseline"] - killed)
+        c["conventions-at-baseline"] = max(0, c["conventions-at-baseline"] - graduated)
+    c["working-file-tokens"] = tokens
+    c["ratified"] += ratified
+    c["killed"] += killed
+    c["graduated"] += graduated
+    c["gate-violations"] += violations
+    for pid in fired:
+        efficacy_for(state, pid)["fired"] += 1
+    for pid in violated:
+        efficacy_for(state, pid)["violated"] += 1
+    for pid in idle:
+        efficacy_for(state, pid)["idle"] += 1
+    if ui_drift:
+        state["library-drift"]["since-last-sync"] = state["library-drift"].get("since-last-sync", 0) + 1
+    for other in co_occurs_with:
+        co_occurrence_for(state, domain, other)["count"] += 1
+    save(project, state)
+    print(f"recorded gate for {domain}: +{ratified} ratified, +{killed} killed, "
+          f"+{violations} violations, drift={'+1' if ui_drift else 'no'}")
+    cmd_triggers(project, None)
+
+
+def cmd_record_gate(project: Project, args) -> None:
     files = project.domain_files()
     if args.domain not in files:
         fail(f"unknown domain '{args.domain}' — have: {', '.join(files) or 'none'}")
-    tokens = est_tokens(files[args.domain])
-    existed = any(c.get("domain") == args.domain for c in state["counters"])
-    c = counter_for(state, args.domain, tokens, files[args.domain], origin=args.origin)
-    if args.origin != c.get("origin", "project"):
-        c["origin"] = args.origin
-    if not existed:
-        # First registration during a gate: the file already contains the entries
-        # this gate ratified/killed/graduated (write-back precedes record-gate), so exclude
-        # them from the baseline or verify would double-count them.
-        c["principles-at-baseline"] = max(0, c["principles-at-baseline"] - args.ratified + args.graduated)
-        c["kills-at-baseline"] = max(0, c["kills-at-baseline"] - args.killed)
-        c["conventions-at-baseline"] = max(0, c["conventions-at-baseline"] - args.graduated)
-    c["working-file-tokens"] = tokens
-    c["ratified"] += args.ratified
-    c["killed"] += args.killed
-    c["graduated"] += args.graduated
-    c["gate-violations"] += args.violations
-    for pid in _ids(args.fired):
-        efficacy_for(state, pid)["fired"] += 1
-    for pid in _ids(args.violated):
-        efficacy_for(state, pid)["violated"] += 1
-    for pid in _ids(args.idle):
-        efficacy_for(state, pid)["idle"] += 1
-    if args.ui_drift:
-        state["library-drift"]["since-last-sync"] = state["library-drift"].get("since-last-sync", 0) + 1
-    for other in _ids(args.co_occurs_with):
-        co_occurrence_for(state, args.domain, other)["count"] += 1
-    save(project, state)
-    print(f"recorded gate for {args.domain}: +{args.ratified} ratified, +{args.killed} killed, "
-          f"+{args.violations} violations, drift={'+1' if args.ui_drift else 'no'}")
-    cmd_triggers(project, None)
+    record_gate_core(project, args.domain, files[args.domain], ratified=args.ratified,
+                      killed=args.killed, graduated=args.graduated, violations=args.violations,
+                      fired=_ids(args.fired), violated=_ids(args.violated), idle=_ids(args.idle),
+                      ui_drift=args.ui_drift, co_occurs_with=_ids(args.co_occurs_with),
+                      origin=args.origin)
 
 
 def cmd_triggers(project: Project, _args) -> None:
@@ -1612,6 +1633,224 @@ def append_import_candidate(target_path: str, fields: dict) -> None:
     open(target_path, "w").write(text)
 
 
+# ── add-principle / ratify-import-candidate: scripted write-back, no hand edits ─────────────────
+#
+# Both write a principle (or convention) into a domain working file and its matching audit.md
+# provenance entry, then call record_gate_core so the ledger and the files can never drift apart
+# the way a hand-edit-then-separately-remember-record-gate sequence can. `add-principle` is the
+# general path (freshly authored or mined content); `ratify-import-candidate` is the same write,
+# sourced from an entry `import-candidate`/`import-default-pool` already queued in
+# corpora/import-candidates.md, consuming it from that file on success.
+
+def format_principle_block(fields: dict) -> str:
+    lines = [f"- id: {fields['id']}", f"  rule: {yaml_quote(fields['rule'])}",
+              f"  condition: {yaml_quote(fields['condition'])}",
+              f"  reason: {yaml_quote(fields['reason'])}"]
+    if fields.get("see-also"):
+        lines.append(f"  see-also: {fields['see-also']}")
+    return "\n".join(lines) + "\n"
+
+
+def append_domain_entry(domain_path: str, block: str) -> None:
+    """Append a fully-formed principle entry to a domain working file's `principles:` list,
+    immediately before `killed:` — every domain file's fixed section order (optional
+    `conventions:`, then `principles:`, then always-last `killed:`) means that anchor holds
+    regardless of how many principles already sit there. Conventions are out of scope here: a
+    convention is graduated from an existing ratified principle (kernel.md, "Retired principle —
+    graduated to a convention"), a distinct move-not-append operation with its own counter
+    semantics (`graduated` means moved-out-of-principles, not freshly-authored) that this
+    function's callers don't perform."""
+    text = open(domain_path).read()
+    idx = text.find("\nkilled:")
+    if idx == -1:
+        fail(f"{domain_path} has no 'killed:' marker to anchor the insertion — malformed or "
+             "missing domain file; create its frontmatter + section shell first")
+    head, tail = text[:idx], text[idx:]
+    open(domain_path, "w").write(head.rstrip("\n") + "\n\n" + block.rstrip("\n") + "\n" + tail)
+
+
+def format_audit_provenance_block(entry_id: str, domain: str, *, provenance: str = "",
+                                   kind: str = "", imported_from: dict = None) -> str:
+    lines = [f"- id: {entry_id}", f"  domain: {domain}"]
+    if kind:
+        lines.append(f"  kind: {kind}")
+    if imported_from:
+        lines.append("  provenance:")
+        lines.append("    imported-from:")
+        lines.append(f"      source: {yaml_quote(imported_from['source'])}")
+        lines.append(f"      domain: {imported_from['domain']}")
+        if imported_from.get("id"):
+            lines.append(f"      id: {imported_from['id']}")
+        if imported_from.get("originally-ratified"):
+            lines.append(f"      originally-ratified: {yaml_quote(imported_from['originally-ratified'])}")
+        lines.append(f"    extracted: {imported_from.get('extracted') or today()}")
+    else:
+        lines.append(f"  provenance: {yaml_quote(provenance)}")
+    return "\n".join(lines) + "\n"
+
+
+def append_audit_provenance(audit_path: str, block: str) -> None:
+    """Append a provenance entry to a layer's audit.md, immediately before the closing fence that
+    precedes the `<!-- corpus-script:begin -->` marker — the same place every entry lands
+    regardless of which domain's earlier section it logically belongs near; audit.md's `# domain:
+    X` headers are informal narrative dividers, not a structural requirement any parser depends
+    on (`parse_audit_entries` scans the whole flat `provenance:` list by id)."""
+    text = open(audit_path).read()
+    marker = "\n```\n\n<!-- corpus-script:begin"
+    idx = text.find(marker)
+    if idx == -1:
+        fail(f"{audit_path} has no recognizable provenance-fence / corpus-script:begin boundary")
+    head, tail = text[:idx], text[idx:]
+    new_head = head.rstrip("\n") + "\n" + block.rstrip("\n") + "\n"
+    open(audit_path, "w").write(new_head + tail)
+
+
+def cmd_add_principle(project: "Project", args) -> None:
+    files = project.domain_files()
+    if args.domain not in files:
+        fail(f"unknown domain '{args.domain}' under {project.domains_dir} — add-principle only "
+             "appends into an existing domain file; create its frontmatter + empty "
+             "principles:/killed: shell first for a brand-new domain")
+    domain_path = files[args.domain]
+    if args.id in collect_domain_ids(domain_path):
+        fail(f"'{args.id}' already exists in {domain_path}")
+
+    fields = {"id": args.id, "rule": args.rule, "condition": args.condition, "reason": args.reason}
+    if args.see_also:
+        fields["see-also"] = args.see_also
+    append_domain_entry(domain_path, format_principle_block(fields))
+
+    append_audit_provenance(project.audit_path, format_audit_provenance_block(
+        args.id, args.domain, provenance=args.provenance, kind=args.kind))
+
+    record_gate_core(project, args.domain, domain_path, ratified=1, origin=args.origin)
+    print(f"added principle '{args.id}' to {domain_path}, provenance recorded in {project.audit_path}")
+
+
+def parse_import_candidates(path: str) -> dict:
+    """Tolerant, purpose-built parser (not a general YAML parser) for corpora/import-candidates.md's
+    `candidates:` list, matching exactly what `append_import_candidate` writes — a flat list of
+    entries, each opening with a zero-indent `- id:` line."""
+    if not os.path.exists(path):
+        return {}
+    text = open(path).read()
+    if "```yaml" not in text:
+        return {}
+    _, _, rest = text.partition("```yaml")
+    fence_body, _, _ = rest.partition("\n```")
+    _, sep, body = fence_body.partition("candidates:")
+    if not sep:
+        return {}
+    body = body.strip("\n")
+    if not body or body.strip() == "[]":
+        return {}
+    entries = {}
+    for block in re.split(r"\n(?=- id:)", body):
+        block = block.strip("\n")
+        m_id = re.match(r"-\s*id:\s*(\S+)", block)
+        if not m_id:
+            continue
+        entry_id = m_id.group(1)
+        entry = {"id": entry_id, "imported-from": {}}
+        in_imported_from = False
+        for raw in block.split("\n")[1:]:
+            stripped = raw.strip()
+            if stripped == "provenance:":
+                continue
+            if stripped == "imported-from:":
+                in_imported_from = True
+                continue
+            m_extracted = re.match(r"extracted:\s*(\S+)", stripped)
+            if m_extracted:
+                entry["extracted"] = m_extracted.group(1)
+                in_imported_from = False
+                continue
+            if in_imported_from:
+                m_field = re.match(r"([\w-]+):\s*(.*)$", stripped)
+                if m_field:
+                    entry["imported-from"][m_field.group(1)] = m_field.group(2).strip().strip('"')
+                continue
+            m_domains = re.match(r"domains:\s*\[(.*)\]", stripped)
+            if m_domains:
+                entry["domains"] = [d.strip() for d in m_domains.group(1).split(",") if d.strip()]
+                continue
+            m_field = re.match(r"(rule|condition|reason|kind):\s*(.*)$", stripped)
+            if m_field:
+                entry[m_field.group(1)] = m_field.group(2).strip().strip('"')
+        entries[entry_id] = entry
+    return entries
+
+
+def remove_import_candidate(path: str, entry_id: str) -> bool:
+    text = open(path).read()
+    if "```yaml" not in text:
+        return False
+    before, _, rest = text.partition("```yaml")
+    fence_body, _, after = rest.partition("\n```")
+    head, sep, body = fence_body.partition("candidates:")
+    if not sep:
+        return False
+    body = body.strip("\n")
+    blocks = [] if not body or body.strip() == "[]" else re.split(r"\n(?=- id:)", body)
+    kept, removed = [], False
+    for block in blocks:
+        block = block.strip("\n")
+        if not block:
+            continue
+        if re.match(rf"-\s*id:\s*{re.escape(entry_id)}\s*$", block.split("\n")[0].strip()):
+            removed = True
+            continue
+        kept.append(block)
+    if not removed:
+        return False
+    new_body = "\n".join(kept)
+    new_fence_body = head + "candidates:" + (("\n" + new_body) if new_body.strip() else " []")
+    open(path, "w").write(before + "```yaml" + new_fence_body + "\n```" + after)
+    return True
+
+
+def cmd_ratify_import_candidate(project: "Project", args) -> None:
+    source_path = args.source or project.import_candidates_path
+    candidates = parse_import_candidates(source_path)
+    entry = candidates.get(args.id)
+    if entry is None:
+        fail(f"no candidate '{args.id}' in {source_path}")
+    dest_domain = args.as_domain or (entry.get("domains") or [None])[0]
+    if not dest_domain:
+        fail(f"candidate '{args.id}' has no destination domain recorded — pass --as-domain")
+    dest_id = args.as_id or args.id
+    files = project.domain_files()
+    if dest_domain not in files:
+        fail(f"unknown domain '{dest_domain}' under {project.domains_dir} — create its "
+             "frontmatter + empty principles:/killed: shell first for a brand-new domain")
+    domain_path = files[dest_domain]
+    if dest_id in collect_domain_ids(domain_path):
+        fail(f"'{dest_id}' already exists in {domain_path} — pass --as-id to rename on write-back")
+
+    if "condition" not in entry:
+        fail(f"candidate '{args.id}' is a convention (no condition) — ratify-import-candidate "
+             "only writes back principles: for now; write this one back by hand into "
+             "conventions:, matching kernel.md's write-back format, then remove it from "
+             f"{source_path} yourself")
+    fields = {"id": dest_id, "rule": entry.get("rule", ""), "condition": entry["condition"],
+              "reason": entry.get("reason", "")}
+    append_domain_entry(domain_path, format_principle_block(fields))
+
+    imported_from = dict(entry.get("imported-from", {}))
+    imported_from["extracted"] = entry.get("extracted", "")
+    if entry.get("id") and entry["id"] != dest_id:
+        imported_from.setdefault("id", entry["id"])
+    append_audit_provenance(project.audit_path, format_audit_provenance_block(
+        dest_id, dest_domain, kind=entry.get("kind", "judgment"), imported_from=imported_from))
+
+    record_gate_core(project, dest_domain, domain_path, ratified=1, origin=args.origin)
+
+    if not remove_import_candidate(source_path, args.id):
+        fail(f"wrote '{dest_id}' to {domain_path} and recorded provenance, but could not remove "
+             f"'{args.id}' from {source_path} — fix that file by hand so it isn't re-ratified")
+    print(f"ratified candidate '{args.id}' as '{dest_id}' -> {dest_domain}, removed from {source_path}")
+
+
 def cmd_import_list(project: "Project", args) -> None:
     target_domains_dir = args.target_domains_dir or project.domains_dir
     target_ids = set()
@@ -2745,6 +2984,38 @@ def main() -> None:
     idp.add_argument("--config", default="", help="defaults to corpora/config.md under --root")
     idp.add_argument("--target-domains-dir", default="", help="defaults to this project's own corpora/domains")
     idp.add_argument("--output", default="", help="candidates file; defaults to corpora/import-candidates.md")
+    ap_ = sub.add_parser("add-principle", help="write a freshly-authored or mined principle into "
+                                                "a domain working file plus its audit.md "
+                                                "provenance entry, and record the gate in one "
+                                                "atomic, scripted step — no hand edits to either "
+                                                "file. Principles only — a convention is graduated "
+                                                "from an existing ratified principle, not authored "
+                                                "fresh (kernel.md, write-back format)")
+    ap_.add_argument("--domains-dir", default="", help=layer_help)
+    ap_.add_argument("--audit", default="", help=layer_help)
+    ap_.add_argument("--domain", required=True)
+    ap_.add_argument("--id", required=True)
+    ap_.add_argument("--rule", required=True)
+    ap_.add_argument("--condition", required=True)
+    ap_.add_argument("--reason", required=True)
+    ap_.add_argument("--see-also", default="")
+    ap_.add_argument("--provenance", required=True, help="free text: date, source, context")
+    ap_.add_argument("--kind", default="", choices=["", "judgment", "knowledge", "direction"])
+    ap_.add_argument("--origin", choices=sorted(ORIGIN_ENUM), default="project")
+    ric = sub.add_parser("ratify-import-candidate", help="write an entry already queued by "
+                                                           "import-candidate/import-default-pool "
+                                                           "into its destination domain plus "
+                                                           "audit.md provenance, record the gate, "
+                                                           "and remove it from the candidates file "
+                                                           "— the scripted counterpart to kernel.md's "
+                                                           "'Write-back format'")
+    ric.add_argument("--domains-dir", default="", help=layer_help)
+    ric.add_argument("--audit", default="", help=layer_help)
+    ric.add_argument("--source", default="", help="defaults to corpora/import-candidates.md")
+    ric.add_argument("--id", required=True, help="the candidate's id in the source candidates file")
+    ric.add_argument("--as-domain", default="", help="overrides the candidate's own recorded domains:")
+    ric.add_argument("--as-id", default="", help="write back under a different id (e.g. on collision)")
+    ric.add_argument("--origin", choices=sorted(ORIGIN_ENUM), default="project")
     md = sub.add_parser("migrate-domains", help="one-time: materialize a pre-dissolution project's "
                                                   "live seed/project merge into its own corpora/domains/ "
                                                   "(processes/domain-repo-migration.md)")
@@ -2824,6 +3095,7 @@ def main() -> None:
      "lint-screenshots": cmd_lint_screenshots,
      "manifest": cmd_manifest, "select": cmd_select,
      "check-composition": cmd_check_composition,
+     "add-principle": cmd_add_principle, "ratify-import-candidate": cmd_ratify_import_candidate,
      "import-list": cmd_import_list, "import-candidate": cmd_import_candidate,
      "import-default-pool": cmd_import_default_pool, "migrate-domains": cmd_migrate_domains,
      "chunk-start": cmd_chunk_start, "chunk-done": cmd_chunk_done,

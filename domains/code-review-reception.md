@@ -40,5 +40,5 @@ principles:
   condition: "Review feedback requests completing, hardening, or 'properly implementing' something whose current call-site usage has not yet been confirmed."
   reason: "A reviewer's 'do this properly' framing reads as authoritative regardless of whether the feature is exercised anywhere — building out an unused code path to satisfy that framing spends real effort on something nothing calls, the same waste avoided anywhere else usage is checked before investing in completeness."
 
-killed: []
+killed:
 ```

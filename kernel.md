@@ -339,7 +339,18 @@ LINEAGE.md, the v3 transition entry.)
 
 ### Write-back format
 
-Ratified principle — append the working fields to the end of the target domain's `principles:`:
+**`corpus.py add-principle --domain D --id ... --rule ... --condition ... --reason ... --provenance
+...`** is the standard way to ratify a freshly-authored or mined principle — it writes the working
+fields into the target domain's `principles:`, files the matching provenance in the layer's audit
+file, and records the gate, as one atomic step. **`corpus.py ratify-import-candidate --id ...
+[--as-domain --as-id]`** does the same for an entry already queued in
+`corpora/import-candidates.md` by `import-candidate`/`import-default-pool` — write-back, provenance
+(carrying its `imported-from` block), record-gate, and removal from the candidates file, together.
+Neither hand-edits a YAML block into place; what follows is the schema they produce, kept here as
+reference (what a proposal must supply, what the write-back looks like) and as the manual fallback
+for a domains-dir the script can't reach.
+
+Ratified principle — the working fields, appended to the end of the target domain's `principles:`:
 
 ```yaml
 - id: principle-id
@@ -368,7 +379,8 @@ carries `date`, `type` (generalized / consolidated / split / moved), and `reason
 Retired principle — graduated to a convention: when a principle has been ratified long enough that
 checking its `condition` before every task is friction without benefit, move it from `principles:`
 to the working file's `conventions:` list, dropping `condition` and keeping its `id`, `rule`, and
-`reason`:
+`reason`. This move (unlike fresh ratification, above) has no `corpus.py` command yet — do it by
+hand, both here and in the audit-layer `history:` entry below:
 
 ```yaml
 - id: convention-id

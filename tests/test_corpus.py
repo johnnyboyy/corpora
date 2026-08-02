@@ -1174,6 +1174,234 @@ class ImportTest(CorpusCommandTestCase):
         self.assertIn("id: a-convention", candidates)
 
 
+class AddPrincipleTest(CorpusCommandTestCase):
+    """add-principle: the scripted write-back for a freshly-authored or mined principle — domain
+    file + audit.md provenance + record-gate, atomically, no hand edits to either file."""
+
+    def write_domain(self, name="sample", body='- id: existing-one\n  rule: "R"\n  condition: "C"\n  reason: "Why."\n\n'):
+        (self.root / "corpora" / "domains" / f"{name}.md").write_text(
+            "---\nsubject: coding\nposture: guardrail\nunits-of-work: [implement-feature]\n"
+            "universal: false\n---\n\n# Domain: sample\n\n```yaml\nlast-retrospective: none\n\n"
+            f"principles:\n\n{body}killed:\n```\n"
+        )
+        (self.root / "corpora" / "domains" / "audit.md").write_text(
+            "# Audit\n\n```yaml\nprovenance:\n\n- id: existing-one\n  domain: sample\n"
+            '  provenance: "2026-01-01, pre-existing."\n```\n\n'
+            "<!-- corpus-script:begin -->\n\n```yaml\ncounters: []\nefficacy: []\n"
+            "co-occurrence: []\nlibrary-drift:\n  since-last-sync: 0\n```\n\n<!-- corpus-script:end -->\n"
+        )
+
+    def add(self, **kwargs):
+        args = {
+            "domain": "sample", "id": "new-one", "rule": "Test rule.",
+            "condition": "Test condition.", "reason": "Test reason.",
+            "provenance": "2026-08-02, test.",
+        }
+        args.update(kwargs)
+        flags = []
+        for k, v in args.items():
+            flags += [f"--{k}", v]
+        return self.run_command(["add-principle", *flags])
+
+    def test_writes_principle_and_provenance_and_reconciles(self):
+        self.write_domain()
+
+        result = self.add()
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        domain_text = (self.root / "corpora" / "domains" / "sample.md").read_text()
+        self.assertIn("id: new-one", domain_text)
+        self.assertIn('condition: "Test condition."', domain_text)
+        audit_text = (self.root / "corpora" / "domains" / "audit.md").read_text()
+        self.assertIn("id: new-one", audit_text)
+        self.assertIn('provenance: "2026-08-02, test."', audit_text)
+        verify = self.run_command(["verify"])
+        self.assertEqual(verify.returncode, 0, verify.stdout + verify.stderr)
+        self.assertIn("reconciled", verify.stdout)
+
+    def test_records_kind_when_given(self):
+        self.write_domain()
+
+        result = self.add(kind="judgment")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        audit_text = (self.root / "corpora" / "domains" / "audit.md").read_text()
+        self.assertIn("kind: judgment", audit_text)
+
+    def test_see_also_written_when_given(self):
+        self.write_domain()
+
+        result = self.add(**{"see-also": "existing-one"})
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        domain_text = (self.root / "corpora" / "domains" / "sample.md").read_text()
+        self.assertIn("see-also: existing-one", domain_text)
+
+    def test_rejects_duplicate_id(self):
+        self.write_domain()
+
+        result = self.add(id="existing-one")
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("already exists", result.stderr)
+
+    def test_rejects_unknown_domain(self):
+        self.write_domain()
+
+        result = self.add(domain="nope")
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("unknown domain", result.stderr)
+
+    def test_condition_is_required(self):
+        self.write_domain()
+
+        result = self.run_command([
+            "add-principle", "--domain", "sample", "--id", "new-one", "--rule", "R",
+            "--reason", "Why.", "--provenance", "p",
+        ])
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("--condition", result.stderr)
+
+    def test_brand_new_domain_reconciles_without_manual_retro_done(self):
+        self.write_domain()
+        self.add()  # register "sample" too, so verify checks every domain in the dir, not just fresh
+        (self.root / "corpora" / "domains" / "fresh.md").write_text(
+            "---\nsubject: coding\nposture: guardrail\nunits-of-work: [implement-feature]\n"
+            "universal: false\n---\n\n# Domain: fresh\n\n```yaml\nlast-retrospective: none\n\n"
+            "principles:\n\nkilled:\n```\n"
+        )
+
+        result = self.add(domain="fresh", id="first-ever")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        verify = self.run_command(["verify"])
+        self.assertEqual(verify.returncode, 0, verify.stdout + verify.stderr)
+
+    def test_multiple_additions_to_same_domain_stay_reconciled(self):
+        self.write_domain()
+
+        self.add(id="one")
+        self.add(id="two")
+        result = self.add(id="three")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        verify = self.run_command(["verify"])
+        self.assertEqual(verify.returncode, 0, verify.stdout + verify.stderr)
+        domain_text = (self.root / "corpora" / "domains" / "sample.md").read_text()
+        for entry_id in ("one", "two", "three"):
+            self.assertIn(f"id: {entry_id}", domain_text)
+
+
+class RatifyImportCandidateTest(CorpusCommandTestCase):
+    """ratify-import-candidate: the scripted counterpart to kernel.md's manual "Write-back
+    format" — consumes an entry already queued by import-candidate/import-default-pool."""
+
+    def setUp(self):
+        super().setUp()
+        self.source_dir = self.root / "source-domains"
+        self.source_dir.mkdir()
+        (self.source_dir / "widgets.md").write_text(
+            "---\nsubject: coding\nposture: guardrail\nunits-of-work: [implement-feature]\n"
+            "universal: false\n---\n\n# Domain: widgets\n\n```yaml\n"
+            "conventions:\n\n"
+            '- id: a-convention\n  rule: "Do X."\n  reason: "Because Y."\n\n'
+            "principles:\n\n"
+            '- id: a-principle\n  rule: "Do Z."\n  condition: "When W."\n  reason: "Because V."\n\n'
+            "killed:\n```\n"
+        )
+        (self.source_dir / "audit.md").write_text(
+            "# Audit\n\n```yaml\nprovenance:\n"
+            "- id: a-principle\n  domain: widgets\n  provenance: \"2026-01-01, some task.\"\n```\n"
+        )
+        (self.root / "corpora" / "domains" / "sample.md").write_text(
+            "---\nsubject: coding\nposture: guardrail\nunits-of-work: [implement-feature]\n"
+            "universal: false\n---\n\n# Domain: sample\n\n```yaml\nlast-retrospective: none\n\n"
+            'principles:\n\n- id: existing-one\n  rule: "R"\n  condition: "C"\n  reason: "Why."\n\n'
+            "killed:\n```\n"
+        )
+        (self.root / "corpora" / "domains" / "audit.md").write_text(
+            "# Audit\n\n```yaml\nprovenance:\n\n- id: existing-one\n  domain: sample\n"
+            '  provenance: "2026-01-01, pre-existing."\n```\n\n'
+            "<!-- corpus-script:begin -->\n\n```yaml\ncounters: []\nefficacy: []\n"
+            "co-occurrence: []\nlibrary-drift:\n  since-last-sync: 0\n```\n\n<!-- corpus-script:end -->\n"
+        )
+
+    def queue(self, entry_id="a-principle"):
+        result = self.run_command([
+            "import-candidate", "--source", str(self.source_dir),
+            "--domain", "widgets", "--id", entry_id,
+        ])
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_writes_back_and_consumes_candidate(self):
+        self.queue("a-principle")
+
+        result = self.run_command([
+            "ratify-import-candidate", "--id", "a-principle", "--as-domain", "sample",
+        ])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        domain_text = (self.root / "corpora" / "domains" / "sample.md").read_text()
+        self.assertIn("id: a-principle", domain_text)
+        self.assertIn('condition: "When W."', domain_text)
+        audit_text = (self.root / "corpora" / "domains" / "audit.md").read_text()
+        self.assertIn("imported-from:", audit_text)
+        self.assertIn("domain: widgets", audit_text)
+        candidates_text = (self.root / "corpora" / "import-candidates.md").read_text()
+        self.assertNotIn("id: a-principle", candidates_text)
+        self.assertIn("candidates: []", candidates_text)
+        verify = self.run_command(["verify"])
+        self.assertEqual(verify.returncode, 0, verify.stdout + verify.stderr)
+
+    def test_honors_as_id_rename(self):
+        self.queue("a-principle")
+
+        result = self.run_command([
+            "ratify-import-candidate", "--id", "a-principle",
+            "--as-domain", "sample", "--as-id", "renamed",
+        ])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        domain_text = (self.root / "corpora" / "domains" / "sample.md").read_text()
+        self.assertIn("id: renamed", domain_text)
+        self.assertNotIn("id: a-principle\n  rule:", domain_text)
+
+    def test_rejects_convention_shaped_candidate(self):
+        self.queue("a-convention")
+
+        result = self.run_command([
+            "ratify-import-candidate", "--id", "a-convention", "--as-domain", "sample",
+        ])
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("convention", result.stderr)
+        candidates_text = (self.root / "corpora" / "import-candidates.md").read_text()
+        self.assertIn("id: a-convention", candidates_text)  # left queued, not consumed
+
+    def test_rejects_unknown_candidate_id(self):
+        self.queue("a-principle")
+
+        result = self.run_command([
+            "ratify-import-candidate", "--id", "does-not-exist", "--as-domain", "sample",
+        ])
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("no candidate", result.stderr)
+
+    def test_rejects_id_collision_at_destination(self):
+        self.queue("a-principle")
+
+        result = self.run_command([
+            "ratify-import-candidate", "--id", "a-principle",
+            "--as-domain", "sample", "--as-id", "existing-one",
+        ])
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("already exists", result.stderr)
+
+
 class MigrateDomainsTest(CorpusCommandTestCase):
     """processes/domain-repo-migration.md: a one-time materialization of a pre-dissolution
     project's live seed/project merge into its own corpora/domains/ — writes directly (no

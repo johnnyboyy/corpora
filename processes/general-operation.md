@@ -197,9 +197,11 @@ Runs immediately after each spawn, by default.
    idle); lint the handoff with the bundled `scripts/corpus.py`, resolving it from this skill's
    directory rather than the project working directory: `python3 <skill-directory>/scripts/corpus.py
    lint-handoff <file>`. Resolve every shortened `corpus.py` command below to that same bundled
-   script. The counts are recorded by the script *after write-back* (step 6), once the ratify
-   numbers exist: `corpus.py record-gate --domain <d> --ratified N --killed N --violations N
-   [--ui-drift] --fired <ids> --violated <ids> --idle <ids>`. Never write the counters block by
+   script. Each ratified proposal's write-back (step 6, below) already records its own `ratified`
+   count as part of that same write — after every proposal in the gate has been processed, one
+   closing call folds in whatever write-back didn't cover: `corpus.py record-gate --domain <d>
+   --ratified 0 --killed N --violations N [--ui-drift] --fired <ids> --violated <ids> --idle
+   <ids>`. Never write the counters block by
    hand — not even when creating a fresh audit file (`kernel.md`, "Storage: working vs audit").
    Also re-apply `principle-judgment`'s genuine-fork test and knowledge-vs-judgment distinction to
    each proposal yourself here, even though `spawn-integrity`'s `proposal-self-cleanup-before-including`
@@ -249,12 +251,16 @@ Runs immediately after each spawn, by default.
    spawn whose stance and subject match — there is no composition declaration to add it to. A proposal
    spanning two domains is a possible domain-boundary problem — surface it rather than
    fragmenting. See `domain-assignment-at-ratify-gate`.
-6. **Write-back** per `kernel.md`. Ratified → working fields (`rule`/`condition`/`reason`)
-   to the end of `principles:` in the target domain working file; the proposal's `provenance`
-   (with its `domain:`) to that layer's `domains/audit.md`. Rejected → append to the domain
-   working file's `killed:` log with an `id`, `kill_type` (`quality` | `container` |
-   `attribution-noise`), and `reason_killed`; per-kill provenance to the audit file. Edited →
-   ratify operator's version.
+6. **Write-back** per `kernel.md`, "Write-back format." Ratified (or edited — write the operator's
+   edited version) → `corpus.py add-principle --domain <d> --id <id> --rule ... --condition ...
+   --reason ... --provenance ... [--kind ...]` for a freshly-authored or mined proposal, or
+   `corpus.py ratify-import-candidate --id <id> --as-domain <d> [--as-id ...]` for one sourced from
+   `reading/candidates.md`/`corpora/import-candidates.md` — either writes the working fields into
+   the target domain, files the provenance in that layer's `domains/audit.md`, and records the
+   proposal's own `ratified` count, atomically; no hand edit to either file. Rejected → append to
+   the domain working file's `killed:` log by hand with an `id`, `kill_type` (`quality` |
+   `container` | `attribution-noise`), and `reason_killed`; per-kill provenance to the audit file —
+   this path has no script yet.
 7. **Resolve deferred decisions.** For any `corpora/deferred-decisions.md` entry this handoff's
    ratified write-back settles, mark it `status: resolved` and remove it — this is the step the
    ratification in steps 4–6 actually authorizes; a proposal presented but rejected or edited away

@@ -62,5 +62,5 @@ principles:
   condition: "A root-cause fix has been implemented for a bug caused by invalid data, state, or an unexpected code path reaching a place it shouldn't."
   reason: "A single validation point can be bypassed by a different code path, a refactor, or a mock that doesn't go through it — a bug fixed at one checkpoint stays reproducible through any path that skips that checkpoint. Validating at every layer the bad value actually crosses makes the failure mode structurally unreachable rather than merely blocked at the one point it was last observed."
 
-killed: []
+killed:
 ```

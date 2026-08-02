@@ -35,9 +35,12 @@ schema and command syntax are `kernel.md`, "Project corpora → Import."
    necessarily the source's own domain name, and ratifies or rejects it individually. `kind:
    judgment` is the default (the entry already cleared the fork test once, in its source corpus),
    but the fork test remains available to re-examine a specific entry rather than rubber-stamp it.
-4. **Write back normally.** Ratified entries follow the ordinary write-back format (`kernel.md`,
-   "Write-back format") — the `imported-from` block is additional provenance, not a different write
-   path.
+4. **Write back with `ratify-import-candidate`.** `corpus.py ratify-import-candidate --id <id>
+   [--as-domain <d2>] [--as-id <id2>]` writes a ratified entry into its destination domain, files
+   its `imported-from` provenance in the layer's audit file, records the gate, and removes it from
+   `corpora/import-candidates.md` — one atomic step, no hand edit to either file (`kernel.md`,
+   "Write-back format"). A convention-shaped candidate (no `condition`) isn't handled by that
+   command yet — write it back into `conventions:` by hand, matching the same schema.
 
 **Repeat rather than fork.** A project that wants to track a source's domain content as it evolves
 re-runs this same procedure periodically (or per updated principle) instead of forking a live copy
