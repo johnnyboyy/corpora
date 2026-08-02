@@ -140,6 +140,11 @@ agent. See `SKILL.md`, "Inline, resume, or isolate," and `LINEAGE.md`, "Role iso
   modes, and domain lifecycle. Reference document.
 - `processes/retrospective.md` — the periodic, backward-looking counterpart to per-task routing: trigger,
   composition, and procedure for reading a domain's accumulated corpus and gate history.
+- `processes/domain-import.md` — the procedure for pulling already-ratified content from another
+  domains-dir into a project's own `corpora/domains/` (bootstrap's default-pool pull, a later
+  individual pick, or a live-merge-model migration) through the ordinary ratify gate. Mechanical;
+  `kernel.md`, "Project corpora → Import," holds the command syntax and candidate schema this
+  points into.
 - `domains/` — every seed domain, flat: stack-agnostic (`coding-general.md`,
   `orchestrator-routing.md`, `ratify-gate.md`, `principle-judgment.md`, `retrospective.md`,
   `testing.md`, `planning.md`, `interviewing.md`, `spawn-integrity.md`) and stack-specific

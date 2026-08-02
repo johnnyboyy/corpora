@@ -766,11 +766,9 @@ An import never writes a domain working file directly — it is a new *producer*
 structurally the same relationship `reading/discovery-agent.md`/`reading/session-harvest-agent.md`
 already have to a candidates file and the ratify gate. The difference is what's being proposed: not
 a freshly-mined judgment call, but an *already-ratified* principle or convention from another
-corpus, re-proposed here with provenance recording where it actually came from. It goes through the
-same gate as any other candidate — the operator (or the gate-running orchestrator) still browses,
-picks a destination domain per entry (not necessarily the source's own domain name — the same
-domain-assignment judgment as "Domain assignment at the gate," above, applied to an imported entry
-instead of a freshly-proposed one), and ratifies or rejects it individually.
+corpus, re-proposed here with provenance recording where it actually came from. **Procedure:
+`processes/domain-import.md`** — this section is the command reference and candidate schema it
+points into, not the step-by-step sequence.
 
 - `corpus.py import-list --source <domains-dir>` — read-only. Lists every principle and convention
   under `<domains-dir>`, flagging which ids already exist anywhere in the target project's own
