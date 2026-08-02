@@ -1771,6 +1771,99 @@ class RootBoundaryTest(unittest.TestCase):
         self.assertIn(str(self.root / "admin"), result.stderr)
 
 
+class NamedRootDiscoveryTest(unittest.TestCase):
+    """list-roots / resolve-root --name / --root-name: the downward-discovery counterpart to
+    resolve-root --file's upward walk — dispatching deliberately into a formalized section of the
+    same project (kernel.md, 'Monorepo root resolution'), not just resolving from a touched file."""
+
+    def setUp(self):
+        self.tempdir = tempfile.TemporaryDirectory()
+        self.root = Path(self.tempdir.name)
+        (self.root / "corpora").mkdir(parents=True)
+        (self.root / "corpora" / "config.md").write_text(
+            "# Config\n\n## project-shape\nlanguage: typescript\n"
+        )
+        (self.root / "admin" / "corpora").mkdir(parents=True)
+        (self.root / "admin" / "corpora" / "config.md").write_text(
+            "# Config\n\n## project-shape\nname: admin\nlanguage: typescript\n"
+        )
+        (self.root / "node_modules" / "some-pkg" / "corpora").mkdir(parents=True)
+        (self.root / "node_modules" / "some-pkg" / "corpora" / "config.md").write_text("# Config\n")
+
+    def tearDown(self):
+        self.tempdir.cleanup()
+
+    def run_command(self, command):
+        return subprocess.run(
+            [sys.executable, str(SCRIPT), *command],
+            text=True, capture_output=True, check=False,
+        )
+
+    def test_list_roots_finds_both_and_skips_node_modules(self):
+        result = self.run_command(["list-roots", "--search-from", str(self.root)])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn(f"admin: {self.root / 'admin'}", result.stdout)
+        self.assertIn(f"{self.root.name}: {self.root}", result.stdout)
+        self.assertNotIn("node_modules", result.stdout)
+
+    def test_resolve_root_by_declared_name(self):
+        result = self.run_command([
+            "resolve-root", "--name", "admin", "--search-from", str(self.root),
+        ])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout.strip(), str(self.root / "admin"))
+
+    def test_resolve_root_by_directory_basename_when_no_declared_name(self):
+        result = self.run_command([
+            "resolve-root", "--name", self.root.name, "--search-from", str(self.root),
+        ])
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout.strip(), str(self.root))
+
+    def test_resolve_root_unknown_name_lists_available(self):
+        result = self.run_command([
+            "resolve-root", "--name", "nonexistent", "--search-from", str(self.root),
+        ])
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("no corpora root named 'nonexistent'", result.stderr)
+        self.assertIn("admin", result.stderr)
+
+    def test_resolve_root_requires_file_or_name(self):
+        result = self.run_command(["resolve-root"])
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("requires --file", result.stderr)
+
+    def test_top_level_root_name_dispatches_into_named_root(self):
+        (self.root / "admin" / "corpora" / "domains").mkdir(parents=True)
+        (self.root / "admin" / "corpora" / "domains" / "widgets.md").write_text(
+            "---\nsubject: coding\nposture: guardrail\nunits-of-work: [implement-feature]\n"
+            "universal: false\n---\n\n# Domain: widgets\n\n```yaml\nlast-retrospective: none\n\n"
+            "conventions:\n\nprinciples:\n\nkilled:\n```\n"
+        )
+
+        result = subprocess.run(
+            [sys.executable, str(SCRIPT), "--root-name", "admin", "manifest"],
+            text=True, capture_output=True, check=False, cwd=str(self.root),
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("widgets", result.stdout)
+
+    def test_root_name_and_for_file_are_mutually_exclusive(self):
+        result = self.run_command([
+            "--for-file", str(self.root / "corpora" / "config.md"),
+            "--root-name", "admin", "verify",
+        ])
+
+        self.assertEqual(result.returncode, 2)
+        self.assertIn("mutually exclusive", result.stderr)
+
+
 class ForFileRootResolutionTest(unittest.TestCase):
     """--for-file resolves --root automatically (kernel.md, 'Monorepo root resolution') so no
     session has to work out which corpora root governs a task before invoking corpus.py."""

@@ -1185,6 +1185,12 @@ def find_root_config(start_path: str) -> str:
 
 
 def cmd_resolve_root(args) -> None:
+    if args.name:
+        cmd_resolve_root_by_name(args)
+        return
+    if not args.file:
+        fail("resolve-root requires --file (upward, from a touched file) or --name (downward, "
+             "by a root's declared or directory name)")
     root = find_root_config(args.file)
     if not root:
         print(f"no corpora root found above {args.file}")
@@ -1217,6 +1223,63 @@ def cmd_check_root_boundary(args) -> None:
         print(f"check-root-boundary: ok — single root {root}")
     else:
         print("check-root-boundary: ok — no touched file resolves to a corpora root")
+
+
+# ── named root discovery: dispatching into a formalized section of the same project ──────────
+#
+# The above resolves a root from a file already known to touch it — upward, from inside that
+# root's own tree. Dispatching *into* a sibling section deliberately (kernel.md, "a task spanning
+# two corpora roots is two units of work, one per root") needs the opposite direction: given no
+# file yet, which named roots exist to target at all. Purely mechanical — no judgment about
+# whether to dispatch, only about resolving a name to a path once the decision is already made.
+
+ROOT_WALK_SKIP_DIRS = {".git", "node_modules", ".venv", "venv", "dist", "build", "__pycache__",
+                        ".worktrees", "worktrees", ".next", "target"}
+
+
+def find_all_root_configs(search_from: str) -> list:
+    """Downward walk from `search_from`, collecting every directory containing a
+    `corpora/config.md` — the counterpart to `find_root_config`'s upward walk. Skips common
+    vendor/build directories so this stays fast in a real repo; does not descend into a found
+    root's own `corpora/` directory (a root's config never nests another root)."""
+    search_from = os.path.abspath(search_from)
+    found = []
+    for dirpath, dirnames, _filenames in os.walk(search_from):
+        dirnames[:] = [d for d in dirnames if d not in ROOT_WALK_SKIP_DIRS and not d.startswith(".")]
+        if os.path.exists(os.path.join(dirpath, "corpora", "config.md")):
+            found.append(dirpath)
+            dirnames[:] = [d for d in dirnames if d != "corpora"]
+    return sorted(found)
+
+
+def root_name_for(root_dir: str) -> str:
+    """A root's declared `name:` (`## project-shape` in its config.md) if present, else its
+    directory's own basename — every root is nameable without requiring the field."""
+    shape = parse_config_shape(os.path.join(root_dir, "corpora", "config.md"))
+    return shape.get("name") or os.path.basename(root_dir.rstrip(os.sep)) or root_dir
+
+
+def cmd_list_roots(args) -> None:
+    roots = find_all_root_configs(args.search_from)
+    if not roots:
+        print(f"no corpora roots found under {os.path.abspath(args.search_from)}")
+        return
+    for root in roots:
+        print(f"{root_name_for(root)}: {root}")
+
+
+def cmd_resolve_root_by_name(args) -> None:
+    roots = find_all_root_configs(args.search_from)
+    matches = [r for r in roots if root_name_for(r) == args.name]
+    if not matches:
+        available = ", ".join(root_name_for(r) for r in roots) or "none"
+        fail(f"no corpora root named '{args.name}' under {os.path.abspath(args.search_from)} — "
+             f"available: {available}")
+    if len(matches) > 1:
+        fail(f"'{args.name}' is ambiguous — matches {len(matches)} roots under "
+             f"{os.path.abspath(args.search_from)}: {', '.join(matches)}. Disambiguate with "
+             "--root/--for-file and the exact path instead.")
+    print(matches[0])
 
 
 # ── domain selection API: frontmatter, manifest, select, check-composition ──────────────────
@@ -2853,6 +2916,13 @@ def main() -> None:
                           "corpora/config.md (kernel.md, 'Monorepo root resolution') instead of "
                           "passing --root explicitly — the standard way to invoke corpus.py for "
                           "an actual task, so no session has to work out which root governs it")
+    ap.add_argument("--root-name", default="",
+                     help="resolve --root by a sibling root's declared or directory name, found "
+                          "by a downward walk from cwd (use the standalone `resolve-root --name "
+                          "--search-from` for a different starting point) — for deliberately "
+                          "dispatching into a formalized section of the same project rather than "
+                          "the root a touched file happens to resolve to (kernel.md, 'Monorepo "
+                          "root resolution'); mutually exclusive with --for-file")
     sub = ap.add_subparsers(dest="cmd", required=True)
     layer_help = "override to work on any domains-dir + audit.md pair — a project's own " \
                  "corpora/domains or the kernel-seed domains/ — not only a project's own corpora"
@@ -2941,13 +3011,23 @@ def main() -> None:
     ld = sub.add_parser("lint-domains", help="works on any domains-dir, not only a project's corpora/domains — "
                                               "validates frontmatter (subject/posture/applies-when/units-of-work)")
     ld.add_argument("--domains-dir", required=True)
-    rr = sub.add_parser("resolve-root", help="nearest-ancestor walk from a file to the corpora root "
-                                              "(directory containing corpora/config.md) that governs it")
-    rr.add_argument("--file", required=True)
+    rr = sub.add_parser("resolve-root", help="--file: nearest-ancestor walk from a file to the "
+                                              "corpora root that governs it (upward). --name: "
+                                              "the named root's path (downward, from --search-from) "
+                                              "— for deliberately dispatching into a sibling section")
+    rr.add_argument("--file", default="", help="upward lookup — resolves the root governing this file")
+    rr.add_argument("--name", default="", help="downward lookup — resolves a root by its declared "
+                                                 "or directory name; use instead of --file")
+    rr.add_argument("--search-from", default=".", help="where the downward walk for --name starts "
+                                                         "(defaults to cwd)")
     crb = sub.add_parser("check-root-boundary", help="fail (exit 2) if a task's touched files resolve "
                                                        "to more than one corpora root — the monorepo "
                                                        "split signal (proposals/domain-repo-import.md)")
     crb.add_argument("--files", required=True, help="comma-separated file paths")
+    lr = sub.add_parser("list-roots", help="downward walk from --search-from, listing every corpora "
+                                            "root found (name: path) — discovery for dispatching "
+                                            "into a formalized section of the same project")
+    lr.add_argument("--search-from", default=".", help="defaults to cwd")
     mf = sub.add_parser("manifest", help="emit the machine-readable domain index for this project's own "
                                           "corpora/domains/ (or --domains-dir), for a process layer to "
                                           "select against without reading prose")
@@ -3063,11 +3143,13 @@ def main() -> None:
 
     no_project = {"kill-report": cmd_kill_report, "graduate-kill": cmd_graduate_kill,
                   "lint-domains": cmd_lint_domains, "resolve-root": cmd_resolve_root,
-                  "check-root-boundary": cmd_check_root_boundary}
+                  "check-root-boundary": cmd_check_root_boundary, "list-roots": cmd_list_roots}
     if args.cmd in no_project:
         no_project[args.cmd](args)
         return
 
+    if args.for_file and args.root_name:
+        fail("--for-file and --root-name are mutually exclusive — pick one")
     root = args.root
     if args.for_file:
         resolved = find_root_config(args.for_file)
@@ -3075,6 +3157,16 @@ def main() -> None:
             fail(f"no corpora root found above {args.for_file} — pass --root explicitly if this "
                  "is a brand-new root not yet bootstrapped")
         root = resolved
+    elif args.root_name:
+        roots = find_all_root_configs(".")
+        matches = [r for r in roots if root_name_for(r) == args.root_name]
+        if not matches:
+            available = ", ".join(root_name_for(r) for r in roots) or "none"
+            fail(f"no corpora root named '{args.root_name}' under cwd — available: {available}")
+        if len(matches) > 1:
+            fail(f"'{args.root_name}' is ambiguous — matches {len(matches)} roots: "
+                 f"{', '.join(matches)}. Use --root with the exact path instead.")
+        root = matches[0]
 
     project = Project(os.path.abspath(root),
                       domains_dir=getattr(args, "domains_dir", "") or "",

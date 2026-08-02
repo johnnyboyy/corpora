@@ -849,6 +849,24 @@ never mixes coding and design domains), just on a different axis: a task spannin
 is two units of work, one per root, sequenced by whichever the planner judges dependent — not a
 single spawn straddling both.
 
+**Dispatching deliberately into a sibling section is the opposite direction** from all of the
+above: not "which root governs this file I already have," but "which root is the section I mean to
+target, before I have any file in it yet." Mechanical only — no judgment domain, since deciding
+*whether* to dispatch into another section is still ordinary routing/planning judgment; only
+resolving a name to a path is new. `corpus.py list-roots [--search-from <dir>]` walks *downward*
+(the mirror of `resolve-root --file`'s upward walk) from `--search-from` (default cwd), skipping
+vendor/build directories, and lists every corpora root found as `name: path`. A root's name is its
+declared `name:` under `## project-shape` in its own `corpora/config.md` if present, else its
+directory's basename — every root is nameable with no config change required.
+`corpus.py resolve-root --name <name> [--search-from <dir>]` resolves one named root's path
+directly (fails, listing what's available, on no match or an ambiguous one). The top-level
+**`--root-name <name>`** flag is the standard way to actually invoke a command against a named
+sibling root — `corpus.py --root-name admin select --unit-of-work implement-feature` — the same
+convenience `--for-file` is for the upward direction; mutually exclusive with `--for-file` since
+they answer different questions. A task whose planner has already decided it needs work done in
+another section names that root; nothing about *finding* it should require the dispatching agent
+to already know or hardcode the sibling's filesystem path.
+
 ### One flat seed layer
 
 The skill's `domains/` is one flat pool — no separate "role pack" layer selected by a project-config
