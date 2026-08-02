@@ -47,7 +47,7 @@ principles:
 - id: proposal-self-cleanup-before-including
   rule: "Before including a principle proposal in your handoff, restate it in the schema's own terms: rule as a crisp actionable statement with no condition-scoping preamble or trailing justification folded in; condition as pure scope; reason as the full justification and story. Watch specifically for a rule field that begins with 'When...' or ends on a because-clause — both are signs condition/reason content bled into rule."
   condition: "Any spawn about to write a proposals: entry into its handoff."
-  reason: "motors-and-controls' sim-09 filed two proposals both shaped this way — a rule field doing the work of all three fields at once — and it took the operator personally rereading and rewriting both before ratifying either. The spawn that produced the proposal is best positioned to do this separation itself, at the moment the what/when/why distinction is freshest, rather than leaving it for the orchestrator or operator to reverse-engineer afterward."
+  reason: "A rule field that silently absorbs condition-scoping or trailing justification does the work of all three fields at once, which forces the orchestrator or operator to reverse-engineer the what/when/why split before the proposal can even be evaluated. The spawn that produced the proposal is best positioned to do this separation itself, at the moment the what/when/why distinction is freshest."
 
 killed:
 

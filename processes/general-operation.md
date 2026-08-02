@@ -206,9 +206,8 @@ Runs immediately after each spawn, by default.
    already asked the spawn to do this — that self-cleanup is not guaranteed to fire correctly every
    time. Fix rule/condition/reason field-bleed directly rather than presenting it broken; flag
    (don't silently reject) anything that fails the fork test outright, with your own assessment when
-   asked. This is a named step here specifically because it was skipped in practice once already —
-   `principle-judgment` is loaded every session regardless, but using it is easy to skip under
-   session momentum unless the step is explicit.
+   asked. This is a named step here, not left implicit, because `principle-judgment` being loaded
+   every session does not guarantee it gets applied under session momentum.
 2. **Check reading candidates.** If `reading/candidates.md` in the corpora skill repo has entries
    whose `domains` match a domain this project declares, surface them alongside session proposals,
    marked `[reading pipeline: <source URL>]`. Same ratify/kill decision; ratified or killed
@@ -239,9 +238,7 @@ Runs immediately after each spawn, by default.
    write its provenance to the audit file, or call `record-gate` for it until the operator has given
    an explicit answer for that specific proposal in this specific gate. A prior gate's approval —
    in this session or any other — is never implicit approval for a new proposal, even one that looks
-   obviously fine; this has already failed once in practice (a gate's write-back and `record-gate`
-   call both ran before the operator was asked anything, because "ask once, write once" had quietly
-   become "ask once per session, write freely after").
+   obviously fine: "ask once" scopes to that one proposal, not to the rest of the session.
 5. **Assign a home.** A `direction` proposal is filed into the project's `ui-library.md`, describing
    only current state — never into a domain, never killed, never a seed candidate, and never with
    an inline provenance/history note (git history is the library's audit trail; no parallel
