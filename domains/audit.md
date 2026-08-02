@@ -1277,6 +1277,17 @@ provenance:
   kind: judgment
   provenance: "2026-08-01, same review pass, mattpocock/skills' prototype skill. Corroborated independently by wayfinder's own Prototype ticket type (also reviewed this session, 2026-08-01) — both name the same recurring need (throwaway code to answer a design/logic question) with zero prior coverage anywhere in corpora's domains. Reading-pipeline provenance flagged; ratified given the independent corroboration and the confirmed absence of existing coverage."
 
+# domain: architecture-health (new domain, seeded 2026-08-01)
+- id: scan-scope-by-recent-churn
+  domain: architecture-health
+  kind: judgment
+  provenance: "2026-08-01, drafted for ah-01 of the architecture-health capability (scoped via the same scratch queue.md dogfooding fog-before-ticket/scope-boundary-is-closed-not-silent). Adapted from mattpocock/skills' improve-codebase-architecture skill's 'scope before you scan' step. Reading-pipeline provenance flagged; ratified given the git-churn-as-signal-for-future-change reasoning holds independent of the source."
+
+- id: dont-relitigate-adr-without-real-friction
+  domain: architecture-health
+  kind: judgment
+  provenance: "2026-08-01, same drafting pass. Adapted from the same skill's ADR-conflict handling. Reading-pipeline provenance flagged; ratified as a genuine scope-boundary judgment mirroring domain-modeling's own ADR-sparingly criteria applied to consuming rather than creating an ADR."
+
 # domain: testing (mattpocock/skills review, 2026-08-01)
 - id: avoid-tautological-test-assertions
   domain: testing
@@ -1624,6 +1635,18 @@ counters:
     gate-violations: 0
     working-file-tokens: 393
     baseline-tokens: 393
+    principles-at-baseline: 0
+    kills-at-baseline: 0
+    conventions-at-baseline: 0
+  - domain: architecture-health
+    origin: project
+    since: 2026-08-01
+    ratified: 2
+    killed: 0
+    graduated: 0
+    gate-violations: 0
+    working-file-tokens: 782
+    baseline-tokens: 782
     principles-at-baseline: 0
     kills-at-baseline: 0
     conventions-at-baseline: 0

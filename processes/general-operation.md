@@ -1,6 +1,6 @@
 ---
 name: corpora:general-operation
-description: The orchestrator's session and per-spawn procedure, in order — session entry, routing, spawn composition, execution, relay, the ratify gate, post-gate maintenance, and the retrospective. Read at the start of every session and followed exactly.
+description: The orchestrator's session and per-spawn procedure, in order — session entry, routing, spawn composition, execution, relay, the ratify gate, post-gate maintenance, the retrospective, and the architecture scan. Read at the start of every session and followed exactly.
 ---
 
 # General operation
@@ -316,3 +316,12 @@ See `processes/retrospective.md` for the full trigger, composition, and procedur
 own periodic trigger, not as part of the per-unit-of-work loop above — `retrospective <domain>` (or
 `retrospective <composition-name>`, covering every domain that composition loads) is an operator
 command, not something Phase 6 ever routes into automatically.
+
+---
+
+## Phase 9 — Architecture scan
+
+See `processes/architecture-scan.md` for the full trigger, composition, and procedure. Same standalone
+posture as Phase 8: `architecture-scan [target]` is an operator command, never a mechanical trigger
+— it scans the managed project's own code rather than corpora's corpus, so the case for staying
+non-automatic is at least as strong as retrospective's.
