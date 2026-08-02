@@ -1264,6 +1264,25 @@ provenance:
   domain: coding-expo
   kind: judgment
   provenance: "2026-07-23, mined from FAMOUS's local Expo/React Native team skill docs (.agents/skills/expo-ui/references/drop-in-replacements.md). Ratified directly to seed — a silent fallback to normal React render cycle that's easy to misdiagnose as an API limitation rather than a missing prerequisite."
+
+# domain: ratify-gate (mattpocock/skills review, 2026-08-01)
+- id: separate-spec-fidelity-from-principle-compliance
+  domain: ratify-gate
+  kind: judgment
+  provenance: "2026-08-01, reviewing mattpocock/skills' code-review skill (github.com/mattpocock/skills) as part of a systematic pass through its promoted engineering/productivity skills (mps-01..mps-11, tracked in a scratch queue.md dogfooding the same-day fog-before-ticket/scope-boundary-is-closed-not-silent queue schema). Its two-axis review (Standards vs. Spec, reported separately, never merged or reranked) named a real gap: the ratify gate's own Phase 6 step 1 audits output against principles but has no structurally separate check for whether the deliverable satisfies its own task's stated acceptance criteria. Reading-pipeline provenance flagged; ratified as a genuine gap against the gate's own existing procedure, not a restatement."
+
+# domain: coding-general (mattpocock/skills review, 2026-08-01)
+- id: throwaway-prototype-capture-decision-not-code
+  domain: coding-general
+  kind: judgment
+  provenance: "2026-08-01, same review pass, mattpocock/skills' prototype skill. Corroborated independently by wayfinder's own Prototype ticket type (also reviewed this session, 2026-08-01) — both name the same recurring need (throwaway code to answer a design/logic question) with zero prior coverage anywhere in corpora's domains. Reading-pipeline provenance flagged; ratified given the independent corroboration and the confirmed absence of existing coverage."
+
+# domain: testing (mattpocock/skills review, 2026-08-01)
+- id: avoid-tautological-test-assertions
+  domain: testing
+  kind: knowledge
+  provenance: "2026-08-01, same review pass, mattpocock/skills' tdd skill. Proposed with low confidence — flagged at proposal time as reading close to universal testing-hygiene doctrine rather than a decision with a genuinely tempting alternative. Operator agreed; rejected."
+  killed: 2026-08-01
 ```
 
 <!-- corpus-script:begin — maintained by scripts/corpus.py; do not edit by hand -->
@@ -1285,13 +1304,13 @@ counters:
     kills-at-baseline: 6
     conventions-at-baseline: 0
   - domain: coding-general
-    origin: seed
+    origin: project
     since: 2026-07-23
-    ratified: 2
+    ratified: 3
     killed: 0
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 5715
+    working-file-tokens: 6016
     baseline-tokens: 5335
     principles-at-baseline: 18
     kills-at-baseline: 1
@@ -1489,13 +1508,13 @@ counters:
     kills-at-baseline: 0
     conventions-at-baseline: 0
   - domain: ratify-gate
-    origin: seed
+    origin: project
     since: 2026-07-30
-    ratified: 0
+    ratified: 1
     killed: 0
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 2418
+    working-file-tokens: 2677
     baseline-tokens: 2418
     principles-at-baseline: 9
     kills-at-baseline: 2
@@ -1588,10 +1607,10 @@ counters:
     origin: project
     since: 2026-07-30
     ratified: 0
-    killed: 0
+    killed: 1
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 1816
+    working-file-tokens: 2006
     baseline-tokens: 1816
     principles-at-baseline: 6
     kills-at-baseline: 0

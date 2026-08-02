@@ -62,6 +62,11 @@ principles:
   condition: "When a spawn writes its Artifact section and the underlying deliverable already exists as a file the orchestrator can open directly."
   reason: "The schema's 'freeform' Artifact field left an implicit default of pasting the whole document, which pays real token cost once and is then discarded when the handoff file is deleted after ratification — the diff is what the audit trail actually needs going forward. A pointer plus a diff gives the orchestrator everything the ratify gate's audit-against-principles step requires, without the throwaway cost."
 
+- id: separate-spec-fidelity-from-principle-compliance
+  rule: "At the gate, check whether the spawn's output actually satisfies its own task's stated acceptance criteria as a finding structurally separate from the principle-compliance audit — report both, never merged into one combined severity list, and never let a clean pass on one stand in for the other."
+  condition: "When auditing a spawn's handoff at the ratify gate, for any unit of work whose originating task or brief states an observable output or acceptance condition distinct from domain-principle compliance."
+  reason: "A deliverable can cleanly pass every composed domain's principles while still not being what the task actually asked for, and vice versa — merging both checks into one pass lets a strong result on one axis mask a real failure on the other, the same masking `testing`'s runtime-verification-required-not-static-checks-alone already guards against for static-vs-runtime checks, applied here to principle-compliance vs. task-fidelity instead."
+
 killed:
 
 - id: pre-scan-before-spawning

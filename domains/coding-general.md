@@ -153,6 +153,11 @@ principles:
   reason: "Separate conditionals over the same input have no structural link between them; nothing stops one from being edited while the other is missed. Keeping one branch per case, in one place, makes the coupling visible at the point of edit instead of relying on the editor's memory to update both sites."
   see-also: single-callsite-helper-scoped
 
+- id: throwaway-prototype-capture-decision-not-code
+  rule: "When building throwaway code to answer a design or logic question — does this state model feel right, what should this UI look like — rather than to ship, keep it visibly marked as throwaway and out of the production path. Once the question is answered, capture the verdict and the question it settled as prose (in the handoff, a commit, or the deciding artifact) rather than folding the prototype code itself into the real implementation."
+  condition: "When a coder- or design-composed spawn builds exploratory code specifically to answer a design or logic question before implementing for real, distinct from ordinary feature implementation."
+  reason: "Throwaway code optimized for learning fast (no tests, no error handling, no abstractions) is exactly the code most likely to get folded into production once the question is answered and it already 'works' — which then ships the shortcuts that were fine for a one-off spike but aren't fine for the real feature. Capturing the verdict as text, separately from the prototype code, keeps the decision durable without also inheriting quality debt that was never meant to survive."
+
 killed:
 
 - id: immutable-by-default

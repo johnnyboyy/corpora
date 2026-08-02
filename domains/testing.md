@@ -56,4 +56,9 @@ principles:
   reason: "File location and test-runner category describe how tests are organized, not what they actually verify — two files in the same 'unit tests' folder can be exercising completely different layers of confidence. A dated, concrete prior incident is falsifiable evidence a hypothetical risk assessment isn't, and keeps prioritization from defaulting to whichever gap is easiest to imagine rather than the one that has actually bitten this project."
 
 killed:
+
+- id: avoid-tautological-test-assertions
+  rule: "Do not write a test whose expected value is derived the same way the code under test computes it (e.g. `expect(add(a, b)).toBe(a + b)`, a snapshot hand-computed by the same logic). Expected values must come from an independent source of truth — a known-good literal, a worked example, the spec."
+  kill_type: knowledge
+  reason_killed: "Reading-pipeline sourced (mattpocock/skills' tdd skill) and close to universal testing-hygiene doctrine, not a decision with a genuinely tempting alternative anyone would rationally pick — the knowledge-risk correlation principle-judgment's reading-pipeline-provenance-flags-knowledge-risk names directly. Operator agreed with this assessment at ratification."
 ```
