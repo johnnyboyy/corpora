@@ -347,6 +347,27 @@ provenance:
       type: folded-to-preamble
       reason: "promoted: retired per v3-redesign-proposal.md; substance moved into coding-general's own preamble."
 
+- id: fog-before-ticket
+  domain: planning
+  kind: judgment
+  provenance: "2026-08-01, reviewing mattpocock/skills (github.com/mattpocock/skills) for principles transferable to corpora's own planning domain — its wayfinder skill's 'Not yet specified' / fog-of-war mechanic named a gap the queue schema had no category for: an in-scope area sensed but not yet sharp enough to state as a task or open question. Reading-pipeline provenance flagged at ratification per reading-pipeline-provenance-flags-knowledge-risk; ratified anyway because the gap is real against corpora's own existing task-is-actionable-without-planning and open-questions-are-explicit principles, not merely plausible-sounding imported doctrine."
+
+- id: scope-boundary-is-closed-not-silent
+  domain: planning
+  kind: judgment
+  provenance: "2026-08-01, same review pass as fog-before-ticket. wayfinder's 'Out of scope' section named a boundary-legibility gap: corpora's queue schema had no way to record that a task or fog entry was deliberately excluded rather than silently dropped. Reading-pipeline provenance flagged; ratified for the same reason as fog-before-ticket."
+
+- id: batch-wide-refactors-by-blast-radius
+  domain: planning
+  kind: judgment
+  provenance: "2026-08-01, same review pass. mattpocock/skills' to-tickets skill's expand-migrate-contract handling for wide mechanical refactors named a decomposition shape sequence-by-output-dependency has no coverage for — that principle's own model assumes discrete per-task outputs, which doesn't hold for a single edit with a codebase-wide blast radius. Reading-pipeline provenance flagged; ratified as a genuine gap, not a restatement."
+
+# domain: prose-craft (new domain, seeded 2026-08-01)
+- id: prefer-leading-word-over-restated-phrasing
+  domain: prose-craft
+  kind: judgment
+  provenance: "2026-08-01, same review pass as fog-before-ticket, mining mattpocock/skills' writing-great-skills reference. First proposed as a principle-judgment.md entry (judging content quality at gate time); operator redirected it to a new domain after noting the consuming moment is authoring prose, not judging whether a candidate is real judgment — a different lens than principle-judgment's own check-principle-against-consuming-lens-not-just-domain-topic exists to catch. Most of writing-great-skills' own taxonomy was screened out before this point: its 'no-op' check restates corpora's existing genuine-fork test, and most of its failure-mode vocabulary (sediment, sprawl, negation) reads as generic technical-writing knowledge rather than judgment earned from a corpora session — this is the one candidate that named a mechanism corpora had no term for. Reading-pipeline provenance flagged; scoped universal because a spawn is close to always producing some form of prose."
+
 # domain: spawn-integrity (new domain, seeded 2026-07-22)
 - id: self-check-against-composed-domains-before-finalizing
   domain: spawn-integrity
@@ -1432,13 +1453,13 @@ counters:
     kills-at-baseline: 1
     conventions-at-baseline: 0
   - domain: planning
-    origin: seed
+    origin: project
     since: 2026-07-23
-    ratified: 0
+    ratified: 3
     killed: 0
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 2312
+    working-file-tokens: 3420
     baseline-tokens: 2145
     principles-at-baseline: 5
     kills-at-baseline: 1
@@ -1573,6 +1594,18 @@ counters:
     working-file-tokens: 1816
     baseline-tokens: 1816
     principles-at-baseline: 6
+    kills-at-baseline: 0
+    conventions-at-baseline: 0
+  - domain: prose-craft
+    origin: project
+    since: 2026-08-01
+    ratified: 1
+    killed: 0
+    graduated: 0
+    gate-violations: 0
+    working-file-tokens: 393
+    baseline-tokens: 393
+    principles-at-baseline: 0
     kills-at-baseline: 0
     conventions-at-baseline: 0
 efficacy:

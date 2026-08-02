@@ -2051,16 +2051,26 @@ QUEUE_LIST_FIELDS = {"blocked-by", "blocks"}
 QUEUE_TASK_FIELDS = ("id", "title", "description", "context", "status", "blocked-by",
                      "parallel-ok", "concern", "judgment", "notes")
 QUEUE_QUESTION_FIELDS = ("id", "question", "blocks", "resolved", "answer")
+QUEUE_NYS_FIELDS = ("id", "note")
+QUEUE_OOS_FIELDS = ("id", "gist", "reason")
 QUEUE_HEADER_FIELDS = ("capability", "area", "status", "created", "updated")
+QUEUE_SECTIONS = ("tasks", "open-questions", "not-yet-specified", "out-of-scope")
 
 
 def parse_queue(path: str) -> tuple:
     """Deliberately flat parser, same style as parse_deferred/parse_chunks. Returns
-    (header, tasks, questions) — header is the top-level scalar fields; tasks/questions are lists
-    of dicts, with blocked-by/blocks parsed into real lists via _parse_inline_list."""
+    (header, tasks, questions, not_yet_specified, out_of_scope) — header is the top-level scalar
+    fields; the four lists hold dicts, with blocked-by/blocks parsed into real lists via
+    _parse_inline_list. not_yet_specified and out_of_scope carry no status/blocking fields —
+    fog isn't a task yet, and a closed scope boundary never becomes one (domains/planning.md,
+    'Fog or ticket?' / 'Out of scope')."""
     header = {}
     tasks = []
     questions = []
+    not_yet_specified = []
+    out_of_scope = []
+    lists_by_section = {"tasks": tasks, "open-questions": questions,
+                         "not-yet-specified": not_yet_specified, "out-of-scope": out_of_scope}
     section = None
     item = None
     for raw in open(path):
@@ -2070,11 +2080,10 @@ def parse_queue(path: str) -> tuple:
             if section is not None:
                 break
             continue
-        if stripped in ("tasks:", "tasks: []"):
-            section, item = "tasks", None
-            continue
-        if stripped in ("open-questions:", "open-questions: []"):
-            section, item = "open-questions", None
+        matched = next((name for name in QUEUE_SECTIONS
+                         if stripped in (f"{name}:", f"{name}: []")), None)
+        if matched:
+            section, item = matched, None
             continue
         if not stripped or stripped.startswith(("#", "```yaml")):
             continue
@@ -2085,17 +2094,20 @@ def parse_queue(path: str) -> tuple:
             continue
         if re.match(r"^\s*-\s+id:\s*", line):
             item = {}
-            (tasks if section == "tasks" else questions).append(item)
+            lists_by_section[section].append(item)
             stripped = re.sub(r"^-\s+", "", stripped)
         if item is not None and ":" in stripped:
             key, _, value = stripped.partition(":")
             key = key.strip()
             value = value.strip()
             item[key] = _parse_inline_list(value) if key in QUEUE_LIST_FIELDS else value
-    return header, tasks, questions
+    return header, tasks, questions, not_yet_specified, out_of_scope
 
 
-def render_queue(header: dict, tasks: list, questions: list) -> str:
+def render_queue(header: dict, tasks: list, questions: list,
+                  not_yet_specified: list = None, out_of_scope: list = None) -> str:
+    not_yet_specified = not_yet_specified or []
+    out_of_scope = out_of_scope or []
     lines = ["```yaml"]
     for key in QUEUE_HEADER_FIELDS:
         lines.append(f"{key}: {header.get(key, '')}")
@@ -2117,13 +2129,25 @@ def render_queue(header: dict, tasks: list, questions: list) -> str:
                 value = f"[{', '.join(value)}]" if isinstance(value, list) else (value or "[]")
             lines.append(f"    {key}: {value}")
         lines.append("")
+    lines.append("not-yet-specified:")
+    for n in not_yet_specified:
+        lines.append(f"  - id: {n.get('id', '')}")
+        for key in QUEUE_NYS_FIELDS[1:]:
+            lines.append(f"    {key}: {n.get(key, '')}")
+        lines.append("")
+    lines.append("out-of-scope:")
+    for o in out_of_scope:
+        lines.append(f"  - id: {o.get('id', '')}")
+        for key in QUEUE_OOS_FIELDS[1:]:
+            lines.append(f"    {key}: {o.get(key, '')}")
+        lines.append("")
     lines.append("```")
     return "\n".join(lines) + "\n"
 
 
 def queue_lint_problems(path: str) -> list:
     problems = []
-    header, tasks, questions = parse_queue(path)
+    header, tasks, questions, not_yet_specified, out_of_scope = parse_queue(path)
     for field in ("capability", "area", "status"):
         if not header.get(field):
             problems.append(f"{path}: missing header field {field}")
@@ -2153,6 +2177,24 @@ def queue_lint_problems(path: str) -> list:
         for blocked in q.get("blocks", []):
             if blocked and blocked not in task_ids:
                 problems.append(f"{label}: blocks references unknown task id '{blocked}'")
+    all_ids = task_ids | question_ids
+    for name, items, fields in (("not-yet-specified", not_yet_specified, QUEUE_NYS_FIELDS),
+                                 ("out-of-scope", out_of_scope, QUEUE_OOS_FIELDS)):
+        seen = set()
+        for entry in items:
+            label = f"{path} {name} {entry.get('id') or '(no id)'}"
+            if not entry.get("id"):
+                problems.append(f"{label}: missing id")
+            elif entry["id"] in seen:
+                problems.append(f"{label}: duplicate {name} id")
+            elif entry["id"] in all_ids:
+                problems.append(f"{label}: id collides with a task or question id — ids must be "
+                                 "unique across the whole queue")
+            seen.add(entry.get("id"))
+            all_ids.add(entry.get("id"))
+            for field in fields[1:]:
+                if not entry.get(field):
+                    problems.append(f"{label}: missing {field}")
     return problems
 
 
@@ -2186,7 +2228,7 @@ def cmd_queue_status(project: "Project", _args) -> None:
     if not os.path.exists(project.queue_path):
         print("no corpora/queue.md")
         return
-    header, tasks, questions = parse_queue(project.queue_path)
+    header, tasks, questions, not_yet_specified, out_of_scope = parse_queue(project.queue_path)
     tasks_by_id = {t.get("id"): t for t in tasks}
     questions_by_id = {q.get("id"): q for q in questions}
     print(f"capability: {header.get('capability', '')}")
@@ -2199,9 +2241,16 @@ def cmd_queue_status(project: "Project", _args) -> None:
     for q in questions:
         if q.get("resolved") != "true":
             print(f"  {q.get('id')}: unresolved — blocks {', '.join(q.get('blocks', [])) or '(nothing)'}")
+    if not_yet_specified:
+        print(f"not-yet-specified: {len(not_yet_specified)} — "
+              f"{', '.join(n.get('id', '') for n in not_yet_specified)}")
+    if out_of_scope:
+        print(f"out-of-scope: {len(out_of_scope)} — "
+              f"{', '.join(o.get('id', '') for o in out_of_scope)}")
 
 
-def _save_queue(project: "Project", header: dict, tasks: list, questions: list) -> None:
+def _save_queue(project: "Project", header: dict, tasks: list, questions: list,
+                 not_yet_specified: list = None, out_of_scope: list = None) -> None:
     header["updated"] = today()
     if tasks and questions is not None:
         all_tasks_complete = all(t.get("status") == "complete" for t in tasks)
@@ -2209,7 +2258,7 @@ def _save_queue(project: "Project", header: dict, tasks: list, questions: list) 
         if all_tasks_complete and all_questions_resolved:
             header["status"] = "complete"
     text = open(project.queue_path).read()
-    block = render_queue(header, tasks, questions)
+    block = render_queue(header, tasks, questions, not_yet_specified, out_of_scope)
     if "```yaml" in text and "```" in text:
         before = text.split("```yaml", 1)[0]
         after = text.split("```yaml", 1)[1].split("```", 1)[1] if "```" in text.split("```yaml", 1)[1] else ""
@@ -2223,12 +2272,12 @@ def cmd_queue_set_status(project: "Project", args) -> None:
         fail(f"no queue at {project.queue_path}")
     if args.status not in TASK_STATUS_ENUM:
         fail(f"status must be one of {sorted(TASK_STATUS_ENUM)}")
-    header, tasks, questions = parse_queue(project.queue_path)
+    header, tasks, questions, not_yet_specified, out_of_scope = parse_queue(project.queue_path)
     task = next((t for t in tasks if t.get("id") == args.id), None)
     if task is None:
         fail(f"unknown task id '{args.id}' — have: {', '.join(t.get('id', '') for t in tasks) or 'none'}")
     task["status"] = args.status
-    _save_queue(project, header, tasks, questions)
+    _save_queue(project, header, tasks, questions, not_yet_specified, out_of_scope)
     tasks_by_id = {t.get("id"): t for t in tasks}
     unblocked = [t.get("id") for t in tasks
                  if t.get("id") != args.id and t.get("status") == "pending"
@@ -2242,13 +2291,13 @@ def cmd_queue_set_status(project: "Project", args) -> None:
 def cmd_queue_resolve_question(project: "Project", args) -> None:
     if not os.path.exists(project.queue_path):
         fail(f"no queue at {project.queue_path}")
-    header, tasks, questions = parse_queue(project.queue_path)
+    header, tasks, questions, not_yet_specified, out_of_scope = parse_queue(project.queue_path)
     question = next((q for q in questions if q.get("id") == args.id), None)
     if question is None:
         fail(f"unknown question id '{args.id}' — have: {', '.join(q.get('id', '') for q in questions) or 'none'}")
     question["resolved"] = "true"
     question["answer"] = args.answer
-    _save_queue(project, header, tasks, questions)
+    _save_queue(project, header, tasks, questions, not_yet_specified, out_of_scope)
     tasks_by_id = {t.get("id"): t for t in tasks}
     unblocked = [t.get("id") for t in tasks
                  if t.get("id") in question.get("blocks", []) and t.get("status") == "pending"
@@ -2256,6 +2305,48 @@ def cmd_queue_resolve_question(project: "Project", args) -> None:
     print(f"{args.id}: resolved")
     if unblocked:
         print(f"now startable: {', '.join(unblocked)}")
+
+
+def cmd_queue_graduate(project: "Project", args) -> None:
+    """Fog-into-task is authorship, not a mechanical rename: the caller (planning spawn) writes
+    the real task into `tasks:` by hand first, exactly like any other task's initial authorship,
+    then this command deletes the now-graduated fog entry and validates the pointer isn't
+    dangling — same 'bookkeeping done by attention is bookkeeping that silently stops' concern
+    this file's queue commands already close for status transitions."""
+    if not os.path.exists(project.queue_path):
+        fail(f"no queue at {project.queue_path}")
+    header, tasks, questions, not_yet_specified, out_of_scope = parse_queue(project.queue_path)
+    entry = next((n for n in not_yet_specified if n.get("id") == args.id), None)
+    if entry is None:
+        fail(f"unknown not-yet-specified id '{args.id}' — have: "
+             f"{', '.join(n.get('id', '') for n in not_yet_specified) or 'none'}")
+    if not any(t.get("id") == args.task_id for t in tasks):
+        fail(f"--task-id '{args.task_id}' is not in tasks — add the task to the queue file first, "
+             "then graduate the fog entry it resolves")
+    not_yet_specified.remove(entry)
+    _save_queue(project, header, tasks, questions, not_yet_specified, out_of_scope)
+    print(f"{args.id}: graduated -> {args.task_id}")
+
+
+def cmd_queue_mark_out_of_scope(project: "Project", args) -> None:
+    """A scope boundary, not a route step (domains/planning.md, 'Out of scope'): moves a task or
+    a not-yet-specified entry to the out-of-scope ledger with a one-line reason, so the boundary
+    stays legible without becoming a task that could ever graduate back in."""
+    if not os.path.exists(project.queue_path):
+        fail(f"no queue at {project.queue_path}")
+    header, tasks, questions, not_yet_specified, out_of_scope = parse_queue(project.queue_path)
+    task = next((t for t in tasks if t.get("id") == args.id), None)
+    nys = next((n for n in not_yet_specified if n.get("id") == args.id), None)
+    if task is None and nys is None:
+        fail(f"unknown id '{args.id}' — not found in tasks or not-yet-specified")
+    gist = (task or nys).get("title") or (task or nys).get("note") or ""
+    if task is not None:
+        tasks.remove(task)
+    else:
+        not_yet_specified.remove(nys)
+    out_of_scope.append({"id": args.id, "gist": gist, "reason": args.reason})
+    _save_queue(project, header, tasks, questions, not_yet_specified, out_of_scope)
+    print(f"{args.id}: out of scope -> {args.reason}")
 
 
 # ── compose-spawn-prompt: mechanical, no-summarization spawn-prompt assembly ─────────────────
@@ -2689,6 +2780,14 @@ def main() -> None:
     qrq = sub.add_parser("queue-resolve-question", help="resolve an open question in-place")
     qrq.add_argument("--id", required=True)
     qrq.add_argument("--answer", required=True)
+    qg = sub.add_parser("queue-graduate", help="remove a not-yet-specified entry once the real "
+                                                "task it resolves has been added to tasks:")
+    qg.add_argument("--id", required=True, help="the not-yet-specified entry's id")
+    qg.add_argument("--task-id", required=True, help="the task id it graduated into")
+    qmo = sub.add_parser("queue-mark-out-of-scope", help="close a task or not-yet-specified "
+                                                           "entry into the out-of-scope ledger")
+    qmo.add_argument("--id", required=True, help="a task id or a not-yet-specified entry's id")
+    qmo.add_argument("--reason", required=True)
     args = ap.parse_args()
 
     no_project = {"kill-report": cmd_kill_report, "graduate-kill": cmd_graduate_kill,
@@ -2732,7 +2831,9 @@ def main() -> None:
      "verify-chunks": cmd_verify_chunks,
      "lint-queue": cmd_lint_queue, "queue-status": cmd_queue_status,
      "queue-set-status": cmd_queue_set_status,
-     "queue-resolve-question": cmd_queue_resolve_question}[args.cmd](project, args)
+     "queue-resolve-question": cmd_queue_resolve_question,
+     "queue-graduate": cmd_queue_graduate,
+     "queue-mark-out-of-scope": cmd_queue_mark_out_of_scope}[args.cmd](project, args)
 
 
 if __name__ == "__main__":

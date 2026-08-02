@@ -65,13 +65,34 @@ open-questions:
     blocks: []                   # list of task ids this question blocks
     resolved: false
     answer: ""
+
+not-yet-specified:
+  - id: nys-<nn>
+    note: "A question or area sensed as in-scope but not yet sharp enough to state precisely —
+           the dim view toward the destination, not a task to slice prematurely."
+
+out-of-scope:
+  - id: <the task or nys id that was closed out>
+    gist: "One-line restatement of what it was, for legibility without reopening the ticket."
+    reason: "Why it sits past the capability's scope."
 ```
 
 Rules:
-- `id` must be stable once written — the orchestrator uses it to mark status.
+- `id` must be stable once written — the orchestrator uses it to mark status. An id is unique
+  across the whole file — `tasks`, `open-questions`, `not-yet-specified`, and `out-of-scope` share
+  one namespace, since `queue-mark-out-of-scope` looks an id up across `tasks` and
+  `not-yet-specified` without the caller naming which.
 - A task whose `blocked-by` list is non-empty and contains any `pending` or `in-progress` ids
   cannot be started.
 - A question that is `resolved: false` blocks all tasks in its `blocks` list.
+- `not-yet-specified` carries no status or blocking fields — it isn't a task yet. An entry
+  **graduates** when it becomes sharp enough to state precisely (not when it becomes answerable):
+  add the real task to `tasks:` by hand, the same authorship as any other task, then run
+  `corpus.py queue-graduate --id <nys> --task-id <t>` to remove the fog entry and confirm the
+  pointer isn't dangling.
+- `out-of-scope` is a closed ledger: a task or `not-yet-specified` entry that turns out to sit
+  past the capability's own scope is moved there with a reason, never deleted outright and never
+  a task again. `corpus.py queue-mark-out-of-scope --id <id> --reason <text>` does the move.
 - The orchestrator updates `status` on tasks and `resolved`/`answer` on questions in-place —
   `corpus.py queue-set-status --id <t> --status <s>` and `corpus.py queue-resolve-question --id <q>
   --answer <text>`, never a hand edit; `queue-status` reads the current state (including whether a
@@ -111,6 +132,22 @@ principles:
   rule: "When setting a task's `concern` field, name the character of the work (e.g. visual, interaction, implementation) as orientation revealed it — never a composition that should perform it."
   condition: "When decomposing a capability into tasks and populating each task's `concern` field."
   reason: "Naming a composition there pre-empts a routing decision the planning spawn doesn't own, and removes the orchestrator's flexibility — e.g. it blocks the lighter surface-to-operator path for settled work, which routes off `concern`/`judgment` signals rather than a composition assignment."
+
+- id: fog-before-ticket
+  rule: "When orientation surfaces something in scope that can't yet be stated as a specific task or open question, write it to `not-yet-specified` rather than silently omitting it or forcing it into an under-specified task or question. The test for fog vs. ticket is whether the question can be stated precisely right now — not whether it can be answered right now."
+  condition: "When decomposing a capability into tasks, whenever orientation surfaces an area that is in scope but not yet sharp enough to phrase as a specific task or open question."
+  reason: "Without an explicit fog category, a planning spawn facing an unsharp-but-real area has only two bad options: omit it (the same silent-assumption risk `open-questions-are-explicit` already guards against for information gaps, applied here to scope gaps) or force it into a task/question that violates `task-is-actionable-without-planning`. Testing on precision-of-statement rather than answerability keeps the fog category from becoming a dumping ground for genuinely resolvable questions that are just inconvenient to resolve now."
+
+- id: scope-boundary-is-closed-not-silent
+  rule: "When a task or not-yet-specified entry turns out to sit past the capability's own destination, move it to `out-of-scope` with a one-line reason rather than deleting it outright or leaving it as an open task. An out-of-scope entry never graduates back into a task; if scope is later redrawn to cover it, that's a new capability, not a resumption."
+  condition: "When a task or not-yet-specified entry is judged to fall outside the capability's own scope, whether caught while first decomposing or discovered later as work proceeds."
+  reason: "Silent deletion loses the boundary decision itself — a later planning pass has no record this was considered and deliberately excluded, and may re-raise a question the capability already settled. A one-line ledger entry keeps the boundary legible without turning `out-of-scope` into a second queue that could ever be resumed from."
+
+- id: batch-wide-refactors-by-blast-radius
+  rule: "When a task's mechanical change fans out widely enough that no single vertical slice can land it as a demoable, working unit, decompose it as expand (add the new form alongside the old) then migrate in batches sized by blast radius, each batch blocked by the expand, then contract (remove the old form), blocked by every migrate batch. Do not force this shape into an ordinary vertical-slice task, and do not leave it as one oversized task."
+  condition: "When decomposing a capability whose core change is a single mechanical edit with a codebase-wide blast radius, rather than a feature built from cooperating vertical slices."
+  reason: "`sequence-by-output-dependency` assumes each task's output is a discrete deliverable other tasks consume — that model breaks when the risk isn't sequencing between distinct outputs but a single edit large enough that no task boundary keeps the codebase working mid-change."
+  see-also: sequence-by-output-dependency
 
 killed:
 
