@@ -1288,6 +1288,12 @@ provenance:
   kind: judgment
   provenance: "2026-08-01, same drafting pass. Adapted from the same skill's ADR-conflict handling. Reading-pipeline provenance flagged; ratified as a genuine scope-boundary judgment mirroring domain-modeling's own ADR-sparingly criteria applied to consuming rather than creating an ADR."
 
+# domain: planning — first retrospective, 2026-08-02
+- id: planning-states-what-not-how-or-who
+  domain: planning
+  kind: judgment
+  provenance: "2026-08-02, planning's first retrospective (triggered: working-file-tokens grew 59% over baseline). structural-kinship-condensation-candidate flagged task-describes-output-not-implementation and concern-names-work-not-role as stating the same underlying test in different words. A second candidate (open-questions-are-explicit/fog-before-ticket/scope-boundary-is-closed-not-silent) was drafted and rejected — its rule read as three routing rules stapled with 'respectively,' not one test; see-also cross-links added between those three instead. This one held up: drafted with its reason grounded independently in what information planning structurally lacks, not in citing the two instances by name, per operator's explicit request. Held as a peer of both instances (domains/audit.md's explicit-by-default/prefer-error-exposing-form precedent), not a replacement."
+
 # domain: codebase-design (new domain, seeded 2026-08-02, resolving nys-01)
 - id: deletion-test-for-suspected-shallow-module
   domain: codebase-design
@@ -1506,14 +1512,14 @@ counters:
     conventions-at-baseline: 0
   - domain: planning
     origin: project
-    since: 2026-07-23
-    ratified: 3
+    since: 2026-08-02
+    ratified: 0
     killed: 0
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 3420
-    baseline-tokens: 2145
-    principles-at-baseline: 5
+    working-file-tokens: 3805
+    baseline-tokens: 3805
+    principles-at-baseline: 9
     kills-at-baseline: 1
     conventions-at-baseline: 0
   - domain: principle-judgment

@@ -104,7 +104,7 @@ Rules:
 ---
 
 ```yaml
-last-retrospective: none
+last-retrospective: 2026-08-02
 
 principles:
 
@@ -122,26 +122,37 @@ principles:
   rule: "A question the planning spawn cannot resolve from available information must appear as an explicit open question in the queue, with the tasks it blocks listed — never a silent assumption. This includes a shared runtime concept (a current position, a selection, a history, a running count) that two or more decomposed tasks would each need to read or mutate: name the concept, state the conflict, and block every affected task rather than letting them independently decide how it behaves."
   condition: "When a decomposition decision hinges on information the planning spawn does not have — including when a capability description implies multiple tasks will operate on the same underlying runtime concept (e.g. undo + filter, pagination + sort, bookmark + search)."
   reason: "Silent assumptions compound: an unresolved question that travels silently into a task produces a deliverable built on an unknown foundation. This is especially costly for a shared concept — tasks that independently decide how it behaves are locally correct but globally inconsistent, and the conflict only surfaces at runtime, where it's expensive to fix. Making it explicit at planning time moves that cost to where it's cheap — one operator answer becomes context for every affected task."
+  see-also: fog-before-ticket, scope-boundary-is-closed-not-silent
 
 - id: task-describes-output-not-implementation
   rule: "A task description states the observable output and its acceptance condition. It does not name files, functions, types, or data paths the executing spawn should touch."
   condition: "When writing or reviewing any task description in the queue."
   reason: "Naming implementation details couples the plan to a specific approach before the implementing spawn has seen the code. It narrows the solution space unnecessarily and makes the queue wrong the moment the code diverges from the assumption — without any signal that it has. The implementing spawn's job is to decide how; the planning spawn's job is to decide what."
+  see-also: planning-states-what-not-how-or-who
 
 - id: concern-names-work-not-role
   rule: "When setting a task's `concern` field, name the character of the work (e.g. visual, interaction, implementation) as orientation revealed it — never a composition that should perform it."
   condition: "When decomposing a capability into tasks and populating each task's `concern` field."
   reason: "Naming a composition there pre-empts a routing decision the planning spawn doesn't own, and removes the orchestrator's flexibility — e.g. it blocks the lighter surface-to-operator path for settled work, which routes off `concern`/`judgment` signals rather than a composition assignment."
+  see-also: planning-states-what-not-how-or-who
 
 - id: fog-before-ticket
   rule: "When orientation surfaces something in scope that can't yet be stated as a specific task or open question, write it to `not-yet-specified` rather than silently omitting it or forcing it into an under-specified task or question. The test for fog vs. ticket is whether the question can be stated precisely right now — not whether it can be answered right now."
   condition: "When decomposing a capability into tasks, whenever orientation surfaces an area that is in scope but not yet sharp enough to phrase as a specific task or open question."
   reason: "Without an explicit fog category, a planning spawn facing an unsharp-but-real area has only two bad options: omit it (the same silent-assumption risk `open-questions-are-explicit` already guards against for information gaps, applied here to scope gaps) or force it into a task/question that violates `task-is-actionable-without-planning`. Testing on precision-of-statement rather than answerability keeps the fog category from becoming a dumping ground for genuinely resolvable questions that are just inconvenient to resolve now."
+  see-also: open-questions-are-explicit, scope-boundary-is-closed-not-silent
 
 - id: scope-boundary-is-closed-not-silent
   rule: "When a task or not-yet-specified entry turns out to sit past the capability's own destination, move it to `out-of-scope` with a one-line reason rather than deleting it outright or leaving it as an open task. An out-of-scope entry never graduates back into a task; if scope is later redrawn to cover it, that's a new capability, not a resumption."
   condition: "When a task or not-yet-specified entry is judged to fall outside the capability's own scope, whether caught while first decomposing or discovered later as work proceeds."
   reason: "Silent deletion loses the boundary decision itself — a later planning pass has no record this was considered and deliberately excluded, and may re-raise a question the capability already settled. A one-line ledger entry keeps the boundary legible without turning `out-of-scope` into a second queue that could ever be resumed from."
+  see-also: open-questions-are-explicit, fog-before-ticket
+
+- id: planning-states-what-not-how-or-who
+  rule: "A planning spawn's output states what needs to be true — a task's observable output and acceptance condition, the character of work it involves — never how it should be implemented or who (which composition) should do it."
+  condition: "When writing any part of a planning spawn's output — a task's description, its `concern` field, or any future field this domain grows — that could be read as prescribing implementation approach or composition/role assignment rather than describing the work itself."
+  reason: "The planning spawn works from only a capability description and its own orientation — it hasn't seen how the executing spawn's implementation will actually take shape, and it doesn't hold the orchestrator's live view of composition load and availability that a routing decision needs. Prescribing either past that boundary embeds a guess made with the least available information into a plan meant to reduce ambiguity — the executing spawn or the orchestrator then has to first detect and unwind that guess before they can apply the fuller information they actually have."
+  see-also: task-describes-output-not-implementation, concern-names-work-not-role
 
 - id: batch-wide-refactors-by-blast-radius
   rule: "When a task's mechanical change fans out widely enough that no single vertical slice can land it as a demoable, working unit, decompose it as expand (add the new form alongside the old) then migrate in batches sized by blast radius, each batch blocked by the expand, then contract (remove the old form), blocked by every migrate batch. Do not force this shape into an ordinary vertical-slice task, and do not leave it as one oversized task."
