@@ -67,6 +67,11 @@ principles:
   condition: "When auditing a spawn's handoff at the ratify gate, for any unit of work whose originating task or brief states an observable output or acceptance condition distinct from domain-principle compliance."
   reason: "A deliverable can cleanly pass every composed domain's principles while still not being what the task actually asked for, and vice versa — merging both checks into one pass lets a strong result on one axis mask a real failure on the other, the same masking `testing`'s runtime-verification-required-not-static-checks-alone already guards against for static-vs-runtime checks, applied here to principle-compliance vs. task-fidelity instead."
 
+- id: verify-artifact-not-reported-status
+  rule: "When processing a spawn's handoff, check the actual artifact it produced — the real diff, file contents, or test output — rather than treating its self-reported status field or narrative claim of success as sufficient evidence on its own."
+  condition: "Processing any handoff whose status claims completion, a fix, or passing verification."
+  reason: "A spawn's own status field is exactly the kind of self-report the operator can't independently observe happening — the same gap `spawn-token-summary` exists to close for cost, applied here to correctness. A reported 'complete' status is a claim, not evidence; the artifact it points to is the evidence."
+
 killed:
 
 - id: pre-scan-before-spawning

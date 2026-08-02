@@ -100,6 +100,27 @@ principles:
   reason: "A task can touch many files within one judgment class (e.g. plumbing) cheaply, or few files across several classes expensively — judgment-class diversity, not file count, is the actual cost driver, so file count alone (`decompose-large-tasks-before-spawning`'s existing trigger) can miss a task that is actually oversized. Bundling unrelated judgment classes into one task also forces whoever reviews it to hold all of them in mind at once, which is itself a review-quality cost independent of execution cost."
   see-also: decompose-large-tasks-before-spawning
 
+- id: parallel-dispatch-requires-verified-independence
+  rule: "Dispatch multiple isolated agents in parallel only for problems verified independent — no shared state, no fix-one-might-fix-others risk — issuing all dispatches in the same turn. Never dispatch more than one implementation agent in parallel against the same working tree or branch, even when the underlying tasks are logically independent. After parallel agents return, check their changes for conflicts before treating the batch as integrated."
+  condition: "Facing 2+ ostensibly separate failures, subsystems, or problems that could plausibly be delegated to concurrent agents, or deciding how to sequence multiple implementation tasks against the same codebase."
+  reason: "Two failures that look separate can still share a root cause or touch the same state — dispatching independently risks conflicting fixes that only surface at integration. Implementation agents carry a sharper version of the same risk: even logically independent tasks write to the same working tree, so parallel implementation dispatch risks colliding edits regardless of task independence — investigation and review agents don't carry this risk because they only read."
+
+- id: model-tier-by-task-complexity
+  rule: "When dispatching an isolated spawn, choose the model tier by the judgment the task actually requires — a fast/cheap model for mechanical work with a complete, unambiguous spec touching few files; a standard model for multi-file integration or pattern-matching; the most capable model for architecture, design, or broad-context judgment calls. Specify the model explicitly — an unset model silently inherits the orchestrator's own tier for every spawn."
+  condition: "Dispatching any isolated spawn where the platform supports selecting a model tier."
+  reason: "Turn count, not just per-token price, drives real cost — a cheap model given work past its judgment ceiling routinely takes several times as many turns to converge, which can cost more overall than a single pass on a stronger model. Leaving the model unset defaults every spawn to the orchestrator's own tier regardless of what the task needs, silently paying the most expensive rate for mechanical work."
+
+- id: bounded-fix-loop-then-forced-disposition
+  rule: "Cap fix-then-review rounds on the same finding at a small fixed number. Before hitting the cap, escalate — a fresh agent, a higher-capability model tier, or both — rather than resuming the same agent at the same capability again. At the cap, stop looping and explicitly dispose of every still-open finding: fixed, or ruled on with the ruling recorded — never left implicitly abandoned by simply moving on."
+  condition: "A fix-then-review loop on the same finding(s) has not converged after multiple rounds."
+  reason: "An uncapped loop risks silently consuming unbounded effort on a stall that repeated attempts at the same capability won't break — escalating capability partway through is a genuinely different intervention than another attempt at the same level, and a hard cap forces an explicit decision instead of the loop simply petering out with the finding's fate never recorded."
+  see-also: repeated-fix-failure-questions-architecture
+
+- id: dont-pre-judge-reviewer-findings
+  rule: "When dispatching a reviewer, never instruct it to skip, downgrade, or not flag a specific issue you anticipate. If you believe a finding would be a false positive, let the reviewer raise it and adjudicate it afterward rather than filtering it out of the review itself."
+  condition: "Writing a review dispatch prompt, when tempted to add an instruction narrowing what the reviewer should flag."
+  reason: "An instruction that pre-filters findings collapses the reviewer's independence into a rubber stamp for whatever the dispatcher already believes — the value of an external review is specifically that it isn't primed by the producer's own assumptions, and adjudicating a raised-then-rejected finding costs less than silently losing a real one to a pre-emptive filter."
+
 killed:
 
 - id: prefer-independent-evaluation

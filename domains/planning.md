@@ -160,6 +160,17 @@ principles:
   reason: "`sequence-by-output-dependency` assumes each task's output is a discrete deliverable other tasks consume — that model breaks when the risk isn't sequencing between distinct outputs but a single edit large enough that no task boundary keeps the codebase working mid-change."
   see-also: sequence-by-output-dependency
 
+- id: no-placeholder-content-in-task-steps
+  rule: "A task's content must be the actual material an implementer needs, not a placeholder standing in for it. Reject and rewrite text like 'add appropriate error handling,' 'handle edge cases,' 'similar to Task N' (without repeating what that means here), or a reference to a type/function/method not defined anywhere in the plan."
+  condition: "Writing or reviewing any task's steps or descriptions in a plan or task queue."
+  reason: "A vague placeholder phrase reads as if it specifies something while actually deferring the real decision to whoever executes it — the same gap `task-is-actionable-without-planning` guards against for a task as a whole, applied here to the prose habit of writing confident-sounding but hollow instructions within an otherwise-actionable task. Generating this kind of plausible-but-empty text is a natural failure mode when drafting a plan, since it pattern-matches to what a real instruction looks like."
+  see-also: task-is-actionable-without-planning
+
+- id: verify-interface-consistency-across-tasks
+  rule: "Before finalizing a decomposition, check that any name, signature, or type one task defines and a later task depends on is used identically across both — same function or type name, same parameters, same return shape. A mismatch is a plan defect, not a detail to reconcile during implementation."
+  condition: "Multiple tasks in one decomposition depend on interfaces (functions, types, data shapes) defined by an earlier task in the same decomposition."
+  reason: "Tasks are drafted in sequence but read independently by whoever executes them — a name that drifts between the task that defines it and the task that depends on it is invisible within either task read alone, and only surfaces once the dependent task's implementer discovers the mismatch, after commitment already happened."
+
 killed:
 
 - id: surface-shared-concept-before-implementation

@@ -60,6 +60,17 @@ principles:
   condition: "Writing or fixing a test that waits on asynchronous behavior or eventual state."
   reason: "An arbitrary delay encodes a guess about how long an operation takes on a given machine under a given load — it passes when the guess happens to be generous enough and fails intermittently otherwise, which is exactly the profile of a flaky test. Waiting on the condition itself ties the test's timing to the actual behavior instead of an assumption about it."
 
+- id: watch-test-fail-before-implementing
+  rule: "When adding a test for new behavior or a bug fix, write the test before the implementation and run it to confirm it fails for the expected reason — not a typo or setup error — before writing the code that makes it pass."
+  condition: "Adding a test that doesn't yet have a passing implementation behind it — new behavior or a bug fix, not a test added after the fact for already-shipped behavior."
+  reason: "A test written after the code it verifies, or never watched failing, hasn't been proven capable of catching the defect it claims to guard against — it may assert on the implementation you just wrote rather than the actual required behavior, and a test that passes on its first run provides no evidence either way."
+  see-also: reproduce-as-failing-test-before-fixing
+
+- id: reverify-after-state-changes-not-from-memory
+  rule: "Re-run verification (tests, build, typecheck) on the actual current state of the code before treating it as passing — a prior green run does not carry forward across a merge, rebase, or further edits."
+  condition: "Before reporting work verified, complete, or ready-to-integrate, when the tree has changed (a merge, a rebase, additional edits) since verification last actually ran."
+  reason: "A verification result is a claim about the exact tree it ran against — treating it as still true after the tree changes substitutes memory for evidence, the same gap `runtime-verification-required-not-static-checks-alone` names for static-vs-runtime checks, applied here to time instead of check type."
+
 killed:
 
 - id: avoid-tautological-test-assertions

@@ -1362,6 +1362,75 @@ provenance:
   domain: debugging
   kind: judgment
   provenance: "2026-08-02, mined from superpowers:systematic-debugging's defense-in-depth.md supporting-technique file, abstracted away from its source's specific four-named-layers framing to the transferable rule (validate at every layer bad data crosses)."
+
+# superpowers skill-mining queue, second wave (2026-08-02): dispatching-parallel-agents,
+# subagent-driven-development, receiving-code-review, test-driven-development,
+# finishing-a-development-branch, verification-before-completion, writing-plans, writing-skills.
+# executing-plans, requesting-code-review, using-git-worktrees, using-superpowers, and brainstorming
+# contributed nothing new — either pure superpowers-mechanism (git worktree/branch mechanics, plan-doc
+# pipeline scaffolding), already covered by an existing corpora principle, or (brainstorming's
+# "every project needs a full design regardless of simplicity") in direct conflict with corpora's
+# already-settled lighter-path principles (spawn-threshold-is-spec-scope,
+# design-pattern-application-lighter-path) and deliberately not imported.
+
+- id: parallel-dispatch-requires-verified-independence
+  domain: orchestrator-routing
+  kind: judgment
+  provenance: "2026-08-02, mined from superpowers:dispatching-parallel-agents (independence check before fan-out) merged with superpowers:subagent-driven-development's stricter same-working-tree rule for implementation agents specifically."
+- id: model-tier-by-task-complexity
+  domain: orchestrator-routing
+  kind: judgment
+  provenance: "2026-08-02, mined from superpowers:subagent-driven-development's Model Selection section. Genuinely new axis for corpora — no existing principle governs model-tier choice, only domain/composition choice."
+- id: bounded-fix-loop-then-forced-disposition
+  domain: orchestrator-routing
+  kind: judgment
+  provenance: "2026-08-02, mined from superpowers:subagent-driven-development's fix-loop/breaker/adjudication mechanism, generalized past its source's specific 5-round cap and ledger format to the transferable rule (cap, escalate before the cap, force a recorded disposition at the cap)."
+- id: dont-pre-judge-reviewer-findings
+  domain: orchestrator-routing
+  kind: judgment
+  provenance: "2026-08-02, mined from superpowers:subagent-driven-development's task-review dispatch guidance ('never instruct a reviewer to ignore or not flag a specific issue')."
+- id: verify-artifact-not-reported-status
+  domain: ratify-gate
+  kind: judgment
+  provenance: "2026-08-02, mined from superpowers:verification-before-completion's 'Agent delegation: check VCS diff, don't trust agent report' row. Filed here rather than a new domain — it's the same class of judgment as artifact-points-to-persisted-file-not-full-reproduction, applied to verification instead of reproduction cost."
+- id: watch-test-fail-before-implementing
+  domain: testing
+  kind: judgment
+  provenance: "2026-08-02, mined from superpowers:test-driven-development's RED step. Kept the verified-failure discipline, deliberately left out the source's absolute 'delete and restart, never adapt' enforcement mechanic as too rigid for a weighable principle — the practical effect is already captured by requiring the test exist and fail before the implementation does."
+- id: reverify-after-state-changes-not-from-memory
+  domain: testing
+  kind: judgment
+  provenance: "2026-08-02, mined from superpowers:finishing-a-development-branch's Common Rationalizations table ('Tests passed earlier this session' / 'A green run only proves the tree it ran on')."
+- id: no-placeholder-content-in-task-steps
+  domain: planning
+  kind: judgment
+  provenance: "2026-08-02, mined from superpowers:writing-plans' 'No Placeholders' section, generalized past its source's plan-document-specific examples to task content generally."
+- id: verify-interface-consistency-across-tasks
+  domain: planning
+  kind: judgment
+  provenance: "2026-08-02, mined from superpowers:writing-plans' self-review step (\"clearLayers() in Task 3 but clearFullLayers() in Task 7\")."
+- id: phrase-rule-form-to-match-the-guarded-failure
+  domain: principle-judgment
+  kind: judgment
+  provenance: "2026-08-02, mined from superpowers:writing-skills' 'Match the Form to the Failure' and 'no nuance clauses' sections, applied to corpora's own rule-authoring practice rather than skill-doc authoring. Notable as a mined principle about how corpora principles themselves should be phrased — checked for self-consistency against principle-judgment's own existing entries, no conflict found."
+
+# domain: code-review-reception (new domain, seeded 2026-08-02, mined from superpowers:receiving-code-review)
+- id: verify-feedback-against-codebase-before-implementing
+  domain: code-review-reception
+  kind: judgment
+  provenance: "2026-08-02, mined from superpowers:receiving-code-review's 'From External Reviewers' checklist."
+- id: clarify-all-unclear-items-before-implementing-any
+  domain: code-review-reception
+  kind: judgment
+  provenance: "2026-08-02, mined from superpowers:receiving-code-review's 'Handling Unclear Feedback' section."
+- id: push-back-on-review-feedback-you-can-show-is-wrong
+  domain: code-review-reception
+  kind: judgment
+  provenance: "2026-08-02, mined from superpowers:receiving-code-review's 'When To Push Back' section, stripped of its source's tone/anti-sycophancy phrasing (already governed by this environment's own default behavior) down to the substantive verify-then-push-back judgment."
+- id: verify-usage-before-implementing-reviewer-completeness-request
+  domain: code-review-reception
+  kind: judgment
+  provenance: "2026-08-02, mined from superpowers:receiving-code-review's 'YAGNI Check for Professional Features' section."
 ```
 
 <!-- corpus-script:begin — maintained by scripts/corpus.py; do not edit by hand -->
@@ -1541,23 +1610,23 @@ counters:
   - domain: orchestrator-routing
     origin: seed
     since: 2026-07-23
-    ratified: 0
+    ratified: 4
     killed: 2
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 4029
+    working-file-tokens: 5049
     baseline-tokens: 3460
     principles-at-baseline: 16
     kills-at-baseline: 1
     conventions-at-baseline: 0
   - domain: planning
-    origin: project
+    origin: seed
     since: 2026-08-02
-    ratified: 0
+    ratified: 2
     killed: 0
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 3805
+    working-file-tokens: 4277
     baseline-tokens: 3805
     principles-at-baseline: 9
     kills-at-baseline: 1
@@ -1565,11 +1634,11 @@ counters:
   - domain: principle-judgment
     origin: seed
     since: 2026-07-30
-    ratified: 0
+    ratified: 1
     killed: 0
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 3622
+    working-file-tokens: 4005
     baseline-tokens: 3620
     principles-at-baseline: 11
     kills-at-baseline: 0
@@ -1587,13 +1656,13 @@ counters:
     kills-at-baseline: 0
     conventions-at-baseline: 0
   - domain: ratify-gate
-    origin: project
+    origin: seed
     since: 2026-07-30
-    ratified: 1
+    ratified: 2
     killed: 0
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 2677
+    working-file-tokens: 2855
     baseline-tokens: 2418
     principles-at-baseline: 9
     kills-at-baseline: 2
@@ -1685,11 +1754,11 @@ counters:
   - domain: testing
     origin: seed
     since: 2026-07-30
-    ratified: 1
+    ratified: 3
     killed: 1
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 2223
+    working-file-tokens: 2623
     baseline-tokens: 1816
     principles-at-baseline: 6
     kills-at-baseline: 0
@@ -1740,6 +1809,18 @@ counters:
     working-file-tokens: 1814
     baseline-tokens: 1814
     principles-at-baseline: 8
+    kills-at-baseline: 0
+    conventions-at-baseline: 0
+  - domain: code-review-reception
+    origin: seed
+    since: 2026-08-02
+    ratified: 0
+    killed: 0
+    graduated: 0
+    gate-violations: 0
+    working-file-tokens: 1019
+    baseline-tokens: 1019
+    principles-at-baseline: 4
     kills-at-baseline: 0
     conventions-at-baseline: 0
 efficacy:

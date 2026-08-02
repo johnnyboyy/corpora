@@ -86,5 +86,10 @@ principles:
   condition: "Deduping a candidate (from any source — reading pipeline, session harvest, a fresh proposal) against a domain's killed: log."
   reason: "kill_type: container exists specifically to distinguish 'this was wrong' from 'this was right but misplaced' — collapsing both into a single dedupe check that always skips a match throws away the container case's whole point, which is that the same content deserves a second look at the right home, not permanent suppression."
 
+- id: phrase-rule-form-to-match-the-guarded-failure
+  rule: "Match a principle's rule phrasing to the failure it guards against. A discipline that gets knowingly skipped under pressure needs a clear prohibition with its reason attached — soft phrasing ('prefer', 'consider') invites negotiation. Output that comes out the wrong shape (bloated, buried, restated) needs a positive statement of what the output actually consists of, not a prohibition list — prohibitions on a shaping problem tend to produce more of the unwanted content, not less. Once a rule's phrasing is working, express a newly-found exception as its own separately conditioned case, never as a trailing nuance clause ('...unless it matters') appended to the existing rule."
+  condition: "Drafting or refining a principle's rule text at the ratify gate or during a retrospective, especially when extending an existing rule to cover a newly-found exception."
+  reason: "A prohibition invites negotiation under a competing pressure ('don't X' vs. 'but I need to X for this other reason') — effective for a discipline being knowingly skipped, but a shaping problem isn't a temptation being resisted, it's an ill-defined target, so naming the correct shape directly leaves nothing to negotiate against. A trailing nuance clause reopens the same negotiation a clean prohibition was resisting, weakening a rule that previously bound cleanly — a genuine exception needs its own explicit condition to weigh, not a soft escape hatch stapled onto the general case."
+
 killed:
 ```
