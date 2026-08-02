@@ -1322,6 +1322,46 @@ provenance:
   kind: knowledge
   provenance: "2026-08-01, same review pass, mattpocock/skills' tdd skill. Proposed with low confidence — flagged at proposal time as reading close to universal testing-hygiene doctrine rather than a decision with a genuinely tempting alternative. Operator agreed; rejected."
   killed: 2026-08-01
+
+# domain: testing (superpowers:systematic-debugging mining, 2026-08-02)
+- id: wait-for-condition-not-arbitrary-delay
+  domain: testing
+  kind: judgment
+  provenance: "2026-08-02, mined from superpowers:systematic-debugging's condition-based-waiting.md supporting-technique file. Passed the genuine-fork test — an agent writing an async test defaults to a guessed sleep duration unless it deliberately reaches for condition polling instead."
+
+# domain: debugging (new domain, seeded 2026-08-02, mined from superpowers:systematic-debugging)
+- id: root-cause-before-fix
+  domain: debugging
+  kind: judgment
+  provenance: "2026-08-02, mined from superpowers:systematic-debugging SKILL.md's Phase 1 / Iron Law. Checked against principle-judgment's reading-pipeline-provenance-flags-knowledge-risk and consuming-lens-includes-agent-vs-human-gap: the guarded-against lapse is applying a guessed fix under task-framing pressure, not a human memory/habit failure, so it clears despite the reading-pipeline source."
+- id: fix-at-source-not-symptom
+  domain: debugging
+  kind: judgment
+  provenance: "2026-08-02, mined from superpowers:systematic-debugging's root-cause-tracing.md supporting-technique file."
+- id: single-hypothesis-minimal-test-reform-on-failure
+  domain: debugging
+  kind: judgment
+  provenance: "2026-08-02, mined from superpowers:systematic-debugging SKILL.md's Phase 3. Merged two adjacent phase steps (single-hypothesis testing and reform-on-failure) into one principle at mining time — both are the same hypothesis-testing loop rather than independent decision points, per mined-workflow-stays-a-workflow's economy concern."
+- id: repeated-fix-failure-questions-architecture
+  domain: debugging
+  kind: judgment
+  provenance: "2026-08-02, mined from superpowers:systematic-debugging SKILL.md's Phase 4.5 (3+ failed fixes). The most concrete/non-generic of the mined set — a specific threshold an agent's own iteration loop would otherwise keep pushing past."
+- id: compare-against-complete-reference
+  domain: debugging
+  kind: judgment
+  provenance: "2026-08-02, mined from superpowers:systematic-debugging SKILL.md's Phase 2. Reframed toward the agent-specific pressure (context-budget-driven partial reads) rather than the source's human-habit framing, per consuming-lens-includes-agent-vs-human-gap."
+- id: state-uncertainty-instead-of-plausible-guess
+  domain: debugging
+  kind: judgment
+  provenance: "2026-08-02, mined from superpowers:systematic-debugging SKILL.md's Phase 3 ('When You Don't Know') and Common Rationalizations table. Weakest-margin entry of the mined set — bordering on generic honesty advice — kept because the specific failure mechanism (a model's plausible-continuation bias) is agent-structural, the same species of tell as ratify-gate's narrated-computation-is-sufficient-utility-evidence."
+- id: reproduce-as-failing-test-before-fixing
+  domain: debugging
+  kind: judgment
+  provenance: "2026-08-02, mined from superpowers:systematic-debugging SKILL.md's Phase 4. Filed here rather than testing.md — it's specifically about fix-cycle ordering, not general test-authoring judgment."
+- id: validate-at-every-layer-after-root-cause
+  domain: debugging
+  kind: judgment
+  provenance: "2026-08-02, mined from superpowers:systematic-debugging's defense-in-depth.md supporting-technique file, abstracted away from its source's specific four-named-layers framing to the transferable rule (validate at every layer bad data crosses)."
 ```
 
 <!-- corpus-script:begin — maintained by scripts/corpus.py; do not edit by hand -->
@@ -1337,7 +1377,7 @@ counters:
     killed: 0
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 9700
+    working-file-tokens: 9703
     baseline-tokens: 9663
     principles-at-baseline: 35
     kills-at-baseline: 6
@@ -1349,7 +1389,7 @@ counters:
     killed: 0
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 6016
+    working-file-tokens: 6019
     baseline-tokens: 5335
     principles-at-baseline: 18
     kills-at-baseline: 1
@@ -1361,7 +1401,7 @@ counters:
     killed: 0
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 1137
+    working-file-tokens: 1141
     baseline-tokens: 1119
     principles-at-baseline: 5
     kills-at-baseline: 0
@@ -1373,7 +1413,7 @@ counters:
     killed: 0
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 4629
+    working-file-tokens: 4632
     baseline-tokens: 4465
     principles-at-baseline: 12
     kills-at-baseline: 10
@@ -1385,7 +1425,7 @@ counters:
     killed: 0
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 1547
+    working-file-tokens: 1550
     baseline-tokens: 1547
     principles-at-baseline: 5
     kills-at-baseline: 2
@@ -1505,7 +1545,7 @@ counters:
     killed: 2
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 4128
+    working-file-tokens: 4029
     baseline-tokens: 3460
     principles-at-baseline: 16
     kills-at-baseline: 1
@@ -1529,7 +1569,7 @@ counters:
     killed: 0
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 3620
+    working-file-tokens: 3622
     baseline-tokens: 3620
     principles-at-baseline: 11
     kills-at-baseline: 0
@@ -1577,7 +1617,7 @@ counters:
     killed: 0
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 2208
+    working-file-tokens: 2193
     baseline-tokens: 1592
     principles-at-baseline: 3
     kills-at-baseline: 3
@@ -1637,19 +1677,19 @@ counters:
     killed: 0
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 2545
+    working-file-tokens: 2546
     baseline-tokens: 2545
     principles-at-baseline: 10
     kills-at-baseline: 0
     conventions-at-baseline: 0
   - domain: testing
-    origin: project
+    origin: seed
     since: 2026-07-30
-    ratified: 0
+    ratified: 1
     killed: 1
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 2006
+    working-file-tokens: 2223
     baseline-tokens: 1816
     principles-at-baseline: 6
     kills-at-baseline: 0
@@ -1688,6 +1728,18 @@ counters:
     working-file-tokens: 1774
     baseline-tokens: 1774
     principles-at-baseline: 0
+    kills-at-baseline: 0
+    conventions-at-baseline: 0
+  - domain: debugging
+    origin: seed
+    since: 2026-08-02
+    ratified: 0
+    killed: 0
+    graduated: 0
+    gate-violations: 0
+    working-file-tokens: 1814
+    baseline-tokens: 1814
+    principles-at-baseline: 8
     kills-at-baseline: 0
     conventions-at-baseline: 0
 efficacy:

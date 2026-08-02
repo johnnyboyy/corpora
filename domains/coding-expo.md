@@ -3,7 +3,7 @@ subject: coding
 posture: guardrail
 applies-when:
   - framework: [expo, react-native]
-units-of-work: [implement-feature]
+units-of-work: [implement-feature, debug-issue]
 universal: false
 ---
 

@@ -1,7 +1,7 @@
 ---
 subject: coding
 posture: guardrail
-units-of-work: [implement-feature]
+units-of-work: [implement-feature, debug-issue]
 universal: false
 ---
 

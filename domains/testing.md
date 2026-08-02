@@ -1,7 +1,7 @@
 ---
 subject: coding
 posture: guardrail
-units-of-work: [implement-feature]
+units-of-work: [implement-feature, debug-issue]
 universal: false
 ---
 
@@ -54,6 +54,11 @@ principles:
   rule: "When assessing how well a test suite covers the application's actual behavior, inventory by the layer each test actually exercises (pure logic vs. the interactive/rendered layer) and check that against the real user-facing paths a person or caller actually takes — not by file location or test-runner category. Cite a concrete, dated instance of this project already having shipped a bug on a given path as stronger risk evidence than a hypothetical when prioritizing which gaps matter."
   condition: "When explicitly assessing test coverage (not routine test-writing alongside a feature, which `feature-level-test-by-default` already covers)."
   reason: "File location and test-runner category describe how tests are organized, not what they actually verify — two files in the same 'unit tests' folder can be exercising completely different layers of confidence. A dated, concrete prior incident is falsifiable evidence a hypothetical risk assessment isn't, and keeps prioritization from defaulting to whichever gap is easiest to imagine rather than the one that has actually bitten this project."
+
+- id: wait-for-condition-not-arbitrary-delay
+  rule: "When a test needs to wait for an async operation or eventual state change, poll for the actual condition it depends on rather than sleeping a guessed duration. Reserve a fixed delay for the rare case of testing timing behavior itself (a debounce or throttle interval), and state explicitly why the delay is needed when one is used."
+  condition: "Writing or fixing a test that waits on asynchronous behavior or eventual state."
+  reason: "An arbitrary delay encodes a guess about how long an operation takes on a given machine under a given load — it passes when the guess happens to be generous enough and fails intermittently otherwise, which is exactly the profile of a flaky test. Waiting on the condition itself ties the test's timing to the actual behavior instead of an assumption about it."
 
 killed:
 
