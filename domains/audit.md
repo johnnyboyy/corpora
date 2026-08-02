@@ -1288,6 +1288,28 @@ provenance:
   kind: judgment
   provenance: "2026-08-01, same drafting pass. Adapted from the same skill's ADR-conflict handling. Reading-pipeline provenance flagged; ratified as a genuine scope-boundary judgment mirroring domain-modeling's own ADR-sparingly criteria applied to consuming rather than creating an ADR."
 
+# domain: codebase-design (new domain, seeded 2026-08-02, resolving nys-01)
+- id: deletion-test-for-suspected-shallow-module
+  domain: codebase-design
+  kind: judgment
+  provenance: "2026-08-02, drafted for cd-01, graduated from nys-01 (the architecture-health capability's scratch queue flagged corpora had no formal deep-module vocabulary). Adapted from mattpocock/skills' codebase-design skill. Reading-pipeline provenance flagged; ratified as a genuine diagnostic — routes the shallow-vs-earning-its-keep question onto what happens to the complexity, not whether the module currently exists."
+
+- id: interface-is-the-test-surface
+  domain: codebase-design
+  kind: judgment
+  provenance: "2026-08-02, same drafting pass. Reading-pipeline provenance flagged; ratified — treats a test forced past a module's interface as a design smell in the interface's shape rather than a reason to test around it."
+
+- id: two-adapters-before-a-real-seam
+  domain: codebase-design
+  kind: judgment
+  provenance: "2026-08-02, same drafting pass. Operator noted this reads as somewhat generic (echoes YAGNI) but judged the framing worth keeping — a concrete, actionable resolution rule (wait for the second adapter) rather than the YAGNI slogan alone. Reading-pipeline provenance flagged; ratified on operator's explicit call."
+
+- id: depth-is-a-property-of-the-interface
+  domain: codebase-design
+  kind: judgment
+  provenance: "2026-08-02, same drafting pass. Operator asked for my own assessment; I flagged it as duplicating the Glossary's own Depth definition rather than adding a separate decision — closer to elaboration than a genuine fork. Operator agreed; folded into the Glossary's Depth entry instead of ratified as a standalone principle."
+  killed: 2026-08-02
+
 # domain: testing (mattpocock/skills review, 2026-08-01)
 - id: avoid-tautological-test-assertions
   domain: testing
@@ -1647,6 +1669,18 @@ counters:
     gate-violations: 0
     working-file-tokens: 782
     baseline-tokens: 782
+    principles-at-baseline: 0
+    kills-at-baseline: 0
+    conventions-at-baseline: 0
+  - domain: codebase-design
+    origin: project
+    since: 2026-08-02
+    ratified: 3
+    killed: 1
+    graduated: 0
+    gate-violations: 0
+    working-file-tokens: 1774
+    baseline-tokens: 1774
     principles-at-baseline: 0
     kills-at-baseline: 0
     conventions-at-baseline: 0
