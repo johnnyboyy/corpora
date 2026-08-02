@@ -122,7 +122,8 @@ For every project, create `corpora/deterministic-shortcut-candidates.md` from `k
 with an empty `candidates: []` list.
 
 **Offer the default-pool import.** A freshly-bootstrapped project's `corpora/domains/` starts
-empty — there is no automatic seed inclusion (`kernel.md`, "Project corpora"). Ask the operator
+empty — there is no automatic inclusion of this skill's own domains (`kernel.md`, "Project
+corpora"). Ask the operator
 whether to bulk-import this skill's default pool now (`corpus.py import-default-pool`), which
 proposes every principle and convention whose `applies-when` already matches the shape just
 recorded, as one batch of candidates in `corpora/import-candidates.md`, ready to ratify. This is

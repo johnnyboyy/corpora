@@ -1,13 +1,18 @@
-# Audit record — kernel-seed layer
+# Audit record — this skill's own domain pool
 
-Provenance and per-kill audit detail for every kernel-seed domain — stack-agnostic
-(`coding-general`, `orchestrator-routing`, `ratify-gate`, `planning`, `interviewing`,
-`spawn-integrity`) and stack-specific (`coding-ts`, `coding-react`, `coding-nextjs`, `css`, `color`,
-`surfaces-elevation`, `visual-hierarchy`, `motion`, `wizards-flows`, `ranking-evaluation`,
-`lists-selection`, `validation-feedback`, `forms-inputs`, `recoverability`, `design-method`) alike,
-now that `role-pack` no longer gates a separate pack layer — see the merge note below. Loaded only
-at ratify/retrospective time — never in a spawn's working context. Keyed by principle `id`, each
-noting its `domain`. See `kernel.md`, "Storage: working vs audit." (Kill logs live in the per-domain
+Provenance and per-kill audit detail for every domain in this skill's own `domains/` — the four
+domains corpora's own operation loads directly (`orchestrator-routing`, `ratify-gate`,
+`principle-judgment`, `retrospective`) alongside every other stack-agnostic
+(`coding-general`, `planning`, `interviewing`, `spawn-integrity`) and stack-specific (`coding-ts`,
+`coding-react`, `coding-nextjs`, `css`, `color`, `surfaces-elevation`, `visual-hierarchy`, `motion`,
+`wizards-flows`, `ranking-evaluation`, `lists-selection`, `validation-feedback`, `forms-inputs`,
+`recoverability`, `design-method`) domain that has accumulated here — this repository is not a
+privileged layer a project's principle gets "promoted" into; it is one domains-dir among any,
+symmetric with a project's own `corpora/domains/`, importable and imported-from the same way
+(`kernel.md`, "Project corpora"). `role-pack` no longer gates a separate pack layer here either —
+see the merge note below. Loaded only at ratify/retrospective time — never in a spawn's working
+context. Keyed by principle `id`, each noting its `domain`. See `kernel.md`, "Storage: working vs
+audit." (Kill logs live in the per-domain
 working files so they are available in the working context.)
 
 > **Web-frontend domain merge (2026-07-22).** The former web-frontend pack layer's domains and audit history were merged flat into this single kernel-seed layer once `role-pack` was retired as a project-config concept (see kernel.md, "Project corpora") — every stack-specific domain now states its own load condition directly against `language`/`framework`/`styling`/`has-ui`, rather than through a pack-name indirection. The provenance entries from that merged layer carry their own migration note below.
@@ -1431,6 +1436,23 @@ provenance:
   domain: code-review-reception
   kind: judgment
   provenance: "2026-08-02, mined from superpowers:receiving-code-review's 'YAGNI Check for Professional Features' section."
+
+# domain: retrospective — seed/project layer distinction retired (point 2 of the operator's
+# 2026-08-02 three-point plan; point 1 was named cross-root dispatch, point 3 was scripted
+# import/provenance). Operator's framing: "There isn't really a concept of layers anymore.
+# Domains can be imported across projects the same as from within the corpora domains dir."
+- id: complementary-principles-signal-abstraction-candidate
+  domain: retrospective
+  kind: judgment
+  provenance: "2026-08-02, operator-authored direction, replacing seed-promotion-candidate's stack-agnostic-wording test with a stronger evidence bar: two or more jointly-necessary principles, not one principle's condition merely reading general."
+- id: seed-promotion-candidate
+  domain: retrospective
+  provenance: "Predates individual per-principle provenance tracking in this file."
+  killed: 2026-08-02
+- id: single-project-shape-principle-stays-provisional
+  domain: retrospective
+  provenance: "Predates individual per-principle provenance tracking in this file."
+  killed: 2026-08-02
 ```
 
 <!-- corpus-script:begin — maintained by scripts/corpus.py; do not edit by hand -->
@@ -1440,7 +1462,6 @@ provenance:
 ```yaml
 counters:
   - domain: coding-expo
-    origin: project
     since: 2026-07-23
     ratified: 0
     killed: 0
@@ -1452,7 +1473,6 @@ counters:
     kills-at-baseline: 6
     conventions-at-baseline: 0
   - domain: coding-general
-    origin: project
     since: 2026-07-23
     ratified: 3
     killed: 0
@@ -1464,7 +1484,6 @@ counters:
     kills-at-baseline: 1
     conventions-at-baseline: 0
   - domain: coding-nextjs
-    origin: project
     since: 2026-07-23
     ratified: 0
     killed: 0
@@ -1476,7 +1495,6 @@ counters:
     kills-at-baseline: 0
     conventions-at-baseline: 0
   - domain: coding-react
-    origin: seed
     since: 2026-07-28
     ratified: 0
     killed: 0
@@ -1488,7 +1506,6 @@ counters:
     kills-at-baseline: 10
     conventions-at-baseline: 0
   - domain: coding-ts
-    origin: project
     since: 2026-07-30
     ratified: 0
     killed: 0
@@ -1500,7 +1517,6 @@ counters:
     kills-at-baseline: 2
     conventions-at-baseline: 2
   - domain: color
-    origin: project
     since: 2026-07-23
     ratified: 0
     killed: 0
@@ -1512,7 +1528,6 @@ counters:
     kills-at-baseline: 2
     conventions-at-baseline: 0
   - domain: css
-    origin: project
     since: 2026-07-23
     ratified: 0
     killed: 0
@@ -1524,7 +1539,6 @@ counters:
     kills-at-baseline: 4
     conventions-at-baseline: 0
   - domain: dependency-management-expo
-    origin: project
     since: 2026-07-23
     ratified: 0
     killed: 0
@@ -1536,7 +1550,6 @@ counters:
     kills-at-baseline: 0
     conventions-at-baseline: 0
   - domain: dependency-management
-    origin: project
     since: 2026-07-23
     ratified: 0
     killed: 0
@@ -1548,7 +1561,6 @@ counters:
     kills-at-baseline: 0
     conventions-at-baseline: 0
   - domain: design-method
-    origin: project
     since: 2026-07-23
     ratified: 0
     killed: 0
@@ -1560,7 +1572,6 @@ counters:
     kills-at-baseline: 0
     conventions-at-baseline: 0
   - domain: forms-inputs
-    origin: project
     since: 2026-07-23
     ratified: 0
     killed: 0
@@ -1572,7 +1583,6 @@ counters:
     kills-at-baseline: 0
     conventions-at-baseline: 0
   - domain: interviewing
-    origin: project
     since: 2026-07-23
     ratified: 0
     killed: 0
@@ -1584,7 +1594,6 @@ counters:
     kills-at-baseline: 0
     conventions-at-baseline: 0
   - domain: lists-selection
-    origin: project
     since: 2026-07-23
     ratified: 0
     killed: 0
@@ -1596,7 +1605,6 @@ counters:
     kills-at-baseline: 1
     conventions-at-baseline: 0
   - domain: motion
-    origin: project
     since: 2026-07-23
     ratified: 0
     killed: 0
@@ -1608,7 +1616,6 @@ counters:
     kills-at-baseline: 0
     conventions-at-baseline: 0
   - domain: orchestrator-routing
-    origin: seed
     since: 2026-07-23
     ratified: 4
     killed: 2
@@ -1620,7 +1627,6 @@ counters:
     kills-at-baseline: 1
     conventions-at-baseline: 0
   - domain: planning
-    origin: seed
     since: 2026-08-02
     ratified: 2
     killed: 0
@@ -1632,7 +1638,6 @@ counters:
     kills-at-baseline: 1
     conventions-at-baseline: 0
   - domain: principle-judgment
-    origin: seed
     since: 2026-07-30
     ratified: 1
     killed: 0
@@ -1644,7 +1649,6 @@ counters:
     kills-at-baseline: 0
     conventions-at-baseline: 0
   - domain: ranking-evaluation
-    origin: project
     since: 2026-07-23
     ratified: 0
     killed: 0
@@ -1656,7 +1660,6 @@ counters:
     kills-at-baseline: 0
     conventions-at-baseline: 0
   - domain: ratify-gate
-    origin: seed
     since: 2026-07-30
     ratified: 2
     killed: 0
@@ -1668,7 +1671,6 @@ counters:
     kills-at-baseline: 2
     conventions-at-baseline: 0
   - domain: recoverability
-    origin: seed
     since: 2026-07-23
     ratified: 0
     killed: 0
@@ -1680,7 +1682,6 @@ counters:
     kills-at-baseline: 1
     conventions-at-baseline: 0
   - domain: spawn-integrity
-    origin: seed
     since: 2026-07-28
     ratified: 2
     killed: 0
@@ -1692,7 +1693,6 @@ counters:
     kills-at-baseline: 3
     conventions-at-baseline: 0
   - domain: surfaces-elevation
-    origin: project
     since: 2026-07-23
     ratified: 0
     killed: 0
@@ -1704,7 +1704,6 @@ counters:
     kills-at-baseline: 0
     conventions-at-baseline: 0
   - domain: validation-feedback
-    origin: project
     since: 2026-07-23
     ratified: 0
     killed: 0
@@ -1716,7 +1715,6 @@ counters:
     kills-at-baseline: 0
     conventions-at-baseline: 0
   - domain: visual-hierarchy
-    origin: project
     since: 2026-07-23
     ratified: 0
     killed: 0
@@ -1728,7 +1726,6 @@ counters:
     kills-at-baseline: 0
     conventions-at-baseline: 0
   - domain: wizards-flows
-    origin: project
     since: 2026-07-23
     ratified: 0
     killed: 0
@@ -1740,19 +1737,17 @@ counters:
     kills-at-baseline: 0
     conventions-at-baseline: 0
   - domain: retrospective
-    origin: project
-    since: 2026-07-30
+    since: 2026-08-02
     ratified: 0
     killed: 0
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 2546
-    baseline-tokens: 2545
-    principles-at-baseline: 10
-    kills-at-baseline: 0
+    working-file-tokens: 2936
+    baseline-tokens: 2936
+    principles-at-baseline: 9
+    kills-at-baseline: 2
     conventions-at-baseline: 0
   - domain: testing
-    origin: seed
     since: 2026-07-30
     ratified: 3
     killed: 1
@@ -1764,7 +1759,6 @@ counters:
     kills-at-baseline: 0
     conventions-at-baseline: 0
   - domain: prose-craft
-    origin: project
     since: 2026-08-01
     ratified: 1
     killed: 0
@@ -1776,7 +1770,6 @@ counters:
     kills-at-baseline: 0
     conventions-at-baseline: 0
   - domain: architecture-health
-    origin: project
     since: 2026-08-01
     ratified: 2
     killed: 0
@@ -1788,7 +1781,6 @@ counters:
     kills-at-baseline: 0
     conventions-at-baseline: 0
   - domain: codebase-design
-    origin: project
     since: 2026-08-02
     ratified: 3
     killed: 1
@@ -1800,25 +1792,23 @@ counters:
     kills-at-baseline: 0
     conventions-at-baseline: 0
   - domain: debugging
-    origin: seed
     since: 2026-08-02
     ratified: 0
     killed: 0
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 1814
+    working-file-tokens: 1813
     baseline-tokens: 1814
     principles-at-baseline: 8
     kills-at-baseline: 0
     conventions-at-baseline: 0
   - domain: code-review-reception
-    origin: seed
     since: 2026-08-02
     ratified: 0
     killed: 0
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 1019
+    working-file-tokens: 1018
     baseline-tokens: 1019
     principles-at-baseline: 4
     kills-at-baseline: 0

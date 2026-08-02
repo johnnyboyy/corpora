@@ -12,7 +12,7 @@ by markers — the script never touches anything outside its markers.
 Commands:
   measure [--domains-dir --audit]  update working-file-tokens for every domain (defaults to the
                                    project layer; override to measure any domains-dir + audit.md
-                                   pair — e.g. the kernel-seed layer, same as kill-report)
+                                   pair — e.g. this skill's own domains/, same as kill-report)
   verify [--domains-dir --audit]   reconcile ledger against working files (detects
                                    unrecorded gates and gate-bypassing writes)
   record-gate --domain D [...]     record a ratify gate's outcomes (same --domains-dir/--audit
@@ -178,9 +178,6 @@ class Project:
 #   efficacy:      list of per-principle dicts
 #   library-drift: one dict
 
-ORIGIN_ENUM = {"seed", "project"}
-
-
 def empty_state() -> dict:
     return {"counters": [], "efficacy": [], "co-occurrence": [], "library-drift": {"since-last-sync": 0}}
 
@@ -220,7 +217,7 @@ def parse_state(text: str) -> dict:
     return state
 
 
-COUNTER_FIELDS = ["domain", "origin", "since", "ratified", "killed", "graduated", "gate-violations",
+COUNTER_FIELDS = ["domain", "since", "ratified", "killed", "graduated", "gate-violations",
                   "working-file-tokens", "baseline-tokens",
                   "principles-at-baseline", "kills-at-baseline", "conventions-at-baseline"]
 COOCCURRENCE_FIELDS = ["domains", "count"]
@@ -261,8 +258,7 @@ def render_state(state: dict) -> str:
     for c in state["counters"]:
         prefix = "  - "
         for f in COUNTER_FIELDS:
-            default = "project" if f == "origin" else 0
-            lines.append(f"{prefix}{f}: {c.get(f, default)}")
+            lines.append(f"{prefix}{f}: {c.get(f, 0)}")
             prefix = "    "
     lines.append("efficacy:")
     for e in state["efficacy"]:
@@ -311,14 +307,14 @@ def save(project: Project, state: dict) -> None:
     open(project.audit_path, "w").write(text)
 
 
-def counter_for(state: dict, domain: str, tokens: int, path: str = "", origin: str = "project") -> dict:
+def counter_for(state: dict, domain: str, tokens: int, path: str = "") -> dict:
     for c in state["counters"]:
         if c.get("domain") == domain:
             c.setdefault("graduated", 0)
             c.setdefault("conventions-at-baseline", 0)
             return c
     p, k, conv = count_entries(path) if path else (0, 0, 0)
-    c = {"domain": domain, "origin": origin, "since": today(), "ratified": 0, "killed": 0,
+    c = {"domain": domain, "since": today(), "ratified": 0, "killed": 0,
          "graduated": 0, "gate-violations": 0, "working-file-tokens": tokens, "baseline-tokens": tokens,
          "principles-at-baseline": p, "kills-at-baseline": k, "conventions-at-baseline": conv}
     state["counters"].append(c)
@@ -404,7 +400,7 @@ def _ids(arg: str) -> list:
 def record_gate_core(project: Project, domain: str, domain_path: str, *, ratified: int = 0,
                       killed: int = 0, graduated: int = 0, violations: int = 0,
                       fired=(), violated=(), idle=(), ui_drift: bool = False,
-                      co_occurs_with=(), origin: str = "project") -> None:
+                      co_occurs_with=()) -> None:
     """The bookkeeping core shared by `record-gate` and any other write path that ratifies,
     kills, or graduates a domain entry — `add-principle`/`ratify-import-candidate` call this
     directly instead of separately invoking `record-gate` as a second manual step, so a scripted
@@ -413,9 +409,7 @@ def record_gate_core(project: Project, domain: str, domain_path: str, *, ratifie
     state = load(project)
     tokens = est_tokens(domain_path)
     existed = any(c.get("domain") == domain for c in state["counters"])
-    c = counter_for(state, domain, tokens, domain_path, origin=origin)
-    if origin != c.get("origin", "project"):
-        c["origin"] = origin
+    c = counter_for(state, domain, tokens, domain_path)
     if not existed:
         # First registration during a gate: the file already contains the entries this gate
         # ratified/killed/graduated (write-back precedes record-gate), so exclude them from the
@@ -451,8 +445,7 @@ def cmd_record_gate(project: Project, args) -> None:
     record_gate_core(project, args.domain, files[args.domain], ratified=args.ratified,
                       killed=args.killed, graduated=args.graduated, violations=args.violations,
                       fired=_ids(args.fired), violated=_ids(args.violated), idle=_ids(args.idle),
-                      ui_drift=args.ui_drift, co_occurs_with=_ids(args.co_occurs_with),
-                      origin=args.origin)
+                      ui_drift=args.ui_drift, co_occurs_with=_ids(args.co_occurs_with))
 
 
 def cmd_triggers(project: Project, _args) -> None:
@@ -1786,7 +1779,7 @@ def cmd_add_principle(project: "Project", args) -> None:
     append_audit_provenance(project.audit_path, format_audit_provenance_block(
         args.id, args.domain, provenance=args.provenance, kind=args.kind))
 
-    record_gate_core(project, args.domain, domain_path, ratified=1, origin=args.origin)
+    record_gate_core(project, args.domain, domain_path, ratified=1)
     print(f"added principle '{args.id}' to {domain_path}, provenance recorded in {project.audit_path}")
 
 
@@ -1906,7 +1899,7 @@ def cmd_ratify_import_candidate(project: "Project", args) -> None:
     append_audit_provenance(project.audit_path, format_audit_provenance_block(
         dest_id, dest_domain, kind=entry.get("kind", "judgment"), imported_from=imported_from))
 
-    record_gate_core(project, dest_domain, domain_path, ratified=1, origin=args.origin)
+    record_gate_core(project, dest_domain, domain_path, ratified=1)
 
     if not remove_import_candidate(source_path, args.id):
         fail(f"wrote '{dest_id}' to {domain_path} and recorded provenance, but could not remove "
@@ -2736,9 +2729,9 @@ def cmd_compose_spawn_prompt(project: Project, args) -> None:
 
 # ── kill-log graduation: age out killed entries with a recorded, stale kill date ─────────────
 #
-# Works on any domains-dir + its audit.md pair — project layer (<root>/corpora/domains) or the
-# kernel-seed layer (domains/) — not only project layers, since retrospective consolidation
-# happens in the skill repo's own seed corpus too.
+# Works on any domains-dir + its audit.md pair — a project's own <root>/corpora/domains, this
+# skill's own domains/, or any other corpora-managed location — since retrospective consolidation
+# happens in this skill repo's own domain pool too, not only in downstream projects.
 
 KILL_GRADUATION_DAYS = 90
 
@@ -2925,7 +2918,7 @@ def main() -> None:
                           "root resolution'); mutually exclusive with --for-file")
     sub = ap.add_subparsers(dest="cmd", required=True)
     layer_help = "override to work on any domains-dir + audit.md pair — a project's own " \
-                 "corpora/domains or the kernel-seed domains/ — not only a project's own corpora"
+                 "corpora/domains or this skill's own domains/ — not only a project's own corpora"
     m = sub.add_parser("measure")
     m.add_argument("--domains-dir", default="", help=layer_help)
     m.add_argument("--audit", default="", help=layer_help)
@@ -2945,8 +2938,6 @@ def main() -> None:
     g.add_argument("--fired", default="", help="comma-separated principle ids")
     g.add_argument("--violated", default="", help="comma-separated principle ids")
     g.add_argument("--idle", default="", help="comma-separated principle ids")
-    g.add_argument("--origin", choices=sorted(ORIGIN_ENUM), default="project",
-                   help="seed | project — stronger than directory-inference alone")
     g.add_argument("--co-occurs-with", default="",
                    help="comma-separated domain names loaded alongside --domain in the same spawn")
     sub.add_parser("triggers")
@@ -3081,7 +3072,6 @@ def main() -> None:
     ap_.add_argument("--see-also", default="")
     ap_.add_argument("--provenance", required=True, help="free text: date, source, context")
     ap_.add_argument("--kind", default="", choices=["", "judgment", "knowledge", "direction"])
-    ap_.add_argument("--origin", choices=sorted(ORIGIN_ENUM), default="project")
     ric = sub.add_parser("ratify-import-candidate", help="write an entry already queued by "
                                                            "import-candidate/import-default-pool "
                                                            "into its destination domain plus "
@@ -3095,7 +3085,6 @@ def main() -> None:
     ric.add_argument("--id", required=True, help="the candidate's id in the source candidates file")
     ric.add_argument("--as-domain", default="", help="overrides the candidate's own recorded domains:")
     ric.add_argument("--as-id", default="", help="write back under a different id (e.g. on collision)")
-    ric.add_argument("--origin", choices=sorted(ORIGIN_ENUM), default="project")
     md = sub.add_parser("migrate-domains", help="one-time: materialize a pre-dissolution project's "
                                                   "live seed/project merge into its own corpora/domains/ "
                                                   "(processes/domain-repo-migration.md)")

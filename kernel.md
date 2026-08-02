@@ -54,7 +54,7 @@ because the audit load is *broad* (the orchestrator pulls the whole layer at onc
 - **Working file** (`domains/<domain>.md`) — one per domain. The active `principles:` with their
   `id / rule / condition / reason / see-also`, the `conventions:` list (below), plus the `killed:`
   log. This is the only part loaded when a spawn works, inline or spawned.
-- **Audit file** (`domains/audit.md`, one per layer — kernel-seed and each project) —
+- **Audit file** (`domains/audit.md`, one per domains-dir — this skill's own and each project's) —
   per-principle `provenance` keyed by `id` (each entry noting its `domain`) and per-kill audit
   metadata. Loaded only at ratify and retrospective time, by the orchestrator —
   never in a spawn's working context. The audit file also carries the layer's **counters** — the
@@ -66,8 +66,6 @@ because the audit load is *broad* (the orchestrator pulls the whole layer at onc
   ```yaml
   counters:
     - domain: coding-general
-      origin: seed                 # seed | project — stronger than directory-inference
-                                    #   alone; defaults from --domains-dir shape, overridable
       since: 2026-06-20            # last retrospective
       ratified: 3                  # new principles since
       killed: 1
@@ -282,7 +280,7 @@ Every cross-boundary change is **propose → ratify → promote**, never write-d
 - Structural changes (split a domain, add an explorer, change a route) go through the
   same gate.
 - A proposal of `kind: direction` takes a **third route**: filed into the project's
-  `ui-library.md` — never ratified into a domain, never killed, never a seed-promotion candidate.
+  `ui-library.md` — never ratified into a domain, never killed, never imported elsewhere as a principle.
   A direction is an identity decision, not a weighable rule; it carries no condition/reason
   obligation, and the library is the project's identity record. Processing a sound direction as a
   failed principle is a container-kill in new clothes. **No parallel audit file exists for
@@ -455,9 +453,9 @@ to override) to be a graduation candidate. The operator/retrospective judges whe
 safe — has anything resembling it resurfaced — then `corpus.py graduate-kill --domains-dir <dir>
 --audit <audit-file> --domain <domain> --id <id>` does the mechanical part: removes the entry from
 the working file's `killed:` log and stamps `graduated:` on its audit-file record. Works on any
-domains-dir + audit.md pair — a project's `corpora/domains/` or the kernel-seed `domains/` — since
-retrospective consolidation happens in the skill repo's own seed corpus too, not only in downstream
-projects.
+domains-dir + audit.md pair — a project's `corpora/domains/` or this skill's own `domains/` — since
+retrospective consolidation happens in this skill repo's own domain pool too, not only in
+downstream projects.
 
 ---
 
@@ -753,17 +751,34 @@ A project's own `corpora/domains/` is the whole domain set that project's spawns
 `select`, `compose-spawn-prompt`, and `manifest` all read only it (or an explicit `--domains-dir`
 override). There is no live, automatic merge with this skill's own `domains/` or with any other
 project's corpora: every corpora-managed location is symmetric — a `domains/` + `audit.md` pair,
-readable and importable the same way regardless of which repository holds it. This skill's own
-`domains/` is not structurally privileged; it is the **default import source**, the pool bootstrap
-offers to pull from on day one (see "Import," below), and nothing more.
+readable and importable the same way regardless of which repository holds it, imported through the
+same mechanism whether the source is this skill's own `domains/`, another project's
+`corpora/domains/`, or a formalized sibling section of the same project (`--root-name`, "Monorepo
+root resolution," below).
+
+**There is no privileged layer a principle gets "promoted" into.** Two things do live in this
+skill's own `domains/` that are genuinely special to this repository, but for a different reason
+than privilege: `orchestrator-routing`, `ratify-gate`, `principle-judgment`, and `retrospective` are
+corpora's *own* operating judgment — `SKILL.md` loads them directly, always, regardless of which
+project is running, because they are what makes corpora corpora (`SKILL.md`, "## domains"). Every
+other domain here (`coding-general`, `testing`, `css`, `color`, ...) is ordinary importable
+content, symmetric with any project's own domains-dir — bootstrap suggests importing from it on day
+one because it already holds broadly useful starter content, not because it occupies a structurally
+privileged position.
 
 A freshly-bootstrapped project therefore starts with an empty `corpora/domains/` and imports what
 it needs — either the default-pool bulk import bootstrap offers, or picking individual principles
-and conventions from any domains-dir later (`corpus.py import-list` / `import-candidate`). A
-project bootstrapped under the older, live-merge model migrates once via
-`processes/domain-repo-migration.md` before its first session under this model — that process
-materializes its previously-live seed content into its own `corpora/domains/` so nothing it already
-relied on silently disappears.
+and conventions from any domains-dir later (`corpus.py import-list` / `import-candidate` /
+`ratify-import-candidate`, "Import," below). The same mechanism runs in the other direction too: a
+project's own well-earned principle propagates elsewhere — into this skill's own `domains/`, into a
+sibling project, into a formalized section of the same project — by being imported there, exactly
+like any other candidate; `domains/retrospective.md`'s `complementary-principles-signal-abstraction-
+candidate` is what a retrospective looks for when deciding whether a principle is actually worth
+proposing for reuse elsewhere, in place of the retired seed/project layer distinction (`LINEAGE.md`
+has the retirement's reasoning). A project bootstrapped under the older, live-merge model migrates
+once via `processes/domain-repo-migration.md` before its first session under this model — that
+process materializes its previously-live seed content into its own `corpora/domains/` so nothing it
+already relied on silently disappears.
 
 A project that wants to track this skill's own domain content as it evolves, rather than
 snapshotting it once at import time, re-runs the default-pool import periodically (or per updated
@@ -835,7 +850,7 @@ doing anything else — no session, orchestrator, or project needs to work out w
 task as a separate step. `--root` still exists for the cases `--for-file` can't cover: bootstrapping
 a brand-new nested root (nothing to resolve to yet, since its `corpora/config.md` doesn't exist
 until that bootstrap writes it), or operating on a `--domains-dir`/`--audit` override that isn't
-tied to any one file (`kill-report`, `graduate-kill`, working the kernel-seed layer directly).
+tied to any one file (`kill-report`, `graduate-kill`, working this skill's own `domains/` directly).
 
 `corpus.py resolve-root --file <path>` and `corpus.py check-root-boundary --files <f1,f2,...>`
 remain available directly for the narrower cases `--for-file` doesn't cover on its own: inspecting
@@ -867,9 +882,9 @@ they answer different questions. A task whose planner has already decided it nee
 another section names that root; nothing about *finding* it should require the dispatching agent
 to already know or hardcode the sibling's filesystem path.
 
-### One flat seed layer
+### One flat domain pool
 
-The skill's `domains/` is one flat pool — no separate "role pack" layer selected by a project-config
+This skill's own `domains/` is one flat pool — no separate "role pack" layer selected by a project-config
 field. A stack-agnostic domain (`coding-general`, `orchestrator-routing`, `spawn-integrity`, ...)
 and a stack-specific one (`coding-react`, `css`, `color`, ...) live side by side; each states its own
 load condition as `applies-when` frontmatter against `corpora/config.md`'s existing project-shape
@@ -903,8 +918,8 @@ Run at two cadences. Same faculty, different direction.
 against contamination — is the working context holding domains from another mode?
 
 **Backward (periodic):** surfaces signals as proposals for the operator — contamination, domain
-tension, convergence, composition drift, seed-promotion candidates, structural kinship, kill
-graduation, anti-overfitting, and efficacy interpretation. See `processes/retrospective.md` for the trigger
+tension, convergence, composition drift, complementary-principle abstraction candidates, structural
+kinship, kill graduation, anti-overfitting, and efficacy interpretation. See `processes/retrospective.md` for the trigger
 and procedure, and `domains/retrospective.md` for the judgment behind each signal — what counts,
 what doesn't, and why. Two adjacent signals (a misplaced principle, and a ratified principle whose
 gate-time discipline may have lapsed) are judged by `principle-judgment` instead, since they're

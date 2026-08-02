@@ -67,13 +67,18 @@ Judgment lives in **domains** — corpora scoped to one subject matter or decisi
 **spawn** is a *stance* (convergent or divergent — `kernel.md`, "Generative stance") plus whatever
 domain subset the orchestrator composes fresh for the task at hand, stated directly in a spawn
 brief every time. The shared mechanism — schema, ratify gate, retrospective — is the **kernel**.
-Seed domains carry general principles earned from real work, in this repo's own `domains/`; a
-project imports what it needs into its own `corpora/domains/`, which is then the whole domain set
-that project's spawns compose from — no live merge with this repo. Principles ratified in a
-project can be exported back into the seed pool when they generalize across projects, or graduate
-into a domain's own `conventions:` list once they've stabilized into unconditioned guidance that
-no longer needs per-task condition-checking. Rejected principles are kept with their reason and a
-`kill_type`. Kernel and seed domains travel in this repo; project domains stay in the project.
+This repo's own `domains/` carries general principles earned from real work; a project imports what
+it needs into its own `corpora/domains/`, which is then the whole domain set that project's spawns
+compose from — no live merge with this repo. Every domains-dir is symmetric, this repo's included:
+there is no privileged "seed" tier a principle gets promoted into. (Two domains here are special for
+a different reason — `orchestrator-routing` and `ratify-gate` are corpora's own operating judgment,
+loaded directly regardless of project, not a privileged pool.) A principle ratified in a project
+propagates elsewhere — into this repo, into another project, into a formalized sibling section of
+the same project — by being imported there, the same mechanism as any other candidate, when a
+retrospective finds it's jointly necessary alongside another principle for a test neither states
+alone. A principle can also graduate into a domain's own `conventions:` list once it's stabilized
+into unconditioned guidance that no longer needs per-task condition-checking. Rejected principles
+are kept with their reason and a `kill_type`.
 
 Domains own corpora, so shared judgment lives once and is available to any spawn whose stance and
 subject match (a divergent UI-composed spawn and a convergent UX-composed spawn both load
@@ -103,18 +108,16 @@ The orchestrator states a stance and domain subset directly in the spawn brief f
 a domain splits into scoped instances when the retrospective surfaces a fork signal — conditions
 that partition the space and give opposing advice.
 
-**Domains (where judgment lives):**
-
-- **Seed domain** — general principles, in the skill's flat `domains/`. The default import
-  source for a new project — not a live-merged layer.
-- **Project domain** — project-specific accumulated judgment at `corpora/domains/<domain>.md` in
-  the target project. Exported back into the seed pool once a principle generalizes beyond the
-  project's specifics.
+**Domains (where judgment lives):** every domains-dir is the same shape — a `domains/` + `audit.md`
+pair — whether it's this skill's own flat `domains/` (general principles, plus the domains corpora
+itself depends on: `orchestrator-routing`, `ratify-gate`) or a project's own
+`corpora/domains/<domain>.md`. Nothing is a privileged "seed" source; this skill's own pool is just
+a convenient default a project's bootstrap suggests importing from on day one.
 
 A project's own `corpora/domains/` is the whole domain set its spawns compose from — no automatic
-seed inclusion. A project may have domains with no seed counterpart at all (project-specific
-subjects, e.g. `spatial-metaphor`), imported principles from another project's corpora, or
-principles it wrote itself.
+inclusion of anything else. A project may have domains with no counterpart in this repo at all
+(project-specific subjects, e.g. `spatial-metaphor`), imported principles from another project's
+corpora, or principles it wrote itself.
 
 **Two load modes** (file granularity matches load granularity):
 
@@ -145,7 +148,7 @@ agent. See `SKILL.md`, "Inline, resume, or isolate," and `LINEAGE.md`, "Role iso
   individual pick, or a live-merge-model migration) through the ordinary ratify gate. Mechanical;
   `kernel.md`, "Project corpora → Import," holds the command syntax and candidate schema this
   points into.
-- `domains/` — every seed domain, flat: stack-agnostic (`coding-general.md`,
+- `domains/` — every domain this repo carries, flat: stack-agnostic (`coding-general.md`,
   `orchestrator-routing.md`, `ratify-gate.md`, `principle-judgment.md`, `retrospective.md`,
   `testing.md`, `planning.md`, `interviewing.md`, `spawn-integrity.md`) and stack-specific
   (`coding-ts.md`, `coding-react.md`, `coding-nextjs.md`, `css.md`, and the design domains
@@ -162,7 +165,7 @@ agent. See `SKILL.md`, "Inline, resume, or isolate," and `LINEAGE.md`, "Role iso
   writes `corpora/config.md`. For `has-ui: yes` projects, sequences three further phases into their
   own files: `processes/ui-library-init.md` (divergent, `corpora/ui-library.md`),
   `processes/screenshot-library-init.md` (mechanical, seeds the screenshot cache), and `processes/ux-library-init.md`
-  (convergent, `corpora/ux-library.md`) — all propose seed design principles.
+  (convergent, `corpora/ux-library.md`) — all propose starter design principles.
 - `processes/ui-library-sync.md`, `processes/ux-library-sync.md`, `processes/screenshot-library-sync.md` — the ongoing
   counterparts to the three init files above: bring each library or the screenshot cache back in
   line with the project's actual state after drift accumulates. Triggered from
@@ -237,18 +240,24 @@ PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -v
 
 ### Cross-project learning
 
-When a principle in a project domain is general — its condition doesn't reference the project's
-stack or specifics — it's a candidate for promotion to the seed domain of the same name here. The
-project domain is where principles are earned; this repo is where they graduate.
+There is no separate promotion process or privileged destination — a principle propagates
+elsewhere the same way any candidate does, through `corpus.py import-candidate` /
+`ratify-import-candidate` (`kernel.md`, "Import"), whether the destination is this repo, another
+project, or a formalized sibling section of the same project (`--root-name`).
 
-The retrospective is the natural trigger: when a project-level principle has held across enough
-tasks that it reads as general, the retrospective surfaces it as a seed promotion candidate. The
-exact process for that promotion is not yet spelled out.
+The retrospective is the natural trigger for *noticing* a candidate worth proposing, but the bar
+isn't one principle's condition merely reading stack-agnostic — that's weak evidence, since a
+condition can read general and simply not have hit its edge case yet.
+`complementary-principles-signal-abstraction-candidate` (`domains/retrospective.md`) is the actual
+test: two or more principles — same domain or different, same project or an already-imported one —
+that are jointly necessary for a test neither states alone. The shared abstraction they jointly
+imply is what gets proposed as a candidate, then ratified through the ordinary gate like anything
+else.
 
 ### New stacks and domain splitting
 
 **New stack:** the kernel applies unchanged — every new project inherits the orchestrator, the
-planner, and `coding-general` for free. Add stack-specific seed domains (with their own load
+planner, and `coding-general` for free. Add stack-specific domains (with their own load
 conditions against `language`/`framework`/`styling`) once a body of stack-specific conventions has
 accumulated and is worth shipping across projects of that stack. Until then, project-earned
 specifics live in `corpora/domains/coding-general.md` (and project-specific domains). Do not

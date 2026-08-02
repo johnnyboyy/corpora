@@ -47,11 +47,11 @@ principles:
   condition: "During a retrospective, reading the co-occurrence tally `record-gate` maintains and any handoff `Surfaced` notes naming a gap between what was composed and what the work actually needed."
   reason: "A single spawn missing a relevant domain is a routing accident; a *pattern* of the same domain being consistently excluded or consistently idle for a given unit-of-work is evidence the composition rule itself is wrong, and only a retrospective's aggregated view across sessions can tell the two apart from a one-off."
 
-- id: seed-promotion-candidate
-  rule: "Surface a project-domain principle as a seed-promotion candidate when its condition makes no reference to this project's stack, domain, or specifics, and it has held across enough tasks to read as general rather than provisional."
-  condition: "During a retrospective, reviewing a project domain's active principles for ones whose condition would bind identically in an unrelated project."
-  reason: "A principle earned in one project only proves it generalizes once its condition is stack/project-agnostic and it has survived repeated application — promoting on stack-agnostic wording alone, before it has actually been re-tested, risks promoting a principle that only happened to never hit its edge case yet."
-  see-also: single-project-shape-principle-stays-provisional
+- id: complementary-principles-signal-abstraction-candidate
+  rule: "When two or more active principles — in the same domain or different ones, from this project or one already imported — are individually narrow but jointly imply a general test neither states alone, propose that shared abstraction as a new candidate: state what the two principles jointly require, then run it through the ordinary ratify gate like any other proposal. This is the only test for surfacing a principle as worth reusing elsewhere — there is no separate promotion pathway or privileged destination domains-dir; reuse elsewhere happens through the same import mechanism as any other candidate (`kernel.md`, \"Project corpora\")."
+  condition: "During a retrospective, or when reading a domain's principles side by side reveals two or more that are jointly load-bearing for a test none of them states individually — distinct from `structural-kinship-condensation-candidate`'s same-test-restated-differently case, and distinct from judging a single principle's condition wording alone."
+  reason: "A single principle's condition reading as stack- or project-agnostic is weak evidence it actually generalizes — it may simply not have hit its edge case yet. Two or more principles that are jointly necessary for a shared underlying test are stronger evidence: the abstraction is directly visible in what they jointly require, not inferred from the absence of project-specific wording in one entry."
+  see-also: structural-kinship-condensation-candidate, co-firing-cluster-signals-meta-principle
 
 - id: structural-kinship-condensation-candidate
   rule: "When several active principles state the same underlying test in different words — visible from existing see-also links or from reading a domain's principles side by side rather than sequentially — propose condensing them into one umbrella statement with the specific cases named as instances, rather than leaving the shared test implicit across separate entries."
@@ -63,12 +63,6 @@ principles:
   rule: "When `corpus.py kill-report` surfaces a killed entry old enough with no sign of recurrence, judge specifically whether anything resembling it has actually resurfaced since — not merely whether enough time has passed — before running `graduate-kill` to demote it."
   condition: "During a retrospective, for every `kill-report` candidate in a domain under review."
   reason: "A kill's job is to stop the same rejected idea from being re-proposed; its value decays once nobody has come near re-proposing it, but 'old enough' is a necessary precondition age can measure, not sufficient evidence recurrence has genuinely stopped — that judgment is what the retrospective adds on top of the mechanical age filter."
-
-- id: single-project-shape-principle-stays-provisional
-  rule: "Surface which ratified principles were earned in a single project shape and mark them as candidates that should stay provisional — weighable, not promoted — until tested against a second shape. A provisional principle with real `fired` counts under a second project shape has earned its promotion case; one that has only ever fired in its birth project stays provisional."
-  condition: "During a retrospective, for any domain whose active principles all trace to one project's provenance."
-  reason: "A principle pressure-tested in only one climate is a promotion risk, not a default — the condition it states may happen to hold everywhere in that one project's shape without actually generalizing, and there's no way to tell the difference without a second shape's evidence."
-  see-also: seed-promotion-candidate
 
 - id: interpret-efficacy-counts-dont-act-on-them-raw
   rule: "Read idle-dominant efficacy counts across many gates as a retirement candidate or a too-narrowly-scoped condition; read recurring violated counts as either a load-bearing principle (still catching real drift) or a badly-conditioned one — the counts alone cannot distinguish either pair, so treat them as a question the retrospective must answer, never as evidence to act on directly."
@@ -82,4 +76,14 @@ principles:
   see-also: structural-kinship-condensation-candidate
 
 killed:
+
+- id: seed-promotion-candidate
+  rule: "Surface a project-domain principle as a seed-promotion candidate when its condition makes no reference to this project's stack, domain, or specifics, and it has held across enough tasks to read as general rather than provisional."
+  kill_type: quality
+  reason_killed: "The privileged-layer concept this assumed — a project-earned principle 'promotes' into a structurally distinct seed tier — was retired: every domains-dir is symmetric, and reuse elsewhere happens through the ordinary import/ratify-gate mechanism regardless of source (kernel.md, 'Project corpora'). Its stack-agnostic-wording-alone test is superseded by complementary-principles-signal-abstraction-candidate, which requires two or more jointly-necessary principles as evidence rather than one principle's condition merely reading general."
+
+- id: single-project-shape-principle-stays-provisional
+  rule: "Surface which ratified principles were earned in a single project shape and mark them as candidates that should stay provisional — weighable, not promoted — until tested against a second shape. A provisional principle with real fired counts under a second project shape has earned its promotion case; one that has only ever fired in its birth project stays provisional."
+  kill_type: quality
+  reason_killed: "Companion kill to seed-promotion-candidate — 'promoted' presumed the same retired privileged-layer distinction. The overfitting concern this guarded against survives, folded into complementary-principles-signal-abstraction-candidate's reason field, rather than as a separate provisional-status principle with no promotion tier left to gate."
 ```

@@ -6,7 +6,7 @@ description: Re-propose an already-ratified principle or convention from another
 # Domain import
 
 **Trigger:** a project wants to pull already-ratified content from another corpora location (this
-skill's own seed `domains/`, another project's `corpora/domains/`) into its own `corpora/domains/`
+skill's own `domains/`, another project's `corpora/domains/`) into its own `corpora/domains/`
 — at bootstrap (the default-pool fast path, `processes/bootstrap.md`), a project migrating off the
 old live-merge model (`processes/domain-repo-migration.md`), or any time later to pick up new or
 updated content.

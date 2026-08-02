@@ -1622,3 +1622,50 @@ monorepo support — remain draft. Neither blocked on the other three; both are 
 of the same underlying mechanism (a new *source* of candidates in the elicitation case, a new
 *resolution* rule for which `corpora/config.md` governs a task in the monorepo case) left for when a
 real project actually needs them.
+
+---
+
+## 2026-08-02 — Seed/project layer distinction retired: every domains-dir is symmetric
+
+Second of a three-point operator plan built on the 2026-07-30 domain-repo-import work above (first:
+named cross-root dispatch, `--root-name`/`list-roots`; third, done first since this point leaned on
+it: scripted `add-principle`/`ratify-import-candidate`, closing the "write-back format" hand-edit
+gap). Operator's framing, verbatim: "There isn't really a concept of layers anymore. Domains can be
+imported across projects the same as from within the corpora domains dir. There is no longer 'seed'
+domains, but perhaps corpora holds on to domains relevant to its processes. If a project has a good
+domain principle, it can be imported into the corpora domain through the same mechanism that a
+project adopts another project's domains/principles."
+
+2026-07-30's work had already dissolved the *live merge* (`kernel.md`'s "Project corpora" already
+said "every corpora-managed location is symmetric") but left one asymmetry standing: `origin:
+seed|project` on every counter, `seed-promotion-candidate`'s promotion test, and prose throughout
+(`kernel.md`, `README.md`, `SKILL.md`) framing this skill's own `domains/` as a privileged "seed
+layer" — the default import source a project principle could eventually "promote" into. Nothing in
+`corpus.py` ever actually branched on `origin`'s value (checked before removing it) — it was a
+purely descriptive label with no behavior riding on it, which made it a clean removal rather than a
+functional change: `ORIGIN_ENUM`, the `--origin` flag on `record-gate`/`add-principle`/
+`ratify-import-candidate`, and the field itself all dropped from `COUNTER_FIELDS`. The next
+`measure`/`record-gate` on an existing audit.md silently stops re-emitting `origin:` on rewrite —
+no migration script needed, the schema change alone heals it.
+
+**What survives, reframed:** this skill's own `domains/` isn't nothing special — `orchestrator-
+routing`, `ratify-gate`, `principle-judgment`, and `retrospective` are corpora's *own* operating
+judgment, loaded directly by `SKILL.md` regardless of which project is running. That's a real,
+load-bearing distinction, but a different one than "seed vs. project": it's about which domains
+*corpora itself* depends on to function, not about where a project's own earned principles are
+allowed to live or "graduate" to. Every other domain in this repo (`coding-general`, `testing`,
+`css`, ...) is ordinary importable content, symmetric with any project's own domains-dir — bootstrap
+suggests importing from it because it's a convenient, broadly-useful starting pool, not because it's
+structurally privileged.
+
+**Replacement signal for the retrospective:** `seed-promotion-candidate` tested one principle's
+condition wording for stack/project-agnosticism — weak evidence, since a condition can read general
+and still just not have hit its edge case yet. Its companion `single-project-shape-principle-stays-
+provisional` existed specifically to gate that weak signal until a second project shape's evidence
+arrived. Both killed; replaced by one principle, `complementary-principles-signal-abstraction-
+candidate` (`domains/retrospective.md`): propose an abstraction when two or more principles — same
+domain or different, same project or an already-imported one — are jointly necessary for a test
+neither states alone. Reuse elsewhere (into this skill's own `domains/`, a sibling project, or a
+formalized section of the same project) happens through the ordinary import/ratify-gate mechanism,
+identically regardless of source or destination — there is no separate promotion pathway or
+privileged target left to route toward.

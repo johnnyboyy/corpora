@@ -29,13 +29,13 @@ the history means) unconditionally, the same way `orchestrator-routing`/`ratify-
    `principles:` and `killed:` entries, and its `domains/audit.md` counters, efficacy, and
    co-occurrence blocks.
 2. Apply `domains/retrospective.md`'s principles to what you read — contamination, domain-tension
-   splits, convergence, composition drift, seed-promotion candidates, structural kinship,
-   anti-overfitting, efficacy interpretation, and co-firing. Every signal that fires is a
-   **proposal to the operator**, never automatic — advisory only, same as any other proposal at the
-   ratify gate.
+   splits, convergence, composition drift, complementary-principle abstraction candidates,
+   structural kinship, anti-overfitting, efficacy interpretation, and co-firing. Every signal that
+   fires is a **proposal to the operator**, never automatic — advisory only, same as any other
+   proposal at the ratify gate.
 3. **Kill graduation, as its own pass:** run `corpus.py kill-report --domains-dir <dir> --audit
-   <audit-file>` (works on a project's `corpora/domains/` or the kernel-seed `domains/` — this
-   repo's own seed corpus retrospects too, not only downstream projects). It lists every killed
+   <audit-file>` (works on a project's `corpora/domains/` or this skill's own `domains/` — this
+   repo's own domain pool retrospects too, not only downstream projects). It lists every killed
    entry missing a `killed:` date (a bookkeeping gap to fix directly) and every one old enough
    (default 90 days, `--min-age-days` to override) to be a graduation candidate. Judge each
    candidate per `domains/retrospective.md`'s `kill-graduation-judged-not-assumed` — then

@@ -96,7 +96,7 @@ ask one clarifying question first.
    rather than asserting the subset freehand; it evaluates every domain's frontmatter against the
    project's `corpora/config.md` and returns the composed set, plus `expected-output:`. For each
    domain in the composition, load its working file (`corpora/domains/<domain>.md`) — a project's
-   own `corpora/domains/` is the whole domain set; there is no separate seed layer to also load
+   own `corpora/domains/` is the whole domain set; there is no other domains-dir to also load
    (`kernel.md`, "Project corpora"). Starting without the full composition is a bug — the spawn
    starts with missing judgment. The spawn reads `corpora/config.md` itself; if absent, surface
    that the project needs `corpora:bootstrap` rather than starting into a vacuum. Hold on to this
@@ -125,10 +125,13 @@ ask one clarifying question first.
    `ratify-gate`).
 
 **Inline spawn work** takes the same brief without the prompt-composition mechanics: load the
-composed stance frame, every domain in the composition (seed + `corpora/domains/<domain>.md` if it
-exists), and kernel.md's "The handoff artifact" section into the current session before starting.
-State what was loaded in one line before starting (`Loaded: <stance>, <domains>`) — a silent load
-is unverifiable; the spawn brief is the check.
+composed stance frame, every domain in the composition from the project's own
+`corpora/domains/<domain>.md` (the same source `compose-spawn-prompt` reads — no live merge with
+this skill's own `domains/`, `kernel.md`, "Project corpora"), and kernel.md's "The handoff artifact"
+section into the current session before starting. The orchestrator's own three domains are already
+loaded per Phase 1, above, and don't get reloaded here. State what was loaded in one line before
+starting (`Loaded: <stance>, <domains>`) — a silent load is unverifiable; the spawn brief is the
+check.
 
 ---
 
@@ -242,12 +245,14 @@ Runs immediately after each spawn, by default.
    in this session or any other — is never implicit approval for a new proposal, even one that looks
    obviously fine: "ask once" scopes to that one proposal, not to the rest of the session.
 5. **Assign a home.** A `direction` proposal is filed into the project's `ui-library.md`, describing
-   only current state — never into a domain, never killed, never a seed candidate, and never with
-   an inline provenance/history note (git history is the library's audit trail; no parallel
-   audit file exists for it) (`kernel.md`, "The ratify gate"). For each ratified *principle*, decide its domain — citing
-   specifically how it matches that domain's stated subject (`kernel.md`, "Domain assignment at
-   the gate") — and write it there; if none fits, create a new domain working file
-   (`corpora/domains/<new>.md`, or a seed domain if general). The domain becomes available to any
+   only current state — never into a domain, never killed, never imported elsewhere as a
+   principle, and never with an inline provenance/history note (git history is the library's audit
+   trail; no parallel audit file exists for it) (`kernel.md`, "The ratify gate"). For each ratified
+   *principle*, decide its domain — citing specifically how it matches that domain's stated subject
+   (`kernel.md`, "Domain assignment at the gate") — and write it there; if none fits, create a new
+   domain working file in whichever domains-dir this gate is running against
+   (`corpora/domains/<new>.md` for a project, this skill's own `domains/<new>.md` when working here
+   directly). The domain becomes available to any
    spawn whose stance and subject match — there is no composition declaration to add it to. A proposal
    spanning two domains is a possible domain-boundary problem — surface it rather than
    fragmenting. See `domain-assignment-at-ratify-gate`.

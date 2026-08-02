@@ -683,7 +683,7 @@ class ScreenshotCommandsTest(CorpusCommandTestCase):
         self.assertIn("no screens tagged", result.stdout)
 
 
-class RecordGateCoOccurrenceAndOriginTest(CorpusCommandTestCase):
+class RecordGateCoOccurrenceTest(CorpusCommandTestCase):
     def write_domain(self, name):
         (self.root / "corpora" / "domains" / f"{name}.md").write_text(
             f'# Domain: {name}\n\n```yaml\nprinciples:\n\n- id: p1\n  rule: "R"\n  condition: "C"\n  reason: "Why."\n```\n'
@@ -717,23 +717,6 @@ class RecordGateCoOccurrenceAndOriginTest(CorpusCommandTestCase):
         audit_text = (self.root / "corpora" / "domains" / "audit.md").read_text()
         self.assertIn("count: 2", audit_text)
 
-    def test_record_gate_defaults_origin_to_project(self):
-        self.write_domain("color")
-
-        result = self.record_gate()
-
-        self.assertEqual(result.returncode, 0, result.stderr)
-        audit_text = (self.root / "corpora" / "domains" / "audit.md").read_text()
-        self.assertIn("origin: project", audit_text)
-
-    def test_record_gate_stamps_explicit_origin(self):
-        self.write_domain("color")
-
-        result = self.record_gate(["--origin", "seed"])
-
-        self.assertEqual(result.returncode, 0, result.stderr)
-        audit_text = (self.root / "corpora" / "domains" / "audit.md").read_text()
-        self.assertIn("origin: seed", audit_text)
 
 
 class ConventionsTest(CorpusCommandTestCase):
@@ -848,8 +831,8 @@ class ConventionsTest(CorpusCommandTestCase):
 
 
 class ArbitraryLayerOverrideTest(unittest.TestCase):
-    """measure/verify/record-gate must work on any domains-dir + audit.md pair — e.g. the
-    kernel-seed layer, not only a project's own corpora/domains — the same treatment
+    """measure/verify/record-gate must work on any domains-dir + audit.md pair — e.g. this
+    skill's own domains/, not only a project's own corpora/domains — the same treatment
     kill-report/graduate-kill already have."""
 
     def setUp(self):

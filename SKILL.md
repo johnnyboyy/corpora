@@ -13,15 +13,17 @@ composition model, generative stance, ratify gate, write-back, handoff artifact,
 `processes/general-operation.md` is the canonical reference for the session and per-spawn procedure — the
 order these pieces run in, from session entry through the ratify gate and the retrospective.
 
-**One flat domain pool.** All seed domains — stack-agnostic (`coding-general`,
+**One flat domain pool.** Every domain this skill carries — stack-agnostic (`coding-general`,
 `orchestrator-routing`, `ratify-gate`, `planning`, `interviewing`, `spawn-integrity`) and
 stack-specific (`coding-ts`, `coding-react`, `coding-nextjs`, `css`, and the design domains) alike —
-live together in `domains/`, with one `domains/audit.md` for the layer. There is no separate
-"role pack" layer selected by a project-config field: each stack-specific domain states its own
-load condition as `applies-when` frontmatter against `corpora/config.md`'s existing shape fields
-(`coding-nextjs` loads when `framework: nextjs`, `css` loads when `styling` is not `none`, and so
-on) — retired 2026-07-22, see `kernel.md`, "One flat seed layer," for why the old `role-pack:`
-field added an indirection without adding information. `scripts/corpus.py select --unit-of-work
+lives together in `domains/`, with one `domains/audit.md` for the pool; nothing here is a
+privileged tier a project's own principle gets "promoted" into (`kernel.md`, "Project corpora").
+There is no separate "role pack" layer selected by a project-config field either: each
+stack-specific domain states its own load condition as `applies-when` frontmatter against
+`corpora/config.md`'s existing shape fields (`coding-nextjs` loads when `framework: nextjs`, `css`
+loads when `styling` is not `none`, and so on) — retired 2026-07-22, see `kernel.md`, "One flat
+domain pool," for why the old `role-pack:` field added an indirection without adding information.
+`scripts/corpus.py select --unit-of-work
 <u>` evaluates every domain's condition mechanically against the project's actual config and
 returns the domain subset directly — see `kernel.md`, "The spawn brief."
 
