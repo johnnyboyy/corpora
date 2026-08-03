@@ -2124,6 +2124,48 @@ def cmd_migrate_domains(project: "Project", args) -> None:
           "(processes/domain-repo-migration.md, step 4).")
 
 
+def cmd_sync_units_of_work(project: "Project", args) -> None:
+    """`migrate-domains` merges principle *content* from seed but deliberately keeps a project's own
+    frontmatter untouched once a domain file already exists — so a project's units-of-work list can
+    drift behind the seed's (e.g. a domain gains `debug-issue` in the seed template after a project
+    already materialized its own copy with only `implement-feature`). This is that sibling: it syncs
+    only the `units-of-work:` list, additively (never removes a project-only entry the seed doesn't
+    have), and is a mechanical composition-scope fix, not a principle — no ratify gate involved."""
+    source_dir = args.source or os.path.join(skill_root(), "domains")
+    domains = sorted(_ids(args.domains)) if args.domains else sorted(project.domain_files().keys())
+    changes = []
+    for domain in domains:
+        seed_path = os.path.join(source_dir, f"{domain}.md")
+        project_path = os.path.join(project.domains_dir, f"{domain}.md")
+        if not os.path.exists(seed_path) or not os.path.exists(project_path):
+            continue
+        seed_fm = parse_domain_frontmatter(seed_path)
+        proj_fm = parse_domain_frontmatter(project_path)
+        if seed_fm is None or proj_fm is None:
+            continue
+        missing = [u for u in seed_fm["units-of-work"] if u not in proj_fm["units-of-work"]]
+        if not missing:
+            continue
+        changes.append((domain, project_path, proj_fm["units-of-work"], missing))
+    if not changes:
+        print("no units-of-work drift found — every checked domain already matches its seed")
+        return
+    verb = "synced" if args.apply else "would sync (dry run — pass --apply to write)"
+    print(f"{verb}:")
+    for domain, project_path, existing, missing in changes:
+        print(f"  - {domain}: +{','.join(missing)}")
+        if args.apply:
+            new_list = existing + missing
+            text = open(project_path).read()
+            new_text = re.sub(r"^units-of-work:\s*\[.*\]\s*$",
+                               "units-of-work: [" + ", ".join(new_list) + "]",
+                               text, count=1, flags=re.MULTILINE)
+            open(project_path, "w").write(new_text)
+    if args.apply:
+        print("Next: run `corpus.py lint-domains` to confirm, and `corpus.py select` for any "
+              "unit-of-work these domains now apply to, to confirm the wider composition.")
+
+
 # ── chunk chaining: ground-truth ledger for a workstream's units of work ────────────────────
 #
 # kernel.md, "Chunk chaining": this ledger records what already happened — it never replaces the
@@ -3092,6 +3134,19 @@ def main() -> None:
     md.add_argument("--config", default="", help="defaults to corpora/config.md under --root")
     md.add_argument("--domains", default="", help="comma-separated domain names; defaults to the "
                                                     "default-pool match plus every domain the project already has")
+    suw = sub.add_parser("sync-units-of-work", help="additively sync each domain's units-of-work "
+                                                      "list from the seed template — migrate-domains "
+                                                      "merges principle content but leaves an "
+                                                      "already-materialized domain's own frontmatter "
+                                                      "untouched, so this list can drift behind the "
+                                                      "seed (e.g. a domain gains debug-issue in the "
+                                                      "seed after a project's own copy was made). "
+                                                      "Mechanical composition-scope fix, not a "
+                                                      "principle — no ratify gate involved.")
+    suw.add_argument("--source", default="", help="defaults to this skill's own domains/")
+    suw.add_argument("--domains", default="", help="comma-separated domain names; defaults to "
+                                                     "every domain the project already has")
+    suw.add_argument("--apply", action="store_true", help="write the changes; omit for a dry-run report")
     cs = sub.add_parser("chunk-start", help="print the deterministic composition for a unit-of-work; writes nothing")
     cs.add_argument("--workstream", required=True)
     cs.add_argument("--unit-of-work", required=True)
@@ -3179,6 +3234,7 @@ def main() -> None:
      "add-principle": cmd_add_principle, "ratify-import-candidate": cmd_ratify_import_candidate,
      "import-list": cmd_import_list, "import-candidate": cmd_import_candidate,
      "import-default-pool": cmd_import_default_pool, "migrate-domains": cmd_migrate_domains,
+     "sync-units-of-work": cmd_sync_units_of_work,
      "chunk-start": cmd_chunk_start, "chunk-done": cmd_chunk_done,
      "lint-chunks": cmd_lint_chunks, "close-workstream": cmd_close_workstream,
      "verify-chunks": cmd_verify_chunks,
