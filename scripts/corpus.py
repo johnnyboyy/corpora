@@ -2014,8 +2014,44 @@ def cmd_import_default_pool(project: "Project", args) -> None:
 # domain-repo-migration.md`; a re-proposed already-killed idea is a low-cost, self-correcting
 # failure mode, not silent content loss).
 
-def render_migrated_domain(domain: str, frontmatter: str, last_retrospective: str,
-                            conventions: dict, principles: dict) -> str:
+def extract_preamble(path: str) -> str:
+    """The free-prose scene-setting text between frontmatter (if any) and the ```yaml fence —
+    domain description, load conditions stated in prose, shared vocabulary/glossary content.
+    Distinct from a principle's `condition`: this is context a reader loads once for the whole
+    domain, never an addressable/killable rule (LINEAGE.md's `fold-to-preamble` retirement was
+    about dissolving *rules* into unstructured prose, not about this kind of scene-setting text,
+    which was never a rule to begin with)."""
+    text = open(path).read()
+    m = FRONTMATTER_RE.match(text)
+    rest = text[m.end():] if m else text
+    fence_idx = rest.find("```yaml")
+    before_fence = rest[:fence_idx] if fence_idx != -1 else rest
+    header_match = re.match(r"\s*#\s*Domain:[^\n]*\n", before_fence)
+    if header_match:
+        before_fence = before_fence[header_match.end():]
+    return before_fence.strip("\n")
+
+
+def extract_killed_block(path: str) -> str:
+    """The raw, verbatim text of an existing domain file's `killed:` list (everything after the
+    `killed:` marker up to the closing fence) — preserved byte-for-byte across migrate-domains
+    rewrites the same way frontmatter and the preamble already are. A kill exists specifically to
+    stop the same rejected idea from being re-proposed; regenerating an empty `killed:` list on
+    every rewrite (the prior behavior) silently erases that history instead of just reformatting it."""
+    if not os.path.exists(path):
+        return ""
+    text = open(path).read()
+    idx = text.find("\nkilled:")
+    if idx == -1:
+        return ""
+    tail = text[idx + len("\nkilled:"):]
+    fence_idx = tail.find("\n```")
+    body = tail[:fence_idx] if fence_idx != -1 else tail
+    return body.strip("\n")
+
+
+def render_migrated_domain(domain: str, frontmatter: str, preamble: str, last_retrospective: str,
+                            conventions: dict, principles: dict, killed_block: str = "") -> str:
     lines = ["```yaml", f"last-retrospective: {last_retrospective}", "", "conventions:", ""]
     for entry_id, fields in conventions.items():
         lines.append(f"- id: {entry_id}")
@@ -2033,10 +2069,15 @@ def render_migrated_domain(domain: str, frontmatter: str, last_retrospective: st
         if fields.get("see-also"):
             lines.append(f"  see-also: {fields['see-also']}")
         lines.append("")
-    lines += ["killed:", "```"]
+    lines.append("killed:")
+    if killed_block:
+        lines.append("")
+        lines.append(killed_block)
+    lines.append("```")
     body = "\n".join(lines) + "\n"
     header = frontmatter if frontmatter else ""
-    return f"{header}\n# Domain: {domain}\n\n{body}"
+    preamble_block = f"{preamble}\n\n" if preamble else ""
+    return f"{header}\n# Domain: {domain}\n\n{preamble_block}{body}"
 
 
 def append_migration_provenance(audit_path: str, domain: str, ids: list) -> None:
@@ -2097,6 +2138,14 @@ def cmd_migrate_domains(project: "Project", args) -> None:
                 if m:
                     last_retrospective = m.group(1)
                     break
+        preamble = ""
+        for candidate_path in (project_path if has_project else None, seed_path if has_seed else None):
+            if candidate_path:
+                p = extract_preamble(candidate_path)
+                if p:
+                    preamble = p
+                    break
+        killed_block = extract_killed_block(project_path) if has_project else ""
         newly_migrated_ids = []
         merged = {}
         for section in ("conventions", "principles"):
@@ -2110,7 +2159,8 @@ def cmd_migrate_domains(project: "Project", args) -> None:
         if not merged["conventions"] and not merged["principles"]:
             continue
         open(project_path, "w").write(render_migrated_domain(
-            domain, frontmatter, last_retrospective, merged["conventions"], merged["principles"]))
+            domain, frontmatter, preamble, last_retrospective, merged["conventions"], merged["principles"],
+            killed_block))
         if newly_migrated_ids:
             append_migration_provenance(project.audit_path, domain, newly_migrated_ids)
             migrated.append(f"{domain}: +{len(newly_migrated_ids)} entries from seed")
