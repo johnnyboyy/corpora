@@ -33,15 +33,10 @@ the history means) unconditionally, the same way `orchestrator-routing`/`ratify-
    structural kinship, anti-overfitting, efficacy interpretation, and co-firing. Every signal that
    fires is a **proposal to the operator**, never automatic — advisory only, same as any other
    proposal at the ratify gate.
-3. **Kill graduation, as its own pass:** run `corpus.py kill-report --domains-dir <dir> --audit
-   <audit-file>` (works on a project's `corpora/domains/` or this skill's own `domains/` — this
-   repo's own domain pool retrospects too, not only downstream projects). It lists every killed
-   entry missing a `killed:` date (a bookkeeping gap to fix directly) and every one old enough
-   (default 90 days, `--min-age-days` to override) to be a graduation candidate. Judge each
-   candidate per `domains/retrospective.md`'s `kill-graduation-judged-not-assumed` — then
-   `corpus.py graduate-kill --domains-dir <dir> --audit <audit-file> --domain <domain> --id <id>`
-   does the mechanical part: removes the entry from the working file's `killed:` log and stamps
-   `graduated:` on its audit-file record.
+3. **Kill graduation, as its own pass:** run it per `processes/kill-graduation.md` — list the
+   candidates (`kill-report`), judge each per `domains/retrospective.md`'s
+   `kill-graduation-judged-not-assumed`, then demote the safe ones (`graduate-kill`). That file has
+   the commands and which `domains-dir`/`audit` pair to pass.
 4. Present every signal and every graduation judgment to the operator: ratify, reject, or edit,
    same as any proposal.
 5. **If a domain-tension split is approved:** this is the one signal whose execution is not
@@ -50,10 +45,10 @@ the history means) unconditionally, the same way `orchestrator-routing`/`ratify-
    `coding-js-react` split into a TS/JS-general domain, a React-specific domain, and had its
    stack-agnostic remainder land in `coding-general`). Create the new working file(s), move each
    affected principle to its new home, and add a `history:` entry (`type: moved` or `type: split`)
-   to that principle's audit-file record per `kernel.md`, "Write-back format." There is no
-   `corpus.py` command for this step — it stays a live conversation deliberately, the same way
-   domain assignment at the ratify gate is the one point in that procedure requiring judgment
-   rather than a script.
+   to that principle's audit-file record (`processes/ratify-write-back.md`, "Reshape a ratified
+   principle"; the `history:` schema is `kernel.md`, "Write-back format"). There is no `corpus.py`
+   command for this step — it stays a live conversation deliberately, the same way domain assignment
+   at the ratify gate is the one point in that procedure requiring judgment rather than a script.
 6. When the retrospective completes, run `corpus.py retro-done --domain <d>` (resets counters,
    re-baselines tokens) for each domain reviewed; after a UI-library sync specifically,
    `corpus.py sync-done`.

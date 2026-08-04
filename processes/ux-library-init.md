@@ -45,7 +45,9 @@ exist in the project:
 Document what exists or was decided — from the codebase, the UI library's behavioral notes, and
 any operator-provided product documentation. Do not invent aspirational patterns; a greenfield
 project gets a short library that grows with the work. The same restraint as `processes/ui-library-init.md`
-applies to proposals: no target count, most foundational choices are `kind: direction`.
+applies to proposals: no target count — most foundational choices are identity/experience
+decisions that live in the `Artifact` itself, reviewed via `processes/design-decision-review.md`,
+never a `proposals:` entry.
 
 When this task arrived via a planner-produced queue, it names a concrete feature to scope against —
 cover the sections above only to the depth that feature actually needs, same restraint
@@ -63,7 +65,7 @@ pollutes the handoff's `proposals` field with entries the gate can only kill.
 Route findings to the handoff's `Surfaced` section, one line each: what was observed, where, and
 why it reads as unintended rather than chosen. The orchestrator relays `Surfaced` verbatim; the
 operator triages — fix now, queue as coder work, or declare it intended (at which point it may
-become a direction).
+become part of the library's documented pattern).
 
 The library records the **intended** pattern, not the defect: where the dominant convention is
 clear, document that and note the deviation as a deviation. Documenting a bug as if it were a
@@ -80,15 +82,18 @@ Structure the document with a section per topic above, in `processes/bootstrap.m
 
 ### Proposed experience principles
 
-Distill the significant decisions made in this session into principles in the standard schema, and
-surface them in the handoff's `proposals` field. You propose the judgment; the orchestrator assigns
-each ratified principle to a design domain at the gate and writes it to
-`corpora/domains/<domain>.md`. No target count — propose what the work genuinely surfaced.
+Distill any genuine judgment the session surfaced — a real tradeoff whose reason will bind future
+weighing, distinct from the identity/experience decisions the library itself records — into
+principles in the standard schema, and surface them in the handoff's `proposals` field with
+`kind: judgment` (rarely `knowledge`). You propose the judgment; the orchestrator assigns each
+ratified principle to a design domain at the gate and writes it to `corpora/domains/<domain>.md`.
+No target count — propose what the work genuinely surfaced, and none is a valid outcome when the
+library captured everything as identity/experience decisions.
 
 ### Handoff
 
 End by writing the handoff artifact per `kernel.md`, "The handoff artifact": the library goes in
-the `Artifact` section; foundational decisions go in `proposals` with `kind` set from the inside
-(a mix of `judgment` and `direction`, provenance `"Bootstrap session, [date], [project name]."`).
-This phase documents experience, not visuals — leave `ui-drift.screens`/`.components` empty; it has
-no shared components of its own to name.
+the `Artifact` section — reviewed via `processes/design-decision-review.md`, not filed as a
+proposal — and any genuine judgment goes in `proposals` (provenance `"Bootstrap session, [date],
+[project name]."`). This phase documents experience, not visuals — leave `ui-drift.screens`/
+`.components` empty; it has no shared components of its own to name.

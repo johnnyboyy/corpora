@@ -37,9 +37,13 @@ A UI-composed spawn's output is a design spec: current state, proposed design pe
 (elements, layout, hierarchy, interaction behavior, empty/loading/selected/error states). Describe
 proportions in relative terms — no pixel values, no CSS class names, no component names;
 implementation is not this spawn's concern. Ground visual decisions in a UX flow spec when one was
-provided. Most proposals are `kind: direction` (filed to the UI library, not a domain) — a
-divergent spawn's output is an identity choice, not a weighable rule; name every screen a spec
-changes in `ui-drift.screens` and every shared component it changes in `ui-drift.components`.
+provided. This output is an identity choice, not a weighable rule — it is never a `proposals:`
+entry; it goes in `Artifact` and is reviewed through `processes/design-decision-review.md`
+(`kernel.md`, "Design decision review"), entirely separate from the ratify gate. Name every screen
+a spec changes in `ui-drift.screens` and every shared component it changes in
+`ui-drift.components`. `proposals:` is reserved for genuine judgment (rarely knowledge) the session
+also surfaced — a real tradeoff whose reason will bind future weighing, distinct from the identity
+choice itself.
 
 ```yaml
 last-retrospective: 2026-06-20

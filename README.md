@@ -210,8 +210,9 @@ updates — not domain content, which every project already controls per-import.
 2. On subsequent invocations, the orchestrator routes work inline, to an existing workstream agent,
    or to a new isolated spawn. A plan starts a new coder-composed workstream; testing feedback and
    revisions return to its owning agent.
-3. Handoffs surface proposals, violations, deterministic shortcut candidates, and other routing material. The
-   operator ratifies corpus and direction changes.
+3. Handoffs surface proposals, violations, deterministic shortcut candidates, and other routing
+   material. The operator ratifies corpus principles at the ratify gate, and separately reviews
+   design decisions (accept / revise / reject) at design decision review.
 4. `corpora/domains/<domain>.md` holds project-specific principles. The orchestrator creates a
    domain file on first ratification into it and assigns every ratified proposal a domain at the
    gate.

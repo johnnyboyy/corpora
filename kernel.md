@@ -279,20 +279,9 @@ Every cross-boundary change is **propose → ratify → promote**, never write-d
 - **Rejections are kept** with their reason. The kill log is the highest-signal training data.
 - Structural changes (split a domain, add an explorer, change a route) go through the
   same gate.
-- A proposal of `kind: direction` takes a **third route**: filed into the project's
-  `ui-library.md` — never ratified into a domain, never killed, never imported elsewhere as a principle.
-  A direction is an identity decision, not a weighable rule; it carries no condition/reason
-  obligation, and the library is the project's identity record. Processing a sound direction as a
-  failed principle is a container-kill in new clothes. **No parallel audit file exists for
-  `ui-library.md`/`ux-library.md`, and none should be created.** The working/audit split above is
-  real infrastructure built specifically for domain corpora (a per-domain working file plus one
-  audit file per layer, both maintained by `corpus.py`) — it does not extend to the library docs by
-  default, and "as usual" language here would wrongly imply it does. `ui-library.md` describes only
-  current application state; git history is its complete audit trail, the same way it is for any
-  other versioned source file — do not write "(direction, <date>, implemented)" tags,
-  "supersedes..." lead-ins, or trailing "*Provenance*" paragraphs into the library itself. A spawn
-  updating the library replaces superseded content outright rather than layering a correction on
-  top of it.
+- This gate is for **principles only** — `proposals:` entries of `kind: judgment` or `kind:
+  knowledge`. A design decision (a divergent spawn's identity/aesthetic choice) is never a proposal
+  and never passes through this gate at all — see `processes/design-decision-review.md`.
 
 ### The genuine-fork test
 
@@ -337,16 +326,11 @@ LINEAGE.md, the v3 transition entry.)
 
 ### Write-back format
 
-**`corpus.py add-principle --domain D --id ... --rule ... --condition ... --reason ... --provenance
-...`** is the standard way to ratify a freshly-authored or mined principle — it writes the working
-fields into the target domain's `principles:`, files the matching provenance in the layer's audit
-file, and records the gate, as one atomic step. **`corpus.py ratify-import-candidate --id ...
-[--as-domain --as-id]`** does the same for an entry already queued in
-`corpora/import-candidates.md` by `import-candidate`/`import-default-pool` — write-back, provenance
-(carrying its `imported-from` block), record-gate, and removal from the candidates file, together.
-Neither hand-edits a YAML block into place; what follows is the schema they produce, kept here as
-reference (what a proposal must supply, what the write-back looks like) and as the manual fallback
-for a domains-dir the script can't reach.
+The **data contracts** a write-back produces — what a ratified principle, a reshaped principle's
+history, and a graduated convention look like on disk. The step-by-step operations that produce
+them (which `corpus.py` command, in what order, and the hand-fallback where no command exists yet)
+live in **`processes/ratify-write-back.md`**; this section is the schema those operations write to
+and the manual fallback for a domains-dir the script can't reach.
 
 Ratified principle — the working fields, appended to the end of the target domain's `principles:`:
 
@@ -362,7 +346,7 @@ ratification). On write-back, that `provenance` is filed by `id` in the layer's 
 its `domain:` noted. The working file's principle carries no `provenance` field.
 
 When a ratified principle is meaningfully reshaped — generalized, consolidated, split, or **moved
-to another domain** — add an optional `history:` sub-list to its provenance entry. Each item
+to another domain** — an optional `history:` sub-list is added to its provenance entry. Each item
 carries `date`, `type` (generalized / consolidated / split / moved), and `reason`:
 
 ```yaml
@@ -374,11 +358,9 @@ carries `date`, `type` (generalized / consolidated / split / moved), and `reason
       reason: "Re-homed from ui-designer corpus to the recoverability domain — it is shared with UX."
 ```
 
-Retired principle — graduated to a convention: when a principle has been ratified long enough that
-checking its `condition` before every task is friction without benefit, move it from `principles:`
-to the working file's `conventions:` list, dropping `condition` and keeping its `id`, `rule`, and
-`reason`. This move (unlike fresh ratification, above) has no `corpus.py` command yet — do it by
-hand, both here and in the audit-layer `history:` entry below:
+Retired principle — graduated to a convention: a principle ratified long enough that checking its
+`condition` before every task is friction without benefit moves from `principles:` to the working
+file's `conventions:` list, dropping `condition` and keeping its `id`, `rule`, and `reason`:
 
 ```yaml
 - id: convention-id
@@ -392,8 +374,8 @@ principle, it is simply unconditioned — checked whenever the domain loads, wit
 condition-weighing left to do. Unlike the old fold-to-preamble mechanic, a convention keeps its
 `id`: it stays addressable, killable (a convention can still move to `killed:` if it turns out
 wrong), and graduatable in the other direction (see "Promotion restraint," below) — dissolving a
-principle into unstructured preamble prose loses all three. Add a `history:` entry (`type:
-graduated-to-convention`) to the principle's audit-layer `provenance` record so the trail stays
+principle into unstructured preamble prose loses all three. A `history:` entry (`type:
+graduated-to-convention`) on the principle's audit-layer `provenance` record keeps the trail
 legible — a principle that reappears as a corpus proposal after graduating is a signal of
 regression, not new insight.
 
@@ -404,12 +386,13 @@ domain-reassignment judgment. No parallel "laws vs. rules" split exists here —
 from condition-checking is *more* dangerous, not more trustworthy, and a separate authority tier
 would carry an ossification risk not worth taking on.
 
-**Promotion restraint** applies to graduation into `conventions:`: before graduating, ask whether
-the spawn would still need to reconsider this when the project context changes. Graduate only if
-the judgment is stable *across the kinds of projects the domain serves* — or is so foundational
-that contestability has genuinely become noise — not merely because it has repeated inside one
-project family. When in doubt, leave it in `principles:` where its `condition` and `reason` can
-still be checked against an unfamiliar case.
+**Promotion restraint** is the judgment that gates graduation into `conventions:` (applied in
+`processes/ratify-write-back.md`, "Graduate a principle to a convention"): before graduating, ask
+whether the spawn would still need to reconsider this when the project context changes. Graduate
+only if the judgment is stable *across the kinds of projects the domain serves* — or is so
+foundational that contestability has genuinely become noise — not merely because it has repeated
+inside one project family. When in doubt, leave it in `principles:` where its `condition` and
+`reason` can still be checked against an unfamiliar case.
 
 ### Killed entries
 
@@ -446,16 +429,11 @@ Per-kill audit detail goes in the layer's audit file, keyed by `id`, alongside i
 **Graduation.** A kill's job is to stop the same rejected idea from being re-proposed. That value
 decays: a kill nobody has come near re-proposing across several retrospectives is no longer live
 guidance, and its continued presence in the working file is a small, permanent reader-tax paid by
-every future spawn session for a risk that has stopped materializing. `scripts/corpus.py kill-report
---domains-dir <dir> --audit <audit-file>` lists, per domain, every killed entry with no recorded
-`killed:` date (a bookkeeping gap to fix) and every one old enough (default 90 days, `--min-age-days`
-to override) to be a graduation candidate. The operator/retrospective judges whether it is actually
-safe — has anything resembling it resurfaced — then `corpus.py graduate-kill --domains-dir <dir>
---audit <audit-file> --domain <domain> --id <id>` does the mechanical part: removes the entry from
-the working file's `killed:` log and stamps `graduated:` on its audit-file record. Works on any
-domains-dir + audit.md pair — a project's `corpora/domains/` or this skill's own `domains/` — since
-retrospective consolidation happens in this skill repo's own domain pool too, not only in
-downstream projects.
+every future spawn session for a risk that has stopped materializing. Retiring such a kill — listing
+the candidates old enough to consider, judging whether anything resembling one has actually
+resurfaced, and demoting it out of the working-file `killed:` log — is
+`processes/kill-graduation.md`; the judgment behind it is `domains/retrospective.md`'s
+`kill-graduation-judged-not-assumed`.
 
 ---
 
@@ -530,7 +508,7 @@ proposals:                   # principle proposals, provenance attached at propo
     rule: "..."
     condition: "..."
     reason: "..."
-    kind: judgment           # judgment | knowledge | direction
+    kind: judgment           # judgment | knowledge — never direction; see processes/design-decision-review.md
     provenance: "date, task, context"
 deterministic-shortcut-candidates: []       # plausible deterministic shortcuts observed during work
 violations-noted: []         # existing principles this work knowingly deviated from, with why
@@ -567,9 +545,11 @@ Field notes:
   prior agent could not continue.
 - **`kind`** is captured when the spawn knows it from the inside, not reconstructed at the gate.
   `judgment` = a decision made under uncertainty where context and tradeoffs shaped the outcome;
-  `knowledge` = derivable from documentation or training; `direction` = a project design-direction
-  choice — an identity decision, not a weighable rule. The stance model predicts `direction`: a
-  divergent spawn's output is a choice, so most UI-identity proposals are direction, not principle.
+  `knowledge` = derivable from documentation or training. A divergent spawn's UI/UX identity choice
+  is not a `kind` value at all — it is the spawn's `Artifact`, never a `proposals:` entry (see
+  `processes/design-decision-review.md`). The stance model predicts most divergent-spawn
+  `proposals:` entries to be rare: an identity choice has nowhere to go in this field by
+  construction.
 - **`deterministic-shortcut-candidates`** is deliberately liberal. Each entry names an observed inference burden
   and concrete deterministic operation shape; it need not prove recurrence or specify a finished
   CLI. The orchestrator transfers it to the persistent project ledger before closing the handoff
@@ -639,27 +619,19 @@ script byproduct instead gives the co-occurrence and composition-drift signals (
 record-gate --co-occurs-with`) ground truth to reconcile against, without asking the ledger to carry
 any of the weight of deciding whether to spawn.
 
-`corpus.py chunk-start --workstream W --unit-of-work U` runs the same `select` call the spawn brief
-already made and prints the composition — a preview, writing nothing; the ledger is append-only and
-only ever written once a real handoff exists to point at, so there is no in-progress entry to
-record before the spawn starts. `chunk-done --workstream W --unit-of-work U --stance S --handoff
-<path> [--next U]` is the operative half — it re-runs `select` itself (so `domains-composed` is
-never self-reported) and appends the entry, failing if the handoff file does not exist or does not
-name the same `workstream`. That existence check makes ordering load-bearing: `chunk-done` must run
-*before* `handoff-done` closes (deletes or archives) the handoff file it points at, never after —
-see `processes/general-operation.md`, Phase 6's chunk-close step. `close-workstream W` is a
-read-only summary once every chunk in a workstream is done — it aggregates the ledger for the
-retrospective, it does not fold multiple chunks' handoffs into one.
-
-`chunk-done` also reconciles against the handoff's own `domains-loaded:` field, when present, and
-refuses to close the chunk if the two disagree. Recomputing `select()` proves it's self-consistent,
-not that it matches what actually happened — a composing process that hard-lists a domain set in
-prose instead of calling `select()` (the exact shape of drift `processes/bootstrap.md`'s Phase 2/3 composition
-had before it was fixed) can silently diverge from `select()`'s answer, and `verify-chunks` alone
-cannot see that: it only recomputes the same function it's checking against itself. The
-`domains-loaded:` cross-check is the actual fidelity check; a handoff written before this schema
-field existed (or by a process that doesn't yet self-report it) skips the check rather than failing
-retroactively.
+The operations against this ledger — previewing a composition (`chunk-start`, writes nothing),
+closing a chunk against its handoff (`chunk-done`), and summarizing a finished workstream
+(`close-workstream`) — are **`processes/chunk-accounting.md`**, along with the load-bearing
+ordering constraint (`chunk-done` must run *before* `handoff-done` closes the handoff file it
+points at) and the three fidelity checks `chunk-done` enforces. Two of those checks are worth
+stating here as invariants, not just steps: `chunk-done` re-runs `select` itself so
+`domains-composed` is never self-reported, and it reconciles against the handoff's own
+`domains-loaded:` field, refusing to close the chunk if the two disagree. Recomputing `select()`
+only proves it's self-consistent, not that it matches what actually happened — a composing process
+that hard-lists a domain set in prose instead of calling `select()` (the exact shape of drift
+`processes/bootstrap.md`'s Phase 2/3 composition had before it was fixed) can silently diverge from
+`select()`'s answer, and recomputation alone cannot see that. The `domains-loaded:` cross-check is
+the actual fidelity check.
 
 ---
 
@@ -696,8 +668,10 @@ dependency. `stance` is `convergent` or `divergent`; `status` is `queued` or `re
 must always be `no`. Group items by stance and related surface, not count alone. Route a spawn
 workstream when several items need coherent judgment, an item becomes blocking, provisional work
 would create material rework, or the operator requests it. Pass the relevant entries to the spawn.
-Mark them `resolved` only after the operator ratifies the spawn's handoff, then remove them; durable
-direction and judgment live in the UI/UX libraries and corpora, not this queue.
+Mark them `resolved` only after the operator's review of the handoff settles them — ratifying a
+principle at the ratify gate, or accepting a design decision at design decision review — then
+remove them; durable direction and judgment live in the UI/UX libraries and corpora, not this
+queue.
 
 ---
 

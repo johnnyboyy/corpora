@@ -6,14 +6,14 @@ description: Bring corpora/ui-library.md back in line with the project's actual 
 # UI library sync
 
 **Trigger:** evaluated at every ratify gate (`processes/general-operation.md`, Phase 6, step 8), never run
-automatically. `direction` filings already update the library directly at the gate as they land —
-this phase is for the gap a single filing doesn't close: accumulated coder-side drift the library
-hasn't caught up to yet. Suggest a sync when `library-drift.since-last-sync ≥ 3` (`kernel.md`, "The
-retrospective," "Triggers"), or immediately when a drifting change *retired* something the library
-still teaches — a stale-but-wrong library is worse than an incomplete one. Handoffs self-report
-`ui-drift`; the gate counts it into `library-drift` mechanically (`corpus.py record-gate
---ui-drift`) — the operator's decision to act on the suggestion is the judgment call, not the count
-itself.
+automatically. Accepted design decisions already update the library directly at design decision
+review (`processes/design-decision-review.md`, Phase 5) as they land — this phase is for the gap a
+single acceptance doesn't close: accumulated coder-side drift the library hasn't caught up to yet.
+Suggest a sync when `library-drift.since-last-sync ≥ 3` (`kernel.md`, "The retrospective,"
+"Triggers"), or immediately when a drifting change *retired* something the library still teaches —
+a stale-but-wrong library is worse than an incomplete one. Handoffs self-report `ui-drift`; the gate
+counts it into `library-drift` mechanically (`corpus.py record-gate --ui-drift`) — the operator's
+decision to act on the suggestion is the judgment call, not the count itself.
 
 **Composition:** divergent stance, `ui-design`-composed — the full ongoing composition (`scripts/
 corpus.py select --unit-of-work design-ui-surface`), not the narrower founding-a-library
@@ -37,8 +37,8 @@ away from.
    detail, the library's full component vocabulary), compare the library's documented values
    (color tokens, spacing, states, visual character) against the current implementation.
 2. Write the entry as a standing description of current state, not a copy of any spawn's own
-   narrated reasoning — the same restriction `processes/general-operation.md`'s "UI library upkeep" states
-   for direction filings applies here: no "(direction, <date>, implemented)" tags, no "supersedes
+   narrated reasoning — the same restriction `processes/design-decision-review.md` states for
+   accepted decisions applies here: no "(direction, <date>, implemented)" tags, no "supersedes
    the prior X" lead-ins, no dates, no naming what was rejected or why. When a corrected entry
    replaces an existing one, overwrite it outright rather than layering the correction on top; the
    library should never require reading two versions to know the current one.

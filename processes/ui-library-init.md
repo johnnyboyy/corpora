@@ -196,7 +196,7 @@ entries the gate can only kill.
 Route findings to the handoff's `Surfaced` section, one line each: what was observed, where, and
 why it reads as unintended rather than chosen. The orchestrator relays `Surfaced` verbatim; the
 operator triages — fix now, queue as coder work, or declare it intended (at which point it may
-become a direction).
+become part of the library's documented pattern).
 
 The library records the **intended** pattern, not the defect: where the dominant convention is
 clear, document that and note the deviation as a deviation. Documenting a bug as if it were a
@@ -219,25 +219,25 @@ than design artifacts (one sentence on the why is enough).
 
 ### Proposed design principles
 
-Distill the significant decisions made in this session into principles in the standard schema, and
-surface them in the handoff's `proposals` field. A foundational color system choice, a density
-decision, a typography role assignment — these are worth encoding with conditions and reasons, so
-future designer sessions can weigh them rather than re-derive them. You propose the judgment; the
-orchestrator assigns each ratified principle to a design domain at the gate (e.g. a color decision
-to `color`, a documentation rule to `design-method`) and writes it to `corpora/domains/<domain>.md`.
+A foundational color system choice, a density decision, a typography role assignment — these are
+identity decisions, not principles. They live entirely in the library document (the `Artifact`),
+reviewed via `processes/design-decision-review.md`; do not also dress one up as a `proposals:`
+entry to give it a condition/reason it doesn't have.
 
-There is no target count — propose what the work genuinely surfaced, and none is a valid
-outcome when the library captured everything as direction. Most foundational choices are
-`kind: direction` (identity decisions; the gate files them into the library itself). A
-*principle* needs a real tradeoff whose reason will bind future weighing — do not dress a
-direction up as one to fill a quota, and do not encode every detail of the library.
+`proposals:` is reserved for genuine judgment the session surfaced *about how to make this kind of
+decision* — a real tradeoff whose reason will bind future weighing (e.g. a rule about when to
+introduce a second accent hue, not the choice of this session's accent hue itself). No target
+count — propose what the work genuinely surfaced, and none is a valid outcome when the library
+captured everything as identity decisions. You propose the judgment; the orchestrator assigns each
+ratified principle to a design domain at the gate (e.g. to `color`, or a documentation rule to
+`design-method`) and writes it to `corpora/domains/<domain>.md`.
 
 ### Handoff
 
 End by writing the handoff artifact per `kernel.md`, "The handoff artifact": the library goes in
-the `Artifact` section; foundational design decisions go in `proposals` with `kind` set from the
-inside (a mix of `judgment` and `direction`, provenance `"Bootstrap session, [date], [project
-name]."`). Leave `ui-drift.screens`/`.components` empty — this phase names its screens and
-components in the library document itself, which `processes/screenshot-library-init.md` reads directly; it
-does not use the drift-invalidation channel, which is reserved for a change to an *existing*
-capture, not an initial one.
+the `Artifact` section — reviewed via `processes/design-decision-review.md`, not filed as a
+proposal — and any genuine judgment goes in `proposals` with `kind: judgment` (rarely `knowledge`),
+provenance `"Bootstrap session, [date], [project name]."`. Leave `ui-drift.screens`/`.components`
+empty — this phase names its screens and components in the library document itself, which
+`processes/screenshot-library-init.md` reads directly; it does not use the drift-invalidation channel, which
+is reserved for a change to an *existing* capture, not an initial one.

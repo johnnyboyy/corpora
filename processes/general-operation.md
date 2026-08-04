@@ -166,18 +166,23 @@ one-line status only.
 
 ## Phase 5 — Relay
 
-4. Relay the handoff artifact — the `Artifact` section for approval before passing to the next
-   spawn, and the `Surfaced` section to the operator **verbatim**, always. Read the handoff from the
-   file the spawn wrote (`kernel.md`, "The handoff artifact"); do not expect or rely on the spawn's
-   own final conversational turn to restate the content — that turn is a terse pointer only, by
-   design, so the content is never generated twice.
-5. If `status: questions-pending`: relay the questions verbatim, collect the operator's answers,
+4. Relay the handoff artifact — the `Surfaced` section to the operator **verbatim**, always. Read
+   the handoff from the file the spawn wrote (`kernel.md`, "The handoff artifact"); do not expect or
+   rely on the spawn's own final conversational turn to restate the content — that turn is a terse
+   pointer only, by design, so the content is never generated twice.
+5. If the handoff is `stance: divergent`, or its `Artifact` otherwise targets `ui-library.md`/
+   `ux-library.md` content, run `processes/design-decision-review.md` now, before continuing:
+   present the `Artifact` and get the operator's accept / revise / reject. A revise resumes the same
+   agent and returns control to Phase 4, same as a `questions-pending` continuation; a reject
+   discards the Artifact with no kill log. This step never touches `proposals:` — see Phase 6 for
+   those.
+6. If `status: questions-pending`: relay the questions verbatim, collect the operator's answers,
    and **continue the same agent** so working context survives — this returns control to Phase 4,
    not to Phase 2. This is the direction-question channel: any composed spawn can ask, when the
    question is real.
-6. If the artifact carries a `tradeoffs` block: relay to operator — implement as specced, accept
+7. If the artifact carries a `tradeoffs` block: relay to operator — implement as specced, accept
    alternative, or send back to the relevant upstream spawn.
-7. If `status: blocked` and `Surfaced` names scope divergence — the task grew to cover materially
+8. If `status: blocked` and `Surfaced` names scope divergence — the task grew to cover materially
    different or additional concerns than originally scoped, not merely a context-pressure tell or a
    genuine open question (`spawn-integrity`'s `periodic-scope-and-integrity-checkpoint`) — decide
    between two responses, using judgment: route the remaining work to a planner for
@@ -233,39 +238,32 @@ Runs immediately after each spawn, by default.
    recurrence. Acceptance authorizes a scoped coder
    workstream, not config registration; register it only after implementation and tests prove useful.
 4. Present proposals from the handoff envelope's `proposals` field (rule, condition, reason,
-   provenance, kind). Surface the `kind` the spawn captured — do not re-evaluate it. `judgment` =
-   decision under uncertainty; `knowledge` = derivable from documentation or training (see
-   `ratify-gate-judgment-vs-knowledge`); `direction` = a project design-direction choice (third
-   route, next step). If a proposal's provenance names a reading-pipeline source rather than an
-   earned incident, flag that alongside it — a real correlation with knowledge-not-judgment risk
-   (`reading-pipeline-provenance-flags-knowledge-risk` in `principle-judgment`). Ask: ratify / reject / edit
-   — **per proposal, every time, no exceptions.** Do not write a proposal back to a domain file,
-   write its provenance to the audit file, or call `record-gate` for it until the operator has given
-   an explicit answer for that specific proposal in this specific gate. A prior gate's approval —
-   in this session or any other — is never implicit approval for a new proposal, even one that looks
-   obviously fine: "ask once" scopes to that one proposal, not to the rest of the session.
-5. **Assign a home.** A `direction` proposal is filed into the project's `ui-library.md`, describing
-   only current state — never into a domain, never killed, never imported elsewhere as a
-   principle, and never with an inline provenance/history note (git history is the library's audit
-   trail; no parallel audit file exists for it) (`kernel.md`, "The ratify gate"). For each ratified
-   *principle*, decide its domain — citing specifically how it matches that domain's stated subject
-   (`kernel.md`, "Domain assignment at the gate") — and write it there; if none fits, create a new
-   domain working file in whichever domains-dir this gate is running against
-   (`corpora/domains/<new>.md` for a project, this skill's own `domains/<new>.md` when working here
-   directly). The domain becomes available to any
-   spawn whose stance and subject match — there is no composition declaration to add it to. A proposal
-   spanning two domains is a possible domain-boundary problem — surface it rather than
-   fragmenting. See `domain-assignment-at-ratify-gate`.
-6. **Write-back** per `kernel.md`, "Write-back format." Ratified (or edited — write the operator's
-   edited version) → `corpus.py add-principle --domain <d> --id <id> --rule ... --condition ...
-   --reason ... --provenance ... [--kind ...]` for a freshly-authored or mined proposal, or
-   `corpus.py ratify-import-candidate --id <id> --as-domain <d> [--as-id ...]` for one sourced from
-   `reading/candidates.md`/`corpora/import-candidates.md` — either writes the working fields into
-   the target domain, files the provenance in that layer's `domains/audit.md`, and records the
-   proposal's own `ratified` count, atomically; no hand edit to either file. Rejected → append to
-   the domain working file's `killed:` log by hand with an `id`, `kill_type` (`quality` |
-   `container` | `attribution-noise`), and `reason_killed`; per-kill provenance to the audit file —
-   this path has no script yet.
+   provenance, kind) — `judgment` or `knowledge` only; a design decision was already handled in
+   Phase 5 and never appears here. Surface the `kind` the spawn captured — do not re-evaluate it.
+   `judgment` = decision under uncertainty; `knowledge` = derivable from documentation or training
+   (see `ratify-gate-judgment-vs-knowledge`). If a proposal's provenance names a reading-pipeline
+   source rather than an earned incident, flag that alongside it — a real correlation with
+   knowledge-not-judgment risk (`reading-pipeline-provenance-flags-knowledge-risk` in
+   `principle-judgment`). Ask: ratify / reject / edit — **per proposal, every time, no exceptions.**
+   Do not write a proposal back to a domain file, write its provenance to the audit file, or call
+   `record-gate` for it until the operator has given an explicit answer for that specific proposal
+   in this specific gate. A prior gate's approval — in this session or any other — is never implicit
+   approval for a new proposal, even one that looks obviously fine: "ask once" scopes to that one
+   proposal, not to the rest of the session.
+5. **Assign a home.** For each ratified principle, decide its domain — citing specifically how it
+   matches that domain's stated subject (`kernel.md`, "Domain assignment at the gate") — and write
+   it there; if none fits, create a new domain working file in whichever domains-dir this gate is
+   running against (`corpora/domains/<new>.md` for a project, this skill's own `domains/<new>.md`
+   when working here directly). The domain becomes available to any spawn whose stance and subject
+   match — there is no composition declaration to add it to. A proposal spanning two domains is a
+   possible domain-boundary problem — surface it rather than fragmenting. See
+   `domain-assignment-at-ratify-gate`.
+6. **Write-back** each proposal per `processes/ratify-write-back.md`: a ratified (or edited)
+   freshly-authored/mined proposal via `add-principle`, one sourced from
+   `reading/candidates.md`/`corpora/import-candidates.md` via `ratify-import-candidate`, and a
+   rejected proposal appended by hand to the domain working file's `killed:` log. That file has the
+   command sequences and the hand-fallback; the data contracts they write are `kernel.md`,
+   "Write-back format" and "Killed entries."
 7. **Resolve deferred decisions.** For any `corpora/deferred-decisions.md` entry this handoff's
    ratified write-back settles, mark it `status: resolved` and remove it — this is the step the
    ratification in steps 4–6 actually authorizes; a proposal presented but rejected or edited away
@@ -275,17 +273,12 @@ Runs immediately after each spawn, by default.
 8. If the operator defers review, the unratified handoff file *is* the queue — leave it in
    `corpora/handoffs/`; a directory of lingering handoffs is a visible backlog. Once a handoff's
    proposals are ratified/killed and written back, **close its chunk before closing the handoff
-   file** (`kernel.md`, "Chunk chaining"): `corpus.py chunk-done --workstream <w> --unit-of-work <u>
-   --stance <s> --handoff <file> [--next <u>]`, using the handoff's own `workstream:`/`stance:`
-   fields and the `unit-of-work:` held from Phase 3, step 1 — `chunk-done` fails if the handoff file
-   no longer exists, so this order is load-bearing, not stylistic. It also fails if the handoff's
-   `domains-loaded:` doesn't match what `select()` recomputes for `<u>` — a real discrepancy to
-   investigate (fix the composing process or the spawn), never a mismatch to paper over by hand-
-   editing the ledger (`kernel.md`, "Chunk chaining"). Only then close the handoff:
-   `corpus.py handoff-done <file>`. By
-   default this deletes it; when `corpora/config.md` sets `debug: yes`, it archives the file to
-   `corpora/handoffs/archive/` instead so the operator can audit past handoffs — the archive is not
-   part of the pending backlog. A unit-of-work whose inline session produced no handoff at all (the
+   file** — this ordering is load-bearing, not stylistic. The `chunk-done` command, its flags, and
+   the fidelity checks it enforces are `processes/chunk-accounting.md`; run it, then close the
+   handoff with `corpus.py handoff-done <file>`. By default that deletes the file; when
+   `corpora/config.md` sets `debug: yes`, it archives the file to `corpora/handoffs/archive/`
+   instead so the operator can audit past handoffs — the archive is not part of the pending backlog.
+   A unit-of-work whose inline session produced no handoff at all (the
    zero-proposals/zero-tradeoffs/no-drift exemption, `kernel.md`, "The handoff artifact") has
    nothing for `chunk-done` to point at either — it stays unchunked, same as it stays
    un-handed-off, and the session-harvest pipeline is the backstop for both.
@@ -305,10 +298,10 @@ Three sync processes trigger from within Phase 6 and may themselves open a new w
 edge back to Phase 2, not a continuation of the gate that produced them. Each is its own file;
 this phase is only the trigger point they share.
 
-**`processes/ui-library-sync.md`** — direction filings already update `ui-library.md` directly at the gate
-(Phase 6, step 5); this is for the coder-side drift a single filing doesn't close.
-`library-drift.since-last-sync ≥ 3`, or a drifting change that retired something the library still
-teaches, suggests running it.
+**`processes/ui-library-sync.md`** — accepted design decisions already update `ui-library.md`
+directly at design decision review (Phase 5, step 5); this is for the coder-side drift a single
+acceptance doesn't close. `library-drift.since-last-sync ≥ 3`, or a drifting change that retired
+something the library still teaches, suggests running it.
 
 **`processes/screenshot-library-sync.md`** — right after processing any handoff whose `ui-drift.screens` or
 `.components` is non-empty, not on a threshold. Mechanical; never spawns a design composition.

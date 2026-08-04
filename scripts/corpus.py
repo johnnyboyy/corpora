@@ -100,7 +100,7 @@ RETRO_VIOLATIONS = 3
 SYNC_DRIFT = 3
 
 STATUS_ENUM = {"complete", "tradeoffs-pending", "questions-pending", "blocked"}
-KIND_ENUM = {"judgment", "knowledge", "direction"}
+KIND_ENUM = {"judgment", "knowledge"}
 DEFERRED_STANCE_ENUM = {"convergent", "divergent"}
 DEFERRED_STATUS_ENUM = {"queued", "resolved"}
 SHORTCUT_STATUS_ENUM = {"open", "deferred", "denied", "accepted", "implemented"}
@@ -3163,7 +3163,7 @@ def main() -> None:
     ap_.add_argument("--reason", required=True)
     ap_.add_argument("--see-also", default="")
     ap_.add_argument("--provenance", required=True, help="free text: date, source, context")
-    ap_.add_argument("--kind", default="", choices=["", "judgment", "knowledge", "direction"])
+    ap_.add_argument("--kind", default="", choices=["", "judgment", "knowledge"])
     ric = sub.add_parser("ratify-import-candidate", help="write an entry already queued by "
                                                            "import-candidate/import-default-pool "
                                                            "into its destination domain plus "
