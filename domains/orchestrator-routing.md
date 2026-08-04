@@ -121,6 +121,12 @@ principles:
   condition: "Writing a review dispatch prompt, when tempted to add an instruction narrowing what the reviewer should flag."
   reason: "An instruction that pre-filters findings collapses the reviewer's independence into a rubber stamp for whatever the dispatcher already believes — the value of an external review is specifically that it isn't primed by the producer's own assumptions, and adjudicating a raised-then-rejected finding costs less than silently losing a real one to a pre-emptive filter."
 
+- id: parallel-agents-assigned-orthogonal-focus
+  rule: "When dispatching multiple parallel agents to widen coverage of the same design or review question, assign each agent an explicit, distinct optimization axis or lens — e.g. minimal-change vs. clean-architecture vs. pragmatic-balance for an architecture question, or correctness vs. simplification vs. convention-adherence for a review — rather than issuing the same open-ended prompt to all of them. Let each agent commit decisively within its assigned lane; consolidate and compare the results afterward."
+  condition: "When spawning more than one instance of the same composition in parallel specifically to widen coverage of one design or review question — not when parallel dispatch is dividing genuinely independent units of work (parallel-dispatch-requires-verified-independence governs that case)."
+  reason: "Identical prompts sent to multiple agents tend to converge on the same answer or share the same blind spots, since nothing decorrelates their attention — the parallelism adds cost without adding coverage. Assigning each agent a distinct, named axis forces real diversity and lets each one commit decisively within its lane instead of hedging across all of them at once, which is also cheaper to compare afterward than reconciling several agents' partially-overlapping hedges."
+  see-also: parallel-dispatch-requires-verified-independence
+
 killed:
 
 - id: prefer-independent-evaluation

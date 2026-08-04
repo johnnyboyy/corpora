@@ -1453,6 +1453,47 @@ provenance:
   domain: retrospective
   provenance: "Predates individual per-principle provenance tracking in this file."
   killed: 2026-08-02
+- id: detect-managed-config-before-edit
+  domain: coding-general
+  kind: judgment
+  provenance: "2026-08-02, mined from marketplace skill semgrep:install-mfw (Step 2/4, 'Inspect the shell config BEFORE installing')"
+- id: parallel-agents-assigned-orthogonal-focus
+  domain: orchestrator-routing
+  kind: judgment
+  provenance: "2026-08-02, mined from marketplace plugin feature-dev (commands/feature-dev.md Phase 4 architect dispatch and Phase 6 reviewer dispatch, both assigning named distinct focuses to parallel agents)"
+- id: scope-iac-permissions-to-stated-need
+  domain: security
+  kind: judgment
+  provenance: "2026-08-02, proposed by an independent research agent tasked with generating security-domain candidates, reviewed and ratified at the gate"
+- id: gate-and-flag-security-check-bypass
+  domain: security
+  kind: judgment
+  provenance: "2026-08-02, proposed by an independent research agent tasked with generating security-domain candidates, reviewed and ratified at the gate"
+- id: fix-implementation-not-security-assertion
+  domain: security
+  kind: judgment
+  provenance: "2026-08-02, proposed by an independent research agent tasked with generating security-domain candidates, reviewed and ratified at the gate"
+- id: state-trust-model-for-vague-auth-asks
+  domain: security
+  kind: judgment
+  provenance: "2026-08-02, proposed by an independent research agent tasked with generating security-domain candidates, reviewed and ratified at the gate"
+- id: verify-dependency-currency-not-familiarity
+  domain: security
+  kind: judgment
+  provenance: "2026-08-02, proposed by an independent research agent tasked with generating security-domain candidates, reviewed and ratified at the gate"
+- id: hardened-defaults-for-scaffolded-services
+  domain: security
+  kind: judgment
+  provenance: "2026-08-02, proposed by an independent research agent tasked with generating security-domain candidates, reviewed and ratified at the gate"
+- id: mask-secrets-in-debug-artifacts
+  domain: security
+  kind: judgment
+  provenance: "2026-08-02, proposed by an independent research agent tasked with generating security-domain candidates, reviewed and ratified at the gate"
+- id: flag-missing-abuse-bound-on-expensive-endpoints
+  domain: security
+  kind: judgment
+  provenance: "2026-08-02, proposed by an independent research agent tasked with generating security-domain candidates, reviewed and ratified at the gate; weakest of the batch — closer to a generic unstated-non-functional-requirement gap than a security-specific fork, kept because the invisibility of the gap in a diff is still a real, distinct point"
+
 ```
 
 <!-- corpus-script:begin — maintained by scripts/corpus.py; do not edit by hand -->
@@ -1474,11 +1515,11 @@ counters:
     conventions-at-baseline: 0
   - domain: coding-general
     since: 2026-07-23
-    ratified: 3
+    ratified: 4
     killed: 0
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 6019
+    working-file-tokens: 6308
     baseline-tokens: 5335
     principles-at-baseline: 18
     kills-at-baseline: 1
@@ -1617,11 +1658,11 @@ counters:
     conventions-at-baseline: 0
   - domain: orchestrator-routing
     since: 2026-07-23
-    ratified: 4
+    ratified: 5
     killed: 2
     graduated: 0
     gate-violations: 0
-    working-file-tokens: 5049
+    working-file-tokens: 5404
     baseline-tokens: 3460
     principles-at-baseline: 16
     kills-at-baseline: 1
@@ -1811,6 +1852,17 @@ counters:
     working-file-tokens: 1018
     baseline-tokens: 1019
     principles-at-baseline: 4
+    kills-at-baseline: 0
+    conventions-at-baseline: 0
+  - domain: security
+    since: 2026-08-02
+    ratified: 8
+    killed: 0
+    graduated: 0
+    gate-violations: 0
+    working-file-tokens: 1923
+    baseline-tokens: 433
+    principles-at-baseline: 0
     kills-at-baseline: 0
     conventions-at-baseline: 0
 efficacy:
