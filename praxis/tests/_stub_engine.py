@@ -28,6 +28,13 @@ if log:
 if subcmd in fail:
     sys.stderr.write(f"stub: {subcmd} configured to fail\\n")
     sys.exit(3)
+if subcmd == "select":
+    # compose: emit the JSON shape corpus.py's `select --json` returns. STUB_DOMAINS (comma-list)
+    # is the composed domain set a test wants back; empty by default.
+    import json
+    doms = [d for d in os.environ.get("STUB_DOMAINS", "").split(",") if d]
+    sys.stdout.write(json.dumps({"unit-of-work": "", "domains": doms}) + "\\n")
+    sys.exit(0)
 sys.stdout.write(f"stub-ok {subcmd}\\n")
 sys.exit(0)
 '''

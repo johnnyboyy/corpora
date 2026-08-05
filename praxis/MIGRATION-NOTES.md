@@ -52,7 +52,21 @@ corpora *write* verbs too — `chunk-done`, `handoff-done`, `add-principle`, `ra
   — cheaper coupling, but the ordering guards (chunk-done-before-handoff-done, the migration
   verify-gate) stop being testable, which is the thing that made them worth scripting.
 
-### F2. `handoff-done` (closing a handoff) lives on both sides of the boundary
+### F2. `handoff-done` (closing a handoff) lived on both sides of the boundary — RESOLVED
+
+**Resolution (per the recommendation below):** the handoff *lifecycle* is now fully praxis-owned.
+`handoff.py` gained **`close`** — native delete, or archive under `<handoffs-dir>/archive/` when the
+governing root's `corpora/config.md` sets `debug: yes`, guarded to a file directly inside the handoffs
+dir (all ported faithfully from corpora's `cmd_handoff_done` + `project_debug`). Alongside it,
+`chunk_ledger.py`'s close sequence went native: praxis reads/writes the ledger at
+`corpora/chunks/<workstream>.md` itself (ported `parse_chunks`/`render_chunks`, byte-compatible with
+corpora), enforces the same load-bearing `chunk-done`-before-close ordering + handoff-exists
+precondition, and reconciles the handoff against the composition (both failures preserved). The **only**
+engine call left in the ledger is `compose`; the four now-native verbs (`chunk-start`, `chunk-close`,
+`handoff-close`, `close-workstream`) were removed from `engine/plugins/corpora.json`. `route.py`'s
+resume-vs-new ledger lookup became a native filesystem check of the same praxis-owned ledger. Corpora's
+`corpus.py` still carries `handoff-done`/`chunk-done`/etc. until an operator retires them — praxis just
+stops calling them; nothing in corpora was edited. The original fork write-up is kept below.
 
 The handoff is declared a **praxis primitive** (`BOUNDARY.md`, "Built so far"; `handoff/`), yet
 *closing* a handoff is a corpora verb (`corpus.py handoff-done`, which deletes/archives the file), and
@@ -121,8 +135,9 @@ comment no longer exists / the surrounding code changed" needs the judgment pass
 ### F7. The corpora-plugin sequence scripts still live in `scripts/`, not a `plugins/corpora/` namespace
 
 With F1 resolved, `scripts/` now holds two kinds of file that the boundary distinguishes but the
-directory does not: **praxis-core** (`root_tree`, `frame`, `handoff`, `engine`, `route`) and
-**corpora-plugin orchestration** (`chunk_ledger`, `ratify_writeback`, `kill_graduation`,
+directory does not: **praxis-core** (`root_tree`, `frame`, `handoff`, `engine`, `route`,
+`chunk_ledger` — the last reclassified from corpora-plugin when its writes went native, F2) and
+**corpora-plugin orchestration** (`ratify_writeback`, `kill_graduation`,
 `domain_import`, `domain_migrate`). This pass marked each plugin script with a one-line header rather
 than moving it — the task explicitly scoped relocation out and asked to record it here instead.
 

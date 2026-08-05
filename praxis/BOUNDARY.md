@@ -63,8 +63,7 @@ engine ships a capabilities manifest and praxis resolves a capability *name* aga
 - The manifest is `engine/plugins/corpora.json` — the exact analogue of `handoff/plugins/corpora.json`.
   It maps each capability to a corpora CLI verb plus an argument shape (`flag`/`positional`/`global`/
   `boolean`, `required`) and a one-line description. It is the only place a corpora verb name lives.
-  Declared capabilities: **compose** (`select`), **chunk-start**, **chunk-close** (`chunk-done`),
-  **handoff-close** (`handoff-done`), **close-workstream**, **principle-add** (`add-principle`),
+  Declared capabilities: **compose** (`select`), **principle-add** (`add-principle`),
   **import-ratify** (`ratify-import-candidate`), **import-file** (`import-candidate`),
   **import-file-pool** (`import-default-pool`), **domain-import-list** (`import-list`),
   **kill-report**, **kill-graduate** (`graduate-kill`), **domain-migrate** (`migrate-domains`),
@@ -96,7 +95,12 @@ one engine registry; nothing else changes.
   composes the schema from base + plugins, generates a skeleton, and *validates that every registered
   plugin's required fields come out the other side* — praxis enforcing presence without knowing what
   any field means. `handoff/plugins/corpora.json` is corpora registered as the first plugin (this is
-  where corpora's handoff schema now lives, instead of baked into corpora's kernel).
+  where corpora's handoff schema now lives, instead of baked into corpora's kernel). The handoff
+  **lifecycle is now fully praxis-owned**: `template` (create) · `validate` · **`close`** (delete, or
+  archive under `<handoffs-dir>/archive/` when the governing root's `corpora/config.md` sets
+  `debug: yes`; guarded to a file sitting directly inside the handoffs dir). No engine is invoked for
+  any of the three — close was the missing third op and is native (ported from corpora's
+  `handoff-done`), so no primitive is split across the boundary.
 - `scripts/root_tree.py interop` + `phases/interop.md` — interop is **entering at the right root**.
   `interop_root` deterministically computes the entry root for a spanning task (the deepest root
   containing all spanned roots) — or reports that none exists and names where to define one. The
@@ -112,10 +116,17 @@ one engine registry; nothing else changes.
   of `frame.py::engine_compose` for everything past compose. Every sequence script routes its corpora
   calls through `engine.invoke`; on lift, `engine_compose` + `engine.invoke` become the one engine
   registry. The whole widened coupling surface is this one file (see `MIGRATION-NOTES.md`, F1).
+- `scripts/chunk_ledger.py` (+ tests) — **praxis-core: unit-of-work accounting.** The chunk ledger is
+  a praxis fact, so praxis reads/writes it at `corpora/chunks/<workstream>.md` **natively** (ported
+  `parse_chunks`/`render_chunks`, byte-compatible with corpora's format), enforces the load-bearing
+  chunk-done-before-handoff-close gate + the handoff-exists precondition, and reconciles the handoff
+  against the composition (both failures: workstream mismatch; `domains-loaded` ≠ `domains-composed`).
+  The **only** engine call left in the ledger is `compose` (the `domains-composed` ground truth); the
+  close sequence now calls `handoff.py close` natively rather than a `handoff-close` engine verb. NOTE:
+  the ledger/handoff *files* still live under `corpora/chunks/` and `corpora/handoffs/` (praxis writes
+  them there); a later move to a praxis-owned path is out of scope, tracked for the lift.
 - Deterministic-procedure scripts (+ tests), each owning ordering/preconditions/guards, tested against
   a stub engine (`tests/_stub_engine.py`):
-  - `scripts/chunk_ledger.py` — chunk-accounting: the close sequence with the load-bearing
-    chunk-done-before-handoff-done gate + handoff-exists precondition.
   - `scripts/domain_migrate.py` — domain-repo-migration: migrate → measure → verify (**hard gate**) →
     lint-domains.
   - `scripts/kill_graduation.py` — kill-graduation: read-only `candidates` vs. one-id `graduate` (no
@@ -144,18 +155,20 @@ one engine registry; nothing else changes.
   core no longer names a corpora verb anywhere; every sequence script invokes by *capability name*
   and the manifest (data) maps it to the verb + argv. `compose` folded in as just another declared
   capability (`frame.py::engine_compose` builds its argv through `resolve`, still interpreting the
-  JSON result). The corpora-plugin sequence scripts (`chunk_ledger`, `ratify_writeback`,
-  `kill_graduation`, `domain_import`, `domain_migrate`) each carry a one-line header marking them
-  corpora-specific orchestration, distinct from praxis-core (`root_tree`, `frame`, `handoff`,
-  `engine`). Tests: `tests/test_engine_capabilities.py`.
+  JSON result). The corpora-plugin sequence scripts (`ratify_writeback`, `kill_graduation`,
+  `domain_import`, `domain_migrate`) each carry a one-line header marking them corpora-specific
+  orchestration, distinct from praxis-core (`root_tree`, `frame`, `handoff`, `engine`, `route`,
+  `chunk_ledger`). (`chunk_ledger` was reclassified corpora-plugin → praxis-core when its writes went
+  native; only `compose` still routes through the engine.) Tests: `tests/test_engine_capabilities.py`.
 
 ### Routing (GO-2 steps 1–2 of the orchestration-spine plan)
 
 - `scripts/route.py` (+ `tests/test_route.py`) — the deterministic fact-sheet a routing decision
   consumes: it runs `frame` (root, span→decompose, composition) and adds the execution-shape signals
   — `spans → isolate`, and the workstream **ledger** lookup (`exists` = resume candidate vs. `absent`/
-  `unknown` = new) via the read-only `close-workstream` capability, degrading to `unknown` when the
-  engine is absent. Facts only; no decision.
+  `unknown` = new) as a **native filesystem check** of the praxis-owned ledger file
+  (`chunk_ledger.chunks_path`); `unknown` when no workstream is named or no single governing root.
+  Facts only; no decision.
 - `phases/routing.md` — the GO-2 judgment on top of `route.py`: pick the unit-of-work, the stance, and
   the execution shape (inline / resume / isolate). *The* "I am the orchestrator" decision, thin by
   design (reads from `route` facts + `framing`'s proportionality), routing *to* the irreducible

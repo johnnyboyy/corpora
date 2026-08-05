@@ -30,11 +30,15 @@ class ManifestTests(unittest.TestCase):
         self.assertEqual(self.m["plugin"], "corpora")
 
     def test_declares_the_capabilities_the_scripts_use(self):
-        for cap in ("compose", "chunk-start", "chunk-close", "handoff-close", "close-workstream",
-                    "principle-add", "import-ratify", "kill-report", "kill-graduate",
+        for cap in ("compose", "principle-add", "import-ratify", "kill-report", "kill-graduate",
                     "domain-import-list", "domain-migrate", "domain-verify", "lint-domains",
                     "gate-record", "triggers"):
             self.assertIn(cap, self.m["capabilities"], cap)
+
+    def test_native_ledger_verbs_are_no_longer_engine_capabilities(self):
+        # chunk_ledger + handoff-close went praxis-native; praxis stops invoking them on the engine.
+        for cap in ("chunk-start", "chunk-close", "handoff-close", "close-workstream"):
+            self.assertNotIn(cap, self.m["capabilities"], cap)
 
 
 class BuildArgvTests(unittest.TestCase):
@@ -42,20 +46,25 @@ class BuildArgvTests(unittest.TestCase):
         self.m = engine.load_manifest()
 
     def test_flag_value_pairs_follow_the_verb(self):
-        argv = engine.build_argv(self.m, "chunk-close", {
-            "workstream": "w", "unit_of_work": "u", "stance": "convergent", "handoff": "h.md"})
-        self.assertEqual(argv[0], "chunk-done")  # capability -> verb
-        self.assertIn("--handoff", argv)
-        self.assertIn("h.md", argv)
+        argv = engine.build_argv(self.m, "principle-add", {
+            "domain": "d", "id": "p1", "rule": "r", "condition": "c", "reason": "y",
+            "provenance": "prov"})
+        self.assertEqual(argv[0], "add-principle")  # capability -> verb
+        self.assertIn("--domain", argv)
+        self.assertIn("d", argv)
 
     def test_optional_absent_param_is_omitted(self):
-        argv = engine.build_argv(self.m, "chunk-close", {
-            "workstream": "w", "unit_of_work": "u", "stance": "s", "handoff": "h", "next": ""})
-        self.assertNotIn("--next", argv)  # empty optional dropped
+        argv = engine.build_argv(self.m, "principle-add", {
+            "domain": "d", "id": "p1", "rule": "r", "condition": "c", "reason": "y",
+            "provenance": "prov", "kind": ""})
+        self.assertNotIn("--kind", argv)  # empty optional dropped
 
     def test_positional_emits_value_alone(self):
-        argv = engine.build_argv(self.m, "handoff-close", {"file": "h.md"})
-        self.assertEqual(argv, ["handoff-done", "h.md"])  # no flag for a positional
+        # No live capability uses a positional after the native-ledger removal; a synthetic manifest
+        # still pins build_argv's positional path (a positional emits the value with no flag).
+        synth = {"plugin": "x", "capabilities": {"p": {
+            "capability": "p", "verb": "vp", "args": [{"param": "file", "positional": True, "required": True}]}}}
+        self.assertEqual(engine.build_argv(synth, "p", {"file": "h.md"}), ["vp", "h.md"])
 
     def test_global_option_precedes_the_verb(self):
         argv = engine.build_argv(self.m, "domain-migrate", {"root": "/proj", "source": "/seed"})

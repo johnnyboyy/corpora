@@ -11,16 +11,24 @@ any future engine) extends the handoff by dropping a manifest, not by editing pr
 Deterministic + testable throughout: JSON manifests in, regex validation out, no YAML dependency
 (matching the "flat enough to validate without a YAML lib" discipline).
 
+The handoff LIFECYCLE is a praxis primitive end to end: praxis owns create (`template`), validate
+(`validate`), AND close (`close`) — no engine is invoked for any of the three. `close` retires a
+ratified handoff by deleting it, or archiving it under `<handoffs-dir>/archive/` when the governing
+root's `corpora/config.md` sets `debug: yes`; the archive is never part of a pending backlog. It is
+guarded so it can only ever act on a file sitting directly inside the handoffs dir.
+
 Commands:
   schema   [--base B] [--plugins-dir D] [--json]        the composed schema (base + all plugins)
   template --unit-of-work U --workstream W --stance S    a skeleton handoff with every required field
              [--base B] [--plugins-dir D]
   validate FILE [--base B] [--plugins-dir D]             fail if any required field/section is missing
+  close    FILE [--handoffs-dir D]                       delete (or archive when debug) a ratified handoff
 """
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -118,6 +126,40 @@ def render_template(schema: dict, values: dict) -> str:
     return "\n".join(lines) + "\n"
 
 
+def project_debug(root: Path) -> bool:
+    """The governing root's `corpora/config.md` `debug: yes` opt-in. Read natively — praxis owns the
+    handoff lifecycle, so it reads this filesystem flag itself rather than asking the engine. Ported
+    faithfully from corpora's `project_debug` (same regex, same yes/true tolerance)."""
+    config = Path(root) / "corpora" / "config.md"
+    if not config.is_file():
+        return False
+    return re.search(r"^debug:\s*(yes|true)\s*$", config.read_text(),
+                     re.MULTILINE | re.IGNORECASE) is not None
+
+
+def close(file: str, handoffs_dir: Path, debug: bool) -> tuple[int, str]:
+    """Close a ratified handoff. Delete it, or archive it under `<handoffs-dir>/archive/` when debug.
+
+    Guard (ported from corpora's `cmd_handoff_done`): the file must sit DIRECTLY inside handoffs_dir —
+    never a nested path, never the archive itself — so close can only ever retire a real pending
+    handoff. Returns (rc, message); rc is a process exit code (0 ok, 1 guard/precondition failure).
+    """
+    path = Path(file).resolve()
+    hdir = Path(handoffs_dir).resolve()
+    if not path.exists():
+        return 1, f"no such file: {file}"
+    if path.parent != hdir:
+        return 1, f"{file} is not directly inside {handoffs_dir}"
+    if debug:
+        archive = hdir / "archive"
+        archive.mkdir(parents=True, exist_ok=True)
+        dest = archive / path.name
+        os.replace(path, dest)
+        return 0, f"archived to {dest}"
+    path.unlink()
+    return 0, f"deleted {path}"
+
+
 def cmd_schema(args) -> int:
     schema = compose(load_manifests(args.base, args.plugins_dir))
     if args.json:
@@ -160,6 +202,17 @@ def cmd_validate(args) -> int:
     return 0
 
 
+def cmd_close(args) -> int:
+    # Default the handoffs dir to the file's own parent, so a bare `close FILE` acts on the dir the
+    # handoff lives in; the governing root is <handoffs-dir>/../.. (root/corpora/handoffs), from which
+    # the debug flag is read. Callers that know the root (e.g. chunk_ledger) pass --handoffs-dir.
+    handoffs_dir = Path(args.handoffs_dir) if args.handoffs_dir else Path(args.file).resolve().parent
+    root = handoffs_dir.resolve().parent.parent
+    rc, msg = close(args.file, handoffs_dir, project_debug(root))
+    print(msg)
+    return rc
+
+
 def main(argv: list[str]) -> int:
     ap = argparse.ArgumentParser(prog="handoff", description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -185,6 +238,12 @@ def main(argv: list[str]) -> int:
     common(va)
     va.add_argument("file")
     va.set_defaults(func=cmd_validate)
+
+    cl = sub.add_parser("close", help="delete (or archive when debug) a ratified handoff")
+    cl.add_argument("file")
+    cl.add_argument("--handoffs-dir", default="",
+                    help="the handoffs dir the file must sit in (default: the file's own parent)")
+    cl.set_defaults(func=cmd_close)
 
     args = ap.parse_args(argv)
     return args.func(args)

@@ -77,5 +77,63 @@ class HandoffTests(unittest.TestCase):
         self.assertTrue(any("Surfaced" in m for m in missing))
 
 
+class HandoffCloseTests(unittest.TestCase):
+    """close is the third lifecycle op (create/validate/close), fully praxis-native: delete by
+    default, archive under <handoffs-dir>/archive/ when the governing root's config sets debug: yes,
+    guarded so it only ever acts on a file sitting directly inside the handoffs dir."""
+
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp())
+        self.root = self.tmp / "proj"
+        self.handoffs = self.root / "corpora" / "handoffs"
+        self.handoffs.mkdir(parents=True)
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def _config(self, text: str):
+        (self.root / "corpora" / "config.md").write_text(text)
+
+    def _handoff(self) -> Path:
+        h = self.handoffs / "h.md"
+        h.write_text("---\nworkstream: w\n---\n")
+        return h
+
+    def test_debug_off_deletes(self):
+        h = self._handoff()  # no config → debug off
+        rc, msg = ho.close(str(h), self.handoffs, ho.project_debug(self.root))
+        self.assertEqual(rc, 0)
+        self.assertFalse(h.exists())
+        self.assertFalse((self.handoffs / "archive").exists())
+
+    def test_debug_on_archives(self):
+        self._config("## project-shape\nname: proj\ndebug: yes\n")
+        h = self._handoff()
+        self.assertTrue(ho.project_debug(self.root))
+        rc, msg = ho.close(str(h), self.handoffs, ho.project_debug(self.root))
+        self.assertEqual(rc, 0)
+        self.assertFalse(h.exists())
+        self.assertTrue((self.handoffs / "archive" / "h.md").is_file())
+
+    def test_guard_refuses_file_not_directly_in_handoffs_dir(self):
+        outside = self.root / "corpora" / "elsewhere.md"
+        outside.write_text("x")
+        rc, msg = ho.close(str(outside), self.handoffs, False)
+        self.assertEqual(rc, 1)
+        self.assertIn("not directly inside", msg)
+        self.assertTrue(outside.exists())  # untouched
+
+    def test_missing_file_is_reported(self):
+        rc, msg = ho.close(str(self.handoffs / "nope.md"), self.handoffs, False)
+        self.assertEqual(rc, 1)
+        self.assertIn("no such file", msg)
+
+    def test_cli_close_deletes(self):
+        h = self._handoff()
+        rc = ho.main(["close", str(h), "--handoffs-dir", str(self.handoffs)])
+        self.assertEqual(rc, 0)
+        self.assertFalse(h.exists())
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -78,50 +78,53 @@ class RouteShapeE2E(unittest.TestCase):
         self.assertTrue(any("isolate" in s for s in d["signals"]))
 
 
-class RouteLedgerStub(unittest.TestCase):
-    """The resume-vs-new signal: routing reads the read-only close-workstream capability."""
+class RouteLedgerNative(unittest.TestCase):
+    """resume-vs-new is now a NATIVE ledger-file lookup — the ledger is a praxis-owned file
+    (<root>/corpora/chunks/<workstream>.md), so routing reads it directly, no engine call."""
 
     def setUp(self):
         self.tmp = Path(tempfile.mkdtemp())
         self.stub = write_stub(self.tmp)
-        self.log = self.tmp / "log.txt"
-        os.environ["STUB_LOG"] = str(self.log)
-        os.environ.pop("STUB_FAIL", None)
+        os.environ.pop("STUB_LOG", None)
         self.root = mkroot(self.tmp, "proj", "proj", universal_domain=True)
         self.target = "proj/src/x.ts"
 
     def tearDown(self):
         shutil.rmtree(self.tmp, ignore_errors=True)
         os.environ.pop("STUB_LOG", None)
-        os.environ.pop("STUB_FAIL", None)
 
     def _route(self, workstream):
         return route.build_route(self.tmp, self.target, [], "implement-feature", workstream, self.stub)
 
+    def _make_ledger(self, workstream):
+        cdir = self.root / "corpora" / "chunks"
+        cdir.mkdir(parents=True, exist_ok=True)
+        (cdir / f"{workstream}.md").write_text(
+            f"# Chunks\n\nworkstream: {workstream}\n\n```yaml\nchunks:\n```\n")
+
     def test_named_workstream_with_ledger_is_resume(self):
-        d = self._route("ws-1")             # stub returns 0 for close-workstream → ledger exists
-        es = d["execution_shape"]
+        self._make_ledger("ws-1")           # native ledger file present → resume candidate
+        es = self._route("ws-1")["execution_shape"]
         self.assertEqual(es["ledger"], "exists")
         self.assertTrue(es["resume_candidate"])
 
     def test_named_workstream_without_ledger_is_new(self):
-        os.environ["STUB_FAIL"] = "close-workstream"   # engine answers: no such ledger
-        d = self._route("ws-1")
-        es = d["execution_shape"]
+        es = self._route("ws-1")["execution_shape"]   # no ledger file → new
         self.assertEqual(es["ledger"], "absent")
         self.assertFalse(es["resume_candidate"])
 
     def test_no_workstream_is_unknown_and_new(self):
-        d = self._route(None)
-        es = d["execution_shape"]
+        es = self._route(None)["execution_shape"]
         self.assertEqual(es["ledger"], "unknown")
         self.assertFalse(es["resume_candidate"])
 
-    def test_engine_absent_degrades_but_keeps_root_facts(self):
+    def test_engine_absent_still_reports_native_ledger_and_root_facts(self):
+        # The ledger lookup no longer depends on the engine, so it stands even when compose can't run.
+        self._make_ledger("ws-1")
         d = route.build_route(self.tmp, self.target, [], "implement-feature", "ws-1",
                               self.tmp / "nonexistent.py")
         es = d["execution_shape"]
-        self.assertEqual(es["ledger"], "unknown")               # could not tell — degraded
+        self.assertEqual(es["ledger"], "exists")               # native lookup, engine-independent
         self.assertEqual(d["frame"]["roots"][0]["name"], "proj")  # root fact still stands
 
 

@@ -15,47 +15,6 @@
       ]
     },
     {
-      "capability": "chunk-start",
-      "verb": "chunk-start",
-      "desc": "print the deterministic composition for a unit-of-work; writes nothing",
-      "read_only": true,
-      "args": [
-        {"param": "workstream", "flag": "--workstream", "required": true},
-        {"param": "unit_of_work", "flag": "--unit-of-work", "required": true},
-        {"param": "domains_dir", "flag": "--domains-dir", "required": false}
-      ]
-    },
-    {
-      "capability": "chunk-close",
-      "verb": "chunk-done",
-      "desc": "close a chunk in the workstream ledger; must run before handoff-close",
-      "args": [
-        {"param": "workstream", "flag": "--workstream", "required": true},
-        {"param": "unit_of_work", "flag": "--unit-of-work", "required": true},
-        {"param": "stance", "flag": "--stance", "required": true},
-        {"param": "handoff", "flag": "--handoff", "required": true},
-        {"param": "next", "flag": "--next", "required": false},
-        {"param": "domains_dir", "flag": "--domains-dir", "required": false}
-      ]
-    },
-    {
-      "capability": "handoff-close",
-      "verb": "handoff-done",
-      "desc": "close (delete/archive) a handoff file; must run after chunk-close",
-      "args": [
-        {"param": "file", "positional": true, "required": true}
-      ]
-    },
-    {
-      "capability": "close-workstream",
-      "verb": "close-workstream",
-      "desc": "read-only summary of a workstream's completed chunks",
-      "read_only": true,
-      "args": [
-        {"param": "workstream", "flag": "--workstream", "required": true}
-      ]
-    },
-    {
       "capability": "principle-add",
       "verb": "add-principle",
       "desc": "write a freshly-authored or mined ratified principle into a domain",
