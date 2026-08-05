@@ -1,0 +1,209 @@
+{
+  "plugin": "corpora",
+  "doc": "Corpora registers the engine capabilities praxis's sequence scripts invoke on it. Each capability names a corpora CLI verb and declares the argument shape praxis must build; praxis's engine resolver composes the argv from this data and calls the verb generically, without ever hardcoding a corpora verb string or learning what a verb means. This is the write-verb analogue of the handoff plugin manifest -- the whole engine-write coupling surface reduced to one declarative file. A second engine could drop its own manifest declaring its own capability->verb map; praxis core would resolve against it identically. Arg descriptors: `flag` + value by default; `positional: true` emits the value alone; `global: true` places the pair BEFORE the verb (corpora's `--root` is a global option that precedes the subcommand); `boolean: true` emits just the flag when the param is truthy. A `required` arg missing from the params raises before the engine is touched.",
+  "capabilities": [
+    {
+      "capability": "compose",
+      "verb": "select",
+      "desc": "give me the domain set for unit-of-work U at root R (returns JSON on stdout)",
+      "read_only": true,
+      "args": [
+        {"param": "root", "flag": "--root", "global": true, "required": false},
+        {"param": "unit_of_work", "flag": "--unit-of-work", "required": true},
+        {"param": "domains_dir", "flag": "--domains-dir", "required": false},
+        {"param": "json", "flag": "--json", "boolean": true, "required": false}
+      ]
+    },
+    {
+      "capability": "chunk-start",
+      "verb": "chunk-start",
+      "desc": "print the deterministic composition for a unit-of-work; writes nothing",
+      "read_only": true,
+      "args": [
+        {"param": "workstream", "flag": "--workstream", "required": true},
+        {"param": "unit_of_work", "flag": "--unit-of-work", "required": true},
+        {"param": "domains_dir", "flag": "--domains-dir", "required": false}
+      ]
+    },
+    {
+      "capability": "chunk-close",
+      "verb": "chunk-done",
+      "desc": "close a chunk in the workstream ledger; must run before handoff-close",
+      "args": [
+        {"param": "workstream", "flag": "--workstream", "required": true},
+        {"param": "unit_of_work", "flag": "--unit-of-work", "required": true},
+        {"param": "stance", "flag": "--stance", "required": true},
+        {"param": "handoff", "flag": "--handoff", "required": true},
+        {"param": "next", "flag": "--next", "required": false},
+        {"param": "domains_dir", "flag": "--domains-dir", "required": false}
+      ]
+    },
+    {
+      "capability": "handoff-close",
+      "verb": "handoff-done",
+      "desc": "close (delete/archive) a handoff file; must run after chunk-close",
+      "args": [
+        {"param": "file", "positional": true, "required": true}
+      ]
+    },
+    {
+      "capability": "close-workstream",
+      "verb": "close-workstream",
+      "desc": "read-only summary of a workstream's completed chunks",
+      "read_only": true,
+      "args": [
+        {"param": "workstream", "flag": "--workstream", "required": true}
+      ]
+    },
+    {
+      "capability": "principle-add",
+      "verb": "add-principle",
+      "desc": "write a freshly-authored or mined ratified principle into a domain",
+      "args": [
+        {"param": "domain", "flag": "--domain", "required": true},
+        {"param": "id", "flag": "--id", "required": true},
+        {"param": "rule", "flag": "--rule", "required": true},
+        {"param": "condition", "flag": "--condition", "required": true},
+        {"param": "reason", "flag": "--reason", "required": true},
+        {"param": "provenance", "flag": "--provenance", "required": true},
+        {"param": "kind", "flag": "--kind", "required": false},
+        {"param": "see_also", "flag": "--see-also", "required": false},
+        {"param": "domains_dir", "flag": "--domains-dir", "required": false},
+        {"param": "audit", "flag": "--audit", "required": false}
+      ]
+    },
+    {
+      "capability": "import-ratify",
+      "verb": "ratify-import-candidate",
+      "desc": "write an entry already queued in the import-candidates file back as ratified",
+      "args": [
+        {"param": "id", "flag": "--id", "required": true},
+        {"param": "as_domain", "flag": "--as-domain", "required": false},
+        {"param": "as_id", "flag": "--as-id", "required": false},
+        {"param": "source", "flag": "--source", "required": false},
+        {"param": "domains_dir", "flag": "--domains-dir", "required": false},
+        {"param": "audit", "flag": "--audit", "required": false}
+      ]
+    },
+    {
+      "capability": "import-file",
+      "verb": "import-candidate",
+      "desc": "propose one principle/convention from a source domains-dir as a candidate",
+      "args": [
+        {"param": "source", "flag": "--source", "required": true},
+        {"param": "domain", "flag": "--domain", "required": true},
+        {"param": "id", "flag": "--id", "required": true},
+        {"param": "as_domain", "flag": "--as-domain", "required": false},
+        {"param": "as_id", "flag": "--as-id", "required": false}
+      ]
+    },
+    {
+      "capability": "import-file-pool",
+      "verb": "import-default-pool",
+      "desc": "propose every principle+convention from every source domain (shape-matched batch)",
+      "args": [
+        {"param": "source", "flag": "--source", "required": false}
+      ]
+    },
+    {
+      "capability": "domain-import-list",
+      "verb": "import-list",
+      "desc": "browse a source domains-dir's principles+conventions, read-only, proposes nothing",
+      "read_only": true,
+      "args": [
+        {"param": "source", "flag": "--source", "required": true},
+        {"param": "target_domains_dir", "flag": "--target-domains-dir", "required": false}
+      ]
+    },
+    {
+      "capability": "kill-report",
+      "verb": "kill-report",
+      "desc": "list killed entries old enough to consider for graduation, read-only",
+      "read_only": true,
+      "args": [
+        {"param": "domains_dir", "flag": "--domains-dir", "required": true},
+        {"param": "audit", "flag": "--audit", "required": true},
+        {"param": "min_age_days", "flag": "--min-age-days", "required": false}
+      ]
+    },
+    {
+      "capability": "kill-graduate",
+      "verb": "graduate-kill",
+      "desc": "demote one explicitly-named, judged-safe killed entry",
+      "args": [
+        {"param": "domains_dir", "flag": "--domains-dir", "required": true},
+        {"param": "audit", "flag": "--audit", "required": true},
+        {"param": "domain", "flag": "--domain", "required": true},
+        {"param": "id", "flag": "--id", "required": true}
+      ]
+    },
+    {
+      "capability": "domain-migrate",
+      "verb": "migrate-domains",
+      "desc": "one-time: materialize a pre-dissolution project's effective domain set",
+      "args": [
+        {"param": "root", "flag": "--root", "global": true, "required": false},
+        {"param": "source", "flag": "--source", "required": false},
+        {"param": "config", "flag": "--config", "required": false},
+        {"param": "domains", "flag": "--domains", "required": false}
+      ]
+    },
+    {
+      "capability": "measure",
+      "verb": "measure",
+      "desc": "measure the materialized domain set (read after migrate)",
+      "read_only": true,
+      "args": [
+        {"param": "root", "flag": "--root", "global": true, "required": false},
+        {"param": "domains_dir", "flag": "--domains-dir", "required": false},
+        {"param": "audit", "flag": "--audit", "required": false}
+      ]
+    },
+    {
+      "capability": "domain-verify",
+      "verb": "verify",
+      "desc": "verify the materialized domain set matches its audit; a hard migration gate",
+      "read_only": true,
+      "args": [
+        {"param": "root", "flag": "--root", "global": true, "required": false},
+        {"param": "domains_dir", "flag": "--domains-dir", "required": false},
+        {"param": "audit", "flag": "--audit", "required": false}
+      ]
+    },
+    {
+      "capability": "lint-domains",
+      "verb": "lint-domains",
+      "desc": "structural lint of a domains-dir",
+      "read_only": true,
+      "args": [
+        {"param": "domains_dir", "flag": "--domains-dir", "required": true}
+      ]
+    },
+    {
+      "capability": "gate-record",
+      "verb": "record-gate",
+      "desc": "record a ratify-gate counter update for a domain (fired/violated/idle, drift)",
+      "args": [
+        {"param": "domain", "flag": "--domain", "required": true},
+        {"param": "domains_dir", "flag": "--domains-dir", "required": false},
+        {"param": "audit", "flag": "--audit", "required": false},
+        {"param": "ratified", "flag": "--ratified", "required": false},
+        {"param": "killed", "flag": "--killed", "required": false},
+        {"param": "graduated", "flag": "--graduated", "required": false},
+        {"param": "violations", "flag": "--violations", "required": false},
+        {"param": "ui_drift", "flag": "--ui-drift", "boolean": true, "required": false},
+        {"param": "fired", "flag": "--fired", "required": false},
+        {"param": "violated", "flag": "--violated", "required": false},
+        {"param": "idle", "flag": "--idle", "required": false},
+        {"param": "co_occurs_with", "flag": "--co-occurs-with", "required": false}
+      ]
+    },
+    {
+      "capability": "triggers",
+      "verb": "triggers",
+      "desc": "emit the maintenance triggers due for the project, read-only",
+      "read_only": true,
+      "args": []
+    }
+  ]
+}

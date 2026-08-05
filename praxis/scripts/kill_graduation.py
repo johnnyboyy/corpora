@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# corpora-plugin script — corpora-specific orchestration (verbs resolved through the corpora engine
+# manifest), distinct from praxis-core (root_tree, frame, handoff, engine).
 """kill_graduation — the two-phase retire-an-old-kill sequence, with the no-auto-graduate discipline.
 
 Migrated from corpora `processes/kill-graduation.md`. The process is deliberately two-phase with a
@@ -30,10 +32,9 @@ import engine  # noqa: E402
 
 
 def cmd_candidates(args) -> int:
-    call = ["kill-report", "--domains-dir", args.domains_dir, "--audit", args.audit]
-    if args.min_age_days is not None:
-        call += ["--min-age-days", str(args.min_age_days)]
-    r = engine.invoke(Path(args.corpus_py), call)
+    r = engine.resolve(Path(args.corpus_py), "kill-report", {
+        "domains_dir": args.domains_dir, "audit": args.audit,
+        "min_age_days": None if args.min_age_days is None else str(args.min_age_days)})
     engine.echo(r, "kill-report")
     return 0 if r.ok else (r.returncode or 1)
 
@@ -41,9 +42,8 @@ def cmd_candidates(args) -> int:
 def cmd_graduate(args) -> int:
     # One id, explicitly named. No path here batches or reads the report back — the judgment that
     # this specific kill is safe to retire happened in the retrospective, out of band, on purpose.
-    r = engine.invoke(Path(args.corpus_py),
-                      ["graduate-kill", "--domains-dir", args.domains_dir, "--audit", args.audit,
-                       "--domain", args.domain, "--id", args.id])
+    r = engine.resolve(Path(args.corpus_py), "kill-graduate", {
+        "domains_dir": args.domains_dir, "audit": args.audit, "domain": args.domain, "id": args.id})
     engine.echo(r, "graduate-kill")
     return 0 if r.ok else (r.returncode or 1)
 

@@ -13,7 +13,19 @@ This file is additive and advisory. Nothing here modified corpora; the migration
 
 ## Part 1 — Open judgment forks (operator review)
 
-### F1. The invocation contract widened from one capability to a set of engine write-verbs
+### F1. The invocation contract widened from one capability to a set of engine write-verbs — RESOLVED
+
+**Resolution (per the recommendation below):** the widening is accepted and the capability set is now
+declared as **data**, not praxis prose — `engine/plugins/corpora.json`, the exact analogue of the
+handoff plugin manifest. `scripts/engine.py` gained `load_manifest` → `build_argv` → `resolve`: a
+sequence script names a *capability* and the manifest maps it to the corpora verb + argv shape, so
+praxis core no longer hardcodes a single corpora verb string anywhere. `compose` folded in as just
+another declared capability. The coupling surface stayed one file (`engine.py`) plus one data file
+(the manifest); on lift they and `frame.engine_compose` collapse into the one engine registry. The
+enumerated capability set now lives in `BOUNDARY.md`'s invocation-contract section. The original fork
+write-up is kept below for the reasoning chain.
+
+
 
 `BOUNDARY.md` names exactly one decided capability praxis invokes on the engine: **compose**
 (`frame.py::engine_compose`). Migrating the deterministic-procedure files (chunk-accounting,
@@ -106,9 +118,35 @@ comment no longer exists / the surrounding code changed" needs the judgment pass
   the queue's `file:line` anchors against current comment positions is the shape — but only if the
   project accepts the line-drift fragility. Not built.
 
+### F7. The corpora-plugin sequence scripts still live in `scripts/`, not a `plugins/corpora/` namespace
+
+With F1 resolved, `scripts/` now holds two kinds of file that the boundary distinguishes but the
+directory does not: **praxis-core** (`root_tree`, `frame`, `handoff`, `engine`, `route`) and
+**corpora-plugin orchestration** (`chunk_ledger`, `ratify_writeback`, `kill_graduation`,
+`domain_import`, `domain_migrate`). This pass marked each plugin script with a one-line header rather
+than moving it — the task explicitly scoped relocation out and asked to record it here instead.
+
+- **The fork:** relocate the five corpora-plugin scripts (and possibly `engine/plugins/corpora.json`'s
+  siblings) into a `plugins/corpora/` namespace, so the on-lift split (praxis core lifts; the corpora
+  plugin stays with corpora, or ships beside it) is a directory move rather than a per-file reading of
+  headers. `library_state` and `churn` are pure-deterministic with *no* corpora coupling — they are
+  core, not plugin, and would stay put; the boundary for them is cleaner than for the five.
+- **Recommendation:** worth doing, but as its own mechanical pass once routing (Part 2 steps 1–2) has
+  settled, because it touches every sequence script's import path and every test's `sys.path`. Doing
+  it now would churn the same files routing review needs stable. Deferred, not rejected.
+
 ---
 
-## Part 2 — The orchestration spine: `general-operation` + `bootstrap` (PLAN, not built)
+## Part 2 — The orchestration spine: `general-operation` + `bootstrap` (steps 1–2 BUILT; 3–4 planned)
+
+**Status update.** Steps 1–2 of the plan below are now **built**: `scripts/route.py` (the GO-2
+deterministic fact-sheet) and `phases/routing.md` (the GO-2 judgment). They are exercised end-to-end
+in `tests/test_route.py` (frame-derived isolate/new shapes against the fixture project; the resume-vs-
+new ledger signal against the stub engine). Steps 3–4 — `phases/session.md` (the loop conductor) and
+`phases/bootstrap.md` — remain **deliberately unbuilt** and operator-gated: they are failure-mode-2
+(two orchestrators coexisting) and must not land until routing has proven it fires per unit of work
+under real use, paired with the corpora-side retirement of the competing `general-operation` framing.
+The rest of this section is the original plan, retained.
 
 These two are the "I am the orchestrator" framing itself. `BOUNDARY.md`'s failure-mode-2 is corpora
 continuing to own orchestration while praxis competes with it; extracting the spine is *how* corpora

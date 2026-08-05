@@ -55,17 +55,30 @@ praxis, rewritten decoupled:
 
 ## The invocation contract — how praxis calls a judgment engine
 
-A phase invokes an engine for a *capability*, generically. Praxis never re-derives what the engine
-provides, never imports it, never learns its schema. Decided capabilities:
+A phase (or a sequence script) invokes an engine for a *capability*, generically. Praxis never
+re-derives what the engine provides, never imports it, never learns its schema — and, now, never
+names an engine verb in its own prose or code. The capability surface is **plugin-declared**: the
+engine ships a capabilities manifest and praxis resolves a capability *name* against it.
 
-- **compose** — "give me the domain set for unit-of-work X at root R." Corpora provides this
-  (`select --json`); it is engine-agnostic on purpose — corpora already ships a `manifest` command
-  "for a process layer to select against." Praxis owns the *unit-of-work decision* (routing
-  judgment); the engine owns turning it into a domain set (composition). Praxis relays the result.
+- The manifest is `engine/plugins/corpora.json` — the exact analogue of `handoff/plugins/corpora.json`.
+  It maps each capability to a corpora CLI verb plus an argument shape (`flag`/`positional`/`global`/
+  `boolean`, `required`) and a one-line description. It is the only place a corpora verb name lives.
+  Declared capabilities: **compose** (`select`), **chunk-start**, **chunk-close** (`chunk-done`),
+  **handoff-close** (`handoff-done`), **close-workstream**, **principle-add** (`add-principle`),
+  **import-ratify** (`ratify-import-candidate`), **import-file** (`import-candidate`),
+  **import-file-pool** (`import-default-pool`), **domain-import-list** (`import-list`),
+  **kill-report**, **kill-graduate** (`graduate-kill`), **domain-migrate** (`migrate-domains`),
+  **measure**, **domain-verify** (`verify`), **lint-domains**, **gate-record** (`record-gate`),
+  **triggers**. A second engine drops its own manifest declaring its own capability→verb map and
+  praxis core resolves against it identically; nothing in praxis enumerates these in prose.
+- **compose** is no longer special — it is just the read capability `frame` interprets as JSON
+  (the domain set for unit-of-work X at root R) rather than branching on pass/fail. Praxis owns the
+  *unit-of-work decision* (routing judgment); the engine owns turning it into a domain set.
 
-The single corpora binding lives in `scripts/frame.py::engine_compose` (locating + calling
-`corpus.py`), overridable with `--corpus-py`. On lift, that one function becomes an engine registry;
-nothing else changes. That is the whole coupling surface.
+The whole coupling surface is two small pieces: the manifest (data) and `scripts/engine.py`
+(`load_manifest` → `build_argv` → `resolve`, plus the `--corpus-py` locator shared with
+`frame.py::engine_compose`). On lift, `engine_compose` + `engine.resolve` + the manifest become the
+one engine registry; nothing else changes.
 
 ## Built so far
 
@@ -119,9 +132,36 @@ nothing else changes. That is the whole coupling surface.
   `phases/retrospective.md`, `phases/architecture-scan.md`, `phases/comment-cleanup.md`,
   `phases/design-decision-review.md`, `phases/library-init.md` + `phases/library-sync.md` (three
   variants each), `phases/domain-import.md`.
-- `MIGRATION-NOTES.md` — the open judgment forks (F1–F6) and the **plan** (not build) for extracting
-  the orchestration spine (`general-operation`, `bootstrap`), the operator-gated failure-mode-2 step.
+- `MIGRATION-NOTES.md` — the open judgment forks (F1–F6, F1 now resolved) and the **plan** (not
+  build) for extracting the orchestration spine (`general-operation`, `bootstrap`), the operator-gated
+  failure-mode-2 step.
 - Full suite: `python3 -m unittest discover -s praxis/tests`.
+
+### Engine capability plugin (resolves F1)
+
+- `engine/plugins/corpora.json` + `scripts/engine.py` (`load_manifest` → `build_argv` → `resolve`) —
+  the engine's write-verb surface is now **plugin-declared**, mirroring the handoff plugin. Praxis
+  core no longer names a corpora verb anywhere; every sequence script invokes by *capability name*
+  and the manifest (data) maps it to the verb + argv. `compose` folded in as just another declared
+  capability (`frame.py::engine_compose` builds its argv through `resolve`, still interpreting the
+  JSON result). The corpora-plugin sequence scripts (`chunk_ledger`, `ratify_writeback`,
+  `kill_graduation`, `domain_import`, `domain_migrate`) each carry a one-line header marking them
+  corpora-specific orchestration, distinct from praxis-core (`root_tree`, `frame`, `handoff`,
+  `engine`). Tests: `tests/test_engine_capabilities.py`.
+
+### Routing (GO-2 steps 1–2 of the orchestration-spine plan)
+
+- `scripts/route.py` (+ `tests/test_route.py`) — the deterministic fact-sheet a routing decision
+  consumes: it runs `frame` (root, span→decompose, composition) and adds the execution-shape signals
+  — `spans → isolate`, and the workstream **ledger** lookup (`exists` = resume candidate vs. `absent`/
+  `unknown` = new) via the read-only `close-workstream` capability, degrading to `unknown` when the
+  engine is absent. Facts only; no decision.
+- `phases/routing.md` — the GO-2 judgment on top of `route.py`: pick the unit-of-work, the stance, and
+  the execution shape (inline / resume / isolate). *The* "I am the orchestrator" decision, thin by
+  design (reads from `route` facts + `framing`'s proportionality), routing *to* the irreducible
+  judgments (composition GO-3, domain-assignment GO-6) rather than automating them. Fires per unit of
+  work — the mitigation for the failure that killed the last praxis. Steps 3–4 (`session.md` loop
+  conductor, `bootstrap.md`) remain unbuilt and operator-gated (see `MIGRATION-NOTES.md` Part 2).
 
 ## The handoff plugin contract
 

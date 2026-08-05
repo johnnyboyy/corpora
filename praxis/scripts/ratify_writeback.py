@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# corpora-plugin script — corpora-specific orchestration (verbs resolved through the corpora engine
+# manifest), distinct from praxis-core (root_tree, frame, handoff, engine).
 """ratify_writeback — the principle write-back verbs, dispatching scripted paths and flagging manual ones.
 
 Migrated from corpora `processes/ratify-write-back.md`. The deterministic fact praxis carries here is
@@ -28,28 +30,17 @@ import engine  # noqa: E402
 
 
 def cmd_add(args) -> int:
-    call = ["add-principle", "--domain", args.domain, "--id", args.id, "--rule", args.rule,
-            "--condition", args.condition, "--reason", args.reason, "--provenance", args.provenance]
-    if args.kind:
-        call += ["--kind", args.kind]
-    if args.see_also:
-        call += ["--see-also", args.see_also]
-    if args.domains_dir:
-        call += ["--domains-dir", args.domains_dir]
-    if args.audit:
-        call += ["--audit", args.audit]
-    r = engine.invoke(Path(args.corpus_py), call)
+    r = engine.resolve(Path(args.corpus_py), "principle-add", {
+        "domain": args.domain, "id": args.id, "rule": args.rule, "condition": args.condition,
+        "reason": args.reason, "provenance": args.provenance, "kind": args.kind,
+        "see_also": args.see_also, "domains_dir": args.domains_dir, "audit": args.audit})
     engine.echo(r, "add-principle")
     return 0 if r.ok else (r.returncode or 1)
 
 
 def cmd_import(args) -> int:
-    call = ["ratify-import-candidate", "--id", args.id]
-    if args.as_domain:
-        call += ["--as-domain", args.as_domain]
-    if args.as_id:
-        call += ["--as-id", args.as_id]
-    r = engine.invoke(Path(args.corpus_py), call)
+    r = engine.resolve(Path(args.corpus_py), "import-ratify",
+                       {"id": args.id, "as_domain": args.as_domain, "as_id": args.as_id})
     engine.echo(r, "ratify-import-candidate")
     return 0 if r.ok else (r.returncode or 1)
 

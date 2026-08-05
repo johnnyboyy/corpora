@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# corpora-plugin script — corpora-specific orchestration (verbs resolved through the corpora engine
+# manifest), distinct from praxis-core (root_tree, frame, handoff, engine).
 """domain_import — the browse -> file -> ratify import sequence for pulling ratified content in.
 
 Migrated from corpora `processes/domain-import.md`. No composition of its own; the one judgment
@@ -26,36 +28,28 @@ import engine  # noqa: E402
 
 
 def cmd_browse(args) -> int:
-    r = engine.invoke(Path(args.corpus_py), ["import-list", "--source", args.source])
+    r = engine.resolve(Path(args.corpus_py), "domain-import-list", {"source": args.source})
     engine.echo(r, "import-list")
     return 0 if r.ok else (r.returncode or 1)
 
 
 def cmd_file(args) -> int:
-    call = ["import-candidate", "--source", args.source, "--domain", args.domain, "--id", args.id]
-    if args.as_domain:
-        call += ["--as-domain", args.as_domain]
-    if args.as_id:
-        call += ["--as-id", args.as_id]
-    r = engine.invoke(Path(args.corpus_py), call)
+    r = engine.resolve(Path(args.corpus_py), "import-file", {
+        "source": args.source, "domain": args.domain, "id": args.id,
+        "as_domain": args.as_domain, "as_id": args.as_id})
     engine.echo(r, "import-candidate")
     return 0 if r.ok else (r.returncode or 1)
 
 
 def cmd_file_pool(args) -> int:
-    call = ["import-default-pool"] + (["--source", args.source] if args.source else [])
-    r = engine.invoke(Path(args.corpus_py), call)
+    r = engine.resolve(Path(args.corpus_py), "import-file-pool", {"source": args.source})
     engine.echo(r, "import-default-pool")
     return 0 if r.ok else (r.returncode or 1)
 
 
 def cmd_ratify(args) -> int:
-    call = ["ratify-import-candidate", "--id", args.id]
-    if args.as_domain:
-        call += ["--as-domain", args.as_domain]
-    if args.as_id:
-        call += ["--as-id", args.as_id]
-    r = engine.invoke(Path(args.corpus_py), call)
+    r = engine.resolve(Path(args.corpus_py), "import-ratify",
+                       {"id": args.id, "as_domain": args.as_domain, "as_id": args.as_id})
     engine.echo(r, "ratify-import-candidate")
     return 0 if r.ok else (r.returncode or 1)
 

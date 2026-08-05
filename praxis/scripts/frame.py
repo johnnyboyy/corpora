@@ -20,12 +20,12 @@ from __future__ import annotations
 
 import argparse
 import json
-import subprocess
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import root_tree as rt  # noqa: E402
+import engine  # noqa: E402
 
 # In-repo binding: praxis lives at <corpora-root>/praxis/, so the corpora engine's CLI is two levels up.
 # This is the only place praxis knows where corpora is; --corpus-py overrides it (and tests use that).
@@ -33,23 +33,26 @@ DEFAULT_CORPUS_PY = Path(__file__).resolve().parents[2] / "scripts" / "corpus.py
 
 
 def engine_compose(root: Path, unit_of_work: str, corpus_py: Path) -> tuple[list[str] | None, str]:
-    """Invoke the judgment engine to compose the domain set for a unit-of-work at a root.
+    """Invoke the judgment engine for the `compose` capability: the domain set for a unit-of-work.
+
+    `compose` is just another declared capability now — its argv is built from the same corpora
+    manifest every write verb uses (`engine.resolve`), so frame no longer hardcodes the `select`
+    verb or its flags. Frame still owns *interpreting* the result (composition is a JSON payload,
+    not a pass/fail), which is why it reads `.stdout` rather than only branching on `.ok`.
 
     Returns (domains, note). domains is None when the engine is unavailable or errored — praxis still
     reports the root facts in that case rather than failing, since it does not depend on the engine.
     """
     if not Path(corpus_py).is_file():
         return None, f"engine not found at {corpus_py} — composition unavailable"
-    cmd = ["python3", str(corpus_py), "--root", str(root), "select",
-           "--unit-of-work", unit_of_work, "--json"]
+    res = engine.resolve(Path(corpus_py), "compose",
+                         {"root": str(root), "unit_of_work": unit_of_work, "json": True}, timeout=30)
+    if not res.ran:
+        return None, res.note()
+    if res.returncode != 0:
+        return None, f"engine returned {res.returncode}: {res.stderr.strip()[:200]}"
     try:
-        out = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
-    except (subprocess.SubprocessError, OSError) as e:
-        return None, f"engine invocation failed: {e}"
-    if out.returncode != 0:
-        return None, f"engine returned {out.returncode}: {out.stderr.strip()[:200]}"
-    try:
-        return json.loads(out.stdout)["domains"], "ok"
+        return json.loads(res.stdout)["domains"], "ok"
     except (json.JSONDecodeError, KeyError) as e:
         return None, f"engine output not understood: {e}"
 

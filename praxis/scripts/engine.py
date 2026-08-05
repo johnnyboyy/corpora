@@ -15,6 +15,7 @@ via `--corpus-py`, so the orchestration is verified without corpora present.
 """
 from __future__ import annotations
 
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -22,6 +23,11 @@ from pathlib import Path
 # In-repo binding: praxis lives at <corpora-root>/praxis/, so corpora's CLI is two levels up.
 # Identical anchor to frame.py::DEFAULT_CORPUS_PY — the two merge into one registry entry on lift.
 DEFAULT_CORPUS_PY = Path(__file__).resolve().parents[2] / "scripts" / "corpus.py"
+
+# The engine's declared capability surface, as data. Praxis core never hardcodes a corpora verb; it
+# resolves a capability NAME through this manifest, exactly as the handoff engine composes its schema
+# from plugin manifests. A second engine drops its own manifest here and everything else is unchanged.
+DEFAULT_MANIFEST = Path(__file__).resolve().parents[1] / "engine" / "plugins" / "corpora.json"
 
 
 class EngineResult:
@@ -60,6 +66,70 @@ def invoke(corpus_py: Path, args: list[str], timeout: int = 60) -> EngineResult:
     except (subprocess.SubprocessError, OSError) as e:
         return EngineResult(1, "", f"engine invocation failed: {e}", ran=True)
     return EngineResult(p.returncode, p.stdout, p.stderr, ran=True)
+
+
+class CapabilityError(KeyError):
+    """A capability was not declared by the manifest, or a required param was not supplied.
+
+    Raised before the engine is ever touched — an unresolvable capability is praxis's own bug (a
+    script asking for something the manifest does not declare), not an engine failure to degrade past.
+    """
+
+
+def load_manifest(manifest_path: Path = DEFAULT_MANIFEST) -> dict:
+    """Load the engine capabilities manifest and index it by capability name.
+
+    Returns {"plugin": str, "capabilities": {name: entry}}. Praxis learns the verb/arg-shape of every
+    engine capability from here — never from a hardcoded string in a script.
+    """
+    data = json.loads(Path(manifest_path).read_text())
+    caps = {c["capability"]: c for c in data.get("capabilities", [])}
+    return {"plugin": data.get("plugin", "?"), "capabilities": caps}
+
+
+def build_argv(manifest: dict, capability: str, params: dict) -> list[str]:
+    """Compose the corpora argv for a capability from declared params. Pure data → argv; no I/O.
+
+    Global args (corpora's `--root`) precede the verb; positionals emit their value alone; booleans
+    emit just the flag when truthy; everything else is a `--flag value` pair. Order within the verb's
+    args follows the manifest's declared order. A missing required param raises CapabilityError.
+    """
+    cap = manifest["capabilities"].get(capability)
+    if cap is None:
+        raise CapabilityError(
+            f"capability '{capability}' not declared by engine plugin '{manifest.get('plugin','?')}'")
+    globals_: list[str] = []
+    rest: list[str] = []
+    for a in cap.get("args", []):
+        name = a["param"]
+        present = name in params and params[name] not in (None, "", False)
+        if a.get("required") and not present:
+            raise CapabilityError(f"capability '{capability}' requires param '{name}'")
+        if not present:
+            continue
+        val = params[name]
+        if a.get("boolean"):
+            piece = [a["flag"]]
+        elif a.get("positional"):
+            piece = [str(val)]
+        else:
+            piece = [a["flag"], str(val)]
+        (globals_ if a.get("global") else rest).extend(piece)
+    return globals_ + [cap["verb"]] + rest
+
+
+def resolve(corpus_py: Path, capability: str, params: dict, *, manifest: dict | None = None,
+            timeout: int = 60) -> EngineResult:
+    """Resolve a capability NAME to its argv via the manifest, then run it through `invoke`.
+
+    This is how every sequence script calls the engine: by capability, never by verb string. The
+    manifest (data) is the only place a corpora verb name lives; on lift it and `frame.engine_compose`
+    collapse into the one engine registry. Param errors raise (praxis's own bug); engine
+    unavailability/failure still degrades through `invoke`'s EngineResult, unchanged.
+    """
+    caps = manifest if manifest is not None else load_manifest()
+    argv = build_argv(caps, capability, params)
+    return invoke(corpus_py, argv, timeout=timeout)
 
 
 def echo(result: EngineResult, label: str) -> None:

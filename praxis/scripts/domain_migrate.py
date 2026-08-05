@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# corpora-plugin script — corpora-specific orchestration (verbs resolved through the corpora engine
+# manifest), distinct from praxis-core (root_tree, frame, handoff, engine).
 """domain_migrate — the one-time domain-repo migration sequence, with its verification gate.
 
 Migrated from corpora `processes/domain-repo-migration.md`. Composition is none (the process says so
@@ -25,18 +27,15 @@ import engine  # noqa: E402
 
 
 def run(corpus_py: Path, source: str | None, root: str | None) -> int:
-    root_args = ["--root", root] if root else []
-
-    md = ["migrate-domains"] + (["--source", source] if source else [])
-    r = engine.invoke(corpus_py, root_args + md)
+    r = engine.resolve(corpus_py, "domain-migrate", {"root": root, "source": source})
     engine.echo(r, "migrate-domains")
     if not r.ok:
         sys.stdout.write("[stop] migration did not materialize cleanly; nothing verified.\n")
         return r.returncode or 1
 
-    engine.echo(engine.invoke(corpus_py, root_args + ["measure"]), "measure")
+    engine.echo(engine.resolve(corpus_py, "measure", {"root": root}), "measure")
 
-    verify = engine.invoke(corpus_py, root_args + ["verify"])
+    verify = engine.resolve(corpus_py, "domain-verify", {"root": root})
     engine.echo(verify, "verify")
     if not verify.ok:
         # The gate: a bad verify is a hard stop — the migration did not complete cleanly and the
@@ -46,8 +45,8 @@ def run(corpus_py: Path, source: str | None, root: str | None) -> int:
                          "lint-domains was not run.\n")
         return verify.returncode or 1
 
-    lint = engine.invoke(corpus_py, ["lint-domains", "--domains-dir",
-                                     str(Path(root or ".") / "corpora" / "domains")])
+    lint = engine.resolve(corpus_py, "lint-domains",
+                          {"domains_dir": str(Path(root or ".") / "corpora" / "domains")})
     engine.echo(lint, "lint-domains")
     return 0 if lint.ok else (lint.returncode or 1)
 

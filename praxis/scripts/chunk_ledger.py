@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# corpora-plugin script — corpora-specific orchestration (verbs resolved through the corpora engine
+# manifest), distinct from praxis-core (root_tree, frame, handoff, engine).
 """chunk_ledger — the deterministic close sequence for a workstream's chunk ledger.
 
 Migrated from corpora `processes/chunk-accounting.md`. That process's judgment content is nil; its
@@ -45,11 +47,9 @@ def close(corpus_py: Path, workstream: str, unit_of_work: str, stance: str, hand
         sys.stdout.write("  chunk-done points at a handoff that must still be on disk; nothing run.\n")
         return 1
 
-    args = ["chunk-done", "--workstream", workstream, "--unit-of-work", unit_of_work,
-            "--stance", stance, "--handoff", str(handoff_path)]
-    if nxt:
-        args += ["--next", nxt]
-    chunk = engine.invoke(corpus_py, args)
+    chunk = engine.resolve(corpus_py, "chunk-close", {
+        "workstream": workstream, "unit_of_work": unit_of_work, "stance": stance,
+        "handoff": str(handoff_path), "next": nxt})
     engine.echo(chunk, "chunk-done")
     if not chunk.ok:
         # The gate: never close (delete/archive) the handoff a failed chunk-done still needs.
@@ -57,7 +57,7 @@ def close(corpus_py: Path, workstream: str, unit_of_work: str, stance: str, hand
                          "so the close can be retried in the correct order.\n")
         return chunk.returncode or 1
 
-    done = engine.invoke(corpus_py, ["handoff-done", str(handoff_path)])
+    done = engine.resolve(corpus_py, "handoff-close", {"file": str(handoff_path)})
     engine.echo(done, "handoff-done")
     return 0 if done.ok else (done.returncode or 1)
 
@@ -68,15 +68,14 @@ def cmd_close(args) -> int:
 
 
 def cmd_preview(args) -> int:
-    r = engine.invoke(Path(args.corpus_py),
-                      ["chunk-start", "--workstream", args.workstream,
-                       "--unit-of-work", args.unit_of_work])
+    r = engine.resolve(Path(args.corpus_py), "chunk-start",
+                       {"workstream": args.workstream, "unit_of_work": args.unit_of_work})
     engine.echo(r, "chunk-start")
     return 0 if r.ok else (r.returncode or 1)
 
 
 def cmd_summary(args) -> int:
-    r = engine.invoke(Path(args.corpus_py), ["close-workstream", "--workstream", args.workstream])
+    r = engine.resolve(Path(args.corpus_py), "close-workstream", {"workstream": args.workstream})
     engine.echo(r, "close-workstream")
     return 0 if r.ok else (r.returncode or 1)
 
