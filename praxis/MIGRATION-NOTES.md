@@ -246,3 +246,27 @@ there for a while — run real tasks through praxis routing while corpora still 
 after routing demonstrably fires per unit of work should steps 3–4 (the loop conductor + bootstrap
 conductor) be attempted, paired with the corpora-side retirement of the competing orchestrator
 framing. Everything in Part 2 is deliberately left unbuilt pending that review.
+
+---
+
+## Part 3 — Capability sort (finalized, operator-ratified)
+
+Every capability the corpora manifest enumerated, dispositioned. This is the sort that decides what
+praxis *invokes* vs *owns* vs extracts into a plugin.
+
+- **Stays corpora** (corpus content / judgment — praxis invokes, never owns): `compose`,
+  `principle-add`, `import-file`, `import-file-pool`, `import-ratify`, `domain-import-list`,
+  `kill-report`, `kill-graduate`, `domain-migrate`, `measure`, `domain-verify`, `lint-domains`,
+  `gate-record`. All operate on domains, principles, kills, imports, or corpus audit state.
+- **Moved to praxis-core** (process accounting — DONE, F2): `chunk-start`, `chunk-close`,
+  `close-workstream`, `handoff-close`. Now native; removed from the corpora capabilities manifest.
+- **Split when the libraries extract** (not now): `triggers` and `gate-record`'s `--ui-drift` bit.
+  `triggers` reads corpus counters (retrospective-due → stays corpora) *and* library-drift (sync-due
+  → goes with the libraries plugin); the drift flag on `gate-record` likewise. Each plugin will emit
+  its own triggers from its own counters when the libraries plugin is built.
+- **The libraries** are not a capability at all — they are a **future full-stack plugin** (UI/UX
+  design domains + the library files + bootstrap/sync phases + a use-capability), per the north star:
+  cores stay minimal, concerns ship as plugins whose domains+phases are snapshot-imported into a
+  project. This is the one remaining extraction, deliberately later.
+
+Net: 13 stay, 4 moved (done), 2 split with the future libraries plugin, libraries → their own plugin.
