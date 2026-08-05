@@ -91,7 +91,37 @@ nothing else changes. That is the whole coupling surface.
   itself) vs *defined-and-passed-off* to a child root that executes in its own context and hands back.
 - `tests/test_e2e.py` — a throwaway fixture project (two roots), praxis scripts driven as real
   subprocesses: frame a task (with real composition via `corpus.py`) → generate a handoff → validate
-  it; and the cross-root decompose path. 27 tests total.
+  it; and the cross-root decompose path.
+
+### Migrated processes (second wave)
+
+- `scripts/engine.py` — the single overridable corpora binding for engine *write verbs*, the analogue
+  of `frame.py::engine_compose` for everything past compose. Every sequence script routes its corpora
+  calls through `engine.invoke`; on lift, `engine_compose` + `engine.invoke` become the one engine
+  registry. The whole widened coupling surface is this one file (see `MIGRATION-NOTES.md`, F1).
+- Deterministic-procedure scripts (+ tests), each owning ordering/preconditions/guards, tested against
+  a stub engine (`tests/_stub_engine.py`):
+  - `scripts/chunk_ledger.py` — chunk-accounting: the close sequence with the load-bearing
+    chunk-done-before-handoff-done gate + handoff-exists precondition.
+  - `scripts/domain_migrate.py` — domain-repo-migration: migrate → measure → verify (**hard gate**) →
+    lint-domains.
+  - `scripts/kill_graduation.py` — kill-graduation: read-only `candidates` vs. one-id `graduate` (no
+    batch path, so the judgment gate can't be skipped).
+  - `scripts/domain_import.py` — domain-import: browse (read-only) → file/file-pool → ratify.
+  - `scripts/ratify_writeback.py` — ratify-write-back: dispatches the two scripted verbs, prints the
+    exact hand-edit steps for the three manual ones (the scripted-vs-manual map is the fact).
+- Pure-deterministic scripts (+ tests), no corpora coupling at all:
+  - `scripts/library_state.py` — the six ui/ux/screenshot library processes' shared fact: `has-ui`,
+    which libraries exist, which init/sync phase is eligible, and the ui→{screenshot,ux} ordering.
+  - `scripts/churn.py` — architecture-scan's `scan-scope-by-recent-churn`, as a git fact.
+- Judgment phases (consume the scripts above; no redundant wrappers): `phases/debugging.md`,
+  `phases/runtime-verification.md`, `phases/testing.md` (the three test processes, one composition),
+  `phases/retrospective.md`, `phases/architecture-scan.md`, `phases/comment-cleanup.md`,
+  `phases/design-decision-review.md`, `phases/library-init.md` + `phases/library-sync.md` (three
+  variants each), `phases/domain-import.md`.
+- `MIGRATION-NOTES.md` — the open judgment forks (F1–F6) and the **plan** (not build) for extracting
+  the orchestration spine (`general-operation`, `bootstrap`), the operator-gated failure-mode-2 step.
+- Full suite: `python3 -m unittest discover -s praxis/tests`.
 
 ## The handoff plugin contract
 
