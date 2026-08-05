@@ -1,0 +1,105 @@
+# praxis (in-repo, pre-split)
+
+Praxis is the **process / orchestration layer** — routing, phases, workflows, the framing step, and the
+hard "one unit-of-work = one spawn = one handoff" rule. Corpora is the **judgment / composition layer**
+it invokes. The horizon is for these to be two systems that compose, with praxis eventually its own repo.
+
+This subtree grows praxis **inside corpora for now**, on purpose: the last attempt externalized too
+early and regressed. We build the boundary here, prove it under real use, and lift the whole `praxis/`
+directory out only once it holds.
+
+## The extraction contract — keep the lift cheap
+
+1. **No corpora imports, ever.** Nothing under `praxis/` imports `corpus.py` or reads corpora's
+   kernel/domains as logic. Praxis reads the filesystem and invokes judgment engines through a generic
+   contract, never by naming corpora as a dependency. (The first failure was praxis pointing at corpora
+   in its own kernel — do not repeat it.)
+2. **Runs off `corpora/config.md` for now.** There is no praxis-native config yet. A root is a directory
+   carrying `corpora/config.md`; `root_tree.py` also recognizes `praxis/config.md` so a future
+   praxis-native config is a one-line default change, not a rewrite.
+3. **Self-contained subtree.** Everything praxis lives under `praxis/` (`scripts/`, `tests/`, and later
+   its own kernel/phases). Lifting praxis = moving this directory out and flipping the config default.
+4. **Corpora must stop owning orchestration** as praxis takes it over — the "I am the orchestrator"
+   framing in corpora's SKILL/kernel is extracted into praxis, not left to compete with it. (This is the
+   second failure to avoid; it is a later step, tracked, not done yet.)
+
+## The migration method — deterministic-first
+
+Every corpora process moves here eventually. The rule for each: **whatever can be a script should be
+a script** — scripts are testable and can't be wrong the way inference can. So each process is sorted
+into two piles:
+
+- its **deterministic** surface (which root, what composition, what drifted, what files changed) →
+  a praxis **script** under `scripts/`, with tests;
+- its **judgment** surface (size this, decide that, weigh the tradeoff) → a thin **phase** under
+  `phases/` that runs the scripts for facts, then invokes the judgment engine only where judgment
+  actually remains.
+
+Not every process yields a new script. `root_tree` was almost all deterministic → a script. `framing`
+is mostly judgment whose deterministic core is *already* scripted (`root_tree` + composition) → a
+phase that consumes those facts, no redundant wrapper. Building each process this way is what orients
+the whole move.
+
+### Phase schema (the template every migrated process follows)
+
+A phase file (`phases/<name>.md`) declares in its own prose — the idea carried over from the old
+praxis, rewritten decoupled:
+
+- **entry condition** — the task-state test that selects this phase (stated in the file, no lookup table)
+- **stance** — convergent / divergent / none
+- **invocations** — which judgment engine(s) it calls, with stance + scope; omit for a purely
+  mechanical phase. Named generically; praxis never hard-depends on a specific engine.
+- **deterministic facts** — the scripts it runs first, whose output is fact not judgment
+- **artifact** — the concrete deliverable it hands forward
+- **surfaced/lacking** — what a run reports as still missing or newly revealed (drives re-routing)
+
+## The invocation contract — how praxis calls a judgment engine
+
+A phase invokes an engine for a *capability*, generically. Praxis never re-derives what the engine
+provides, never imports it, never learns its schema. Decided capabilities:
+
+- **compose** — "give me the domain set for unit-of-work X at root R." Corpora provides this
+  (`select --json`); it is engine-agnostic on purpose — corpora already ships a `manifest` command
+  "for a process layer to select against." Praxis owns the *unit-of-work decision* (routing
+  judgment); the engine owns turning it into a domain set (composition). Praxis relays the result.
+
+The single corpora binding lives in `scripts/frame.py::engine_compose` (locating + calling
+`corpus.py`), overridable with `--corpus-py`. On lift, that one function becomes an engine registry;
+nothing else changes. That is the whole coupling surface.
+
+## Built so far
+
+- `scripts/root_tree.py` (+ tests) — deterministic root-tree resolver. `tree` / `resolve` / `span`.
+  The "fact prior to everything": which root(s) a task belongs to, produced by script, never inferred.
+- `scripts/frame.py` (+ tests) — the deterministic fact bundle for a task: governing root, the
+  span→decompose verdict, and the composition (invoked from the engine). Isolates the sole corpora
+  binding to one overridable function. 13 tests total: `python3 -m unittest discover -s praxis/tests`.
+- `phases/framing.md` — the first phase: the universal, proportional front door (frame facts → sizing
+  → assumption-relay → route). The judgment layer that consumes `frame.py`. First worked example of a
+  judgment-phase; `root_tree` was the first worked example of a pure-deterministic script.
+- `handoff/` + `scripts/handoff.py` (+ tests) — **the handoff is a praxis primitive**: one
+  unit-of-work produces one handoff. Praxis owns the envelope (`handoff/base.json`); judgment engines
+  hook in as **plugins** (`handoff/plugins/*.json`) declaring the fields they expect. `handoff.py`
+  composes the schema from base + plugins, generates a skeleton, and *validates that every registered
+  plugin's required fields come out the other side* — praxis enforcing presence without knowing what
+  any field means. `handoff/plugins/corpora.json` is corpora registered as the first plugin (this is
+  where corpora's handoff schema now lives, instead of baked into corpora's kernel).
+- `scripts/root_tree.py interop` + `phases/interop.md` — interop is **entering at the right root**.
+  `interop_root` deterministically computes the entry root for a spanning task (the deepest root
+  containing all spanned roots) — or reports that none exists and names where to define one. The
+  phase is the judgment half: at the entry root the boundary decides *done-here* (the interop concern
+  itself) vs *defined-and-passed-off* to a child root that executes in its own context and hands back.
+- `tests/test_e2e.py` — a throwaway fixture project (two roots), praxis scripts driven as real
+  subprocesses: frame a task (with real composition via `corpus.py`) → generate a handoff → validate
+  it; and the cross-root decompose path. 27 tests total.
+
+## The handoff plugin contract
+
+Praxis's invariant: **a unit-of-work produces a handoff.** The *shape* of that handoff is dynamic —
+composed from plugin manifests, not fixed. A plugin drops a `handoff/plugins/<name>.json` declaring
+its `frontmatter` fields and `sections` (name, required, shape, desc). Rules praxis enforces:
+`handoff.py validate` fails unless every required field from base **and every registered plugin** is
+present; a plugin may **not** override a base field (base wins, conflict recorded) so no plugin can
+downgrade a required base field. This is how corpora "hooks into" the handoff — and how a second
+engine would, without either knowing about the other.
+
