@@ -1,22 +1,26 @@
 ---
 name: corpora:ux-library-sync
-description: Bring corpora/ux-library.md back in line with the project's actual experience patterns after coder-side drift has accumulated. Trigger is not yet mechanical, unlike processes/ui-library-sync.md — see the note below before relying on this file as parallel to that one.
+description: Bring corpora/ux-library.md back in line with the project's actual experience patterns after coder-side drift has accumulated. Suggested alongside processes/ui-library-sync.md off the same library-drift counter, since real UX work rarely happens without UI drift — the operator decides whether the accumulated drift actually touched a flow.
 ---
 
 # UX library sync
 
-**This process has no mechanical trigger yet — unlike `processes/ui-library-sync.md`.** `kernel.md`'s
-handoff schema and `corpus.py` track `ui-drift` (screens/components) and a `library-drift` counter
-fed by it; nothing equivalent exists for experience/flow drift today. A coder-composed spawn that
-changes how a flow behaves has no field to self-report that in, and the gate has no counter to
-threshold against. Until that's added — a `ux-drift` handoff field plus an `experience-drift`
-counter, the same shape as `ui-drift`/`library-drift` — this phase runs on judgment alone:
+**Trigger:** suggested alongside `processes/ui-library-sync.md`, off the *same* `library-drift`
+counter — when `library-drift.since-last-sync ≥ 3`, or a drifting change retired a flow/state/
+recoverability convention the `ux-library.md` still teaches, the gate suggests both a UI and a UX
+sync. There is no separate `ux-drift` field or counter, deliberately: real UX work (a changed flow,
+a new confirmation step, a reworked navigation model) almost always surfaces as changed screens, so
+it already lives inside the `ui-drift` signal — UX drift is a subset of UI drift, not a separate
+thing to track. The coupling is unfiltered: the same counter suggests both, and the operator
+dismisses the UX half when the accumulated drift was purely visual (a restyle that touched no
+documented flow). The immediate case still holds too — a `Surfaced` note that a documented flow was
+contradicted or retired surfaces a UX sync suggestion right then, ahead of the threshold, since a
+stale-but-wrong library is worse than an incomplete one.
 
-**Trigger:** the operator requests it directly, or a handoff's `Surfaced` section notes that an
-established flow, state pattern, or recoverability convention the `ux-library.md` documents has
-been contradicted or retired by a coder-side change. Surface the latter as a suggestion at the
-ratify gate the same way a mechanical trigger would, but it is a judgment call by whoever is
-reading `Surfaced`, not a threshold check.
+The `library-drift` counter is shared with the UI sync and is reset once by `corpus.py sync-done`
+after the sync pass completes — whether that pass synced the UI library, the UX library, or both.
+Dismissing the UX half doesn't hold the counter open; it re-accumulates and re-suggests on the next
+round of drift.
 
 **Composition:** convergent stance, `ux-design`-composed — the full ongoing composition (`scripts/
 corpus.py select --unit-of-work design-ux-flow`), not the narrower founding-a-library composition
@@ -35,9 +39,10 @@ ux-library.md` section by section — navigation model, flow inventory, interact
 state and feedback patterns, recoverability conventions — against how the project actually behaves
 today, and correct any entry the library still teaches that the product has since moved away from.
 
-1. For each flow or convention named in the triggering `Surfaced` note (or, absent that detail, the
-   library's full section list), compare the library's documented behavior against the current
-   implementation.
+1. For each flow or convention named in the triggering `Surfaced` note, or — when the trigger was
+   the drift threshold rather than a specific note — the flows and conventions touching the screens
+   the accumulated `ui-drift` named, compare the library's documented behavior against the current
+   implementation. Absent any such detail, walk the library's full section list.
 2. Write the entry as a standing description of current state, not a copy of any spawn's own
    narrated reasoning — the same restriction `processes/ui-library-sync.md` applies to `ui-library.md`
    corrections applies here: no history tags, no "supersedes the prior X" lead-ins, no naming what

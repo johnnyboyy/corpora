@@ -303,11 +303,15 @@ directly at design decision review (Phase 5, step 5); this is for the coder-side
 acceptance doesn't close. `library-drift.since-last-sync ≥ 3`, or a drifting change that retired
 something the library still teaches, suggests running it.
 
+**`processes/ux-library-sync.md`** — suggested alongside the UI sync, off the *same*
+`library-drift` counter (`≥ 3`, or a retired flow/state/recoverability convention). UX drift is a
+subset of UI drift — real UX work almost always surfaces as changed screens — so it rides the UI
+signal rather than a separate one. The coupling is unfiltered: the operator dismisses the UX half
+when the accumulated drift was purely visual. `corpus.py sync-done` resets the shared counter once,
+whichever pass(es) ran.
+
 **`processes/screenshot-library-sync.md`** — right after processing any handoff whose `ui-drift.screens` or
 `.components` is non-empty, not on a threshold. Mechanical; never spawns a design composition.
-
-**`processes/ux-library-sync.md`** — has no mechanical trigger today; see that file for why, and for the
-judgment-based trigger it runs on in the meantime.
 
 ---
 

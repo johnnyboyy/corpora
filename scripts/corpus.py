@@ -35,7 +35,7 @@ Commands:
   set-deterministic-shortcut-status [...]         record the operator's candidate disposition
   retro-done --domain D [...]       reset counters after a retrospective (same --domains-dir/--audit
                                    override)
-  sync-done [...]                  reset library-drift after a UI-library sync (same
+  sync-done [...]                  reset library-drift after a UI/UX-library sync (same
                                    --domains-dir/--audit override)
   compose-spawn-prompt [...]       mechanically assemble a spawn-ready prompt: stance frame +
                                    full domain files (this project's own corpora/domains/, or
@@ -465,7 +465,7 @@ def cmd_triggers(project: Project, _args) -> None:
             fired.append(f"retrospective {c['domain']} — " + "; ".join(reasons))
     drift = state["library-drift"].get("since-last-sync", 0)
     if drift >= SYNC_DRIFT:
-        fired.append(f"ui-library sync — drift {drift} >= {SYNC_DRIFT}")
+        fired.append(f"ui + ux library sync — drift {drift} >= {SYNC_DRIFT}")
     if fired:
         print("TRIGGERS FIRED (suggest to operator — never automatic):")
         for f in fired:

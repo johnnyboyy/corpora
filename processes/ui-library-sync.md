@@ -15,6 +15,12 @@ a stale-but-wrong library is worse than an incomplete one. Handoffs self-report 
 counts it into `library-drift` mechanically (`corpus.py record-gate --ui-drift`) — the operator's
 decision to act on the suggestion is the judgment call, not the count itself.
 
+The same `library-drift` suggestion also carries a **UX** sync suggestion
+(`processes/ux-library-sync.md`), off this one shared counter — UX drift is a subset of UI drift, so
+it needs no separate signal. Whether the accumulated drift actually touched a flow is the operator's
+call; a purely-visual restyle is a UI sync only. Whichever pass runs, `corpus.py sync-done` resets
+the shared counter once.
+
 **Composition:** divergent stance, `ui-design`-composed — the full ongoing composition (`scripts/
 corpus.py select --unit-of-work design-ui-surface`), not the narrower founding-a-library
 composition `processes/ui-library-init.md` uses. A sync project already has concrete components and screens
